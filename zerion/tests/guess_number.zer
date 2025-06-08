@@ -1,0 +1,49 @@
+load "libs.random"
+load "libs.sys"
+
+attempt = 0
+max_attempts = 10
+secret_number = 0
+
+defun handle_input(m, m_)
+    i = to_int(input("Enter a number from " + to_str(m) + " to " + to_str(m_) + ": "), true)
+    while i == none or (i < m or i > m_) do
+        attempt = attempt + 1
+        if attempt >= max_attempts do
+            println("You have used all your attempts!\nThe secret number was: " + to_str(secret_number))
+            exit(0)
+        done
+        println("Invalid input!")
+        i = to_int(input("Enter a number from " + to_str(m) + " to " + to_str(m_) + ": "), true)
+    done
+    return i
+done
+
+defun guess_number(m, m_)
+    attempt = 0
+    secret_number = rand_int(m, m_)
+    while attempt < max_attempts do
+        i = handle_input(m, m_)
+        attempt = attempt + 1
+        if i == secret_number do
+            println("You guessed it right!\nAttempts: " + to_str(attempt))
+            return none
+        elif i < secret_number do
+            println("Your guess is lower than the secret number!")
+        else
+            println("Your guess is higher than the secret number!")
+        done
+    done
+    println("You have used all your attempts!\nThe secret number was: " + to_str(secret_number))
+done
+
+defun main()
+    m = 1
+    m_ = 1000
+    guess_number(m, m_)
+done
+
+if is_main do
+    main()
+    exit(0)
+done

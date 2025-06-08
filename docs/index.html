@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zerion Documentation & Libraries</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            --bg: #101522;
+            --panel: #181c2f;
+            --neon-blue: #1ad1ff;
+            --neon-green: #1affb3;
+            --text: #e6faff;
+            --muted: #b2fff7;
+            --border: #1ad1ff44;
+            --code-bg: #181c2f;
+            --btn-bg: linear-gradient(90deg, #1ad1ff 60%, #1affb3 100%);
+            --btn-text: #101522;
+        }
+        body {
+            font-family: 'Segoe UI', 'Fira Mono', 'Consolas', Arial, sans-serif;
+            background: linear-gradient(135deg, #101522 0%, #16213a 100%);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+        }
+        header {
+            background: linear-gradient(90deg, #1ad1ff 0%, #1affb3 100%);
+            color: #101522;
+            padding: 2.2rem 1rem 1.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 24px #1ad1ff44;
+            border-bottom: 2px solid var(--border);
+        }
+        header h1 {
+            font-size: 2.2rem;
+            letter-spacing: 2px;
+            margin: 0 0 0.5rem 0;
+            text-shadow: 0 0 10px #1ad1ff, 0 0 18px #1affb3;
+        }
+        header p {
+            font-size: 1.1rem;
+            margin: 0;
+            font-weight: 500;
+            text-shadow: 0 0 6px #1ad1ff88;
+        }
+        main {
+            max-width: 900px;
+            margin: 2.5rem auto;
+            background: var(--panel);
+            border-radius: 18px;
+            box-shadow: 0 4px 32px #1ad1ff22, 0 0 0 2px var(--border);
+            padding: 2.5rem 2rem 2rem 2rem;
+            position: relative;
+        }
+        h2 {
+            color: var(--neon-blue);
+            text-shadow: 0 0 6px #1ad1ff, 0 0 10px #1affb3;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+        }
+        h3 {
+            color: var(--neon-green);
+            margin-top: 2rem;
+            margin-bottom: 0.7rem;
+            font-size: 1.15rem;
+            text-shadow: 0 0 6px #1affb3;
+        }
+        ul {
+            margin-bottom: 1.5rem;
+        }
+        pre, code {
+            font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+            font-size: 1.06em;
+        }
+        pre {
+            background: var(--code-bg);
+            color: var(--muted);
+            border-radius: 10px;
+            padding: 1.1rem;
+            margin: 1.2rem 0 1.7rem 0;
+            box-shadow: 0 0 10px #1ad1ff33;
+            overflow-x: auto;
+        }
+        code {
+            background: #16213a;
+            color: var(--neon-blue);
+            border-radius: 5px;
+            padding: 0.12em 0.35em;
+        }
+        .lib-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2em;
+            margin-bottom: 2em;
+        }
+        .lib-list a {
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            font-weight: bold;
+            border-radius: 6px;
+            padding: 0.5em 1.2em;
+            text-decoration: none;
+            box-shadow: 0 0 8px #1ad1ff55;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .lib-list a:hover {
+            background: linear-gradient(90deg, #1affb3 60%, #1ad1ff 100%);
+            color: var(--btn-text);
+            box-shadow: 0 0 14px #1affb3aa;
+        }
+        .lib-content {
+            margin-bottom: 2.5em;
+        }
+        .lib-content h3 {
+            margin-bottom: 0.3em;
+        }
+        .lib-content pre {
+            margin-top: 0.2em;
+        }
+        .howto {
+            background: linear-gradient(90deg, #1ad1ff22 0%, #1affb322 100%);
+            border-left: 4px solid var(--neon-blue);
+            border-radius: 10px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 8px #1ad1ff22;
+        }
+        .howto h3 {
+            color: var(--neon-green);
+            margin-top: 0;
+            margin-bottom: 0.7rem;
+            font-size: 1.18rem;
+            text-shadow: 0 0 6px #1affb3;
+        }
+        .howto ul {
+            margin: 0;
+            padding-left: 1.2rem;
+        }
+        .howto li {
+            margin-bottom: 0.7rem;
+        }
+        footer {
+            text-align: center;
+            color: #1ad1ffcc;
+            margin: 2.5rem 0 1.2rem 0;
+            font-size: 1.05em;
+            letter-spacing: 1px;
+            text-shadow: 0 0 6px #1ad1ff88;
+        }
+        footer a {
+            color: #1affb3;
+            text-decoration: underline;
+        }
+        @media (max-width: 600px) {
+            main { padding: 1.2rem 0.5rem; }
+            pre { font-size: 0.98em; }
+            .lib-list { flex-direction: column; gap: 0.7em; }
+        }
+    </style>
+    <script>
+        function showLib(lib) {
+            document.querySelectorAll('.lib-content').forEach(function(div) {
+                div.style.display = 'none';
+            });
+            document.getElementById('lib-' + lib).style.display = 'block';
+            document.querySelectorAll('.lib-list a').forEach(function(a) {
+                a.classList.remove('active');
+            });
+            document.getElementById('btn-' + lib).classList.add('active');
+        }
+        window.addEventListener('DOMContentLoaded', function() {
+            var first = document.querySelector('.lib-list a');
+            if (first) first.click();
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Zerion Documentation & Libraries</h1>
+        <p>Welcome to the official docs and standard library reference for Zerion.</p>
+    </header>
+    <main>
+        <h2>Getting Started</h2>
+        <ul>
+            <li>Install Zerion: <code>git clone https://github.com/memecoder12345678/zerion</code></li>
+            <li>Run a file: <code>python zerion.py yourfile.zer</code></li>
+            <li>Open interactive shell: <code>python zerion.py</code></li>
+            <li>See <a href="../web/index.html" style="color:#1affb3;">homepage</a> for more info.</li>
+        </ul>
+        <div class="howto" style="margin-bottom:2.5rem;">
+            <h3>Recommended Environment</h3>
+            <ul>
+                <li><b>For learning:</b> Python 3.11.9 or newer (best for beginners and educational purposes)</li>
+                <li><b>For automation:</b> PyPy 3.11.11 (recommended when running repetitive tasks or automation scripts)</li>
+                <li><b>IDE recommendation:</b> Use <b style="color:#1affb3;">Zerion Editor</b> with syntax highlighting for the best learning experience</li>
+                <li><b>Note:</b> While the language is designed for simplicity, PyPy can significantly speed up automation tasks</li>
+            </ul>
+        </div>
+        <h2>Standard Libraries</h2>
+        <div class="lib-list">
+            <a href="javascript:void(0)" id="btn-list" onclick="showLib('list')">list</a>
+            <a href="javascript:void(0)" id="btn-string" onclick="showLib('string')">string</a>
+            <a href="javascript:void(0)" id="btn-math" onclick="showLib('math')">math</a>
+            <a href="javascript:void(0)" id="btn-file" onclick="showLib('file')">file</a>
+            <a href="javascript:void(0)" id="btn-hash" onclick="showLib('hash')">hash</a>
+            <a href="javascript:void(0)" id="btn-memory" onclick="showLib('memory')">memory</a>
+            <a href="javascript:void(0)" id="btn-net" onclick="showLib('net')">net</a>
+            <a href="javascript:void(0)" id="btn-random" onclick="showLib('random')">random</a>
+            <a href="javascript:void(0)" id="btn-sys" onclick="showLib('sys')">sys</a>
+            <a href="javascript:void(0)" id="btn-threading" onclick="showLib('threading')">threading</a>
+            <a href="javascript:void(0)" id="btn-time" onclick="showLib('time')">time</a>
+            <a href="javascript:void(0)" id="btn-keyboard" onclick="showLib('keyboard')">keyboard</a>
+        </div>
+        <div id="lib-list" class="lib-content" style="display:none;">
+            <h3>list.zer</h3>
+            <ul>
+                <li><b>map(f, l)</b> &rarr; List &mdash; Apply function <code>f</code> to each element of list <code>l</code></li>
+                <li><b>filter(f, l)</b> &rarr; List &mdash; Filter list <code>l</code> by function <code>f</code> (keep elements where <code>f(x)</code> is true)</li>
+                <li><b>reduce(f, l, i)</b> &rarr; Any &mdash; Reduce list <code>l</code> with function <code>f</code> and initial value <code>i</code></li>
+                <li><b>min(l)</b> &rarr; Number &mdash; Minimum value in list <code>l</code></li>
+                <li><b>max(l)</b> &rarr; Number &mdash; Maximum value in list <code>l</code></li>
+                <li><b>list_slice(l, from, to)</b> &rarr; List &mdash; Slice list <code>l</code> from <code>from</code> to <code>to</code> (exclusive)</li>
+                <li><b>reverse(l)</b> &rarr; List &mdash; Reverse the list <code>l</code></li>
+                <li><b>zip(l1, l2)</b> &rarr; List &mdash; Pair elements from <code>l1</code> and <code>l2</code> (shortest length)</li>
+                <li><b>zip_longest(l1, l2)</b> &rarr; List &mdash; Pair elements from <code>l1</code> and <code>l2</code> (fill with <code>none</code> if lengths differ)</li>
+                <li><b>change_value(l, i, v)</b> &rarr; List &mdash; Change value at index <code>i</code> in list <code>l</code> to <code>v</code></li>
+                <li><b>sort(l, reverse)</b> &rarr; List &mdash; Sort list <code>l</code> (<code>reverse</code>: 0=asc, 1=desc)</li>
+                <li><b>count(l, v)</b> &rarr; Number &mdash; Count occurrences of <code>v</code> in <code>l</code></li>
+                <li><b>index_of(l, v)</b> &rarr; Number/none &mdash; Index of <code>v</code> in <code>l</code> or <code>none</code> if not found</li>
+                <li><b>clear_list(l)</b> &rarr; none &mdash; Remove all elements from <code>l</code></li>
+                <li><b>list_multiply(l, n)</b> &rarr; List &mdash; Repeat list <code>l</code> <code>n</code> times</li>
+                <li><b>rand_int_list(len, min, max)</b> &rarr; List &mdash; List of random integers</li>
+                <li><b>rand_float_list(len, min, max)</b> &rarr; List &mdash; List of random floats</li>
+            </ul>
+        </div>
+        <div id="lib-string" class="lib-content" style="display:none;">
+            <h3>string.zer</h3>
+            <ul>
+                <li><b>split(s, sep)</b> &rarr; List &mdash; Split string <code>s</code> by separator <code>sep</code></li>
+                <li><b>str_slice(s, from, to)</b> &rarr; String &mdash; Slice string <code>s</code> from <code>from</code> to <code>to</code></li>
+                <li><b>join(sep, l)</b> &rarr; String &mdash; Join list <code>l</code> with separator <code>sep</code></li>
+                <li><b>replace(s, old, new)</b> &rarr; String &mdash; Replace <code>old</code> with <code>new</code> in <code>s</code></li>
+                <li><b>to_upper(s)</b> &rarr; String &mdash; Uppercase <code>s</code></li>
+                <li><b>to_lower(s)</b> &rarr; String &mdash; Lowercase <code>s</code></li>
+                <li><b>ord(s)</b> &rarr; Number &mdash; Unicode code point of character <code>s</code></li>
+                <li><b>chr(n)</b> &rarr; String &mdash; Character from code <code>n</code></li>
+                <li><b>is_digit(s)</b> &rarr; Bool &mdash; Is <code>s</code> a digit</li>
+                <li><b>is_ascii_lowercase(s)</b> &rarr; Bool &mdash; Is <code>s</code> a lowercase letter</li>
+                <li><b>is_ascii_uppercase(s)</b> &rarr; Bool &mdash; Is <code>s</code> an uppercase letter</li>
+                <li><b>is_ascii_letter(s)</b> &rarr; Bool &mdash; Is <code>s</code> a letter</li>
+                <li><b>is_space(s)</b> &rarr; Bool &mdash; Is <code>s</code> a whitespace character</li>
+                <li><b>find(s, v)</b> &rarr; Number/none &mdash; Index of substring <code>v</code> in <code>s</code></li>
+                <li><b>find_all(s, v)</b> &rarr; List &mdash; All indices of substring <code>v</code> in <code>s</code></li>
+                <li><b>startswith(s, v)</b> &rarr; Bool &mdash; <code>s</code> starts with <code>v</code></li>
+                <li><b>endswith(s, v)</b> &rarr; Bool &mdash; <code>s</code> ends with <code>v</code></li>
+                <li><b>str_multiply(s, n)</b> &rarr; String &mdash; Repeat string <code>s</code> <code>n</code> times</li>
+            </ul>
+        </div>
+        <div id="lib-math" class="lib-content" style="display:none;">
+            <h3>math.zer</h3>
+            <ul>
+                <li><b>sqrt(a)</b> &rarr; Number &mdash; Square root of <code>a</code></li>
+                <li><b>abs(a)</b> &rarr; Number &mdash; Absolute value of <code>a</code></li>
+                <li><b>fact(n)</b> &rarr; Number &mdash; Factorial of <code>n</code></li>
+                <li><b>sin(x)</b> &rarr; Number &mdash; Sine of <code>x</code></li>
+                <li><b>cos(x)</b> &rarr; Number &mdash; Cosine of <code>x</code></li>
+                <li><b>tan(x)</b> &rarr; Number &mdash; Tangent of <code>x</code></li>
+                <li><b>gcd(a, b)</b> &rarr; Number &mdash; GCD of <code>a</code> and <code>b</code></li>
+                <li><b>lcm(a, b)</b> &rarr; Number &mdash; LCM of <code>a</code> and <code>b</code></li>
+                <li><b>fib(n)</b> &rarr; Number &mdash; <code>n</code>-th Fibonacci number</li>
+                <li><b>is_prime(n)</b> &rarr; Bool &mdash; Is <code>n</code> prime</li>
+                <li><b>deg2rad(d)</b> &rarr; Number &mdash; Degrees to radians</li>
+                <li><b>rad2deg(r)</b> &rarr; Number &mdash; Radians to degrees</li>
+                <li><b>exp(x)</b> &rarr; Number &mdash; Exponential of <code>x</code></li>
+                <li><b>log(x)</b> &rarr; Number &mdash; Natural logarithm of <code>x</code></li>
+                <li><b>sinh(x)</b> &rarr; Number &mdash; Hyperbolic sine</li>
+                <li><b>cosh(x)</b> &rarr; Number &mdash; Hyperbolic cosine</li>
+                <li><b>tanh(x)</b> &rarr; Number &mdash; Hyperbolic tangent</li>
+                <li><b>round(x)</b> &rarr; Number &mdash; Round <code>x</code> to nearest integer</li>
+                <li>Constants: <b>PI</b>, <b>E</b>, <b>ln2</b></li>
+            </ul>
+        </div>
+        <div id="lib-file" class="lib-content" style="display:none;">
+            <h3>file.zer</h3>
+            <ul>
+                <li><b>write(file, mode, text)</b> &rarr; none &mdash; Write <code>text</code> to <code>file</code> with mode <code>mode</code> ("w" or "a")</li>
+                <li><b>read(file)</b> &rarr; String &mdash; Read contents of <code>file</code></li>
+                <li><b>exists(file)</b> &rarr; Bool &mdash; Check if <code>file</code> exists</li>
+                <li><b>get_dir()</b> &rarr; String &mdash; Get current directory</li>
+                <li><b>set_dir(dir)</b> &rarr; none &mdash; Change current directory</li>
+                <li><b>list_dir(dir)</b> &rarr; List &mdash; List files in directory</li>
+                <li><b>make_dir(dir)</b> &rarr; none &mdash; Create directory</li>
+                <li><b>remove_file(file)</b> &rarr; none &mdash; Remove file</li>
+                <li><b>rename(old, new)</b> &rarr; none &mdash; Rename file or directory</li>
+                <li><b>remove_dir(dir)</b> &rarr; none &mdash; Remove directory</li>
+                <li><b>copy(src, dst)</b> &rarr; none &mdash; Copy file</li>
+                <li><b>is_file(file)</b> &rarr; Bool &mdash; Is path a file</li>
+            </ul>
+        </div>
+        <div id="lib-hash" class="lib-content" style="display:none;">
+            <h3>hash.zer</h3>
+            <ul>
+                <li><b>md5(s)</b> &rarr; String &mdash; MD5 hash of <code>s</code></li>
+                <li><b>sha1(s)</b> &rarr; String &mdash; SHA1 hash of <code>s</code></li>
+                <li><b>sha256(s)</b> &rarr; String &mdash; SHA256 hash of <code>s</code></li>
+                <li><b>sha512(s)</b> &rarr; String &mdash; SHA512 hash of <code>s</code></li>
+                <li><b>crc32(s)</b> &rarr; String &mdash; CRC32 hash of <code>s</code></li>
+            </ul>
+        </div>
+        <div id="lib-memory" class="lib-content" style="display:none;">
+            <h3>memory.zer</h3>
+            <ul>
+                <li><b>remember(key, value)</b> &rarr; none &mdash; Store <code>value</code> with <code>key</code></li>
+                <li><b>recall(key)</b> &rarr; value/none &mdash; Retrieve value by <code>key</code></li>
+                <li><b>forget(key)</b> &rarr; none &mdash; Remove <code>key</code> from memory</li>
+                <li><b>clear_memory()</b> &rarr; none &mdash; Clear all memory</li>
+                <li><b>keys()</b> &rarr; List &mdash; List all keys</li>
+                <li><b>is_empty()</b> &rarr; Bool &mdash; Is memory empty</li>
+                <li><b>size()</b> &rarr; Number &mdash; Number of keys</li>
+            </ul>
+        </div>
+        <div id="lib-net" class="lib-content" style="display:none;">
+            <h3>net.zer</h3>
+            <ul>
+                <li><b>get_ip()</b> &rarr; String &mdash; Get public IP address</li>
+                <li><b>get_mac()</b> &rarr; String &mdash; Get MAC address</li>
+                <li><b>ping(host)</b> &rarr; String &mdash; Ping host</li>
+                <li><b>downl(url)</b> &rarr; File &mdash; Download file from URL</li>
+                <li><b>get_local_ip()</b> &rarr; String &mdash; Get local IP address</li>
+                <li><b>get_hostname()</b> &rarr; String &mdash; Get hostname</li>
+            </ul>
+        </div>
+        <div id="lib-random" class="lib-content" style="display:none;">
+            <h3>random.zer</h3>
+            <ul>
+                <li><b>rand()</b> &rarr; Float &mdash; Random float in [0, 1]</li>
+                <li><b>rand_int(min, max)</b> &rarr; Int &mdash; Random integer in [min, max]</li>
+                <li><b>rand_float(min, max)</b> &rarr; Float &mdash; Random float in [min, max]</li>
+                <li><b>rand_choice(list)</b> &rarr; Any &mdash; Random element from list</li>
+                <li><b>int_seed(i)</b> &rarr; Int &mdash; Integer seed</li>
+                <li><b>float_seed(f)</b> &rarr; Int &mdash; Float seed</li>
+            </ul>
+        </div>
+        <div id="lib-sys" class="lib-content" style="display:none;">
+            <h3>sys.zer</h3>
+            <ul>
+                <li><b>system(cmd)</b> &rarr; none &mdash; Execute system command</li>
+                <li><b>get_env(name)</b> &rarr; String &mdash; Get environment variable</li>
+                <li><b>set_env(name, value)</b> &rarr; none &mdash; Set environment variable</li>
+                <li><b>exit(code)</b> &rarr; none &mdash; Exit program</li>
+                <li><b>argv</b> &mdash; List of command-line arguments</li>
+                <li><b>os_name</b> &mdash; OS name</li>
+            </ul>
+        </div>
+        <div id="lib-threading" class="lib-content" style="display:none;">
+            <h3>threading.zer</h3>
+            <ul>
+                <li><b>thread_start(func, args)</b> &rarr; Thread &mdash; Start a new thread</li>
+                <li><b>thread_sleep(seconds)</b> &rarr; none &mdash; Sleep current thread</li>
+                <li><b>thread_join(thread, timeout)</b> &rarr; none &mdash; Wait for thread to finish</li>
+                <li><b>thread_is_alive(thread)</b> &rarr; Bool &mdash; Is thread alive</li>
+                <li><b>thread_cancel(thread)</b> &rarr; none &mdash; Cancel thread</li>
+            </ul>
+        </div>
+        <div id="lib-time" class="lib-content" style="display:none;">
+            <h3>time.zer</h3>
+            <ul>
+                <li><b>sleep(seconds)</b> &rarr; none &mdash; Sleep for <code>seconds</code></li>
+                <li><b>time()</b> &rarr; Float &mdash; Current time (seconds since epoch)</li>
+                <li><b>ctime(time)</b> &rarr; String &mdash; Human-readable time</li>
+            </ul>
+        </div>
+        <div id="lib-keyboard" class="lib-content" style="display:none;">
+            <h3>keyboard.zer</h3>
+            <ul>
+                <li><b>keyboard_write(text)</b> &rarr; none &mdash; Type <code>text</code> as keyboard input</li>
+                <li><b>keyboard_press(key)</b> &rarr; none &mdash; Press a key</li>
+                <li><b>keyboard_release(key)</b> &rarr; none &mdash; Release a key</li>
+                <li><b>keyboard_wait(key)</b> &rarr; none &mdash; Wait for key press</li>
+                <li><b>keyboard_is_pressed(key)</b> &rarr; Bool &mdash; Is key pressed</li>
+            </ul>
+        </div>
+        <h2>How to Use Libraries</h2>
+        <ul>
+            <li>To use a library, add <code>load "libs.&lt;name&gt;"</code> at the top of your <b>.zer</b> file.</li>
+            <li>Example: <code>load "libs.math"</code></li>
+            <li>Then call functions as documented above.</li>
+        </ul>
+        <!-- Zerion Editor Section -->
+        <h2>Zerion Editor</h2>
+        <div class="howto" style="margin-bottom:2.5rem;">
+            <h3>About Zerion Editor</h3>
+            <ul>
+                <li><b>Modern, lightweight code editor</b> designed for Zerion language</li>
+                <li>Syntax highlighting, auto-complete, file explorer, markdown preview</li>
+                <li>Open images, manage folders, and more</li>
+                <li>Cross-platform (Windows/Linux/Mac, requires Python 3.11+ and PyQt5)</li>
+            </ul>
+            <h3>Key Features</h3>
+            <ul>
+                <li>Tabbed editing, drag & drop file tree, and project explorer</li>
+                <li>Live Markdown preview for <code>.md</code> files</li>
+                <li>Quick commenting/uncommenting for Zerion code</li>
+                <li>Auto-completion for keywords, functions, and types</li>
+                <li>Image viewer for common formats (PNG, JPG, GIF, etc.)</li>
+            </ul>
+            <h3>Keyboard Shortcuts</h3>
+            <ul>
+                <li><b>Ctrl+N</b>: New file</li>
+                <li><b>Ctrl+O</b>: Open file</li>
+                <li><b>Ctrl+K</b>: Open folder</li>
+                <li><b>Ctrl+Shift+K</b>: Close folder</li>
+                <li><b>Ctrl+S</b>: Save file</li>
+                <li><b>Ctrl+Shift+S</b>: Save as</li>
+                <li><b>Ctrl+F</b>: Find</li>
+                <li><b>Ctrl+H</b>: Find and Replace</li>
+                <li><b>Ctrl+B</b>: Toggle file tree</li>
+                <li><b>Ctrl+Shift+E</b>: Show explorer</li>
+                <li><b>Ctrl+Q</b>: Exit</li>
+                <li><b>Ctrl+/</b>: Toggle comment (Zerion files)</li>
+                <li><b>Ctrl+P</b>: Toggle Markdown preview</li>
+                <li><b>Ctrl+X</b>: Cut line (when nothing selected)</li>
+                <li><b>Ctrl+Z / Ctrl+Y</b>: Undo / Redo</li>
+                <li><b>Ctrl+A</b>: Select all</li>
+            </ul>
+            <div style="margin-top:1em;">
+                <b>To launch:</b> <code>python zerion_editor.py</code>
+            </div>
+        </div>
+        <!-- End Zerion Editor Section -->
+    </main>
+    <footer>
+        Zerion &copy; 2025 MemeCoder &mdash; <a href="https://github.com/memecoder12345678/zerion" target="_blank">GitHub</a>
+    </footer>
+</body>
+</html>

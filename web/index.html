@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zerion Programming Language</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            --bg: #101522;
+            --panel: #181c2f;
+            --neon-blue: #1ad1ff;
+            --neon-green: #1affb3;
+            --neon-shadow: 0 0 8px #1ad1ff, 0 0 16px #1affb3;
+            --text: #e6faff;
+            --muted: #b2fff7;
+            --border: #1ad1ff44;
+            --code-bg: #181c2f;
+            --btn-bg: linear-gradient(90deg, #1ad1ff 60%, #1affb3 100%);
+            --btn-bg-hover: linear-gradient(90deg, #1affb3 60%, #1ad1ff 100%);
+            --btn-text: #101522;
+            --btn-shadow: 0 0 12px #1ad1ff55;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', 'Fira Mono', 'Consolas', Arial, sans-serif;
+            background: linear-gradient(135deg, #101522 0%, #16213a 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        header {
+            background: linear-gradient(90deg, #1ad1ff 0%, #1affb3 100%);
+            color: #101522;
+            padding: 2.5rem 1rem 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 24px #1ad1ff44;
+            border-bottom: 2px solid var(--border);
+        }
+        header h1 {
+            font-size: 2.7rem;
+            letter-spacing: 2px;
+            margin: 0 0 0.5rem 0;
+            text-shadow: 0 0 10px #1ad1ff, 0 0 18px #1affb3;
+        }
+        header p {
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 500;
+            text-shadow: 0 0 6px #1ad1ff88;
+        }
+        main {
+            max-width: 800px;
+            margin: 2.5rem auto;
+            background: var(--panel);
+            border-radius: 18px;
+            box-shadow: 0 4px 32px #1ad1ff22, 0 0 0 2px var(--border);
+            padding: 2.5rem 2rem 2rem 2rem;
+            position: relative;
+        }
+        h2 {
+            color: var(--neon-blue);
+            text-shadow: 0 0 6px #1ad1ff, 0 0 10px #1affb3;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+        ul.features {
+            margin: 2rem 0 2.5rem 0;
+            padding-left: 1.2rem;
+            list-style: none;
+        }
+        ul.features li {
+            margin-bottom: 0.8rem;
+            padding-left: 1.2rem;
+            position: relative;
+            font-size: 1.08rem;
+        }
+        ul.features li:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.5em;
+            width: 0.7em;
+            height: 0.7em;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1ad1ff 60%, #1affb3 100%);
+            box-shadow: 0 0 6px #1ad1ff88;
+        }
+        pre, code {
+            font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+            font-size: 1.08em;
+        }
+        pre {
+            background: var(--code-bg);
+            color: var(--muted);
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin: 1.5rem 0 2rem 0;
+            box-shadow: 0 0 10px #1ad1ff33;
+            overflow-x: auto;
+        }
+        code {
+            background: #16213a;
+            color: var(--neon-blue);
+            border-radius: 5px;
+            padding: 0.15em 0.4em;
+        }
+        ol, ul {
+            margin-bottom: 1.5rem;
+        }
+        .howto {
+            background: linear-gradient(90deg, #1ad1ff22 0%, #1affb322 100%);
+            border-left: 4px solid var(--neon-blue);
+            border-radius: 10px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 8px #1ad1ff22;
+        }
+        .howto h3 {
+            color: var(--neon-green);
+            margin-top: 0;
+            margin-bottom: 0.7rem;
+            font-size: 1.18rem;
+            text-shadow: 0 0 6px #1affb3;
+        }
+        .howto ul {
+            margin: 0;
+            padding-left: 1.2rem;
+        }
+        .howto li {
+            margin-bottom: 0.7rem;
+        }
+        .btn-group {
+            display: flex;
+            gap: 1.2em;
+            margin-top: 1.5em;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-block;
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            padding: 0.7em 1.5em;
+            font-size: 1.08em;
+            box-shadow: var(--btn-shadow);
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background: var(--btn-bg-hover);
+            color: var(--btn-text);
+            box-shadow: 0 0 18px #1affb3aa;
+        }
+        footer {
+            text-align: center;
+            color: #1ad1ffcc;
+            margin: 2.5rem 0 1.2rem 0;
+            font-size: 1.05em;
+            letter-spacing: 1px;
+            text-shadow: 0 0 6px #1ad1ff88;
+        }
+        footer a {
+            color: #1affb3;
+            text-decoration: underline;
+        }
+        /* Zerion syntax highlighting */
+        .highlight-zerion .zer-keyword { color: #1ad1ff; font-weight: bold; }
+        .highlight-zerion .zer-func { color: #1affb3; }
+        .highlight-zerion .zer-string { color: #ffe066; }
+        .highlight-zerion .zer-number { color: #ffb366; }
+        .highlight-zerion .zer-comment { color: #7fffd4; font-style: italic; }
+        .highlight-zerion .zer-var { color: #e6faff; }
+        @media (max-width: 600px) {
+            main { padding: 1.2rem 0.5rem; }
+            pre { font-size: 0.98em; }
+            .btn-group { flex-direction: column; gap: 0.7em; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Zerion Programming Language</h1>
+        <p>Simple, educational, and task-oriented.<br> <span style="color:#1affb3;">Perfect for learning and automation.</span></p>
+    </header>
+    <main>
+        <h2>Why Zerion?</h2>
+        <ul class="features">
+            <li>Beginner-friendly syntax ideal for learning programming</li>
+            <li>Built-in tools for common task automation</li>
+            <li>Visual feedback and clear error messages</li>
+            <li>Educational libraries for math and basic algorithms</li>
+            <li>Simple file handling and system automation</li>
+            <li>Great for teaching programming concepts to children</li>
+        </ul>
+        <div class="howto" style="margin-bottom:2.5rem;">
+            <h3>Best Use Cases</h3>
+            <ul>
+                <li><b>Perfect for:</b> Learning programming, educational projects, and basic task automation</li>
+                <li><b>Easy syntax:</b> Designed for clarity and learning, not performance</li>
+                <li><b>Note:</b> Not recommended for computation-heavy tasks or production-level applications</li>
+            </ul>
+        </div>
+        <h2>Example</h2>
+        <pre><code class="highlight-zerion" id="zerion-example"><span class="zer-comment"># Hello World</span>
+<span class="zer-keyword">println</span>(<span class="zer-string">"Hello, World!"</span>)
+
+<span class="zer-comment"># Variables and math</span>
+<span class="zer-var">x</span> = <span class="zer-number">10</span>
+<span class="zer-var">y</span> = <span class="zer-number">20</span>
+<span class="zer-keyword">println</span>(<span class="zer-var">x</span> + <span class="zer-var">y</span>)
+
+<span class="zer-comment"># Functions</span>
+<span class="zer-keyword">defun</span> <span class="zer-func">add</span>(<span class="zer-var">a</span>, <span class="zer-var">b</span>)
+    <span class="zer-keyword">return</span> <span class="zer-var">a</span> + <span class="zer-var">b</span>
+<span class="zer-keyword">done</span>
+
+<span class="zer-keyword">println</span>(<span class="zer-func">add</span>(<span class="zer-number">5</span>, <span class="zer-number">3</span>))
+
+<span class="zer-comment"># Lists</span>
+<span class="zer-var">nums</span> = <span>[</span><span class="zer-number">1</span>, <span class="zer-number">2</span>, <span class="zer-number">3</span>, <span class="zer-number">4</span>, <span class="zer-number">5</span><span>]</span>
+<span class="zer-keyword">println</span>(<span class="zer-var">nums</span>)</code></pre>
+        <div class="howto">
+            <h3>How to Use Zerion</h3>
+            <ul>
+                <li><b>Install:</b> Clone the repository from <a href="https://github.com/memecoder12345678/zerion" target="_blank" style="color:#1affb3;">GitHub</a>.</li>
+                <li><b>Setup:</b> Add Zerion to your <code>PATH</code> if you want to run it from anywhere.</li>
+                <li><b>Run a file:</b> <code>python zerion.py yourfile.zer</code></li>
+                <li><b>Open interactive shell:</b> Just run <code>python zerion.py</code> and start typing Zerion code.</li>
+                <li><b>Get help:</b> Type <code>grammar</code>, <code>license</code>, or <code>copyright</code> in the shell for info.</li>
+                <li><b>Documentation:</b> <a href="../docs/index.html" style="color:#1affb3;">Read the full docs here</a>.</li>
+            </ul>
+        </div>
+        <div class="btn-group">
+            <a class="btn" href="https://github.com/memecoder12345678/zerion" target="_blank">GitHub</a>
+            <a class="btn" href="../docs/index.html">Documentation</a>
+        </div>
+    </main>
+    <footer>
+        Zerion &copy; 2025 MemeCoder &mdash; <a href="https://github.com/memecoder12345678/zerion" target="_blank">GitHub</a>
+    </footer>
+</body>
+</html>

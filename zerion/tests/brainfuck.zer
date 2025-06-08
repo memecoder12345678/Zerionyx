@@ -1,0 +1,83 @@
+load "libs.sys"
+load "libs.string"
+load "libs.list"
+
+memory = list_multiply([0], 30*1000) # this thing is lagging like fucking crazy 💀💀💀
+pointer = 0
+
+defun pass() -> none
+
+defun brainfuck(nput)
+    if not is_str(nput) do
+        panic("'nput' must be a string", "T")
+    done
+    nput = split(nput, "")
+    output = ""
+    i = 0
+    while i < len(nput) do
+        # println("i: " + to_str(i) + ", " + "nput>i: " + ", " + to_str(nput>i) + ", " + "memory: " + to_str(memory)+ ", " + "pointer: " + to_str(pointer))
+        if (nput>i) == ">" do
+            pointer = pointer + 1
+        elif (nput>i) == "<" do
+            if pointer > 0 do
+                pointer = pointer - 1
+            done
+        elif (nput>i) == "+" do
+            change_value(memory, pointer, ((memory>pointer)+1) % 256)
+        elif (nput>i) == "-" do
+            if memory>pointer > 0 do
+                change_value(memory, pointer, (memory>pointer)-1)
+            done
+        elif (nput>i) == "." do
+            output = output + chr(memory>pointer)
+        elif (nput>i) == "," do
+            change_value(memory, pointer, ord(input("> ")))
+        elif (nput>i) == "[" do
+            if (memory>pointer) == 0 do
+                count = 1
+                while count > 0 do
+                    i = i + 1
+                    if (nput>i) == "[" do
+                        count = count + 1
+                    elif (nput>i) == "]" do
+                        count = count - 1
+                    done
+                done
+            done
+        elif (nput>i) == "]" do
+            if (memory>pointer) != 0 do
+                count = 1
+                while count > 0 do
+                    i = i - 1
+                    if (nput>i) == "]" do
+                        count = count + 1
+                    elif (nput>i) == "[" do
+                        count = count - 1
+                    done
+                done
+            done
+        else
+            pass()
+        done
+        i = i + 1
+    done
+    return output
+done
+
+if is_main do
+    println("Brainfuck Interpreter")
+    while true do
+        code = input(">> ")
+        if code == "exit" do
+            exit(0)
+        done
+        output = brainfuck(code)
+        if is_none(output) do
+            continue
+        elif len(output) == 0 do
+            continue
+        else
+            println(output)
+        done
+    done
+done
