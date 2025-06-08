@@ -52,7 +52,7 @@ Visit the official Zerion website for an introduction and more information: [Zer
 
 1. Clone the repository
 2. Add zerion to your PATH
-3. Run zerion files with `python zerion/zerion.py file.zer`
+3. Run zerion files with `python zerion.py file.zer`
 
 ## Documentation
 
