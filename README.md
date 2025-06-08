@@ -46,7 +46,7 @@ done
 
 ## Website
 
-Visit the official Zerion website for an introduction and more information: [Zerion Language Website](https://memecoder12345678.github.io/zerion/))
+Visit the official Zerion website for an introduction and more information: [Zerion Language Website](https://memecoder12345678.github.io/zerion/)
 
 ## Installation
 
