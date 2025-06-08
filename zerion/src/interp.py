@@ -20,6 +20,9 @@ from shutil import rmtree, copy
 from .lex import Lexer, RTResult
 
 import urllib.request
+import urllib.error
+from urllib.parse import unquote
+import re
 import subprocess
 import socket
 import uuid
@@ -1872,7 +1875,12 @@ class BuiltInFunction(BaseFunction):
     execute_ping_fp.arg_names = ["host"]
 
     def execute_downl_fp(self, exec_ctx):
+        def sanitize_filename(filename):
+            filename = unquote(filename)
+            filename = re.sub(r'[^a-zA-Z0-9._-]', '_', filename)
+            return filename or "downl_" + hex(time.time_ns())[2:]
         url: String = exec_ctx.symbol_table.get("url")
+        timeout: Number = exec_ctx.symbol_table.get("timeout")
         if not isinstance(url, String):
             return RTResult().failure(
                 TError(
@@ -1883,9 +1891,22 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         try:
-            name = url.value.split("/")[-1] or "file"
-            urllib.request.urlretrieve(url, name)
-            return RTResult().success(File(name))
+            req = urllib.request.Request(url.value, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
+            with urllib.request.urlopen(req, timeout=timeout.value) as response:
+                cd = response.headers.get('Content-Disposition')
+                if cd:
+                    fname = re.findall('filename="(.+)"', cd)
+                    name = sanitize_filename(fname[0]) if fname else url.value.split("/")[-1]
+                else:
+                    name = url.value.split("/")[-1]
+
+                name = sanitize_filename(name)
+                if not name:
+                    name = "downl_" + hex(time.time_ns())[2:]
+
+                with open(name, 'wb') as out_file:
+                    out_file.write(response.read())
+            return RTResult().success(File(name, path=os.path.abspath(name)))
         except urllib.error.HTTPError as e:
             return RTResult().failure(
                 RTError(
@@ -1895,17 +1916,18 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        except:
+        except Exception as e:
             return RTResult().failure(
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    f"Failed to download {url}",
+                    f"Failed to download {url}: {str(e)}",
                     exec_ctx,
                 )
             )
 
-    execute_downl_fp.arg_names = ["url"]
+    execute_downl_fp.arg_names = ["url", "timeout"]
+
 
     def execute_get_local_ip_fp(self, exec_ctx):
         try:
