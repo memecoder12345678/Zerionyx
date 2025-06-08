@@ -46,7 +46,7 @@ done
 
 ## Website
 
-Visit the official Zerion website for an introduction and more information: [Zerion Language Website](web/index.html)
+Visit the official Zerion website for an introduction and more information: [Zerion Language Website](docs/index.html)
 
 ## Installation
 
@@ -56,7 +56,7 @@ Visit the official Zerion website for an introduction and more information: [Zer
 
 ## Documentation
 
-Full documentation is available at [docs/index.html](docs/index.html)
+Full documentation is available at [docs/index.html](docs/docs.html)
 
 ## License
 
