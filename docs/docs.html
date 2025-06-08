@@ -154,6 +154,10 @@
             color: #1affb3;
             text-decoration: underline;
         }
+        .highlight-zerion {
+            background: transparent;
+            padding: 0;
+        }
         @media (max-width: 600px) {
             main { padding: 1.2rem 0.5rem; }
             pre { font-size: 0.98em; }
@@ -202,7 +206,7 @@
         <h2>Language Grammar</h2>
         <div class="howto" style="margin-bottom:2.5rem;">
             <h3>Syntax Definition</h3>
-            <pre><code>STATEMENT:
+            <pre><code class="highlight-zerion">STATEMENT:
     | NEWLINE* statement (NEWLINE+ statement)* NEWLINE*
     | 'load' STRING
     | 'return' EXPR
