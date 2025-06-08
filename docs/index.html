@@ -10,12 +10,15 @@
             --panel: #181c2f;
             --neon-blue: #1ad1ff;
             --neon-green: #1affb3;
+            --neon-shadow: 0 0 8px #1ad1ff, 0 0 16px #1affb3;
             --text: #e6faff;
             --muted: #b2fff7;
             --border: #1ad1ff44;
             --code-bg: #181c2f;
             --btn-bg: linear-gradient(90deg, #1ad1ff 60%, #1affb3 100%);
+            --btn-bg-hover: linear-gradient(90deg, #1affb3 60%, #1ad1ff 100%);
             --btn-text: #101522;
+            --btn-shadow: 0 0 12px #1ad1ff55;
         }
         body {
             font-family: 'Segoe UI', 'Fira Mono', 'Consolas', Arial, sans-serif;
@@ -165,6 +168,10 @@
             text-decoration: underline;
         }
         /* Zerion syntax highlighting */
+        .highlight-zerion {
+            background: transparent; /* Đổi background thành trong suốt */
+            padding: 0;
+        }
         .highlight-zerion .zer-keyword { color: #1ad1ff; font-weight: bold; }
         .highlight-zerion .zer-func { color: #1affb3; }
         .highlight-zerion .zer-string { color: #ffe066; }
