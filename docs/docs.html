@@ -199,6 +199,79 @@
                 <li><b>Note:</b> While the language is designed for simplicity, PyPy can significantly speed up automation tasks</li>
             </ul>
         </div>
+        <h2>Language Grammar</h2>
+        <div class="howto" style="margin-bottom:2.5rem;">
+            <h3>Syntax Definition</h3>
+            <pre><code>STATEMENT:
+    | NEWLINE* statement (NEWLINE+ statement)* NEWLINE*
+    | 'load' STRING
+    | 'return' EXPR
+    | 'continue'
+    | 'break'
+    | EXPR
+
+EXPR:
+    | 'let' IDENTIFIER '=' EXPR
+    | IDENTIFIER '=' EXPR
+    | COMP_EXPR (('and' | 'or') COMP_EXPR)*
+
+COMP_EXPR:
+    | ARITH_EXPR (('==' | '<' | '>' | '<=' | '>=' | '!=' ) ARITH_EXPR)*
+    | 'not' COMP_EXPR
+
+ARITH_EXPR:
+    | TERM (('+' | '-') TERM)*
+
+TERM:
+    | FACTOR (('*' | '/' | '//' | '%') FACTOR)*
+
+FACTOR:
+    | ('+' | '-') FACTOR
+    | POWER
+
+POWER:
+    | CALL ('^' FACTOR)*
+
+CALL:
+    | ATOM ('(' (EXPR (',' EXPR)*)? ')')?
+
+ATOM:
+    | INT | FLOAT | STRING | IDENTIFIER
+    | '(' EXPR ')'
+    | LIST_EXPR | LIST_INDEX
+    | IF_EXPR | FOR_EXPR | WHILE_EXPR
+    | DEF_FUNC | COMMENT
+
+LIST_INDEX:
+    | IDENTIFIER '>' EXPR
+
+LIST_EXPR:
+    | '[' (EXPR (',' EXPR)*)? ']'
+
+IF_EXPR:
+    | 'if' EXPR 'do' STATEMENT
+      (NEWLINE 'elif' EXPR 'do' STATEMENT)*
+      (NEWLINE 'else' STATEMENT)?
+      NEWLINE 'done'
+
+FOR_EXPR:
+    | 'for' IDENTIFIER '=' EXPR 'to' EXPR
+      ('step' EXPR)?
+      'do' STATEMENT
+      NEWLINE 'done'
+
+WHILE_EXPR:
+    | 'while' EXPR 'do' STATEMENT
+      NEWLINE 'done'
+
+DEF_FUNC:
+    | 'defun' IDENTIFIER '(' (IDENTIFIER (',' IDENTIFIER)*)? ')'
+      ('->' EXPR)?
+      NEWLINE 'done'
+
+COMMENT:
+    | '#' EXPR</code></pre>
+        </div>
         <h2>Standard Libraries</h2>
         <div class="lib-list">
             <a href="javascript:void(0)" id="btn-list" onclick="showLib('list')">list</a>
@@ -389,7 +462,6 @@
             <li>Example: <code>load "libs.math"</code></li>
             <li>Then call functions as documented above.</li>
         </ul>
-        <!-- Zerion Editor Section -->
         <h2>Zerion Editor</h2>
         <div class="howto" style="margin-bottom:2.5rem;">
             <h3>About Zerion Editor</h3>
@@ -430,7 +502,6 @@
                 <b>To launch:</b> <code>python zerion_editor.py</code>
             </div>
         </div>
-        <!-- End Zerion Editor Section -->
     </main>
     <footer>
         Zerion &copy; 2025 MemeCoder &mdash; <a href="https://github.com/memecoder12345678/zerion" target="_blank">GitHub</a>
