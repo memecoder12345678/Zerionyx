@@ -26,8 +26,9 @@ Zerion is an educational programming language designed for learning and task aut
 println("Hello, World!")
 
 # Simple automation example
+load "libs.file"
 defun create_backup(file)
-    copy(file, file + ".bak")
+    copy(file, to_str(file) + ".bak")
     println("Backup created: " + file + ".bak")
 done
 
