@@ -1,9 +1,9 @@
 load "libs.time"
 
-let N = 1000000
-let total = 0
+N = 1000000
+total = 0
 total = set_reusable(total, true) # Reusable variable to avoid reallocation
-let i = 1
+i = 1
 i = set_reusable(i, true) # Reusable variable to avoid reallocation
 
 let start = time()
@@ -12,7 +12,7 @@ for i_ = i to N + 1 do
     total = total + i_
 done
 
-let end = time()
+end = time()
 println("Sum: " + to_str(total))
 println("Zerion ran in: " + to_str(end - start) + " seconds")
 
