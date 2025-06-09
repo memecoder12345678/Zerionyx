@@ -17,7 +17,7 @@
             },
             {
                 "keyword": {
-                    "color": "#00FFFF",
+                    "color": "#00ffff",
                     "paper-color": "#181a1b",
                     "font": {
                         "family": "consolas",
@@ -65,13 +65,13 @@
             },
             {
                 "string": {
-                    "color": "#74CCBA",
+                    "color": "#7fffd4",
                     "paper-color": "#181a1b"
                 }
             },
             {
                 "types": {
-                    "color": "#00B3E6",
+                    "color": "#00b3e6",
                     "paper-color": "#181a1b",
                     "font": {
                         "family": "consolas",
@@ -83,7 +83,7 @@
             },
             {
                 "brackets": {
-                    "color": "#00FFFF",
+                    "color": "#00ffff",
                     "paper-color": "#181a1b"
                 }
             },
@@ -101,7 +101,7 @@
             },
             {
                 "constants": {
-                    "color": "#39FF14",
+                    "color": "#1affb3",
                     "paper-color": "#181a1b"
                 }
             }
