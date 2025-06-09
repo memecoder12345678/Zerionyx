@@ -2,7 +2,7 @@ load "libs.sys"
 load "libs.string"
 load "libs.list"
 
-memory = list_multiply([0], 30*1000) # this thing is lagging like fucking crazy 💀💀💀
+memory = [0]
 pointer = 0
 
 defun pass() -> none
@@ -17,6 +17,13 @@ defun brainfuck(nput)
     while i < len(nput) do
         # println("i: " + to_str(i) + ", " + "nput>i: " + ", " + to_str(nput>i) + ", " + "memory: " + to_str(memory)+ ", " + "pointer: " + to_str(pointer))
         if (nput>i) == ">" do
+            if pointer >= 30000 do
+                println("Memory Error")
+            else
+                if pointer >= len(memory) do
+                    append(memory, 0)
+                done
+            done
             pointer = pointer + 1
         elif (nput>i) == "<" do
             if pointer > 0 do
