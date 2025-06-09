@@ -13,7 +13,7 @@ done
 list_files = list_dir(folder_path)
 err = catch(make_dir("backup"))
 if not is_none(err>1) do
-    println("File Error: Can't make backup folder")
+    println("File Error: Can not make backup folder")
     exit(1)
 else
     set_dir("backup")
