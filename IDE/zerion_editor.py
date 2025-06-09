@@ -121,10 +121,6 @@ class MainWindow(QMainWindow):
     def __init__(self):
 
         super().__init__()
-        self.settings_file = os.path.join(
-            os.path.dirname(__file__), "settings.json"
-        )
-        self.content_cache = None
         self.setWindowTitle("Zerion Editor")
         QDir.addSearchPath(
             "icons",
