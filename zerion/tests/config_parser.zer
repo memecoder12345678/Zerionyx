@@ -1,0 +1,29 @@
+load "libs.file"
+load "libs.sys"
+load "libs.string"
+
+config_path = argv>2
+
+if not exists(folder_path) do
+    println("File Error: File does not exist")
+    exit(1)
+done
+
+defun parse_config(config_file)
+    config = []
+    lines = split(read(config_file), "\n")
+    for i = 0 to len(lines) do
+        line = lines>i
+        if line != "" do
+            vals = split(line, "=")
+            append(config, strip(vals>0), strip(vals>1)])
+        end
+    end
+    return config
+end
+
+config = parse_config()
+
+for i=0 till len(config) do 
+    print((config>i>0) + " = " + (config>i>1))
+end
