@@ -1,0 +1,32 @@
+load "libs.file"
+load "libs.sys"
+
+folder_path = argv>2
+
+if not exists(folder_path) do
+    println("File Error: Folder does not exist")
+    exit(1)
+else
+    set_dir(folder_path)
+done
+
+list_files = list_dir(folder_path)
+err = catch(make_dir("backup"))
+if not is_none(err>1) do
+    println("File Error: Can't make backup folder")
+    exit(1)
+else
+    set_dir("backup")
+    for i = 0 to len(folder_path) do
+        if is_file(list_files>i) do
+            err = catch(copy(list_files>i, list_files>i + ".bak"))
+            if is_none(err>1) do
+                println("Backup created: " + file + ".bak")
+            else
+                println(err>1)
+            done
+        else
+            println("Warning: subfolders not supported yet")
+        done
+    done
+done
