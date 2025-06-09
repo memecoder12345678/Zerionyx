@@ -51,7 +51,6 @@ class FindReplaceDialog(QDialog):
         self.replace_all_btn.clicked.connect(self.replace_all)
         self.close_btn.clicked.connect(self.close)
 
-        # Thêm phím tắt trong dialog
         self.find_shortcut = QShortcut(QKeySequence("Return"), self)
         self.find_shortcut.activated.connect(self.find_next)
         self.replace_shortcut = QShortcut(QKeySequence("Shift+Return"), self)
@@ -59,7 +58,6 @@ class FindReplaceDialog(QDialog):
         self.replace_all_shortcut = QShortcut(QKeySequence("Ctrl+Return"), self)
         self.replace_all_shortcut.activated.connect(self.replace_all)
 
-        # Đặt focus vào ô tìm kiếm khi mở dialog
         self.find_input.setFocus()
 
     def find_next(self):
@@ -74,11 +72,11 @@ class FindReplaceDialog(QDialog):
 
         found = self.editor.findFirst(
             text,
+            False,
             case_sensitive,
-            False,  # wholeWords
-            False,  # regexp
-            True,   # forward
-            True    # wrap
+            False,
+            True,
+            True
         )
 
         if not found:
