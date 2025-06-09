@@ -79,7 +79,7 @@ def main():
     elif len(sys.argv) == 2 and sys.argv[1] == "--version":
         print(f"Zerion {INFO}")
         return
-    elif len(sys.argv) == 2:
+    else:
         file_name = os.path.abspath(sys.argv[1])
         if not file_name.endswith(".zer"):
             print("Error: The file must have a '.zer' extension.")
@@ -112,8 +112,7 @@ def main():
         except Exception as e:
             print(f"Interpreter error: {e}.")
             return
-    else:
-        print(f"Usage: {__file__} '<file>.zer' or only {__file__} to open the shell.")
+
 
 
 if __name__ == "__main__":
