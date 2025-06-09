@@ -17,9 +17,10 @@ if not is_none(err>1) do
     exit(1)
 else
     set_dir("backup")
-    for i = 0 to len(folder_path) do
-        if is_file(list_files>i) do
-            err = catch(copy(list_files>i, list_files>i + ".bak"))
+    for i = 0 to len(list_files) do
+        file = list_files>i
+        if is_file(file) do
+            err = catch(copy(file, file + ".bak"))
             if is_none(err>1) do
                 println("Backup created: " + file + ".bak")
             else
