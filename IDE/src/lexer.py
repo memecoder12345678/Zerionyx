@@ -229,7 +229,7 @@ class ZerionLexer(BaseLexer):
         }
         self.lib_functions = {
             "libs.math": ["sqrt", "abs", "fact", "sin", "cos", "tan", "gcd", "lcm", "fib", "is_prime", "deg2rad", "rad2deg", "exp", "log", "sinh", "cosh", "tanh", "round"],
-            "libs.string": ["split", "join", "replace", "strip", "to_upper", "to_lower", "ord", "chr", "is_digit", "is_ascii_lowercase", "is_ascii_uppercase", "is_ascii_letter", "is_space", "find", "find_all", "startswith", "endswith", "str_multiply"],
+            "libs.string": ["split", "join", "replace", "strip", "to_upper", "to_lower", "ord", "chr", "is_digit", "is_ascii_lowercase", "is_ascii_uppercase", "is_ascii_letter", "is_space", "find", "find_all", "startswith", "endswith", "str_multiply", "str_slice"],
             "libs.list": ["map", "filter", "reduce", "min", "max", "reverse", "zip", "zip_longest", "change_value", "sort", "count", "index_of", "clear_list", "list_multiply", "rand_int_list", "rand_float_list"],
             "libs.file": ["read", "write", "remove_file", "remove_dir", "exists", "rename", "copy", "list_dir", "set_dir", "get_dir", "make_dir", "is_file"],
             "libs.time": ["time", "ctime", "sleep"],
