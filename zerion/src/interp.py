@@ -521,7 +521,11 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        sliced_string = string.value[int(start.value) if not isinstance(start, None_) else None : int(end.value) if not isinstance(end, None_) else None]
+        sliced_string = string.value[
+            int(start.value) if not isinstance(start, None_) else None : (
+                int(end.value) if not isinstance(end, None_) else None
+            )
+        ]
         return RTResult().success(String(sliced_string))
 
     execute_str_slice_fp.arg_names = ["string", "start", "end"]
@@ -691,7 +695,7 @@ class BuiltInFunction(BaseFunction):
 
     execute_set_env_fp.arg_names = ["name", "value"]
 
-    def execute_get_dir_fp(self, exec_ctx):
+    def execute_get_cdir_fp(self, exec_ctx):
         try:
             return RTResult().success(String(os.getcwd()))
         except Exception as e:
@@ -704,9 +708,9 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_get_dir_fp.arg_names = []
+    execute_get_cdir_fp.arg_names = []
 
-    def execute_set_dir_fp(self, exec_ctx):
+    def execute_set_cdir_fp(self, exec_ctx):
         name = exec_ctx.symbol_table.get("name")
 
         if not isinstance(name, String):
@@ -714,7 +718,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'set_dir' must be a string",
+                    "First argument of 'set_cdir' must be a string",
                     exec_ctx,
                 )
             )
@@ -742,7 +746,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_set_dir_fp.arg_names = ["name"]
+    execute_set_cdir_fp.arg_names = ["name"]
 
     def execute_rand_fp(self, exec_ctx):
         return RTResult().success(Number(random.random()))
@@ -978,11 +982,7 @@ class BuiltInFunction(BaseFunction):
                 return RTResult().success(String(""))
 
             return RTResult().success(
-                String(
-                    sep.value.join(
-                        [str(element) for element in iterables.elements]
-                    )
-                )
+                String(sep.value.join([str(element) for element in iterables.elements]))
             )
         elif isinstance(iterables, String):
             if len(iterables) == 0:
@@ -1878,8 +1878,9 @@ class BuiltInFunction(BaseFunction):
     def execute_downl_fp(self, exec_ctx):
         def sanitize_filename(filename):
             filename = unquote(filename)
-            filename = re.sub(r'[^a-zA-Z0-9._-]', '_', filename)
+            filename = re.sub(r"[^a-zA-Z0-9._-]", "_", filename)
             return filename or "downl_" + hex(time.time_ns())[2:]
+
         url: String = exec_ctx.symbol_table.get("url")
         timeout: Number = exec_ctx.symbol_table.get("timeout")
         if not isinstance(url, String):
@@ -1892,12 +1893,19 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         try:
-            req = urllib.request.Request(url.value, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
+            req = urllib.request.Request(
+                url.value,
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"},
+            )
             with urllib.request.urlopen(req, timeout=timeout.value) as response:
-                cd = response.headers.get('Content-Disposition')
+                cd = response.headers.get("Content-Disposition")
                 if cd:
                     fname = re.findall('filename="(.+)"', cd)
-                    name = sanitize_filename(fname[0]) if fname else url.value.split("/")[-1]
+                    name = (
+                        sanitize_filename(fname[0])
+                        if fname
+                        else url.value.split("/")[-1]
+                    )
                 else:
                     name = url.value.split("/")[-1]
 
@@ -1905,7 +1913,7 @@ class BuiltInFunction(BaseFunction):
                 if not name:
                     name = "downl_" + hex(time.time_ns())[2:]
 
-                with open(name, 'wb') as out_file:
+                with open(name, "wb") as out_file:
                     out_file.write(response.read())
             return RTResult().success(File(name, path=os.path.abspath(name)))
         except urllib.error.HTTPError as e:
@@ -1928,7 +1936,6 @@ class BuiltInFunction(BaseFunction):
             )
 
     execute_downl_fp.arg_names = ["url", "timeout"]
-
 
     def execute_get_local_ip_fp(self, exec_ctx):
         try:
@@ -1975,7 +1982,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return hashlib.md5(text.encode()).hexdigest()
+        return RTResult.success(String(str(hashlib.md5(text.encode()).hexdigest())))
 
     execute_md5_fp.arg_names = ["text"]
 
@@ -1990,7 +1997,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return hashlib.sha1(text.encode()).hexdigest()
+        return RTResult.success(String(str(hashlib.sha1(text.encode()).hexdigest())))
 
     execute_sha1_fp.arg_names = ["text"]
 
@@ -2005,7 +2012,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return hashlib.sha256(text.encode()).hexdigest()
+        return RTResult.success(String(str(hashlib.sha256(text.encode()).hexdigest())))
 
     execute_sha256_fp.arg_names = ["text"]
 
@@ -2020,7 +2027,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return hashlib.sha512(text.encode()).hexdigest()
+        return RTResult.success(String(str(hashlib.sha512(text.encode()).hexdigest())))
 
     execute_sha512_fp.arg_names = ["text"]
 
@@ -2035,7 +2042,9 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return format(zlib.crc32(text.encode()) & 0xFFFFFFFF, "08x")
+        return RTResult.success(
+            String(str(format(zlib.crc32(text.encode()) & 0xFFFFFFFF, "08x")))
+        )
 
     execute_crc32_fp.arg_names = ["text"]
 
@@ -2095,7 +2104,7 @@ class BuiltInFunction(BaseFunction):
             res = func.execute(args.elements)
             if res.error and isinstance(res.error, (RTError, FError, MError, TError)):
                 err_str = str(res.error)
-                err_line = err_str.strip().split('\n')[-1]
+                err_line = err_str.strip().split("\n")[-1]
                 return RTResult().success(List([None_.none, String(err_line)]))
             elif res.error:
                 return RTResult().failure(res.error)
@@ -2103,7 +2112,7 @@ class BuiltInFunction(BaseFunction):
                 return RTResult().success(List([res.value, None_.none]))
         except (RTError, FError, MError, TError) as err:
             err_str = str(err)
-            err_line = err_str.strip().split('\n')[-1]
+            err_line = err_str.strip().split("\n")[-1]
             return RTResult().success(List([None_.none, String(err_line)]))
         except Exception as err:
             return RTResult().failure(
@@ -2166,7 +2175,7 @@ class BuiltInFunction(BaseFunction):
                 pass
             if res.error and isinstance(res.error, (RTError, FError, MError, TError)):
                 err_str = str(res.error)
-                err_line = err_str.strip().split('\n')[-1]
+                err_line = err_str.strip().split("\n")[-1]
                 return RTResult().success(List([None_.none, String(err_line)]))
             elif res.error:
                 return RTResult().failure(res.error)
@@ -2178,7 +2187,7 @@ class BuiltInFunction(BaseFunction):
             except Exception:
                 pass
             err_str = str(err)
-            err_line = err_str.strip().split('\n')[-1]
+            err_line = err_str.strip().split("\n")[-1]
             return RTResult().success(List([None_.none, String(err_line)]))
         except Exception as err:
             try:
@@ -2195,6 +2204,7 @@ class BuiltInFunction(BaseFunction):
             )
 
     execute_finally.arg_names = ["func", "args", "final_func", "final_args"]
+
     def execute_is_file_fp(self, exec_ctx):
         path = exec_ctx.symbol_table.get("path")
         if not isinstance(path, String):
@@ -2209,7 +2219,9 @@ class BuiltInFunction(BaseFunction):
         return RTResult().success(
             Number.true if os.path.isfile(path.value) else Number.false
         )
+
     execute_is_file_fp.arg_names = ["path"]
+
     def execute_set_reusable(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
         reusable = exec_ctx.symbol_table.get("reusable")
@@ -2250,53 +2262,68 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
+
     execute_set_reusable.arg_names = ["value", "reusable"]
+
     def execute_sqrt_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
         return RTResult().success(Number(math.sqrt(a.value)))
+
     execute_sqrt_fp.arg_names = ["a"]
 
     def execute_abs_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
         return RTResult().success(Number(abs(a.value)))
+
     execute_abs_fp.arg_names = ["a"]
 
     def execute_sin_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.sin(x.value)))
+
     execute_sin_fp.arg_names = ["x"]
 
     def execute_cos_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.cos(x.value)))
+
     execute_cos_fp.arg_names = ["x"]
 
     def execute_tan_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.tan(x.value)))
+
     execute_tan_fp.arg_names = ["x"]
+
     def execute_fact_fp(self, exec_ctx):
         n = exec_ctx.symbol_table.get("n")
         return RTResult().success(Number(math.factorial(n.value)))
+
     execute_fact_fp.arg_names = ["n"]
+
     def execute_gcd_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
         b = exec_ctx.symbol_table.get("b")
         return RTResult().success(Number(math.gcd(a.value, b.value)))
+
     execute_gcd_fp.arg_names = ["a", "b"]
+
     def execute_lcm_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
         b = exec_ctx.symbol_table.get("b")
         return RTResult().success(Number(math.lcm(a.value, b.value)))
+
     execute_fact_fp.arg_names = ["a", "b"]
+
     def execute_fib_fp(self, exec_ctx):
         n = exec_ctx.symbol_table.get("n")
         if n.value == 0:
             return RTResult().success(Number(0))
         a, b = 0, 1
         for _ in range(n.value + 1):
-            a, b = b, a + b # this is the most Pythonic bullshit I've ever seen 🐍
+            a, b = b, a + b  # this is the most Pythonic bullshit I've ever seen 🐍
         return RTResult().success(Number(b))
+
     execute_fib_fp.arg_names = ["n"]
 
     def execute_is_prime_fp(self, exec_ctx):
@@ -2318,35 +2345,70 @@ class BuiltInFunction(BaseFunction):
     def execute_deg2rad_fp(self, exec_ctx):
         d = exec_ctx.symbol_table.get("d")
         return RTResult().success(Number(math.radians(d.value)))
+
     execute_deg2rad_fp.arg_names = ["d"]
+
     def execute_rad2deg_fp(self, exec_ctx):
         r = exec_ctx.symbol_table.get("r")
         return RTResult().success(Number(math.degrees(r.value)))
+
     execute_rad2deg_fp.arg_names = ["r"]
+
     def execute_exp_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.exp(x.value)))
+
     execute_exp_fp.arg_names = ["x"]
+
     def execute_log_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.log(x.value)))
+
     execute_log_fp.arg_names = ["x"]
+
     def execute_sinh_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.sinh(x.value)))
+
     execute_sinh_fp.arg_names = ["x"]
+
     def execute_cosh_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.cosh(x.value)))
+
     execute_cosh_fp.arg_names = ["x"]
+
     def execute_tanh_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.tanh(x.value)))
+
     execute_tanh_fp.arg_names = ["x"]
+
     def execute_round_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(round(x.value)))
+
     execute_round_fp.arg_names = ["x"]
+
+    def execute_abs_path_fp(self, exec_ctx):
+        path = exec_ctx.symbol_table.get("path")
+        return RTResult().success(String(os.path.abspath(path.value)))
+
+    execute_abs_path_fp.arg_names = ["path"]
+
+    def execute_dir_name_fp(self, exec_ctx):
+        path = exec_ctx.symbol_table.get("path")
+        return RTResult().success(String(os.path.dirname(path.value)))
+
+    execute_dir_name_fp.arg_names = ["path"]
+
+    def execute_base_name_fp(self, exec_ctx):
+        path = exec_ctx.symbol_table.get("path")
+        return RTResult().success(String(os.path.basename(path.value)))
+
+    execute_base_name_fp.arg_names = ["path"]
+
+
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
     func_name = method_name[8:]
     method = getattr(BuiltInFunction, method_name)
@@ -2639,8 +2701,6 @@ class Parser:
             if res.error:
                 return res
             return res.success(UnaryOpNode(tok, factor))
-
-       
 
         return self.power()
 
@@ -3049,8 +3109,6 @@ class Parser:
             body = res.register(self.statements())
             if res.error:
                 return res
-
-           
 
             if not self.current_tok.matches(TT_KEYWORD, "done"):
                 return res.failure(
@@ -3656,7 +3714,9 @@ class Interpreter:
 
         return res.success(result)
 
+
 global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv]))
+global_symbol_table.seyt("os_sep_fp", String(os.sep))
 global_symbol_table.set("none", None_.none)
 global_symbol_table.set("false", Number.false)
 global_symbol_table.set("true", Number.true)
