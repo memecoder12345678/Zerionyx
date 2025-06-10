@@ -3656,8 +3656,7 @@ class Interpreter:
 
         return res.success(result)
 
-global_symbol_table.set("argv_fp", List(sys.argv))
-
+global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv]))
 global_symbol_table.set("none", None_.none)
 global_symbol_table.set("false", Number.false)
 global_symbol_table.set("true", Number.true)
