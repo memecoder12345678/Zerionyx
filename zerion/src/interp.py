@@ -979,7 +979,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(
                 String(
                     sep.value.join(
-                        [str(element.value) for element in iterables.elements]
+                        [str(element) for element in iterables.elements]
                     )
                 )
             )
