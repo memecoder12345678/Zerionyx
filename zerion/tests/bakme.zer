@@ -1,10 +1,12 @@
 load "libs.file"
 load "libs.sys"
+load "libs.string"
+load "libs.termcolor"
 
 folder_path = argv>2
 
 if not exists(folder_path) do
-    println("File Error: Folder does not exist")
+    cprintln("Error: Folder does not exist", "red", none, 'bold')
     exit(1)
 else
     set_dir(folder_path)
@@ -13,7 +15,7 @@ done
 list_files = list_dir(folder_path)
 err = catch(make_dir("backup"))
 if not is_none(err>1) do
-    println("File Error: Can not make backup folder")
+    cprintln("Error: Can not make backup folder", "red", none, 'bold')
     exit(1)
 else
     set_dir("backup")
@@ -22,12 +24,18 @@ else
         if is_file(file) do
             err = catch(copy(file, file + ".bak"))
             if is_none(err>1) do
-                println("Backup created: " + file + ".bak")
+                cprintln("Backup created: " + file + ".bak", "green", none, 'bold')
             else
-                println(err>1)
+                if startswith(err>1, "Runtime ") do
+                    msg = str_slice(err>1, len("Runtime "), len(err>1))
+                    cprintln(msg, "red", none, 'bold')
+                elif startswith(err>1, "File ") do
+                    msg = str_slice(err>1, len("File "), len(err>1))
+                    cprintln(msg, "red", none, 'bold')
+                done
             done
         else
-            println("Warning: subfolders not supported yet")
+            cprintln("Warning: subfolders not supported yet", "yellow", none, 'bold')
         done
     done
 done
