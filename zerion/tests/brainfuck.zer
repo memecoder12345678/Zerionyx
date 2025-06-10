@@ -71,7 +71,7 @@ defun brainfuck(nput)
     return output
 done
 
-if is_main do
+defun main()
     println("Brainfuck Interpreter")
     while true do
         code = input(">> ")
@@ -87,4 +87,8 @@ if is_main do
             println(output)
         done
     done
+done
+
+if is_main do
+    main()
 done

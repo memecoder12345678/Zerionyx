@@ -6,17 +6,20 @@ total = 0
 total = set_reusable(total, true) # Reusable variable to avoid reallocation
 i = 1
 i = set_reusable(i, true) # Reusable variable to avoid reallocation
-
 let start = time()
 
-for i_ = i to N + 1 do
-    total = total + i_
+defun main()
+    for i_ = i to N + 1 do
+        total = total + i_
+    done
 done
 
-end = time()
-println("Sum: " + to_str(total))
-println("Zerion ran in: " + to_str(end - start) + " seconds")
-exit(0)
+if is_main do
+    end = time()
+    println("Sum: " + to_str(total))
+    println("Zerion ran in: " + to_str(end - start) + " seconds")
+    exit(0)
+done
 
 # Fastest: 1.2033976 seconds
 # Slowest: 1.2669648 seconds

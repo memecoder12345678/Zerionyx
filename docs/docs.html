@@ -205,8 +205,6 @@
             </ul>
         </div>
         <h2>Language Grammar</h2>
-        <div class="howto" style="margin-bottom:2.5rem;">
-            <h3>Syntax Definition</h3>
             <pre><code class="highlight-zerion">STATEMENT:
     | NEWLINE* statement (NEWLINE+ statement)* NEWLINE*
     | 'load' STRING
@@ -276,7 +274,32 @@ DEF_FUNC:
 
 COMMENT:
     | '#' EXPR</code></pre>
-        </div>
+        <h2>Built-in Functions</h2>
+        <ul>
+            <li><b>append(obj, val)</b> &rarr; list &mdash; Add <code>val</code> to end of <code>obj</code> return <code>val</code></li>
+            <li><b>catch(func, args)</b> &rarr; list &mdash; Run <code>func</code> with <code>args</code> return <code>[result, none]</code> if ok or <code>[none, err]</code> if error</li>
+            <li><b>clear()</b> &rarr; none &mdash; Clear terminal</li>
+            <li><b>extend(a, b)</b> &rarr; none &mdash; Add all in <code>b</code> to <code>a</code> both must be list</li>
+            <li><b>finally(f, a, final_f, final_a)</b> &rarr; list &mdash; Run <code>f</code> with <code>a</code> then always run <code>final_f</code> with <code>final_a</code> return like <code>catch</code></li>
+            <li><b>input(prompt)</b> &rarr; string &mdash; Show <code>prompt</code> get user input</li>
+            <li><b>insert(lst, i, val)</b> &rarr; none &mdash; insert <code>val</code> to <code>lst</code> at index <code>i</code></li>
+            <li><b>is_func(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is func</li>
+            <li><b>is_list(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is list</li>
+            <li><b>is_none(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is none</li>
+            <li><b>is_num(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is number</li>
+            <li><b>is_str(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is string</li>
+            <li><b>is_thread(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is thread</li>
+            <li><b>len(x)</b> &rarr; number &mdash; Get length of <code>x</code></li>
+            <li><b>panic(msg, type)</b> &mdash; Stop with err <code>msg</code> and <code>type</code></li>
+            <li><b>pop(lst, i)</b> &rarr; any &mdash; Remove and return item at <code>i</code> in <code>lst</code></li>
+            <li><b>print(text)</b> &rarr; none &mdash; Prints <code>text</code> to the standard output with no newline</li>
+            <li><b>println(text)</b> &rarr; none &mdash; Same as <code>print</code> but adds a newline</li>
+            <li><b>set_reusable(val, re)</b> &rarr; list/num &mdash; Set reuse flag of <code>val</code> to <code>re</code> (<code>true</code>/<code>false</code>)</li>
+            <li><b>to_float(x, silent)</b> &rarr; float/none &mdash; Convert <code>x</code> to float return <code>none</code> if fail and <code>silent</code> true else raise</li>
+            <li><b>to_int(x, silent)</b> &rarr; int/none &mdash; Convert <code>x</code> to int return <code>none</code> if fail and <code>silent</code> true else raise</li>
+            <li><b>to_str(x)</b> &rarr; string &mdash; Convert <code>x</code> to string</li>
+            <li><b>type(x)</b> &rarr; string/none &mdash; Return type of <code>x</code> as string or none</li>
+        </ul>
         <h2>Standard Libraries</h2>
         <div class="lib-list">
             <a href="javascript:void(0)" id="btn-list" onclick="showLib('list')">list</a>

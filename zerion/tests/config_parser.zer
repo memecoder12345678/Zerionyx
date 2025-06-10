@@ -4,13 +4,6 @@ load "libs.string"
 load "libs.list"
 load "libs.termcolor"
 
-config_path = argv>2
-
-if not exists(config_path) do
-    cprintln("Error: File does not exist", 'red', none, 'bold')
-    exit(1)
-done
-
 defun parse_config(config_file)
     config = []
     lines = split(read(config_file), "\n")
@@ -24,12 +17,22 @@ defun parse_config(config_file)
     return config
 done
 
-config = parse_config(config_path)
-
-for i = 0 to len(config) do 
-    cprint((config>i>0), 'magenta', none, 'bold')
-    print(" = ")
-    cprint((config>i>1), 'green', none, none)
-    println("")
+defun main()
+    config_path = argv>2
+    if not exists(config_path) do
+        cprintln("Error: File does not exist", 'red', none, 'bold')
+        exit(1)
+    done
+    config = parse_config(config_path)
+    for i = 0 to len(config) do 
+        cprint((config>i>0), 'magenta', none, 'bold')
+        print(" = ")
+        cprint((config>i>1), 'green', none, none)
+        println("")
+    done
 done
-exit(0)
+
+if is_main do
+    main()
+    exit(0)
+done
