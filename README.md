@@ -1,4 +1,5 @@
 # Zerion Programming Language
+![Zerion](docs/favicon.ico)
 
 Zerion is an educational programming language designed for learning and task automation.
 
