@@ -367,8 +367,8 @@ COMMENT:
                 <li><b>write(file, mode, text)</b> &rarr; none &mdash; Write <code>text</code> to <code>file</code> with mode <code>mode</code> ("w" or "a")</li>
                 <li><b>read(file)</b> &rarr; String &mdash; Read contents of <code>file</code></li>
                 <li><b>exists(file)</b> &rarr; Bool &mdash; Check if <code>file</code> exists</li>
-                <li><b>get_dir()</b> &rarr; String &mdash; Get current directory</li>
-                <li><b>set_dir(dir)</b> &rarr; none &mdash; Change current directory</li>
+                <li><b>get_cdir()</b> &rarr; String &mdash; Get current directory</li>
+                <li><b>set_cdir(dir)</b> &rarr; none &mdash; Change current directory</li>
                 <li><b>list_dir(dir)</b> &rarr; List &mdash; List files in directory</li>
                 <li><b>make_dir(dir)</b> &rarr; none &mdash; Create directory</li>
                 <li><b>remove_file(file)</b> &rarr; none &mdash; Remove file</li>
@@ -376,6 +376,10 @@ COMMENT:
                 <li><b>remove_dir(dir)</b> &rarr; none &mdash; Remove directory</li>
                 <li><b>copy(src, dst)</b> &rarr; none &mdash; Copy file</li>
                 <li><b>is_file(file)</b> &rarr; Bool &mdash; Is path a file</li>
+                <li><b>abs_path(path)</b> &rarr; String &mdash; Get absolute path</li>
+                <li><b>base_name(file)</b> &rarr; String &mdash; Get file name</li>
+                <li><b>dir_name(file)</b> &rarr; String &mdash; Get parent folder</li>
+                <li>Constants: <b>os_sep</b></li>
             </ul>
         </div>
         <div id="lib-hash" class="lib-content" style="display:none;">
@@ -406,7 +410,7 @@ COMMENT:
                 <li><b>get_ip()</b> &rarr; String &mdash; Get public IP address</li>
                 <li><b>get_mac()</b> &rarr; String &mdash; Get MAC address</li>
                 <li><b>ping(host)</b> &rarr; String &mdash; Ping host</li>
-                <li><b>downl(url, timeout)</b> &rarr; File &mdash; Download file from URL</li>
+                <li><b>downl(url, timeout)</b> &rarr; String &mdash; Download file from URL</li>
                 <li><b>get_local_ip()</b> &rarr; String &mdash; Get local IP address</li>
                 <li><b>get_hostname()</b> &rarr; String &mdash; Get hostname</li>
             </ul>
