@@ -9,7 +9,7 @@ class NumberNode:
 
     def __repr__(self):
         return f"{self.tok}"
-    
+
     def __str__(self):
         return f"NumberNode({self.tok.value})"
 
@@ -25,13 +25,13 @@ class StringNode:
 
     def __repr__(self):
         return f"{self.tok}"
-    
+
     def __str__(self):
-        return f"StringNode(\"{self.tok.value}\")"
+        return f'StringNode("{self.tok.value}")'
 
 
 class ListNode:
-    
+
     __slots__ = ["element_nodes", "pos_start", "pos_end"]
 
     def __init__(self, element_nodes, pos_start, pos_end):
@@ -39,7 +39,6 @@ class ListNode:
 
         self.pos_start = pos_start
         self.pos_end = pos_end
-    
 
     def __str__(self):
         return f"ListNode({', '.join(str(x) for x in self.element_nodes)})"
@@ -85,7 +84,7 @@ class BinOpNode:
 
     def __repr__(self):
         return f"({self.left_node}, {self.op_tok}, {self.right_node})"
-    
+
     def __str__(self):
         return f"BinOpNode({self.left_node} {self.op_tok.type} {self.right_node})"
 
@@ -102,7 +101,7 @@ class UnaryOpNode:
 
     def __repr__(self):
         return f"({self.op_tok}, {self.node})"
-    
+
     def __str__(self):
         return f"UnaryOpNode({self.op_tok.type}{self.node})"
 
@@ -286,7 +285,7 @@ class LoadNode:
         self.pos_end = self.module_name_tok.pos_end
 
     def __str__(self):
-        return f"LoadNode(\"{self.file_path}\")"
+        return f'LoadNode("{self.file_path}")'
 
 
 def ast_to_dict(node):
@@ -319,14 +318,13 @@ def ast_to_dict(node):
         }
     if isinstance(node, ListNode):
         elements = [ast_to_dict(e) for e in node.element_nodes]
-        return {
-            "type": "ListNode",
-            "elements": elements
-        }
+        return {"type": "ListNode", "elements": elements}
     if isinstance(node, IfNode):
         return {
             "type": "IfNode",
-            "cases": [[ast_to_dict(cond), ast_to_dict(expr)] for cond, expr, _ in node.cases],
+            "cases": [
+                [ast_to_dict(cond), ast_to_dict(expr)] for cond, expr, _ in node.cases
+            ],
             "else": ast_to_dict(node.else_case[0]) if node.else_case else None,
         }
     if isinstance(node, ForNode):

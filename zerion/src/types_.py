@@ -1,4 +1,4 @@
-from .lex import RTResult
+from .lexer import RTResult
 import operator
 from functools import wraps
 from .errors import (
@@ -9,15 +9,21 @@ from .errors import (
 
 
 def handle_number_op(func):
-    """Decorator xử lý các kiểm tra chung cho các phép toán số học và logic."""
 
     @wraps(func)
     def wrapper(self, other):
         if not isinstance(other, Number):
-            return None, self.illegal_operation(other, f"The operation only supports number, not '{other.type()}'")
+            return None, self.illegal_operation(
+                other, f"The operation only supports number, not '{other.type()}'"
+            )
 
         if self.value is None or other.value is None:
-            return None, TError(self.pos_start, self.pos_end, "Cannot perform arithmetic with 'none'", self.context)
+            return None, TError(
+                self.pos_start,
+                self.pos_end,
+                "Cannot perform arithmetic with 'none'",
+                self.context,
+            )
 
         return func(self, other)
 
@@ -208,6 +214,37 @@ class Object:
         )
 
 
+class ThreadWrapper(Object):
+    def __init__(self, thread):
+        super().__init__()
+        self.thread = thread
+
+    def copy(self):
+        copy = ThreadWrapper(self.thread)
+        copy.set_pos(self.pos_start, self.pos_end)
+        copy.set_context(self.context)
+        return copy
+
+    def type(self):
+        return "<thread>"
+
+    def __str__(self):
+        return f"<thread id={self.thread.ident} active={self.thread.is_alive()}>"
+
+    def __repr__(self):
+        return self.__str__()
+
+    def join(self, timeout=None):
+        return self.thread.join(timeout)
+
+    def is_alive(self):
+        return self.thread.is_alive()
+
+    def cancel(self):
+        if self.thread.is_alive():
+            self.thread._stop()
+
+
 class BaseFunction(Object):
 
     def __init__(self, name):
@@ -368,12 +405,14 @@ None_.none = None_("none")
 
 
 class Number(Object):
-    __slots__ = ('value', 'context', 'pos_start', 'pos_end', 'fields')
+    __slots__ = ("value", "context", "pos_start", "pos_end", "fields")
 
-    def __init__(self, value, context=None, pos_start=None, pos_end=None, reusable=False):
+    def __init__(
+        self, value, context=None, pos_start=None, pos_end=None, reusable=False
+    ):
         self.reusable = reusable
         self.value = value
-        self.context = context 
+        self.context = context
         self.pos_start = pos_start
         self.pos_end = pos_end
         self.fields = []
@@ -383,7 +422,7 @@ class Number(Object):
 
     @handle_number_op
     def i_add(self, other):
-        self.value += other.value 
+        self.value += other.value
         return self, None
 
     @handle_number_op
@@ -393,28 +432,28 @@ class Number(Object):
         if self.value == 0:
             return other, None
         if other.value == 1:
-            if hasattr(self, 'reusable'):
+            if hasattr(self, "reusable"):
                 self.value += 1
                 return self, None
             return Number(self.value + 1, self.context), None
         if self.value == 1:
-            if hasattr(other, 'reusable'):
+            if hasattr(other, "reusable"):
                 other.value += 1
                 return other, None
-        if hasattr(self, 'reusable'):
+        if hasattr(self, "reusable"):
             self.value += other.value
             return self, None
         return Number(self.value + other.value, self.context), None
 
-    @handle_number_op 
+    @handle_number_op
     def subbed_by(self, other):
         if other.value == 0:
             return self, None
         if other.value == 1:
-            if hasattr(self, 'reusable'):
+            if hasattr(self, "reusable"):
                 self.value -= 1
                 return self, None
-        if hasattr(self, 'reusable'):
+        if hasattr(self, "reusable"):
             self.value -= other.value
             return self, None
         return Number(self.value - other.value, self.context), None
@@ -434,7 +473,9 @@ class Number(Object):
     @handle_number_op
     def dived_by(self, other):
         if other.value == 0:
-            return None, MError(other.pos_start, other.pos_end, "Division by zero", self.context)
+            return None, MError(
+                other.pos_start, other.pos_end, "Division by zero", self.context
+            )
         if other.value == 1:
             return self, None
         return Number(self.value / other.value).set_context(self.context), None
@@ -442,7 +483,9 @@ class Number(Object):
     @handle_number_op
     def moduled_by(self, other):
         if other.value == 0:
-            return None, MError(other.pos_start, other.pos_end, "Division by zero", self.context)
+            return None, MError(
+                other.pos_start, other.pos_end, "Division by zero", self.context
+            )
         if other.value == 1:
             return Number.false, None
         return Number(self.value % other.value).set_context(self.context), None
@@ -457,23 +500,29 @@ class Number(Object):
             return Number(self.value * self.value).set_context(self.context), None
         if self.value == 0:
             return Number.false, None
-        return Number(self.value ** other.value).set_context(self.context), None
+        return Number(self.value**other.value).set_context(self.context), None
 
     @handle_number_op
     def floordived_by(self, other):
         if other.value == 0:
-            return None, MError(other.pos_start, other.pos_end, "Division by zero", self.context)
+            return None, MError(
+                other.pos_start, other.pos_end, "Division by zero", self.context
+            )
         if other.value == 1:
             return self, None
         return Number(self.value // other.value).set_context(self.context), None
 
     def _get_comparison_result(self, other, op):
         default = 1 if op is operator.ne else 0
-        
-        if isinstance(other, Number) and self.value is not None and other.value is not None:
+
+        if (
+            isinstance(other, Number)
+            and self.value is not None
+            and other.value is not None
+        ):
             result = int(op(self.value, other.value))
             return Number(result, self.context), None
-            
+
         if self.value is None:
             if isinstance(other, None_):
                 result = 1 if op in (operator.eq, operator.le, operator.ge) else 0
@@ -513,7 +562,10 @@ class Number(Object):
                 "Cannot perform logical operation with 'none'",
                 self.context,
             )
-        return Number((self.value != 0) & (other.value != 0)).set_context(self.context), None
+        return (
+            Number((self.value != 0) & (other.value != 0)).set_context(self.context),
+            None,
+        )
 
     def ored_by(self, other):
         if not isinstance(other, Number):
@@ -527,7 +579,10 @@ class Number(Object):
                 "Cannot perform logical operation with 'none'",
                 self.context,
             )
-        return Number((self.value != 0) | (other.value != 0)).set_context(self.context), None
+        return (
+            Number((self.value != 0) | (other.value != 0)).set_context(self.context),
+            None,
+        )
 
     def notted(self):
         if self.value is None:
@@ -600,6 +655,7 @@ Number.false = Number(0, reusable=True)
 Number.true = Number(1, reusable=True)
 Number.none = None_.none
 
+
 class String(Object):
 
     __slots__ = "value"
@@ -653,12 +709,23 @@ class String(Object):
         default_result = 1 if op is operator.ne else 0
         return Number(default_result).set_context(self.context), None
 
-    def get_comparison_eq(self, other): return self._make_comparison(other, operator.eq, String)
-    def get_comparison_ne(self, other): return self._make_comparison(other, operator.ne, String)
-    def get_comparison_lt(self, other): return self._make_comparison(other, operator.lt, String)
-    def get_comparison_gt(self, other): return self._make_comparison(other, operator.gt, String)
-    def get_comparison_lte(self, other): return self._make_comparison(other, operator.le, String)
-    def get_comparison_gte(self, other): return self._make_comparison(other, operator.ge, String)
+    def get_comparison_eq(self, other):
+        return self._make_comparison(other, operator.eq, String)
+
+    def get_comparison_ne(self, other):
+        return self._make_comparison(other, operator.ne, String)
+
+    def get_comparison_lt(self, other):
+        return self._make_comparison(other, operator.lt, String)
+
+    def get_comparison_gt(self, other):
+        return self._make_comparison(other, operator.gt, String)
+
+    def get_comparison_lte(self, other):
+        return self._make_comparison(other, operator.le, String)
+
+    def get_comparison_gte(self, other):
+        return self._make_comparison(other, operator.ge, String)
 
     def is_true(self):
 
@@ -707,7 +774,7 @@ class List(Object):
         self.reusable = reusable
 
     def added_to(self, other):
-        if hasattr(self, 'reusable') and self.reusable:
+        if hasattr(self, "reusable") and self.reusable:
             self.elements.append(other)
             return self, None
         new_list = self.copy()
@@ -716,7 +783,7 @@ class List(Object):
 
     def subbed_by(self, other):
         if isinstance(other, Number):
-            if hasattr(self, 'reusable') and self.reusable:
+            if hasattr(self, "reusable") and self.reusable:
                 try:
                     self.elements.pop(other.value)
                     return self, None
@@ -734,7 +801,7 @@ class List(Object):
             except:
                 return None, RTError(
                     other.pos_start,
-                    other.pos_end, 
+                    other.pos_end,
                     "Element at this index could not be removed from list because index is out of bounds",
                     self.context,
                 )
@@ -745,8 +812,8 @@ class List(Object):
 
     def multed_by(self, other):
         if isinstance(other, List):
-            if hasattr(self, 'reusable') and self.reusable:
-                self.elements.extend(other.elements) 
+            if hasattr(self, "reusable") and self.reusable:
+                self.elements.extend(other.elements)
                 return self, None
             new_list = self.copy()
             new_list.elements.extend(other.elements)
@@ -827,8 +894,11 @@ class File(Object):
         default_result = 1 if op is operator.ne else 0
         return Number(default_result).set_context(self.context), None
 
-    def get_comparison_eq(self, other): return self._make_comparison(other, operator.eq, File)
-    def get_comparison_ne(self, other): return self._make_comparison(other, operator.ne, File)
+    def get_comparison_eq(self, other):
+        return self._make_comparison(other, operator.eq, File)
+
+    def get_comparison_ne(self, other):
+        return self._make_comparison(other, operator.ne, File)
 
     def copy(self):
 
@@ -847,5 +917,6 @@ class File(Object):
     def __repr__(self):
 
         return f"<File {self.name}>"
+
 
 List.empty = List([], reusable=True)

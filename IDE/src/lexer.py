@@ -5,6 +5,7 @@ from typing import TypedDict
 from PyQt5.Qsci import QsciLexerCustom
 from PyQt5.QtGui import QFont, QColor
 
+
 class DefaultConfig(TypedDict):
     color: str
     paper: str
@@ -130,7 +131,7 @@ class BaseLexer(QsciLexerCustom):
                 continue
 
             for k, v in clr[name].items():
-                if k == "color": 
+                if k == "color":
                     self.setColor(QColor(v), style_id)
                 elif k == "paper-color":
                     self.setPaper(QColor(v), style_id)
@@ -194,7 +195,6 @@ class BaseLexer(QsciLexerCustom):
         else:
             return None
 
-
     def peek_tok(self, n=0):
         try:
             return self.token_list[n]
@@ -207,7 +207,9 @@ class BaseLexer(QsciLexerCustom):
             i = skip_tokens
 
         temp_idx = i
-        while temp_idx < len(self.token_list) and self.token_list[temp_idx][0].isspace():
+        while (
+            temp_idx < len(self.token_list) and self.token_list[temp_idx][0].isspace()
+        ):
             temp_idx += 1
 
         if temp_idx < len(self.token_list):
@@ -216,30 +218,154 @@ class BaseLexer(QsciLexerCustom):
             return ("", 0), temp_idx + 1
 
 
-
 class ZerionLexer(BaseLexer):
     def __init__(self, editor):
         super(ZerionLexer, self).__init__("Zerion", editor)
         self.current_file = None
         self.core_functions = {
-            "append", "clear", "extend", "is_none", "input", "insert", "is_func",
-            "set_reusable", "is_list", "is_num", "is_thread", "is_str", "len",
-            "catch", "finally", "panic", "pop", "print", "println", "to_float",
-            "to_int", "to_str", "type",
+            "append",
+            "clear",
+            "extend",
+            "is_none",
+            "input",
+            "insert",
+            "is_func",
+            "set_reusable",
+            "is_list",
+            "is_num",
+            "is_thread",
+            "is_str",
+            "len",
+            "catch",
+            "finally",
+            "panic",
+            "pop",
+            "print",
+            "println",
+            "to_float",
+            "to_int",
+            "to_str",
+            "type",
         }
         self.lib_functions = {
-            "libs.math": ["sqrt", "abs", "fact", "sin", "cos", "tan", "gcd", "lcm", "fib", "is_prime", "deg2rad", "rad2deg", "exp", "log", "sinh", "cosh", "tanh", "round"],
-            "libs.string": ["split", "join", "replace", "strip", "to_upper", "to_lower", "ord", "chr", "is_digit", "is_ascii_lowercase", "is_ascii_uppercase", "is_ascii_letter", "is_space", "find", "find_all", "startswith", "endswith", "str_multiply", "str_slice"],
-            "libs.list": ["map", "filter", "reduce", "min", "max", "reverse", "zip", "zip_longest", "change_value", "sort", "count", "index_of", "clear_list", "list_multiply", "rand_int_list", "rand_float_list"],
-            "libs.file": ["read", "write", "remove_file", "remove_dir", "exists", "rename", "copy", "list_dir", "set_cdir", "get_cdir", "make_dir", "is_file", "abs_path", "base_name", "dir_name"],
+            "libs.math": [
+                "sqrt",
+                "abs",
+                "fact",
+                "sin",
+                "cos",
+                "tan",
+                "gcd",
+                "lcm",
+                "fib",
+                "is_prime",
+                "deg2rad",
+                "rad2deg",
+                "exp",
+                "log",
+                "sinh",
+                "cosh",
+                "tanh",
+                "round",
+            ],
+            "libs.string": [
+                "split",
+                "join",
+                "replace",
+                "strip",
+                "to_upper",
+                "to_lower",
+                "ord",
+                "chr",
+                "is_digit",
+                "is_ascii_lowercase",
+                "is_ascii_uppercase",
+                "is_ascii_letter",
+                "is_space",
+                "find",
+                "find_all",
+                "startswith",
+                "endswith",
+                "str_multiply",
+                "str_slice",
+            ],
+            "libs.list": [
+                "map",
+                "filter",
+                "reduce",
+                "min",
+                "max",
+                "reverse",
+                "zip",
+                "zip_longest",
+                "change_value",
+                "sort",
+                "count",
+                "index_of",
+                "clear_list",
+                "list_multiply",
+                "rand_int_list",
+                "rand_float_list",
+            ],
+            "libs.file": [
+                "read",
+                "write",
+                "remove_file",
+                "remove_dir",
+                "exists",
+                "rename",
+                "copy",
+                "list_dir",
+                "set_cdir",
+                "get_cdir",
+                "make_dir",
+                "is_file",
+                "abs_path",
+                "base_name",
+                "dir_name",
+            ],
             "libs.time": ["time", "ctime", "sleep"],
-            "libs.random": ["rand", "rand_int", "rand_choice", "rand_float", "int_seed", "float_seed"],
+            "libs.random": [
+                "rand",
+                "rand_int",
+                "rand_choice",
+                "rand_float",
+                "int_seed",
+                "float_seed",
+            ],
             "libs.sys": ["exit", "system", "get_env", "set_env"],
             "libs.hash": ["md5", "sha1", "sha256", "sha512", "crc32"],
-            "libs.memory": ["remember", "forget", "recall", "clear_memory", "keys", "is_empty", "size"],
-            "libs.net": ["get_ip", "get_hostname", "get_local_ip", "get_mac", "ping", "downl"],
-            "libs.threading" : ["thread_start", "thread_join", "thread_sleep", "thread_is_alive", "thread_cancel"],
-            "libs.keyboard": ["keyboard_write", "keyboard_press", "keyboard_release", "keyboard_wait", "keyboard_is_pressed"],
+            "libs.memory": [
+                "remember",
+                "forget",
+                "recall",
+                "clear_memory",
+                "keys",
+                "is_empty",
+                "size",
+            ],
+            "libs.net": [
+                "get_ip",
+                "get_hostname",
+                "get_local_ip",
+                "get_mac",
+                "ping",
+                "downl",
+            ],
+            "libs.threading": [
+                "thread_start",
+                "thread_join",
+                "thread_sleep",
+                "thread_is_alive",
+                "thread_cancel",
+            ],
+            "libs.keyboard": [
+                "keyboard_write",
+                "keyboard_press",
+                "keyboard_release",
+                "keyboard_wait",
+                "keyboard_is_pressed",
+            ],
             "libs.termcolor": ["cprintln", "cprint"],
         }
         self.operators = ["+", "-", "*", "/", "%", "^", "=", "<", ">", "!"]
@@ -247,18 +373,35 @@ class ZerionLexer(BaseLexer):
         self.literals = ["true", "false", "none"]
         self.user_functions = set()
         self.available_functions = set(self.core_functions)
-        self.setKeywords([
-            "let", "and", "or", "not", "if", "elif", "else", "for", "to", "do",
-            "step", "while", "defun", "done", "return", "continue", "break", "load",
-        ])
-
+        self.setKeywords(
+            [
+                "let",
+                "and",
+                "or",
+                "not",
+                "if",
+                "elif",
+                "else",
+                "for",
+                "to",
+                "do",
+                "step",
+                "while",
+                "defun",
+                "done",
+                "return",
+                "continue",
+                "break",
+                "load",
+            ]
+        )
 
         self.in_string_mode = False
         self.string_quote_char = None
         self.is_triple_string = False
         self.triple_closing_match_count = 0
         self.is_escape_sequence_char = False
-        
+
         self.last_scanned_pos = 0
 
     def set_current_file(self, filepath):
@@ -278,14 +421,17 @@ class ZerionLexer(BaseLexer):
 
         used_libs = set(self.find_loads_outside_strings(text))
 
-
-        if self.user_functions != current_funcs or self.available_functions_changed(used_libs):
+        if self.user_functions != current_funcs or self.available_functions_changed(
+            used_libs
+        ):
             self.user_functions = current_funcs
             self.available_functions = set(self.core_functions)
             for lib in used_libs:
                 if lib in self.lib_functions:
                     self.available_functions.update(self.lib_functions[lib])
-            if hasattr(self.editor, 'SendScintilla') and hasattr(self.editor, 'SCI_COLOURISE'):
+            if hasattr(self.editor, "SendScintilla") and hasattr(
+                self.editor, "SCI_COLOURISE"
+            ):
                 self.editor.SendScintilla(self.editor.SCI_COLOURISE, 0, -1)
 
     def available_functions_changed(self, used_libs):
@@ -297,7 +443,10 @@ class ZerionLexer(BaseLexer):
 
     def find_loads_outside_strings(self, text):
         string_spans = []
-        for m in re.finditer(r'("""[\s\S]*?"""|\'\'\'[\s\S]*?\'\'\'|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\')', text):
+        for m in re.finditer(
+            r'("""[\s\S]*?"""|\'\'\'[\s\S]*?\'\'\'|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\')',
+            text,
+        ):
             string_spans.append((m.start(), m.end()))
 
         def is_in_string(pos):
@@ -314,9 +463,11 @@ class ZerionLexer(BaseLexer):
         return result
 
     def _remove_strings_and_comments(self, text):
-        processed = re.sub(r'""".*?"""|\'\'\'.*?\'\'\'', '', text, flags=re.DOTALL)
-        processed = re.sub(r'"[^"\\]*(?:\\.[^"\\]*)*"|\'[^\'\\]*(?:\\.[^\'\\]*)*\'', '', processed)
-        processed = re.sub(r'#.*$', '', processed, flags=re.MULTILINE)
+        processed = re.sub(r'""".*?"""|\'\'\'.*?\'\'\'', "", text, flags=re.DOTALL)
+        processed = re.sub(
+            r'"[^"\\]*(?:\\.[^"\\]*)*"|\'[^\'\\]*(?:\\.[^\'\\]*)*\'', "", processed
+        )
+        processed = re.sub(r"#.*$", "", processed, flags=re.MULTILINE)
         return processed
 
     def _scan_to_restore_state(self, scan_to_pos: int):
@@ -340,7 +491,7 @@ class ZerionLexer(BaseLexer):
         text_to_scan = self.editor.text(scan_from, scan_to_pos)
 
         self.generate_tokens(text_to_scan)
-        
+
         while True:
             curr_token = self.next_tok()
             if curr_token is None:
@@ -360,7 +511,7 @@ class ZerionLexer(BaseLexer):
                 else:
                     if self.is_escape_sequence_char:
                         self.is_escape_sequence_char = False
-                    elif tok_str == '\\':
+                    elif tok_str == "\\":
                         self.is_escape_sequence_char = True
                     elif tok_str == self.string_quote_char:
                         self.in_string_mode = False
@@ -378,7 +529,7 @@ class ZerionLexer(BaseLexer):
                     self.in_string_mode = True
                     self.is_triple_string = False
                     self.string_quote_char = tok_str
-        
+
         self.last_scanned_pos = scan_to_pos
 
     def styleText(self, start: int, end: int) -> None:
@@ -388,20 +539,22 @@ class ZerionLexer(BaseLexer):
         full_text = self.editor.text()
         if not full_text:
             return
-        
+
         self.update_definitions(full_text)
 
         self._scan_to_restore_state(start)
 
         self.startStyling(start)
-        
+
         visible_text = full_text[start : min(end, len(full_text))]
         self.generate_tokens(visible_text)
-        
+
         line_comment_active = False
         if start > 0:
-            previous_style = self.editor.SendScintilla(self.editor.SCI_GETSTYLEAT, start - 1)
-            if previous_style == self.COMMENTS and full_text[start-1] != '\n':
+            previous_style = self.editor.SendScintilla(
+                self.editor.SCI_GETSTYLEAT, start - 1
+            )
+            if previous_style == self.COMMENTS and full_text[start - 1] != "\n":
                 line_comment_active = True
 
         while True:
@@ -414,7 +567,8 @@ class ZerionLexer(BaseLexer):
 
             if line_comment_active:
                 self.setStyling(tok_len, self.COMMENTS)
-                if "\n" in tok_str: line_comment_active = False
+                if "\n" in tok_str:
+                    line_comment_active = False
                 continue
 
             if self.in_string_mode:
@@ -428,9 +582,12 @@ class ZerionLexer(BaseLexer):
                     else:
                         self.triple_closing_match_count = 0
                 else:
-                    if self.is_escape_sequence_char: self.is_escape_sequence_char = False
-                    elif tok_str == '\\': self.is_escape_sequence_char = True
-                    elif tok_str == self.string_quote_char: self.in_string_mode = False
+                    if self.is_escape_sequence_char:
+                        self.is_escape_sequence_char = False
+                    elif tok_str == "\\":
+                        self.is_escape_sequence_char = True
+                    elif tok_str == self.string_quote_char:
+                        self.in_string_mode = False
                 continue
 
             if tok_str == "#":
@@ -459,16 +616,26 @@ class ZerionLexer(BaseLexer):
                 name_candidate, num_tokens = self.skip_spaces_peek()
                 if name_candidate and name_candidate[0].isidentifier():
                     self.setStyling(tok_len, self.KEYWORD)
-                    for _ in range(num_tokens - 1): self.setStyling(self.next_tok()[1], self.DEFAULT)
+                    for _ in range(num_tokens - 1):
+                        self.setStyling(self.next_tok()[1], self.DEFAULT)
                     self.setStyling(self.next_tok()[1], self.FUNCTION_AND_CLASS_DEF)
-                else: self.setStyling(tok_len, self.KEYWORD)
-            elif tok_str in self.keywords_list: self.setStyling(tok_len, self.KEYWORD)
-            elif tok_str in self.available_functions or tok_str in self.user_functions: self.setStyling(tok_len, self.FUNCTIONS)
-            elif tok_str.isnumeric() or (tok_str.count('.') == 1 and tok_str.replace('.', '').isnumeric()): self.setStyling(tok_len, self.CONSTANTS)
-            elif tok_str in self.types or tok_str in self.literals: self.setStyling(tok_len, self.TYPES)
-            elif tok_str in "()[]": self.setStyling(tok_len, self.BRACKETS)
+                else:
+                    self.setStyling(tok_len, self.KEYWORD)
+            elif tok_str in self.keywords_list:
+                self.setStyling(tok_len, self.KEYWORD)
+            elif tok_str in self.available_functions or tok_str in self.user_functions:
+                self.setStyling(tok_len, self.FUNCTIONS)
+            elif tok_str.isnumeric() or (
+                tok_str.count(".") == 1 and tok_str.replace(".", "").isnumeric()
+            ):
+                self.setStyling(tok_len, self.CONSTANTS)
+            elif tok_str in self.types or tok_str in self.literals:
+                self.setStyling(tok_len, self.TYPES)
+            elif tok_str in "()[]":
+                self.setStyling(tok_len, self.BRACKETS)
             elif tok_str in self.operators:
                 self.setStyling(tok_len, self.TYPES)
-            else: self.setStyling(tok_len, self.DEFAULT)
-        
+            else:
+                self.setStyling(tok_len, self.DEFAULT)
+
         self.last_scanned_pos = end

@@ -10,7 +10,13 @@ from src.file_tree import FileTreeDelegate, FileTreeView
 from src.welcome_screen import WelcomeScreen
 
 from PyQt5.QtWidgets import (
-    QDialog, QGridLayout, QLabel, QLineEdit, QPushButton, QCheckBox, QMessageBox
+    QDialog,
+    QGridLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QCheckBox,
+    QMessageBox,
 )
 from PyQt5.QtCore import Qt
 from PyQt5.Qsci import QsciScintilla
@@ -70,14 +76,7 @@ class FindReplaceDialog(QDialog):
 
         case_sensitive = self.case_checkbox.isChecked()
 
-        found = self.editor.findFirst(
-            text,
-            False,
-            case_sensitive,
-            False,
-            True,
-            True
-        )
+        found = self.editor.findFirst(text, False, case_sensitive, False, True, True)
 
         if not found:
             QMessageBox.information(self, "Find", "No more matches found.")
@@ -91,8 +90,9 @@ class FindReplaceDialog(QDialog):
         replace_text = self.replace_input.text()
         case_sensitive = self.case_checkbox.isChecked()
 
-        if (case_sensitive and selected == find_text) or \
-           (not case_sensitive and selected.lower() == find_text.lower()):
+        if (case_sensitive and selected == find_text) or (
+            not case_sensitive and selected.lower() == find_text.lower()
+        ):
             self.editor.replaceSelectedText(replace_text)
 
         self.find_next()
@@ -112,7 +112,9 @@ class FindReplaceDialog(QDialog):
         if self.case_checkbox.isChecked():
             new_content = content.replace(find_text, replace_text)
         else:
-            new_content = re.sub(re.escape(find_text), replace_text, content, flags=re.IGNORECASE)
+            new_content = re.sub(
+                re.escape(find_text), replace_text, content, flags=re.IGNORECASE
+            )
 
         self.editor.setText(new_content)
 
@@ -126,9 +128,7 @@ class MainWindow(QMainWindow):
             "icons",
             os.path.join(os.path.dirname(__file__), f".{os.sep}src{os.sep}icons"),
         )
-        self.setWindowIcon(
-            QIcon("icons:/zerion-icon.png")
-        )
+        self.setWindowIcon(QIcon("icons:/zerion-icon.png"))
         self.resize(1300, 900)
         self.status_bar = QStatusBar()
         self.status_bar.setStyleSheet(
@@ -153,15 +153,9 @@ class MainWindow(QMainWindow):
         self.status_position = QLabel()
         self.status_file = QLabel()
         self.status_folder = QLabel()
-        self.status_bar.addPermanentWidget(
-            self.status_position
-        )
-        self.status_bar.addPermanentWidget(
-            self.status_file
-        )
-        self.status_bar.addPermanentWidget(
-            self.status_folder
-        )
+        self.status_bar.addPermanentWidget(self.status_position)
+        self.status_bar.addPermanentWidget(self.status_file)
+        self.status_bar.addPermanentWidget(self.status_folder)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -169,22 +163,14 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(0, 0, 0, 0)
 
         self.left_container = QWidget()
-        left_layout = QVBoxLayout(
-            self.left_container
-        )
+        left_layout = QVBoxLayout(self.left_container)
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.setSpacing(0)
 
         explorer_header = QWidget()
-        explorer_header.setFixedHeight(
-            35
-        )
-        header_layout = QHBoxLayout(
-            explorer_header
-        )
-        header_layout.setContentsMargins(
-            10, 0, 4, 0
-        )
+        explorer_header.setFixedHeight(35)
+        header_layout = QHBoxLayout(explorer_header)
+        header_layout.setContentsMargins(10, 0, 4, 0)
 
         header_label = QLabel("EXPLORER")
         header_label.setStyleSheet(
@@ -202,9 +188,7 @@ class MainWindow(QMainWindow):
         header_layout.addStretch()
 
         self.toggle_tree = QPushButton()
-        self.toggle_tree.setIcon(
-            QIcon("icons:/close.ico")
-        )
+        self.toggle_tree.setIcon(QIcon("icons:/close.ico"))
         self.toggle_tree.setFixedSize(24, 24)
         self.toggle_tree.setStyleSheet(
             """
@@ -222,26 +206,16 @@ class MainWindow(QMainWindow):
             }
         """
         )
-        self.toggle_tree.clicked.connect(
-            self.toggle_file_tree
-        )
+        self.toggle_tree.clicked.connect(self.toggle_file_tree)
         header_layout.addWidget(self.toggle_tree)
 
-        left_layout.addWidget(
-            explorer_header
-        )
+        left_layout.addWidget(explorer_header)
 
         self.folder_section = QWidget()
-        folder_layout = QHBoxLayout(
-            self.folder_section
-        )
-        folder_layout.setContentsMargins(
-            10, 4, 4, 4
-        )
+        folder_layout = QHBoxLayout(self.folder_section)
+        folder_layout.setContentsMargins(10, 4, 4, 4)
 
-        folder_name = os.path.basename(
-            os.path.dirname(os.path.abspath(__file__))
-        )
+        folder_name = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
         self.folder_label = QLabel(folder_name.upper())
         self.folder_label.setStyleSheet(
             """
@@ -259,9 +233,7 @@ class MainWindow(QMainWindow):
 
         splitter = QSplitter(Qt.Horizontal)
         layout.addWidget(splitter)
-        splitter.addWidget(
-            self.left_container
-        )
+        splitter.addWidget(self.left_container)
 
         tabs_container = QWidget()
         tabs_layout = QVBoxLayout(tabs_container)
@@ -274,9 +246,7 @@ class MainWindow(QMainWindow):
         self.tabs.setMovable(True)
         self.tabs.setElideMode(Qt.ElideRight)
         self.tabs.setUsesScrollButtons(True)
-        self.tabs.currentChanged.connect(
-            self.on_tab_changed
-        )
+        self.tabs.currentChanged.connect(self.on_tab_changed)
         self.tabs.setStyleSheet(
             """
             QTabWidget::pane {
@@ -351,9 +321,7 @@ class MainWindow(QMainWindow):
         self.splitter = splitter
         self.tree_width = 230
 
-        self.splitter.splitterMoved.connect(
-            self.on_splitter_moved
-        )
+        self.splitter.splitterMoved.connect(self.on_splitter_moved)
         self.resizeEvent = self.on_resize
 
         self.fs_model = QFileSystemModel()
@@ -361,59 +329,37 @@ class MainWindow(QMainWindow):
         self.current_project_dir = None
 
         self.fs_watcher = QFileSystemWatcher()
-        self.fs_watcher.directoryChanged.connect(
-            self.on_directory_changed
-        )
-        self.fs_watcher.fileChanged.connect(
-            self.on_file_changed
-        )
+        self.fs_watcher.directoryChanged.connect(self.on_directory_changed)
+        self.fs_watcher.fileChanged.connect(self.on_file_changed)
 
         self.left_container.hide()
         self.folder_section.hide()
-        self.splitter.setSizes(
-            [0, self.width()]
-        )
+        self.splitter.setSizes([0, self.width()])
         self.file_tree = FileTreeView(self)
         self.fs_model.setReadOnly(False)
         self.file_tree.setFocusPolicy(Qt.NoFocus)
         self.file_tree.setModel(self.fs_model)
-        self.file_tree.setRootIndex(
-            self.fs_model.index("")
-        )
-        self.file_tree.setEditTriggers(
-            QTreeView.EditTrigger.NoEditTriggers
-        )
-        self.file_tree.setContextMenuPolicy(
-            Qt.CustomContextMenu
-        )
-        self.file_tree.customContextMenuRequested.connect(
-            self.show_context_menu
-        )
+        self.file_tree.setRootIndex(self.fs_model.index(""))
+        self.file_tree.setEditTriggers(QTreeView.EditTrigger.NoEditTriggers)
+        self.file_tree.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.file_tree.customContextMenuRequested.connect(self.show_context_menu)
         self.file_tree.setIndentation(12)
-        self.file_tree.setSizePolicy(
-            QSizePolicy.Expanding, QSizePolicy.Expanding
-        )
+        self.file_tree.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.file_tree.setDragEnabled(True)
         self.file_tree.setAcceptDrops(True)
         self.file_tree.setDropIndicatorShown(True)
-        self.file_tree.setDragDropMode(
-            QAbstractItemView.DragDrop
-        )
+        self.file_tree.setDragDropMode(QAbstractItemView.DragDrop)
 
         self.file_tree.setHeaderHidden(True)
-        self.file_tree.setAnimated(
-            False
-        )
+        self.file_tree.setAnimated(False)
         self.file_tree.setUniformRowHeights(True)
 
         self.file_tree.setColumnHidden(1, True)
         self.file_tree.setColumnHidden(2, True)
         self.file_tree.setColumnHidden(3, True)
 
-        self.file_tree.clicked.connect(
-            self.on_file_tree_clicked
-        )
+        self.file_tree.clicked.connect(self.on_file_tree_clicked)
 
         self.fs_model.setFilter(
             QDir.NoDotAndDotDot | QDir.AllDirs | QDir.Files | QDir.Drives
@@ -421,9 +367,7 @@ class MainWindow(QMainWindow):
 
         self.file_tree.setIconSize(QSize(16, 16))
         self.tree_delegate = FileTreeDelegate()
-        self.file_tree.setItemDelegate(
-            self.tree_delegate
-        )
+        self.file_tree.setItemDelegate(self.tree_delegate)
 
         left_layout.addWidget(self.file_tree)
 
@@ -552,24 +496,18 @@ class MainWindow(QMainWindow):
         self.create_menu_bar()
 
         self.welcome_screen = WelcomeScreen()
-        self.tabs.addTab(
-            self.welcome_screen, self.welcome_screen.tabname
-        )
+        self.tabs.addTab(self.welcome_screen, self.welcome_screen.tabname)
 
         self.clipboard_path = None
         self.clipboard_operation = None
 
         self.check_timer = QTimer()
-        self.check_timer.timeout.connect(
-            self.check_path_exists
-        )
+        self.check_timer.timeout.connect(self.check_path_exists)
         self.check_timer.start(500)
 
         self.find_replace_dialog = None
 
-    def show_status_message(
-        self, msg, timeout=2000
-    ):
+    def show_status_message(self, msg, timeout=2000):
         self.status_bar.showMessage(msg, timeout)
 
     def file_tree_(self):
@@ -578,59 +516,35 @@ class MainWindow(QMainWindow):
             if not self.current_project_dir:
                 return
             self.left_container.show()
-            total = (
-                self.splitter.sizes()[0] + self.splitter.sizes()[1]
-            )
-            self.splitter.setSizes(
-                [self.tree_width, total - self.tree_width]
-            )
+            total = self.splitter.sizes()[0] + self.splitter.sizes()[1]
+            self.splitter.setSizes([self.tree_width, total - self.tree_width])
         else:
-            if (
-                not self.left_container.isVisible()
-            ):
+            if not self.left_container.isVisible():
                 self.left_container.show()
-                total = (
-                    self.splitter.sizes()[0] + self.splitter.sizes()[1]
-                )
-                self.splitter.setSizes(
-                    [self.tree_width, total - self.tree_width]
-                )
+                total = self.splitter.sizes()[0] + self.splitter.sizes()[1]
+                self.splitter.setSizes([self.tree_width, total - self.tree_width])
 
     def toggle_file_tree(self):
         if not self.current_project_dir:
             self.file_tree_()
             return
         if self.left_container.isVisible():
-            self.tree_width = self.splitter.sizes()[
-                0
-            ]
+            self.tree_width = self.splitter.sizes()[0]
             self.left_container.hide()
-            self.splitter.setSizes(
-                [0, self.width()]
-            )
+            self.splitter.setSizes([0, self.width()])
         else:
             self.left_container.show()
-            total = (
-                self.splitter.sizes()[0] + self.splitter.sizes()[1]
-            )
-            self.splitter.setSizes(
-                [self.tree_width, total - self.tree_width]
-            )
+            total = self.splitter.sizes()[0] + self.splitter.sizes()[1]
+            self.splitter.setSizes([self.tree_width, total - self.tree_width])
 
     def on_splitter_moved(self, pos, index):
         if self.left_container.isVisible():
-            self.tree_width = self.splitter.sizes()[
-                0
-            ]
+            self.tree_width = self.splitter.sizes()[0]
 
     def on_resize(self, event):
         if self.left_container.isVisible():
-            total = (
-                self.splitter.sizes()[0] + self.splitter.sizes()[1]
-            )
-            self.splitter.setSizes(
-                [self.tree_width, total - self.tree_width]
-            )
+            total = self.splitter.sizes()[0] + self.splitter.sizes()[1]
+            self.splitter.setSizes([self.tree_width, total - self.tree_width])
         super().resizeEvent(event)
 
     def create_menu_bar(self):
@@ -676,22 +590,14 @@ class MainWindow(QMainWindow):
         """
         )
         file_menu = menubar.addMenu("File")
-        file_menu.addAction(
-            "New...", self.new_file, QKeySequence.New
-        )
+        file_menu.addAction("New...", self.new_file, QKeySequence.New)
 
-        file_menu.addAction(
-            "Open...", self.open_file, QKeySequence.Open
-        )
-        file_menu.addAction(
-            "Open Folder...", self.open_folder, QKeySequence("Ctrl+K")
-        )
+        file_menu.addAction("Open...", self.open_file, QKeySequence.Open)
+        file_menu.addAction("Open Folder...", self.open_folder, QKeySequence("Ctrl+K"))
         file_menu.addAction(
             "Close Folder", self.close_folder, QKeySequence("Ctrl+Shift+K")
         )
-        file_menu.addAction(
-            "Save", self.save_file, QKeySequence.Save
-        )
+        file_menu.addAction("Save", self.save_file, QKeySequence.Save)
         file_menu.addAction(
             "Save As...", self.save_file_as, QKeySequence("Ctrl+Shift+S")
         )
@@ -699,42 +605,22 @@ class MainWindow(QMainWindow):
         file_menu.addAction(
             "Toggle File Tree", self.toggle_file_tree, QKeySequence("Ctrl+B")
         )
-        file_menu.addAction(
-            "Explorer", self.file_tree_, QKeySequence("Ctrl+Shift+E")
-        )
+        file_menu.addAction("Explorer", self.file_tree_, QKeySequence("Ctrl+Shift+E"))
         file_menu.addSeparator()
-        file_menu.addAction(
-            "Exit", self.close, QKeySequence("Ctrl+Q")
-        )
+        file_menu.addAction("Exit", self.close, QKeySequence("Ctrl+Q"))
 
         edit_menu = menubar.addMenu("Edit")
-        edit_menu.addAction(
-            "Undo", self.undo, QKeySequence.Undo
-        )
-        edit_menu.addAction(
-            "Redo", self.redo, QKeySequence.Redo
-        )
+        edit_menu.addAction("Undo", self.undo, QKeySequence.Undo)
+        edit_menu.addAction("Redo", self.redo, QKeySequence.Redo)
         edit_menu.addSeparator()
-        edit_menu.addAction(
-            "Cut", self.cut, QKeySequence.Cut
-        )
-        edit_menu.addAction(
-            "Copy", self.copy, QKeySequence.Copy
-        )
-        edit_menu.addAction(
-            "Paste", self.paste, QKeySequence.Paste
-        )
+        edit_menu.addAction("Cut", self.cut, QKeySequence.Cut)
+        edit_menu.addAction("Copy", self.copy, QKeySequence.Copy)
+        edit_menu.addAction("Paste", self.paste, QKeySequence.Paste)
         edit_menu.addSeparator()
-        edit_menu.addAction(
-            "Select All", self.select_all, QKeySequence.SelectAll
-        )
+        edit_menu.addAction("Select All", self.select_all, QKeySequence.SelectAll)
         edit_menu.addSeparator()
-        edit_menu.addAction(
-            "Find", self.show_find_dialog, QKeySequence("Ctrl+F")
-        )
-        edit_menu.addAction(
-            "Replace", self.show_replace_dialog, QKeySequence("Ctrl+H")
-        )
+        edit_menu.addAction("Find", self.show_find_dialog, QKeySequence("Ctrl+F"))
+        edit_menu.addAction("Replace", self.show_replace_dialog, QKeySequence("Ctrl+H"))
 
         view_menu = menubar.addMenu("View")
         view_menu.addAction(self.preview_action)
@@ -761,31 +647,19 @@ class MainWindow(QMainWindow):
             self.current_project_dir = folder
             self.fs_model.setRootPath(folder)
             root_index = self.fs_model.index(folder)
-            self.file_tree.setRootIndex(
-                root_index
-            )
-            self.folder_label.setText(
-                os.path.basename(folder).upper()
-            )
-            self.setWindowTitle(
-                f"Zerion Editor - {os.path.basename(folder)}"
-            )
+            self.file_tree.setRootIndex(root_index)
+            self.folder_label.setText(os.path.basename(folder).upper())
+            self.setWindowTitle(f"Zerion Editor - {os.path.basename(folder)}")
 
             self.fs_watcher.addPath(folder)
 
             self.folder_section.show()
             self.left_container.show()
-            self.splitter.setSizes(
-                [self.tree_width, self.width() - self.tree_width]
-            )
-            self.show_status_message(
-                f"Folder - {folder}"
-            )
+            self.splitter.setSizes([self.tree_width, self.width() - self.tree_width])
+            self.show_status_message(f"Folder - {folder}")
 
     def on_directory_changed(self, path):
-        self.fs_model.setRootPath(
-            self.current_project_dir
-        )
+        self.fs_model.setRootPath(self.current_project_dir)
 
         if path not in self.fs_watcher.directories():
             self.fs_watcher.addPath(path)
@@ -794,9 +668,7 @@ class MainWindow(QMainWindow):
         tabs_to_remove = []
         for i in range(self.tabs.count()):
             tab = self.tabs.widget(i)
-            if (
-                hasattr(tab, "filepath") and tab.filepath == path
-            ):
+            if hasattr(tab, "filepath") and tab.filepath == path:
                 tabs_to_remove.append(i)
         for i in reversed(tabs_to_remove):
             self.tabs.removeTab(i)
@@ -811,9 +683,7 @@ class MainWindow(QMainWindow):
 
         for i in range(self.tabs.count()):
             tab = self.tabs.widget(i)
-            if (
-                hasattr(tab, "filepath") and tab.filepath == path
-            ):
+            if hasattr(tab, "filepath") and tab.filepath == path:
                 try:
                     with open(path, "r", encoding="utf-8") as file:
                         content = file.read()
@@ -823,9 +693,7 @@ class MainWindow(QMainWindow):
                     pass
                 break
 
-        if (
-            os.path.exists(path) and path not in self.fs_watcher.files()
-        ):
+        if os.path.exists(path) and path not in self.fs_watcher.files():
             self.fs_watcher.addPath(path)
 
     def update_folder_title(self):
@@ -913,9 +781,7 @@ class MainWindow(QMainWindow):
                 with open(path, "rb") as f:
                     content = f.read().decode("utf-8")
                 name: str = os.path.basename(path)
-                tab = EditorTab(
-                    abs_path, main_window=self
-                )
+                tab = EditorTab(abs_path, main_window=self)
                 tab.editor.setText(content)
                 tab.save()
             index = self.tabs.addTab(tab, tab.tabname)
@@ -956,9 +822,7 @@ class MainWindow(QMainWindow):
         if fname:
             current.filepath = fname
             name = os.path.basename(fname)
-            self.tabs.setTabText(
-                self.tabs.currentIndex(), name
-            )
+            self.tabs.setTabText(self.tabs.currentIndex(), name)
             self.save_file()
         else:
             return
@@ -988,9 +852,7 @@ class MainWindow(QMainWindow):
         abs_path = os.path.abspath(filepath)
         for i in range(self.tabs.count()):
             tab = self.tabs.widget(i)
-            if (
-                tab.filepath and os.path.abspath(tab.filepath) == abs_path
-            ):
+            if tab.filepath and os.path.abspath(tab.filepath) == abs_path:
                 self.tabs.removeTab(i)
                 break
 
@@ -1191,26 +1053,16 @@ class MainWindow(QMainWindow):
         target_path = self.current_project_dir
         if index.isValid():
             path = self.fs_model.filePath(index)
-            target_path = (
-                path if os.path.isdir(path) else os.path.dirname(path)
-            )
+            target_path = path if os.path.isdir(path) else os.path.dirname(path)
 
-        self.show_status_message(
-            f"Folder - {target_path}"
-        )
+        self.show_status_message(f"Folder - {target_path}")
 
         try:
-            filename = os.path.basename(
-                self.clipboard_path
-            )
+            filename = os.path.basename(self.clipboard_path)
             new_path = os.path.join(target_path, filename)
 
-            if os.path.exists(
-                new_path
-            ):
-                self.close_file_tab(
-                    new_path
-                )
+            if os.path.exists(new_path):
+                self.close_file_tab(new_path)
                 reply = QMessageBox.question(
                     self,
                     "File exists",
@@ -1231,12 +1083,8 @@ class MainWindow(QMainWindow):
                     with open(new_path, "wb") as dst:
                         dst.write(content)
             else:
-                self.close_file_tab(
-                    self.clipboard_path
-                )
-                shutil.move(
-                    self.clipboard_path, new_path
-                )
+                self.close_file_tab(self.clipboard_path)
+                shutil.move(self.clipboard_path, new_path)
                 self.clipboard_path = None
 
         except Exception as e:
@@ -1247,9 +1095,7 @@ class MainWindow(QMainWindow):
             return
 
         path = self.fs_model.filePath(index)
-        self.show_status_message(
-            f"Folder - {os.path.dirname(path)}"
-        )
+        self.show_status_message(f"Folder - {os.path.dirname(path)}")
         try:
             reply = QMessageBox.question(
                 self,
@@ -1275,22 +1121,16 @@ class MainWindow(QMainWindow):
             return
 
         old_path = self.fs_model.filePath(index)
-        self.show_status_message(
-            f"Folder - {os.path.dirname(old_path)}"
-        )
+        self.show_status_message(f"Folder - {os.path.dirname(old_path)}")
         old_name = os.path.basename(old_path)
 
         new_name, ok = QInputDialog.getText(
             self, "Rename", "Enter new name:", QLineEdit.Normal, old_name
         )
 
-        if (
-            ok and new_name and new_name != old_name
-        ):
+        if ok and new_name and new_name != old_name:
             try:
-                new_path = os.path.join(
-                    os.path.dirname(old_path), new_name
-                )
+                new_path = os.path.join(os.path.dirname(old_path), new_name)
                 self.close_file_tab(old_path)
                 os.rename(old_path, new_path)
             except Exception as e:
@@ -1313,23 +1153,15 @@ class MainWindow(QMainWindow):
         elif isinstance(tab, ImageViewer):
             self.show_status_message("Ready")
             self.status_position.clear()
-            self.status_file.setText(
-                f"File - {tab.filepath}"
-            )
+            self.status_file.setText(f"File - {tab.filepath}")
         else:
             line, col = tab.editor.getCursorPosition()
             self.show_status_message("Ready")
-            self.status_position.setText(
-                f"Ln {line + 1}, Col {col + 1}"
-            )
+            self.status_position.setText(f"Ln {line + 1}, Col {col + 1}")
             if tab.filepath:
-                self.status_file.setText(
-                    f"File - {tab.filepath}"
-                )
+                self.status_file.setText(f"File - {tab.filepath}")
             else:
-                self.status_file.setText(
-                    "File - Untitled"
-                )
+                self.status_file.setText("File - Untitled")
                 self.status_folder.clear()
 
     def toggle_preview(self):
@@ -1339,17 +1171,13 @@ class MainWindow(QMainWindow):
 
     def close_folder(self):
         if self.fs_watcher.directories():
-            self.fs_watcher.removePaths(
-                self.fs_watcher.directories()
-            )
+            self.fs_watcher.removePaths(self.fs_watcher.directories())
         if self.fs_watcher.files():
             self.fs_watcher.removePaths(self.fs_watcher.files())
 
         self.current_project_dir = None
         self.fs_model.setRootPath("")
-        self.file_tree.setRootIndex(
-            self.fs_model.index("")
-        )
+        self.file_tree.setRootIndex(self.fs_model.index(""))
         self.left_container.hide()
         self.folder_section.hide()
         self.splitter.setSizes([0, self.width()])
@@ -1387,9 +1215,7 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    app.setStyle(
-        "Fusion"
-    )
+    app.setStyle("Fusion")
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())

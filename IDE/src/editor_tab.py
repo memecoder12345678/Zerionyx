@@ -18,9 +18,7 @@ class EditorTab(QWidget):
         super().__init__()
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        self.setStyleSheet(
-            "border: none; margin: 0px; padding: 0px;"
-        )
+        self.setStyleSheet("border: none; margin: 0px; padding: 0px;")
 
         self.editor = QsciScintilla()
         self.filepath = filepath
@@ -32,12 +30,8 @@ class EditorTab(QWidget):
             if len(os.path.splitext(os.path.basename(filepath or ""))[0]) > 16
             else os.path.basename(filepath or "Untitled")
         )
-        self.editor.textChanged.connect(
-            self.handle_text_changed
-        )
-        self.editor.cursorPositionChanged.connect(
-            self.update_cursor_position
-        )
+        self.editor.textChanged.connect(self.handle_text_changed)
+        self.editor.cursorPositionChanged.connect(self.update_cursor_position)
 
         self.setup_basic_editor()
 
@@ -50,12 +44,8 @@ class EditorTab(QWidget):
         self.is_markdown = filepath and filepath.endswith(".md")
 
     def setup_basic_editor(self):
-        self.editor.textChanged.connect(
-            self.on_text_changed
-        )
-        self.editor.textChanged.connect(
-            self.update_line_count
-        )
+        self.editor.textChanged.connect(self.on_text_changed)
+        self.editor.textChanged.connect(self.update_line_count)
         self.editor.setPaper(QColor("#181a1b"))
         self.editor.setColor(QColor("#b2eff5"))
         self.editor.setStyleSheet(
@@ -75,9 +65,7 @@ QAbstractItemView::item:selected {
 }
 """
         )
-        self.editor.SendScintilla(
-            QsciScintilla.SCI_SETBUFFEREDDRAW, True
-        )
+        self.editor.SendScintilla(QsciScintilla.SCI_SETBUFFEREDDRAW, True)
         self.editor.SendScintilla(
             QsciScintilla.SCI_SETLAYOUTCACHE, QsciScintilla.SC_CACHE_PAGE
         )
@@ -85,9 +73,7 @@ QAbstractItemView::item:selected {
             QsciScintilla.SCI_SETCODEPAGE, QsciScintilla.SC_CP_UTF8
         )
 
-        self.editor.setWhitespaceVisibility(
-            QsciScintilla.WsInvisible
-        )
+        self.editor.setWhitespaceVisibility(QsciScintilla.WsInvisible)
         self.editor.setEolVisibility(False)
         self.editor.setWrapVisualFlags(QsciScintilla.WrapFlagNone)
         self.editor.setWhitespaceSize(0)
@@ -101,16 +87,10 @@ QAbstractItemView::item:selected {
         self.editor.setColor(QColor("#b2eff5"))
         self.editor.setUtf8(True)
 
-        self.editor.setMarginType(
-            0, QsciScintilla.NumberMargin
-        )
+        self.editor.setMarginType(0, QsciScintilla.NumberMargin)
         self.update_line_count()
-        self.editor.setMarginsForegroundColor(
-            QColor("#1177AA")
-        )
-        self.editor.setMarginsBackgroundColor(
-            QColor("#1e1e1e")
-        )
+        self.editor.setMarginsForegroundColor(QColor("#1177AA"))
+        self.editor.setMarginsBackgroundColor(QColor("#1e1e1e"))
         self.editor.setMarginsFont(font)
         self.editor.setMarginLineNumbers(0, True)
 
@@ -127,12 +107,8 @@ QAbstractItemView::item:selected {
         selection_glow = QColor("#00ffcc")
         selection_glow.setAlpha(30)
 
-        self.editor.setSelectionBackgroundColor(
-            selection_glow
-        )
-        self.editor.setSelectionForegroundColor(
-            selection_color
-        )
+        self.editor.setSelectionBackgroundColor(selection_glow)
+        self.editor.setSelectionForegroundColor(selection_color)
 
         self.editor.setAutoIndent(True)
         self.editor.setIndentationGuides(True)
@@ -143,27 +119,15 @@ QAbstractItemView::item:selected {
         self.editor.setBackspaceUnindents(True)
 
         self.editor.setEolMode(QsciScintilla.EolUnix)
-        self.editor.convertEols(
-            QsciScintilla.EolUnix
-        )
+        self.editor.convertEols(QsciScintilla.EolUnix)
 
-        self.editor.setBraceMatching(
-            QsciScintilla.SloppyBraceMatch
-        )
+        self.editor.setBraceMatching(QsciScintilla.SloppyBraceMatch)
 
-        self.editor.setMatchedBraceBackgroundColor(
-            QColor("#3B514D")
-        )
-        self.editor.setMatchedBraceForegroundColor(
-            QColor("#FFEF28")
-        )
+        self.editor.setMatchedBraceBackgroundColor(QColor("#3B514D"))
+        self.editor.setMatchedBraceForegroundColor(QColor("#FFEF28"))
 
-        self.editor.setUnmatchedBraceBackgroundColor(
-            QColor("#3B514D")
-        )
-        self.editor.setUnmatchedBraceForegroundColor(
-            QColor("#FF0000")
-        )
+        self.editor.setUnmatchedBraceBackgroundColor(QColor("#3B514D"))
+        self.editor.setUnmatchedBraceForegroundColor(QColor("#FF0000"))
 
     def update_line_count(self):
         line_count = self.editor.lines()
@@ -184,21 +148,13 @@ QAbstractItemView::item:selected {
         from src.autocomplete import build_autocomplete
 
         build_autocomplete(self.lexer)
-        self.editor.setAutoCompletionSource(
-            QsciScintilla.AcsAPIs
-        )
+        self.editor.setAutoCompletionSource(QsciScintilla.AcsAPIs)
         self.editor.setAutoCompletionThreshold(1)
-        self.editor.setAutoCompletionCaseSensitivity(
-            False
-        )
-        self.editor.setAutoCompletionUseSingle(
-            QsciScintilla.AcusNever
-        )
+        self.editor.setAutoCompletionCaseSensitivity(False)
+        self.editor.setAutoCompletionUseSingle(QsciScintilla.AcusNever)
 
         self.auto_timer = QTimer(self)
-        self.auto_timer.timeout.connect(
-            self.refresh_autocomplete
-        )
+        self.auto_timer.timeout.connect(self.refresh_autocomplete)
         self.auto_timer.start(500)
 
     def toggle_markdown_preview(self):
@@ -215,9 +171,7 @@ QAbstractItemView::item:selected {
             self.preview_mode = True
             self.editor.hide()
             self.preview_widget = QWebEngineView(self)
-            self.layout().addWidget(
-                self.preview_widget
-            )
+            self.layout().addWidget(self.preview_widget)
             self.update_markdown_preview()
 
     def update_markdown_preview(self):
@@ -225,27 +179,19 @@ QAbstractItemView::item:selected {
 
             def replace_image_paths(match):
                 img_path = match.group(2)
-                if (
-                    not os.path.isabs(img_path) and self.filepath
-                ):
-                    img_path = os.path.join(
-                        os.path.dirname(self.filepath), img_path
-                    )
+                if not os.path.isabs(img_path) and self.filepath:
+                    img_path = os.path.join(os.path.dirname(self.filepath), img_path)
 
                 if os.path.exists(img_path):
                     mime_type = mimetypes.guess_type(img_path)[0]
                     if mime_type and mime_type.startswith("image/"):
                         with open(img_path, "rb") as img_file:
-                            img_data = base64.b64encode(
-                                img_file.read()
-                            ).decode()
+                            img_data = base64.b64encode(img_file.read()).decode()
                             return f'<img src="data:{mime_type};base64,{img_data}"'
                 return match.group(0)
 
             markdown_text = self.editor.text()
-            html_content = md_renderer.markdown(
-                markdown_text
-            )
+            html_content = md_renderer.markdown(markdown_text)
 
             html_content = re.sub(
                 r'<img([^>]*?)src="([^"]+)"', replace_image_paths, html_content
@@ -375,9 +321,7 @@ QAbstractItemView::item:selected {
             self.preview_widget.setHtml(html_template)
 
     def refresh_autocomplete(self):
-        if (
-            hasattr(self, "lexer") and self.filepath and self.filepath.endswith(".zer")
-        ):
+        if hasattr(self, "lexer") and self.filepath and self.filepath.endswith(".zer"):
             from src.autocomplete import build_autocomplete
 
             build_autocomplete(self.lexer)
@@ -385,16 +329,10 @@ QAbstractItemView::item:selected {
     def handle_text_changed(self):
         if not self.is_modified:
             self.is_modified = True
-            current_index = (
-                self.main_window.tabs.currentIndex()
-            )
-            current_text = self.main_window.tabs.tabText(
-                current_index
-            )
+            current_index = self.main_window.tabs.currentIndex()
+            current_text = self.main_window.tabs.tabText(current_index)
             if not current_text.startswith("*"):
-                self.main_window.tabs.setTabText(
-                    current_index, "*" + current_text
-                )
+                self.main_window.tabs.setTabText(current_index, "*" + current_text)
 
     def on_text_changed(self):
         if not self.is_modified:
@@ -405,35 +343,19 @@ QAbstractItemView::item:selected {
     def save(self):
         self.is_modified = False
         current_index = self.main_window.tabs.currentIndex()
-        current_text = self.main_window.tabs.tabText(
-            current_index
-        )
-        if (
-            current_text.startswith("*") and self.filepath
-        ):
-            self.main_window.tabs.setTabText(
-                current_index, current_text[1:]
-            )
+        current_text = self.main_window.tabs.tabText(current_index)
+        if current_text.startswith("*") and self.filepath:
+            self.main_window.tabs.setTabText(current_index, current_text[1:])
 
     def eventFilter(self, obj, event):
-        if (
-            obj is self.editor and event.type() == QEvent.KeyPress
-        ):
-            if (
-                event.key() == Qt.Key_Slash and event.modifiers() == Qt.ControlModifier
-            ):
-                if self.filepath and self.filepath.endswith(
-                    ".zer"
-                ):
+        if obj is self.editor and event.type() == QEvent.KeyPress:
+            if event.key() == Qt.Key_Slash and event.modifiers() == Qt.ControlModifier:
+                if self.filepath and self.filepath.endswith(".zer"):
                     self.toggle_line_comment_zerion()
                 return True
-            if (
-                event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_X
-            ):
+            if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_X:
                 if not self.editor.hasSelectedText():
-                    line, _ = (
-                        self.editor.getCursorPosition()
-                    )
+                    line, _ = self.editor.getCursorPosition()
                     self.editor.setSelection(
                         line, 0, line, self.editor.lineLength(line)
                     )
@@ -443,13 +365,9 @@ QAbstractItemView::item:selected {
 
     def toggle_line_comment_zerion(self):
         if self.editor.hasSelectedText():
-            line_from, _, line_to, _ = (
-                self.editor.getSelection()
-            )
+            line_from, _, line_to, _ = self.editor.getSelection()
         else:
-            line_from = line_to = self.editor.getCursorPosition()[
-                0
-            ]
+            line_from = line_to = self.editor.getCursorPosition()[0]
         all_commented = True
         for line in range(line_from, line_to + 1):
             text = self.editor.text(line)
@@ -466,36 +384,22 @@ QAbstractItemView::item:selected {
             if all_commented:
                 if stripped.startswith("#"):
                     new_text = text.replace("#", "", 1)
-                    self.editor.setSelection(
-                        line, 0, line, len(text)
-                    )
+                    self.editor.setSelection(line, 0, line, len(text))
                     self.editor.replaceSelectedText(new_text)
             else:
                 if not stripped.startswith("#"):
-                    new_text = (
-                        text[:indent] + "#" + text[indent:]
-                    )
-                    self.editor.setSelection(
-                        line, 0, line, len(text)
-                    )
+                    new_text = text[:indent] + "#" + text[indent:]
+                    self.editor.setSelection(line, 0, line, len(text))
                     self.editor.replaceSelectedText(new_text)
         self.editor.endUndoAction()
         if line_from != line_to:
             final_line = self.editor.text(line_to)
-            self.editor.setSelection(
-                line_from, 0, line_to, len(final_line)
-            )
-            self.editor.setCursorPosition(
-                line_to, 0
-            )
+            self.editor.setSelection(line_from, 0, line_to, len(final_line))
+            self.editor.setCursorPosition(line_to, 0)
         else:
-            self.editor.setCursorPosition(
-                line_from, 0
-            )
+            self.editor.setCursorPosition(line_from, 0)
         self.refresh_autocomplete()
 
     def update_cursor_position(self):
         line, col = self.editor.getCursorPosition()
-        self.main_window.status_position.setText(
-            f"Ln {line + 1}, Col {col + 1}"
-        )
+        self.main_window.status_position.setText(f"Ln {line + 1}, Col {col + 1}")
