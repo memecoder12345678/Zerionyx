@@ -3,40 +3,78 @@ load "libs.sys"
 load "libs.string"
 load "libs.termcolor"
 
-folder_path = argv>2
+defun backup_folder(path, current_backup_path, root_backup_path)
+    list_files = list_dir(path)
 
-if not exists(folder_path) do
-    cprintln("Error: Folder does not exist", "red", none, none)
-    exit(1)
-else
-    set_dir(folder_path)
-done
+    for i = 0 to len(list_files) do
+        file = list_files > i
+        full_path = path + "\\" + file
+        full_backup_dest = current_backup_path + "\\" + file
 
-list_files = list_dir(".\\")
-if not exists(".\\backup") do
-    err = catch(make_dir, ["backup"])
-    if not is_none(err>1) do
-        cprintln("Error: Can not make backup folder", "red", none, none)
-        exit(1)
-    done
-done
-for i = 0 to len(list_files) do
-    file = list_files>i
-    if is_file(file) do
-        err = catch(copy, [file, ".\\backup\\" + file + ".bak"])
-        if is_none(err>1) do
-            cprintln("Backup created: " + ".\\backup\\" +  file + ".bak", "green", none, none)
+        if full_path == root_backup_path do
+            cprintln("Skipping main backup directory itself: " + full_path, "yellow", none, none)
+            continue
+        done
+
+        if is_file(full_path) do
+            err = catch(copy, [full_path, full_backup_dest + ".bak"])
+            
+            if is_none(err > 1) do
+                cprintln("Backup created: " + full_backup_dest + ".bak", "green", none, none)
+            else
+                error_msg_str = err > 1 
+                if startswith(error_msg_str, "Runtime ") do
+                    msg = str_slice(error_msg_str, len("Runtime "), len(error_msg_str))
+                    cprintln("Runtime Error copying " + file + ": " + msg, "red", none, none)
+                elif startswith(error_msg_str, "File ") do
+                    msg = str_slice(error_msg_str, len("File "), len(error_msg_str))
+                    cprintln("File Error copying " + file + ": " + msg, "red", none, none)
+                else
+                    cprintln("Error copying " + file + ": " + error_msg_str, "red", none, none)
+                done
+            done
         else
-            if startswith(err>1, "Runtime ") do
-                msg = str_slice(err>1, len("Runtime "), len(err>1))
-                cprintln(msg, "red", none, none)
-            elif startswith(err>1, "File ") do
-                msg = str_slice(err>1, len("File "), len(err>1))
-                cprintln(msg, "red", none, none)
+            err = catch(make_dir, [full_backup_dest])
+            if not is_none(err > 1) do
+                cprintln("Error: Can not make subfolder in backup: " + full_backup_dest + " (Reason: " + (err > 1) + ")", "red", none, none)
+            else
+                backup_folder(full_path, full_backup_dest, root_backup_path)
             done
         done
-    else
-        cprintln("Warning: subfolders not supported yet", "yellow", none, none)
     done
 done
-exit(0)
+
+if len(argv) < 3 do
+    cprintln("Usage: bakme.zer <folder_to_backup>", "yellow", none, none)
+    exit(1)
+done
+
+folder_path = argv > 2
+if not exists(folder_path) do 
+    cprintln("Error: Folder does not exist: " + folder_path, "red", none, none) 
+    exit(1) 
+done
+
+if is_file(folder_path) do 
+    cprintln("Error: Path provided is not a folder: " + folder_path, "red", none, none)
+    exit(1)
+done
+
+actual_backup_root_path = folder_path + "\\backup"
+err_make_main_backup = catch(make_dir, [actual_backup_root_path])
+
+if not is_none(err_make_main_backup > 1) do
+    if exists(actual_backup_root_path) and not is_file(actual_backup_root_path) do
+        cprintln("Main backup folder already exists (and is a directory): " + actual_backup_root_path, "cyan", none, none)
+    else
+        cprintln("Error: Can not make main backup folder: " + actual_backup_root_path + " (Reason: " + (err_make_main_backup > 1) + ")", "red", none, none)
+        exit(1)
+    done
+else
+    cprintln("Main backup folder created: " + actual_backup_root_path, "blue", none, none)
+done
+
+cprintln("Starting backup of: " + folder_path, "cyan", none, none)
+cprintln("Target backup folder: " + actual_backup_root_path, "cyan", none, none)
+backup_folder(folder_path, actual_backup_root_path, actual_backup_root_path)
+cprintln("Backup process finished.", "green", none, none)
