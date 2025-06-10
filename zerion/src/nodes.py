@@ -287,3 +287,88 @@ class LoadNode:
 
     def __str__(self):
         return f"LoadNode(\"{self.file_path}\")"
+
+
+def ast_to_dict(node):
+    if node is None:
+        return None
+    if isinstance(node, NumberNode):
+        return {"type": "NumberNode", "value": node.tok.value}
+    if isinstance(node, StringNode):
+        return {"type": "StringNode", "value": node.tok.value}
+    if isinstance(node, VarAccessNode):
+        return {"type": "VarAccessNode", "name": node.var_name_tok.value}
+    if isinstance(node, VarAssignNode):
+        return {
+            "type": "VarAssignNode",
+            "name": node.var_name_tok.value,
+            "value": ast_to_dict(node.value_node),
+        }
+    if isinstance(node, BinOpNode):
+        return {
+            "type": "BinOpNode",
+            "left": ast_to_dict(node.left_node),
+            "op": node.op_tok.type,
+            "right": ast_to_dict(node.right_node),
+        }
+    if isinstance(node, UnaryOpNode):
+        return {
+            "type": "UnaryOpNode",
+            "op": node.op_tok.type,
+            "node": ast_to_dict(node.node),
+        }
+    if isinstance(node, ListNode):
+        elements = [ast_to_dict(e) for e in node.element_nodes]
+        return {
+            "type": "ListNode",
+            "elements": elements
+        }
+    if isinstance(node, IfNode):
+        return {
+            "type": "IfNode",
+            "cases": [[ast_to_dict(cond), ast_to_dict(expr)] for cond, expr, _ in node.cases],
+            "else": ast_to_dict(node.else_case[0]) if node.else_case else None,
+        }
+    if isinstance(node, ForNode):
+        return {
+            "type": "ForNode",
+            "var": node.var_name_tok.value,
+            "start": ast_to_dict(node.start_value_node),
+            "end": ast_to_dict(node.end_value_node),
+            "step": ast_to_dict(node.step_value_node),
+            "body": ast_to_dict(node.body_node),
+        }
+    if isinstance(node, WhileNode):
+        return {
+            "type": "WhileNode",
+            "condition": ast_to_dict(node.condition_node),
+            "body": ast_to_dict(node.body_node),
+        }
+    if isinstance(node, FuncDefNode):
+        return {
+            "type": "FuncDefNode",
+            "name": node.var_name_tok.value if node.var_name_tok else "anonymous",
+            "args": [tok.value for tok in node.arg_name_toks],
+            "body": ast_to_dict(node.body_node),
+        }
+    if isinstance(node, CallNode):
+        return {
+            "type": "CallNode",
+            "function": ast_to_dict(node.node_to_call),
+            "args": [ast_to_dict(arg) for arg in node.arg_nodes],
+        }
+    if isinstance(node, ReturnNode):
+        return {"type": "ReturnNode", "value": ast_to_dict(node.node_to_return)}
+    if isinstance(node, ContinueNode):
+        return {"type": "ContinueNode"}
+    if isinstance(node, BreakNode):
+        return {"type": "BreakNode"}
+    if isinstance(node, AccessNode):
+        return {
+            "type": "AccessNode",
+            "object": ast_to_dict(node.obj),
+            "index": ast_to_dict(node.index),
+        }
+    if isinstance(node, LoadNode):
+        return {"type": "LoadNode", "path": node.file_path}
+    return {"type": "UnknownNode", "repr": repr(node)}
