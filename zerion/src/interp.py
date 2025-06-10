@@ -3,7 +3,7 @@ import sys
 import time
 import random
 import math
-from parser import *
+from .parser import *
 from .nodes import *
 from .types_ import *
 from .consts import *
@@ -453,6 +453,20 @@ class BuiltInFunction(BaseFunction):
 
     execute_exit_fp.arg_names = ["value"]
 
+    def execute_list_slice_fp(self, exec_ctx):
+        l = exec_ctx.symbol_table.get("l")
+        start = exec_ctx.symbol_table.get("start")
+        end = exec_ctx.symbol_table.get("end")
+
+        sliced_l = l.elements[
+            int(start.value) if not isinstance(start, None_) else None : (
+                int(end.value)
+            )
+        ]
+        return RTResult().success(List(sliced_l))
+
+    execute_list_slice_fp.arg_names = ["l", "start", "end"]
+
     def execute_str_slice_fp(self, exec_ctx):
         string = exec_ctx.symbol_table.get("string")
         start = exec_ctx.symbol_table.get("start")
@@ -490,7 +504,7 @@ class BuiltInFunction(BaseFunction):
 
         sliced_string = string.value[
             int(start.value) if not isinstance(start, None_) else None : (
-                int(end.value) if not isinstance(end, None_) else None
+                int(end.value)
             )
         ]
         return RTResult().success(String(sliced_string))
@@ -1780,7 +1794,7 @@ class BuiltInFunction(BaseFunction):
     def execute_get_ip_fp(self, exec_ctx):
         try:
             with urllib.request.urlopen("https://api.ipify.org") as res_:
-                return RTResult.success(String(res_.read().decode()))
+                return RTResult().success(String(res_.read().decode()))
         except:
             return RTResult().failure(
                 RTError(
@@ -1925,7 +1939,7 @@ class BuiltInFunction(BaseFunction):
 
     def execute_get_hostname_fp(self, exec_ctx):
         try:
-            return RTResult.success(String(socket.gethostname()))
+            return RTResult().success(String(socket.gethostname()))
         except:
             return RTResult().failure(
                 RTError(
@@ -1949,9 +1963,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult.success(
-            String(str(hashlib.md5(text.encode()).hexdigest()).decode())
-        )
+        return RTResult().success(String(str(hashlib.md5(text.value.encode()).hexdigest())))
 
     execute_md5_fp.arg_names = ["text"]
 
@@ -1966,8 +1978,8 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult.success(
-            String(str(hashlib.sha1(text.encode()).hexdigest()).decode())
+        return RTResult().success(
+            String(str(hashlib.sha1(text.value.encode()).hexdigest()))
         )
 
     execute_sha1_fp.arg_names = ["text"]
@@ -1983,8 +1995,8 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult.success(
-            String(str(hashlib.sha256(text.encode()).hexdigest()).decode())
+        return RTResult().success(
+            String(str(hashlib.sha256(text.value.encode()).hexdigest()))
         )
 
     execute_sha256_fp.arg_names = ["text"]
@@ -2000,8 +2012,8 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult.success(
-            String(str(hashlib.sha512(text.encode()).hexdigest()).decode())
+        return RTResult().success(
+            String(str(hashlib.sha512(text.value.encode()).hexdigest()))
         )
 
     execute_sha512_fp.arg_names = ["text"]
@@ -2017,8 +2029,8 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult.success(
-            String(str(format(zlib.crc32(text.encode()) & 0xFFFFFFFF, "08x")).decode())
+        return RTResult().success(
+            String(str(format(zlib.crc32(text.value.encode()) & 0xFFFFFFFF, "08x")))
         )
 
     execute_crc32_fp.arg_names = ["text"]
@@ -2766,7 +2778,7 @@ class Interpreter:
 
 
 global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv]))
-global_symbol_table.seyt("os_sep_fp", String(os.sep))
+global_symbol_table.set("os_sep_fp", String(os.sep))
 global_symbol_table.set("none", None_.none)
 global_symbol_table.set("false", Number.false)
 global_symbol_table.set("true", Number.true)

@@ -109,9 +109,9 @@ def main():
         except IOError as e:
             print(f"Error reading file '{file_name}': {e}.")
             return
-        except Exception as e:
-            print(f"Interpreter error: {e}.")
-            return
+        # except Exception as e:
+        #     print(f"Interpreter error: {e}.")
+        #     return
 
 
 if __name__ == "__main__":

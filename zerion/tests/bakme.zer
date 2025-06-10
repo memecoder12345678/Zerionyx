@@ -39,3 +39,4 @@ for i = 0 to len(list_files) do
         cprintln("Warning: subfolders not supported yet", "yellow", none, none)
     done
 done
+exit(0)

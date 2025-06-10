@@ -1,11 +1,13 @@
 load "libs.file"
 load "libs.sys"
 load "libs.string"
+load "libs.list"
+load "libs.termcolor"
 
 config_path = argv>2
 
-if not exists(folder_path) do
-    println("File Error: File does not exist")
+if not exists(config_path) do
+    cprintln("Error: File does not exist", 'red', none, 'bold')
     exit(1)
 done
 
@@ -16,14 +18,18 @@ defun parse_config(config_file)
         line = lines>i
         if line != "" do
             vals = split(line, "=")
-            append(config, strip(vals>0), strip(vals>1)])
-        end
-    end
+            append(config, [strip(to_str(vals>0), " "), strip(to_str(join("", list_slice(vals, 1, len(vals)))), " ")])
+        done
+    done
     return config
-end
+done
 
-config = parse_config()
+config = parse_config(config_path)
 
-for i=0 till len(config) do 
-    print((config>i>0) + " = " + (config>i>1))
-end
+for i = 0 to len(config) do 
+    cprint((config>i>0), 'magenta', none, 'bold')
+    print(" = ")
+    cprint((config>i>1), 'green', none, none)
+    println("")
+done
+exit(0)

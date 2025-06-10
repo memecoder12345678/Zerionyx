@@ -15,6 +15,10 @@ defun split(s, s_)
     return split_fp(s, s_)
 done
 
+defun strip(s, s_)
+    return strip_fp(s, s_)
+done 
+
 defun str_slice(s, t, e)
     return str_slice_fp(s, t, e)
 done

@@ -295,69 +295,70 @@ COMMENT:
         <div id="lib-list" class="lib-content" style="display:none;">
             <h3>list.zer</h3>
             <ul>
-                <li><b>map(f, l)</b> &rarr; List &mdash; Apply function <code>f</code> to each element of list <code>l</code></li>
-                <li><b>filter(f, l)</b> &rarr; List &mdash; Filter list <code>l</code> by function <code>f</code> (keep elements where <code>f(x)</code> is true)</li>
-                <li><b>reduce(f, l, i)</b> &rarr; Any &mdash; Reduce list <code>l</code> with function <code>f</code> and initial value <code>i</code></li>
-                <li><b>min(l)</b> &rarr; Number &mdash; Minimum value in list <code>l</code></li>
-                <li><b>max(l)</b> &rarr; Number &mdash; Maximum value in list <code>l</code></li>
-                <li><b>list_slice(l, from, to)</b> &rarr; List &mdash; Slice list <code>l</code> from <code>from</code> to <code>to</code> (exclusive)</li>
-                <li><b>reverse(l)</b> &rarr; List &mdash; Reverse the list <code>l</code></li>
-                <li><b>zip(l1, l2)</b> &rarr; List &mdash; Pair elements from <code>l1</code> and <code>l2</code> (shortest length)</li>
-                <li><b>zip_longest(l1, l2)</b> &rarr; List &mdash; Pair elements from <code>l1</code> and <code>l2</code> (fill with <code>none</code> if lengths differ)</li>
-                <li><b>change_value(l, i, v)</b> &rarr; List &mdash; Change value at index <code>i</code> in list <code>l</code> to <code>v</code></li>
-                <li><b>sort(l, reverse)</b> &rarr; List &mdash; Sort list <code>l</code> (<code>reverse</code>: 0=asc, 1=desc)</li>
-                <li><b>count(l, v)</b> &rarr; Number &mdash; Count occurrences of <code>v</code> in <code>l</code></li>
-                <li><b>index_of(l, v)</b> &rarr; Number/none &mdash; Index of <code>v</code> in <code>l</code> or <code>none</code> if not found</li>
+                <li><b>map(f, l)</b> &rarr; list &mdash; Apply function <code>f</code> to each element of list <code>l</code></li>
+                <li><b>filter(f, l)</b> &rarr; list &mdash; Filter list <code>l</code> by function <code>f</code> (keep elements where <code>f(x)</code> is true)</li>
+                <li><b>reduce(f, l, i)</b> &rarr; any &mdash; Reduce list <code>l</code> with function <code>f</code> and initial value <code>i</code></li>
+                <li><b>min(l)</b> &rarr; number &mdash; Minimum value in list <code>l</code></li>
+                <li><b>max(l)</b> &rarr; number &mdash; Maximum value in list <code>l</code></li>
+                <li><b>list_slice(l, from, to)</b> &rarr; list &mdash; Slice list <code>l</code> from <code>from</code> to <code>to</code> (exclusive)</li>
+                <li><b>reverse(l)</b> &rarr; list &mdash; Reverse the list <code>l</code></li>
+                <li><b>zip(l1, l2)</b> &rarr; list &mdash; Pair elements from <code>l1</code> and <code>l2</code> (shortest length)</li>
+                <li><b>zip_longest(l1, l2)</b> &rarr; list &mdash; Pair elements from <code>l1</code> and <code>l2</code> (fill with <code>none</code> if lengths differ)</li>
+                <li><b>change_value(l, i, v)</b> &rarr; list &mdash; Change value at index <code>i</code> in list <code>l</code> to <code>v</code></li>
+                <li><b>sort(l, reverse)</b> &rarr; list &mdash; Sort list <code>l</code> (<code>reverse</code>: 0=asc, 1=desc)</li>
+                <li><b>count(l, v)</b> &rarr; number &mdash; Count occurrences of <code>v</code> in <code>l</code></li>
+                <li><b>index_of(l, v)</b> &rarr; number/none &mdash; Index of <code>v</code> in <code>l</code> or <code>none</code> if not found</li>
                 <li><b>clear_list(l)</b> &rarr; none &mdash; Remove all elements from <code>l</code></li>
-                <li><b>list_multiply(l, n)</b> &rarr; List &mdash; Repeat list <code>l</code> <code>n</code> times</li>
-                <li><b>rand_int_list(len, min, max)</b> &rarr; List &mdash; List of random integers</li>
-                <li><b>rand_float_list(len, min, max)</b> &rarr; List &mdash; List of random floats</li>
+                <li><b>list_multiply(l, n)</b> &rarr; list &mdash; Repeat list <code>l</code> <code>n</code> times</li>
+                <li><b>rand_int_list(len, min, max)</b> &rarr; list &mdash; List of random integers</li>
+                <li><b>rand_float_list(len, min, max)</b> &rarr; list &mdash; List of random floats</li>
             </ul>
         </div>
         <div id="lib-string" class="lib-content" style="display:none;">
             <h3>string.zer</h3>
             <ul>
-                <li><b>split(s, sep)</b> &rarr; List &mdash; Split string <code>s</code> by separator <code>sep</code></li>
-                <li><b>str_slice(s, from, to)</b> &rarr; String &mdash; Slice string <code>s</code> from <code>from</code> to <code>to</code></li>
-                <li><b>join(sep, l)</b> &rarr; String &mdash; Join list <code>l</code> with separator <code>sep</code></li>
-                <li><b>replace(s, old, new)</b> &rarr; String &mdash; Replace <code>old</code> with <code>new</code> in <code>s</code></li>
-                <li><b>to_upper(s)</b> &rarr; String &mdash; Uppercase <code>s</code></li>
-                <li><b>to_lower(s)</b> &rarr; String &mdash; Lowercase <code>s</code></li>
-                <li><b>ord(s)</b> &rarr; Number &mdash; Unicode code point of character <code>s</code></li>
-                <li><b>chr(n)</b> &rarr; String &mdash; Character from code <code>n</code></li>
-                <li><b>is_digit(s)</b> &rarr; Bool &mdash; Is <code>s</code> a digit</li>
-                <li><b>is_ascii_lowercase(s)</b> &rarr; Bool &mdash; Is <code>s</code> a lowercase letter</li>
-                <li><b>is_ascii_uppercase(s)</b> &rarr; Bool &mdash; Is <code>s</code> an uppercase letter</li>
-                <li><b>is_ascii_letter(s)</b> &rarr; Bool &mdash; Is <code>s</code> a letter</li>
-                <li><b>is_space(s)</b> &rarr; Bool &mdash; Is <code>s</code> a whitespace character</li>
-                <li><b>find(s, v)</b> &rarr; Number/none &mdash; Index of substring <code>v</code> in <code>s</code></li>
-                <li><b>find_all(s, v)</b> &rarr; List &mdash; All indices of substring <code>v</code> in <code>s</code></li>
-                <li><b>startswith(s, v)</b> &rarr; Bool &mdash; <code>s</code> starts with <code>v</code></li>
-                <li><b>endswith(s, v)</b> &rarr; Bool &mdash; <code>s</code> ends with <code>v</code></li>
-                <li><b>str_multiply(s, n)</b> &rarr; String &mdash; Repeat string <code>s</code> <code>n</code> times</li>
+                <li><b>split(s, sep)</b> &rarr; list &mdash; Split string <code>s</code> by separator <code>sep</code></li>
+                <li><b>strip(s, sep)</b> &rarr; list &mdash; Trims <code>sep</code> from both ends of <code>s</code></li>
+                <li><b>str_slice(s, from, to)</b> &rarr; str &mdash; Slice string <code>s</code> from <code>from</code> to <code>to</code></li>
+                <li><b>join(sep, l)</b> &rarr; str &mdash; Join list <code>l</code> with separator <code>sep</code></li>
+                <li><b>replace(s, old, new)</b> &rarr; str &mdash; Replace <code>old</code> with <code>new</code> in <code>s</code></li>
+                <li><b>to_upper(s)</b> &rarr; str &mdash; Uppercase <code>s</code></li>
+                <li><b>to_lower(s)</b> &rarr; str &mdash; Lowercase <code>s</code></li>
+                <li><b>ord(s)</b> &rarr; number &mdash; Unicode code point of character <code>s</code></li>
+                <li><b>chr(n)</b> &rarr; str &mdash; Character from code <code>n</code></li>
+                <li><b>is_digit(s)</b> &rarr; true/false &mdash; Is <code>s</code> a digit</li>
+                <li><b>is_ascii_lowercase(s)</b> &rarr; true/false &mdash; Is <code>s</code> a lowercase letter</li>
+                <li><b>is_ascii_uppercase(s)</b> &rarr; true/false &mdash; Is <code>s</code> an uppercase letter</li>
+                <li><b>is_ascii_letter(s)</b> &rarr; true/false &mdash; Is <code>s</code> a letter</li>
+                <li><b>is_space(s)</b> &rarr; true/false &mdash; Is <code>s</code> a whitespace character</li>
+                <li><b>find(s, v)</b> &rarr; number/none &mdash; Index of substring <code>v</code> in <code>s</code></li>
+                <li><b>find_all(s, v)</b> &rarr; list &mdash; All indices of substring <code>v</code> in <code>s</code></li>
+                <li><b>startswith(s, v)</b> &rarr; true/false &mdash; <code>s</code> starts with <code>v</code></li>
+                <li><b>endswith(s, v)</b> &rarr; true/false &mdash; <code>s</code> ends with <code>v</code></li>
+                <li><b>str_multiply(s, n)</b> &rarr; str &mdash; Repeat string <code>s</code> <code>n</code> times</li>
             </ul>
         </div>
         <div id="lib-math" class="lib-content" style="display:none;">
             <h3>math.zer</h3>
             <ul>
-                <li><b>sqrt(a)</b> &rarr; Number &mdash; Square root of <code>a</code></li>
-                <li><b>abs(a)</b> &rarr; Number &mdash; Absolute value of <code>a</code></li>
-                <li><b>fact(n)</b> &rarr; Number &mdash; Factorial of <code>n</code></li>
-                <li><b>sin(x)</b> &rarr; Number &mdash; Sine of <code>x</code></li>
-                <li><b>cos(x)</b> &rarr; Number &mdash; Cosine of <code>x</code></li>
-                <li><b>tan(x)</b> &rarr; Number &mdash; Tangent of <code>x</code></li>
-                <li><b>gcd(a, b)</b> &rarr; Number &mdash; GCD of <code>a</code> and <code>b</code></li>
-                <li><b>lcm(a, b)</b> &rarr; Number &mdash; LCM of <code>a</code> and <code>b</code></li>
-                <li><b>fib(n)</b> &rarr; Number &mdash; <code>n</code>-th Fibonacci number</li>
-                <li><b>is_prime(n)</b> &rarr; Bool &mdash; Is <code>n</code> prime</li>
-                <li><b>deg2rad(d)</b> &rarr; Number &mdash; Degrees to radians</li>
-                <li><b>rad2deg(r)</b> &rarr; Number &mdash; Radians to degrees</li>
-                <li><b>exp(x)</b> &rarr; Number &mdash; Exponential of <code>x</code></li>
-                <li><b>log(x)</b> &rarr; Number &mdash; Natural logarithm of <code>x</code></li>
-                <li><b>sinh(x)</b> &rarr; Number &mdash; Hyperbolic sine</li>
-                <li><b>cosh(x)</b> &rarr; Number &mdash; Hyperbolic cosine</li>
-                <li><b>tanh(x)</b> &rarr; Number &mdash; Hyperbolic tangent</li>
-                <li><b>round(x)</b> &rarr; Number &mdash; Round <code>x</code> to nearest integer</li>
+                <li><b>sqrt(a)</b> &rarr; number &mdash; Square root of <code>a</code></li>
+                <li><b>abs(a)</b> &rarr; number &mdash; Absolute value of <code>a</code></li>
+                <li><b>fact(n)</b> &rarr; number &mdash; Factorial of <code>n</code></li>
+                <li><b>sin(x)</b> &rarr; number &mdash; Sine of <code>x</code></li>
+                <li><b>cos(x)</b> &rarr; number &mdash; Cosine of <code>x</code></li>
+                <li><b>tan(x)</b> &rarr; number &mdash; Tangent of <code>x</code></li>
+                <li><b>gcd(a, b)</b> &rarr; number &mdash; GCD of <code>a</code> and <code>b</code></li>
+                <li><b>lcm(a, b)</b> &rarr; number &mdash; LCM of <code>a</code> and <code>b</code></li>
+                <li><b>fib(n)</b> &rarr; number &mdash; <code>n</code>-th Fibonacci number</li>
+                <li><b>is_prime(n)</b> &rarr; true/false &mdash; Is <code>n</code> prime</li>
+                <li><b>deg2rad(d)</b> &rarr; number &mdash; Degrees to radians</li>
+                <li><b>rad2deg(r)</b> &rarr; number &mdash; Radians to degrees</li>
+                <li><b>exp(x)</b> &rarr; number &mdash; Exponential of <code>x</code></li>
+                <li><b>log(x)</b> &rarr; number &mdash; Natural logarithm of <code>x</code></li>
+                <li><b>sinh(x)</b> &rarr; number &mdash; Hyperbolic sine</li>
+                <li><b>cosh(x)</b> &rarr; number &mdash; Hyperbolic cosine</li>
+                <li><b>tanh(x)</b> &rarr; number &mdash; Hyperbolic tangent</li>
+                <li><b>round(x)</b> &rarr; number &mdash; Round <code>x</code> to nearest integer</li>
                 <li>Constants: <b>PI</b>, <b>E</b>, <b>ln2</b></li>
             </ul>
         </div>
@@ -365,72 +366,72 @@ COMMENT:
             <h3>file.zer</h3>
             <ul>
                 <li><b>write(file, mode, text)</b> &rarr; none &mdash; Write <code>text</code> to <code>file</code> with mode <code>mode</code> ("w" or "a")</li>
-                <li><b>read(file)</b> &rarr; String &mdash; Read contents of <code>file</code></li>
-                <li><b>exists(file)</b> &rarr; Bool &mdash; Check if <code>file</code> exists</li>
-                <li><b>get_cdir()</b> &rarr; String &mdash; Get current directory</li>
+                <li><b>read(file)</b> &rarr; str &mdash; Read contents of <code>file</code></li>
+                <li><b>exists(file)</b> &rarr; true/false &mdash; Check if <code>file</code> exists</li>
+                <li><b>get_cdir()</b> &rarr; str &mdash; Get current directory</li>
                 <li><b>set_cdir(dir)</b> &rarr; none &mdash; Change current directory</li>
-                <li><b>list_dir(dir)</b> &rarr; List &mdash; List files in directory</li>
+                <li><b>list_dir(dir)</b> &rarr; list &mdash; List files in directory</li>
                 <li><b>make_dir(dir)</b> &rarr; none &mdash; Create directory</li>
                 <li><b>remove_file(file)</b> &rarr; none &mdash; Remove file</li>
                 <li><b>rename(old, new)</b> &rarr; none &mdash; Rename file or directory</li>
                 <li><b>remove_dir(dir)</b> &rarr; none &mdash; Remove directory</li>
                 <li><b>copy(src, dst)</b> &rarr; none &mdash; Copy file</li>
-                <li><b>is_file(file)</b> &rarr; Bool &mdash; Is path a file</li>
-                <li><b>abs_path(path)</b> &rarr; String &mdash; Get absolute path</li>
-                <li><b>base_name(file)</b> &rarr; String &mdash; Get file name</li>
-                <li><b>dir_name(file)</b> &rarr; String &mdash; Get parent folder</li>
+                <li><b>is_file(file)</b> &rarr; true/false &mdash; Is path a file</li>
+                <li><b>abs_path(path)</b> &rarr; str &mdash; Get absolute path</li>
+                <li><b>base_name(file)</b> &rarr; str &mdash; Get file name</li>
+                <li><b>dir_name(file)</b> &rarr; str &mdash; Get parent folder</li>
                 <li>Constants: <b>os_sep</b></li>
             </ul>
         </div>
         <div id="lib-hash" class="lib-content" style="display:none;">
             <h3>hash.zer</h3>
             <ul>
-                <li><b>md5(s)</b> &rarr; String &mdash; MD5 hash of <code>s</code></li>
-                <li><b>sha1(s)</b> &rarr; String &mdash; SHA1 hash of <code>s</code></li>
-                <li><b>sha256(s)</b> &rarr; String &mdash; SHA256 hash of <code>s</code></li>
-                <li><b>sha512(s)</b> &rarr; String &mdash; SHA512 hash of <code>s</code></li>
-                <li><b>crc32(s)</b> &rarr; String &mdash; CRC32 hash of <code>s</code></li>
+                <li><b>md5(s)</b> &rarr; str &mdash; MD5 hash of <code>s</code></li>
+                <li><b>sha1(s)</b> &rarr; str &mdash; SHA1 hash of <code>s</code></li>
+                <li><b>sha256(s)</b> &rarr; str &mdash; SHA256 hash of <code>s</code></li>
+                <li><b>sha512(s)</b> &rarr; str &mdash; SHA512 hash of <code>s</code></li>
+                <li><b>crc32(s)</b> &rarr; str &mdash; CRC32 hash of <code>s</code></li>
             </ul>
         </div>
         <div id="lib-memory" class="lib-content" style="display:none;">
             <h3>memory.zer</h3>
             <ul>
                 <li><b>remember(key, value)</b> &rarr; none &mdash; Store <code>value</code> with <code>key</code></li>
-                <li><b>recall(key)</b> &rarr; value/none &mdash; Retrieve value by <code>key</code></li>
+                <li><b>recall(key)</b> &rarr; any/none &mdash; Retrieve value by <code>key</code></li>
                 <li><b>forget(key)</b> &rarr; none &mdash; Remove <code>key</code> from memory</li>
                 <li><b>clear_memory()</b> &rarr; none &mdash; Clear all memory</li>
-                <li><b>keys()</b> &rarr; List &mdash; List all keys</li>
-                <li><b>is_empty()</b> &rarr; Bool &mdash; Is memory empty</li>
-                <li><b>size()</b> &rarr; Number &mdash; Number of keys</li>
+                <li><b>keys()</b> &rarr; list &mdash; List all keys</li>
+                <li><b>is_empty()</b> &rarr; true/false &mdash; Is memory empty</li>
+                <li><b>size()</b> &rarr; number &mdash; Number of keys</li>
             </ul>
         </div>
         <div id="lib-net" class="lib-content" style="display:none;">
             <h3>net.zer</h3>
             <ul>
-                <li><b>get_ip()</b> &rarr; String &mdash; Get public IP address</li>
-                <li><b>get_mac()</b> &rarr; String &mdash; Get MAC address</li>
-                <li><b>ping(host)</b> &rarr; String &mdash; Ping host</li>
-                <li><b>downl(url, timeout)</b> &rarr; String &mdash; Download file from URL</li>
-                <li><b>get_local_ip()</b> &rarr; String &mdash; Get local IP address</li>
-                <li><b>get_hostname()</b> &rarr; String &mdash; Get hostname</li>
+                <li><b>get_ip()</b> &rarr; str &mdash; Get public IP address</li>
+                <li><b>get_mac()</b> &rarr; str &mdash; Get MAC address</li>
+                <li><b>ping(host)</b> &rarr; str &mdash; Ping host</li>
+                <li><b>downl(url, timeout)</b> &rarr; str &mdash; Download file from URL</li>
+                <li><b>get_local_ip()</b> &rarr; str &mdash; Get local IP address</li>
+                <li><b>get_hostname()</b> &rarr; str &mdash; Get hostname</li>
             </ul>
         </div>
         <div id="lib-random" class="lib-content" style="display:none;">
             <h3>random.zer</h3>
             <ul>
-                <li><b>rand()</b> &rarr; Float &mdash; Random float in [0, 1]</li>
-                <li><b>rand_int(min, max)</b> &rarr; Int &mdash; Random integer in [min, max]</li>
-                <li><b>rand_float(min, max)</b> &rarr; Float &mdash; Random float in [min, max]</li>
-                <li><b>rand_choice(list)</b> &rarr; Any &mdash; Random element from list</li>
-                <li><b>int_seed(i)</b> &rarr; Int &mdash; Integer seed</li>
-                <li><b>float_seed(f)</b> &rarr; Int &mdash; Float seed</li>
+                <li><b>rand()</b> &rarr; float &mdash; Random float in [0, 1]</li>
+                <li><b>rand_int(min, max)</b> &rarr; int &mdash; Random integer in [min, max]</li>
+                <li><b>rand_float(min, max)</b> &rarr; float &mdash; Random float in [min, max]</li>
+                <li><b>rand_choice(list)</b> &rarr; any &mdash; Random element from list</li>
+                <li><b>int_seed(i)</b> &rarr; int &mdash; Integer seed</li>
+                <li><b>float_seed(f)</b> &rarr; float &mdash; Float seed</li>
             </ul>
         </div>
         <div id="lib-sys" class="lib-content" style="display:none;">
             <h3>sys.zer</h3>
             <ul>
                 <li><b>system(cmd)</b> &rarr; none &mdash; Execute system command</li>
-                <li><b>get_env(name)</b> &rarr; String &mdash; Get environment variable</li>
+                <li><b>get_env(name)</b> &rarr; str &mdash; Get environment variable</li>
                 <li><b>set_env(name, value)</b> &rarr; none &mdash; Set environment variable</li>
                 <li><b>exit(code)</b> &rarr; none &mdash; Exit program</li>
                 <li><b>argv</b> &mdash; List of command-line arguments</li>
@@ -440,10 +441,10 @@ COMMENT:
         <div id="lib-threading" class="lib-content" style="display:none;">
             <h3>threading.zer</h3>
             <ul>
-                <li><b>thread_start(func, args)</b> &rarr; Thread &mdash; Start a new thread</li>
+                <li><b>thread_start(func, args)</b> &rarr; thread &mdash; Start a new thread</li>
                 <li><b>thread_sleep(seconds)</b> &rarr; none &mdash; Sleep current thread</li>
                 <li><b>thread_join(thread, timeout)</b> &rarr; none &mdash; Wait for thread to finish</li>
-                <li><b>thread_is_alive(thread)</b> &rarr; Bool &mdash; Is thread alive</li>
+                <li><b>thread_is_alive(thread)</b> &rarr; true/false &mdash; Is thread alive</li>
                 <li><b>thread_cancel(thread)</b> &rarr; none &mdash; Cancel thread</li>
             </ul>
         </div>
@@ -451,8 +452,8 @@ COMMENT:
             <h3>time.zer</h3>
             <ul>
                 <li><b>sleep(seconds)</b> &rarr; none &mdash; Sleep for <code>seconds</code></li>
-                <li><b>time()</b> &rarr; Float &mdash; Current time (seconds since epoch)</li>
-                <li><b>ctime(time)</b> &rarr; String &mdash; Human-readable time</li>
+                <li><b>time()</b> &rarr; float &mdash; Current time (seconds since epoch)</li>
+                <li><b>ctime(time)</b> &rarr; str &mdash; Human-readable time</li>
             </ul>
         </div>
         <div id="lib-keyboard" class="lib-content" style="display:none;">
@@ -462,7 +463,7 @@ COMMENT:
                 <li><b>keyboard_press(key)</b> &rarr; none &mdash; Press a key</li>
                 <li><b>keyboard_release(key)</b> &rarr; none &mdash; Release a key</li>
                 <li><b>keyboard_wait(key)</b> &rarr; none &mdash; Wait for key press</li>
-                <li><b>keyboard_is_pressed(key)</b> &rarr; Bool &mdash; Is key pressed</li>
+                <li><b>keyboard_is_pressed(key)</b> &rarr; true/false &mdash; Is key pressed</li>
             </ul>
         </div>
         <div id="lib-termcolor" class="lib-content" style="display:none;">

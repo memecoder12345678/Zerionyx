@@ -129,17 +129,7 @@ defun list_slice(l, f, t)
     if type(t) != int and t != none and type(t) != float do
         panic("Third argument of 'list_slice' must be an number or 'none'", "T")
     done
-    let r = []
-    if t == none do
-        t = len(l)
-    done
-    if f < 0 or t < 0 or f >= len(l) or t > len(l) do
-        panic("Slice indices out of range", "T")
-    done
-    for i = f to t - 1 do
-        append(r, l>i)
-    done
-    return r
+    return list_slice_fp(l, f, t)
 done
 
 defun reverse(l)
