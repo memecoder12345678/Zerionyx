@@ -38,11 +38,11 @@ defun backup_folder(path, cbp, rbp)
 done
 
 defun main()
-    if len(argv) < 3 do
+    if len(argv) < 2 do
         cprintln("Usage: bakme.zer <folder_to_backup>", "yellow", none, none)
         exit(1)
     done
-    fp = argv>2
+    fp = argv>1
     if not exists(fp) do 
         cprintln("Error: Folder does not exist: " + fp, "red", none, none) 
         exit(1) 

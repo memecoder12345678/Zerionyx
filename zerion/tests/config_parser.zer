@@ -10,17 +10,80 @@ defun parse_config(config_file)
     for i = 0 to len(lines) do
         line = lines>i
         if line != "" do
+            line = strip(line, " ")
+            if startswith(line, "#") do
+                continue
+            done
             vals = split(line, "=")
-            append(config, [strip(to_str(vals>0), " "), strip(to_str(join("", list_slice(vals, 1, len(vals)))), " ")])
+            if  len(vals) > 2 do
+                cprint("Error", "red", none, "bold")
+                println(": line " + to_str(i + 1) + " is not a valid config line")
+                continue
+            done
+            if vals>1 == ""  or vals>0 == "" do
+                cprint("Error", "red", none, "bold")
+                println(": line " + to_str(i + 1) + " is not a valid config line")
+                continue
+            else
+                val = to_str(strip(to_str(join("", list_slice(vals, 1, len(vals)))), " "))
+                if is_num(to_int(val, true)) do
+                    if endswith(to_str(to_float(val, false)), ".0") do
+                        val = to_int(val, false)
+                    else
+                        val = to_float(val, false)
+                    done
+                elif val == "none" do
+                    val = none
+                elif val == "true" do
+                    val = true
+                elif val == "false" do
+                    val = false
+                elif (startswith(val, '"') and endswith(val, '"')) or (startswith(val, "'") and endswith(val, "'")) do
+                    val = to_str(str_slice(val, 1, -1))
+                elif len(split(val, "#")) > 1 do
+                    in_single_quote = false
+                    in_double_quote = false
+                    val_ = split(val, "")
+                    for i = 0 to len(val_) do
+                        c = val_>i
+                        if c == "'"  and not in_double_quote do
+                            in_single_quote = not in_single_quote
+                        elif c == '"' and not in_single_quote do
+                            in_double_quote = not in_double_quote
+                        elif c == '#' and not in_single_quote and not in_double_quote do
+                            val = strip(join("", list_slice(val_, 0, i)), " ")
+                            if (startswith(val, '"') and endswith(val, '"')) or (startswith(val, "'") and endswith(val, "'")) do
+                                val = to_str(str_slice(val, 1, -1))
+                            done
+                        done
+                    done
+                done
+            done
+            append(config, [strip(to_str(vals>0), " "), val])
         done
     done
     return config
 done
 
+# --- note: use this function get value from config --- #
+# defun get_config_value(config, key, default)
+#     for i = 0 to len(config) do
+#         if config>i>0 == key do
+#             return config>i>1
+#         done
+#     done
+#     return default
+# done
+# --- end note --- #
+
 defun main()
-    config_path = argv>2
+    config_path = argv>1
     if not exists(config_path) do
         cprintln("Error: File does not exist", 'red', none, 'bold')
+        exit(1)
+    done
+    if not is_file(config_path) do
+        cprintln("Error: Path is not a file", 'red', none, 'bold')
         exit(1)
     done
     config = parse_config(config_path)

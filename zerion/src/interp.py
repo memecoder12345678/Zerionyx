@@ -457,12 +457,9 @@ class BuiltInFunction(BaseFunction):
         l = exec_ctx.symbol_table.get("l")
         start = exec_ctx.symbol_table.get("start")
         end = exec_ctx.symbol_table.get("end")
-
-        sliced_l = l.elements[
-            int(start.value) if not isinstance(start, None_) else None : (
-                int(end.value)
-            )
-        ]
+        a = int(start.value) if not isinstance(start, None_) else None
+        b = int(end.value) if not isinstance(end, None_) else None
+        sliced_l = l.elements[a:b]
         return RTResult().success(List(sliced_l))
 
     execute_list_slice_fp.arg_names = ["l", "start", "end"]
@@ -501,12 +498,9 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-
-        sliced_string = string.value[
-            int(start.value) if not isinstance(start, None_) else None : (
-                int(end.value)
-            )
-        ]
+        a = int(start.value) if not isinstance(start, None_) else None
+        b = int(end.value) if not isinstance(end, None_) else None
+        sliced_string = string.value[a:b]
         return RTResult().success(String(sliced_string))
 
     execute_str_slice_fp.arg_names = ["string", "start", "end"]
@@ -2777,7 +2771,7 @@ class Interpreter:
         return res.success(result)
 
 
-global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv]))
+global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv[1:]]))
 global_symbol_table.set("os_sep_fp", String(os.sep))
 global_symbol_table.set("none", None_.none)
 global_symbol_table.set("false", Number.false)
