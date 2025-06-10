@@ -1982,7 +1982,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult.success(String(str(hashlib.md5(text.encode()).hexdigest())))
+        return RTResult.success(String(str(hashlib.md5(text.encode()).hexdigest()).decode()))
 
     execute_md5_fp.arg_names = ["text"]
 
@@ -1997,7 +1997,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult.success(String(str(hashlib.sha1(text.encode()).hexdigest())))
+        return RTResult.success(String(str(hashlib.sha1(text.encode()).hexdigest()).decode()))
 
     execute_sha1_fp.arg_names = ["text"]
 
@@ -2012,7 +2012,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult.success(String(str(hashlib.sha256(text.encode()).hexdigest())))
+        return RTResult.success(String(str(hashlib.sha256(text.encode()).hexdigest()).decode()))
 
     execute_sha256_fp.arg_names = ["text"]
 
@@ -2027,7 +2027,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult.success(String(str(hashlib.sha512(text.encode()).hexdigest())))
+        return RTResult.success(String(str(hashlib.sha512(text.encode()).hexdigest()).decode()))
 
     execute_sha512_fp.arg_names = ["text"]
 
@@ -2043,7 +2043,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         return RTResult.success(
-            String(str(format(zlib.crc32(text.encode()) & 0xFFFFFFFF, "08x")))
+            String(str(format(zlib.crc32(text.encode()) & 0xFFFFFFFF, "08x")).decode())
         )
 
     execute_crc32_fp.arg_names = ["text"]
