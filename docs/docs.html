@@ -290,6 +290,7 @@ COMMENT:
             <a href="javascript:void(0)" id="btn-threading" onclick="showLib('threading')">threading</a>
             <a href="javascript:void(0)" id="btn-time" onclick="showLib('time')">time</a>
             <a href="javascript:void(0)" id="btn-keyboard" onclick="showLib('keyboard')">keyboard</a>
+            <a href="javascript:void(0)" id="btn-termcolor" onclick="showLib('termcolor')">termcolor</a>
         </div>
         <div id="lib-list" class="lib-content" style="display:none;">
             <h3>list.zer</h3>
@@ -458,6 +459,13 @@ COMMENT:
                 <li><b>keyboard_release(key)</b> &rarr; none &mdash; Release a key</li>
                 <li><b>keyboard_wait(key)</b> &rarr; none &mdash; Wait for key press</li>
                 <li><b>keyboard_is_pressed(key)</b> &rarr; Bool &mdash; Is key pressed</li>
+            </ul>
+        </div>
+        <div id="lib-termcolor" class="lib-content" style="display:none;">
+            <h3>termcolor.zer</h3>
+            <ul>
+                <li><b>cprint(text, color, bg, style)</b> &rarr; none &mdash; Prints <code>text</code> with color, background, and style with no newline</li>
+                <li><b>cprintln(text, color, bg, style)</b> &rarr; none &mdash; Same as <code>cprint</code> but adds a newline</li>
             </ul>
         </div>
         <h2>How to Use Libraries</h2>
