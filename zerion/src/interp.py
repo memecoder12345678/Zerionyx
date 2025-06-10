@@ -31,9 +31,10 @@ import ssl
 import hashlib
 import zlib
 
+from colorama import init
+
+init()
 ssl._create_default_https_context = ssl._create_unverified_context
-
-
 BUILTIN_FUNCTIONS = []
 global_symbol_table = SymbolTable()
 
