@@ -1,3 +1,5 @@
+from colorama import init, Fore, Style
+init(autoreset=True)
 class Token:
     __slots__ = ["type", "value", "pos_start", "pos_end"]
 
@@ -20,12 +22,12 @@ class Token:
         if self.value:
             if self.type == "STRING":
                 return (
-                    f"STRING: '{self.value}'".replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r").replace("\\", "\\\\")
+                    f"{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}STRING{Fore.RESET}{Style.RESET_ALL}: {Fore.CYAN}'{self.value}'".replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r").replace("\\", "\\\\")
                     if self.value.find("'") == -1
-                    else f'STRING: "{self.value}"'.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r").replace("\\", "\\\\")
+                    else f'{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}STRING{Fore.RESET}{Style.RESET_ALL}: {Fore.CYAN}"{self.value}"'.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r").replace("\\", "\\\\")
                 )
-            return f"{self.type}: {self.value}"
-        return f"{self.type}"
+            return f"{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}{self.type}{Fore.RESET}{Style.RESET_ALL}: {Fore.CYAN}{self.value}"
+        return f"{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}{self.type}"
 
 
 class Position:
