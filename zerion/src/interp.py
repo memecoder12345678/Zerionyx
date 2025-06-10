@@ -1915,7 +1915,7 @@ class BuiltInFunction(BaseFunction):
 
                 with open(name, "wb") as out_file:
                     out_file.write(response.read())
-            return RTResult().success(File(name, path=os.path.abspath(name)))
+            return RTResult().success(String(os.path.abspath(name)))
         except urllib.error.HTTPError as e:
             return RTResult().failure(
                 RTError(
