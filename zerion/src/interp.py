@@ -31,7 +31,7 @@ import ssl
 import hashlib
 import zlib
 
-from colorama import init
+from colorama import init, Fore, Style
 
 init()
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -3738,7 +3738,7 @@ private_symbol_table.set("is_main", Number(0))
 def run(fn, text):
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
-    # print("--- Tokens ---")
+    # print(f"{Fore.LIGHTBLACK_EX}{Style.BRIGHT}--- Tokens ---")
     # for token in tokens:
     #     print(token)
     if error:
@@ -3750,15 +3750,20 @@ def run(fn, text):
         ast = parser.parse()
         if ast.error:
             return None, ast.error
-        # print("--- AST ---")
-        # print(ast.node)
+        # print(f"{Fore.LIGHTBLACK_EX}{Style.BRIGHT}--- AST ---")
+        # from rich import print_json 
+        # print_json(data=ast_to_dict(ast.node))
         interpreter = Interpreter()
         context = Context("<program>")
         context.symbol_table = global_symbol_table
         context.private_symbol_table = private_symbol_table
         context.private_symbol_table.set("is_main", Number(1))
         result = interpreter.visit(ast.node, context)
-        result.value = "" if str(result.value) == "none" else result.value
+        if result.value == "none":
+            result.value = ""
+        else:
+            # print(f"{Fore.LIGHTBLACK_EX}{Style.BRIGHT}--- Output ---")
+            result.value = result.value
         return result.value, result.error
     except KeyboardInterrupt:
         print("Interrupt Error: User Terminated")
