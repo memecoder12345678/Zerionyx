@@ -1,5 +1,7 @@
 # libs.file
 
+os_sep = os_sep_fp
+
 defun write(f, m, t)
     if m != "w" and m != "a" do
         panic("Invalid mode for write operation", "F")
