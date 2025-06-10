@@ -239,7 +239,8 @@ class ZerionLexer(BaseLexer):
             "libs.memory": ["remember", "forget", "recall", "clear_memory", "keys", "is_empty", "size"],
             "libs.net": ["get_ip", "get_hostname", "get_local_ip", "get_mac", "ping", "downl"],
             "libs.threading" : ["thread_start", "thread_join", "thread_sleep", "thread_is_alive", "thread_cancel"],
-            "libs.keyboard": ["keyboard_write", "keyboard_press", "keyboard_release", "keyboard_wait", "keyboard_is_pressed"]
+            "libs.keyboard": ["keyboard_write", "keyboard_press", "keyboard_release", "keyboard_wait", "keyboard_is_pressed"],
+            "libs.termcolor": ["cprintln", "cprint"],
         }
         self.operators = ["+", "-", "*", "/", "%", "^", "=", "<", ">", "!"]
         self.types = ["list", "str", "int", "float", "func"]
