@@ -3759,7 +3759,7 @@ def run(fn, text):
         context.private_symbol_table = private_symbol_table
         context.private_symbol_table.set("is_main", Number(1))
         result = interpreter.visit(ast.node, context)
-        if result.value == "none":
+        if str(result.value) == "none":
             result.value = ""
         else:
             # print(f"{Fore.LIGHTBLACK_EX}{Style.BRIGHT}--- Output ---")
