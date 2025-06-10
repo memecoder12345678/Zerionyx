@@ -6,36 +6,36 @@ load "libs.termcolor"
 folder_path = argv>2
 
 if not exists(folder_path) do
-    cprintln("Error: Folder does not exist", "red", none, 'bold')
+    cprintln("Error: Folder does not exist", "red", none, none)
     exit(1)
 else
     set_dir(folder_path)
 done
 
-list_files = list_dir(folder_path)
-err = catch(make_dir("backup"))
-if not is_none(err>1) do
-    cprintln("Error: Can not make backup folder", "red", none, 'bold')
-    exit(1)
-else
-    set_dir("backup")
-    for i = 0 to len(list_files) do
-        file = list_files>i
-        if is_file(file) do
-            err = catch(copy(file, file + ".bak"))
-            if is_none(err>1) do
-                cprintln("Backup created: " + file + ".bak", "green", none, 'bold')
-            else
-                if startswith(err>1, "Runtime ") do
-                    msg = str_slice(err>1, len("Runtime "), len(err>1))
-                    cprintln(msg, "red", none, 'bold')
-                elif startswith(err>1, "File ") do
-                    msg = str_slice(err>1, len("File "), len(err>1))
-                    cprintln(msg, "red", none, 'bold')
-                done
-            done
+list_files = list_dir(".\\")
+if not exists(".\\backup") do
+    err = catch(make_dir, ["backup"])
+    if not is_none(err>1) do
+        cprintln("Error: Can not make backup folder", "red", none, none)
+        exit(1)
+    done
+done
+for i = 0 to len(list_files) do
+    file = list_files>i
+    if is_file(file) do
+        err = catch(copy, [file, ".\\backup\\" + file + ".bak"])
+        if is_none(err>1) do
+            cprintln("Backup created: " + ".\\backup\\" +  file + ".bak", "green", none, none)
         else
-            cprintln("Warning: subfolders not supported yet", "yellow", none, 'bold')
+            if startswith(err>1, "Runtime ") do
+                msg = str_slice(err>1, len("Runtime "), len(err>1))
+                cprintln(msg, "red", none, none)
+            elif startswith(err>1, "File ") do
+                msg = str_slice(err>1, len("File "), len(err>1))
+                cprintln(msg, "red", none, none)
+            done
         done
+    else
+        cprintln("Warning: subfolders not supported yet", "yellow", none, none)
     done
 done
