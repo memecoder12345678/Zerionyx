@@ -8,7 +8,6 @@ defun parse_config(config_file)
     parsed_config_data = []
     current_section_name = "__global__"
     current_section_items = []
-
     lines = split(read(config_file), "\n")
     for i = 0 to len(lines) do
         line = lines>i
