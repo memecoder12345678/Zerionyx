@@ -29,7 +29,7 @@
             },
             {
                 "functions": {
-                    "color": "#41ffc3",
+                    "color": "#00db96",
                     "paper-color": "#181a1b",
                     "font": {
                         "family": "consolas",
@@ -41,7 +41,7 @@
             },
             {
                 "function_and_class_def": {
-                    "color": "#41ffc3",
+                    "color": "#00db96",
                     "paper-color": "#181a1b",
                     "font": {
                         "family": "consolas",
@@ -53,7 +53,7 @@
             },
             {
                 "classes": {
-                    "color": "#41ffc3",
+                    "color": "#00db96",
                     "paper-color": "#181a1b",
                     "font": {
                         "family": "consolas",
@@ -65,7 +65,7 @@
             },
             {
                 "string": {
-                    "color": "#7fffd4",
+                    "color": "#e2fb8c",
                     "paper-color": "#181a1b"
                 }
             },
@@ -101,7 +101,7 @@
             },
             {
                 "constants": {
-                    "color": "#1affb3",
+                    "color": "#ffb366",
                     "paper-color": "#181a1b"
                 }
             }

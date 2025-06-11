@@ -173,12 +173,14 @@
             background: transparent;
             padding: 0;
         }
-        .highlight-zerion .zer-keyword { color: #1ad1ff; font-weight: bold; }
-        .highlight-zerion .zer-func { color: #1affb3; }
-        .highlight-zerion .zer-string { color: #ffe066; }
+        .highlight-zerion .zer-keyword { color: #00ffff; font-weight: bold; }
+        .highlight-zerion .zer-func-def { color: #00db96; font-style: italic; font-weight: bold;}
+        .highlight-zerion .zer-func { color: #00db96; font-weight: bold;}
+        .highlight-zerion .zer-string { color: #e2fb8c; }
         .highlight-zerion .zer-number { color: #ffb366; }
-        .highlight-zerion .zer-comment { color: #7fffd4; font-style: italic; }
-        .highlight-zerion .zer-var { color: #e6faff; }
+        .highlight-zerion .zer-comment { color: #666666; font-style: italic; font-weight: bold; }
+        .highlight-zerion .zer-var { color: #b2eff5; font-weight: bold;}
+        .highlight-zerion .zer-types { color: #00b3e6; font-weight: bold;}
         @media (max-width: 600px) {
             main { padding: 1.2rem 0.5rem; }
             pre { font-size: 0.98em; }
@@ -189,7 +191,7 @@
 <body>
     <header>
         <h1>Zerion Programming Language</h1>
-        <p>Simple, educational, and task-oriented.<br> <span style="color:#1affb3;">Perfect for learning and automation.</span></p>
+        <p>Simple, educational, and task-oriented.<br> <span style="color:#00b3e6;">Perfect for learning and automation.</span></p>
     </header>
     <main>
         <h2>Why Zerion?</h2>
@@ -211,23 +213,23 @@
         </div>
         <h2>Example</h2>
         <pre><code class="highlight-zerion" id="zerion-example"><span class="zer-comment"># Hello World</span>
-<span class="zer-keyword">println</span>(<span class="zer-string">"Hello, World!"</span>)
+<span class="zer-func">println</span>(<span class="zer-string">"Hello, World!"</span>)
 
 <span class="zer-comment"># Variables and math</span>
-<span class="zer-var">x</span> = <span class="zer-number">10</span>
-<span class="zer-var">y</span> = <span class="zer-number">20</span>
-<span class="zer-keyword">println</span>(<span class="zer-var">x</span> + <span class="zer-var">y</span>)
+<span class="zer-var">x</span> <span class="zer-types">=</span> <span class="zer-number">10</span>
+<span class="zer-var">y</span> <span class="zer-types">=</span> <span class="zer-number">20</span>
+<span class="zer-func">println</span>(<span class="zer-var">x</span> <span class="zer-types">+</span> <span class="zer-var">y</span>)
 
 <span class="zer-comment"># Functions</span>
-<span class="zer-keyword">defun</span> <span class="zer-func">add</span>(<span class="zer-var">a</span>, <span class="zer-var">b</span>)
-    <span class="zer-keyword">return</span> <span class="zer-var">a</span> + <span class="zer-var">b</span>
+<span class="zer-keyword">defun</span> <span class="zer-func-def">add</span>(<span class="zer-var">a</span><span class="zer-var">,</span> <span class="zer-var">b</span>)
+    <span class="zer-keyword">return</span> <span class="zer-var">a</span> <span class="zer-types">+</span> <span class="zer-var">b</span>
 <span class="zer-keyword">done</span>
 
-<span class="zer-keyword">println</span>(<span class="zer-func">add</span>(<span class="zer-number">5</span>, <span class="zer-number">3</span>))
+<span class="zer-keyword">println</span>(<span class="zer-func">add</span>(<span class="zer-number">5</span><span class="zer-var">,</span> <span class="zer-number">3</span>))
 
 <span class="zer-comment"># Lists</span>
-<span class="zer-var">nums</span> = <span>[</span><span class="zer-number">1</span>, <span class="zer-number">2</span>, <span class="zer-number">3</span>, <span class="zer-number">4</span>, <span class="zer-number">5</span><span>]</span>
-<span class="zer-keyword">println</span>(<span class="zer-var">nums</span>)</code></pre>
+<span class="zer-var">nums</span> = <span>[</span><span class="zer-number">1</span><span class="zer-var">,</span> <span class="zer-number">2</span><span class="zer-var">,</span> <span class="zer-number">3</span><span class="zer-var">,</span> <span class="zer-number">4</span><span class="zer-var">,</span> <span class="zer-number">5</span><span>]</span>
+<span class="zer-func">println</span>(<span class="zer-var">nums</span>)</code></pre>
         <div class="howto">
             <h3>How to Use Zerion</h3>
             <ul>
