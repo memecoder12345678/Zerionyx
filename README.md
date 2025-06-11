@@ -3,22 +3,20 @@
 
 Zerion is an educational programming language designed for learning and task automation.
 
-## Features
+## Why Zerion?
 
-- Beginner-friendly syntax perfect for learning
-- Clear error messages and helpful debugging
-- Extensive libraries for common automation tasks
-- Built-in tools for file handling and system tasks
-- Educational math and algorithm libraries
-- Simple I/O operations for automation scripts
+- Beginner-friendly syntax ideal for learning programming
+- Built-in tools for common task automation
+- Visual feedback and clear error messages
+- Educational libraries for math and basic algorithms
+- Simple file handling and system automation
+- Great for teaching programming concepts to children
 
-## Best Use Cases
-
-- Learning programming concepts
-- Teaching children to code
-- Automating repetitive tasks
-- Basic system administration
-- Educational projects and exercises
+>    ## Best Use Cases
+>
+>    - **Perfect for:** Learning programming, educational projects, and basic task automation
+>    - **Easy syntax:** Designed for clarity and learning, not performance
+>    - **Note:** Not recommended for computation-heavy tasks or production-level applications
 
 ## Example
 
@@ -26,38 +24,47 @@ Zerion is an educational programming language designed for learning and task aut
 # Hello World
 println("Hello, World!")
 
-# Simple automation example
-load "libs.file"
-defun create_backup(file)
-    copy(file, to_str(file) + ".bak")
-    println("Backup created: " + file + ".bak")
+# Variables and math
+x = 10
+y = 20
+println(x + y)
+
+# Functions
+defun add(a, b)
+    return a + b
 done
 
-# Math learning example
-defun is_even(n)
-    return n % 2 == 0
-done
+println(add(5, 3))
+
+# Lists
+nums = [1, 2, 3, 4, 5]
+println(nums)
 ```
 
-## Performance Note
+>    ## How to Use Zerion
+>    - **Install:** Clone the repository from GitHub.
+>    - **Setup:** Add Zerion to your PATH if you want to run it from anywhere.
+>    - **Run a file:** python ./interpreter/zerion.py yourfile.zer
+>    - **Open interactive shell:** Just run python ./interpreter/zerion.py and start typing Zerion code.
+>    - **Get help:** Type grammar, license, or copyright in the shell for info.
+>    - **Documentation:** Read the full docs here.
 
-- Use Python 3.11.9+ for learning and basic tasks
-- For faster automation tasks, use PyPy 3.11.11
-- Not recommended for computation-heavy applications
+
+>    ## Recommended Environment
+>    - **For learning:** Python 3.11.9 or newer (best for beginners and educational purposes)
+>    - **For automation:** PyPy 3.11.11 (recommended when running repetitive tasks or automation scripts)
+>    - **IDE recommendation:** Use [Zerion Editor](https://memecoder12345678.github.io/zerion/docs.html#Zerion%20Editor) with syntax highlighting for the best learning experience
+>    - **Note:** While the language is designed for simplicity, PyPy can significantly speed up automation tasks
+
 
 ## Website
 
 Visit the official Zerion website for an introduction and more information: [Zerion Language Website](https://memecoder12345678.github.io/zerion/)
 
-## Installation
-
-1. Clone the repository
-2. Add zerion to your PATH
-3. Run zerion files with `python zerion.py file.zer`
 
 ## Documentation
 
-Full documentation is available at [Zerion Documentation Website](https://memecoder12345678.github.io/zerion/docs.html)
+The official Zerion documentation is available at [Zerion Documentation Website](https://memecoder12345678.github.io/zerion/docs.html)
 
 ## License
 
