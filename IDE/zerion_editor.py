@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
             "icons",
             os.path.join(os.path.dirname(__file__), f".{os.sep}src{os.sep}icons"),
         )
-        self.setWindowIcon(QIcon("icons:/zerion-icon.png"))
+        self.setWindowIcon(QIcon("icons:/zerion-icon.ico"))
         self.resize(1300, 900)
         self.status_bar = QStatusBar()
         self.status_bar.setStyleSheet(
