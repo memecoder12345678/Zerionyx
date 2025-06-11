@@ -1,0 +1,23 @@
+# libs.sys
+
+let argv = argv_fp
+let os_name = os_name_fp
+
+defun system(c)
+    system_fp(c)
+    return none
+done
+
+defun get_env(n)
+    return get_env_fp(n)
+    return none
+done
+
+defun set_env(n, v)
+    set_env_fp(n, v)
+    return none
+done
+
+defun exit(e)
+    exit_fp(e)
+done

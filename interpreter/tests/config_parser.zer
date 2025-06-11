@@ -118,7 +118,7 @@ defun get_config_value(config_data, section_name, key_name, default_value)
     done
     return default_value
 done
-# --- end note --- #
+# --- note --- #
 
 defun main()
     if len(argv) < 2 do
@@ -167,8 +167,8 @@ defun main()
                 println("")
             done
         done
-        # Example usage of get_config_value
-        println("\n--- Example Get Config Value ---")
+        # ---  Example --- #
+        # println("\n--- Example Get Config Value ---")
         # Assuming you have a config file like:
         # name = GlobalVal
         # [Settings]
@@ -176,18 +176,19 @@ defun main()
         # theme = dark
         # [Database]
         # host = localhost
-        user_name = get_config_value(config_data, "Settings", "user", "default_user")
-        cprint("User from [Settings]: ", "white", none, none)
-        cprintln(user_name, "cyan", none, none)
-        db_host = get_config_value(config_data, "Database", "host", "127.0.0.1")
-        cprint("Host from [Database]: ", "white", none, none)
-        cprintln(db_host, "cyan", none, none)
-        global_val = get_config_value(config_data, "__global__", "name", "not_found")
-        cprint("Name from __global__: ", "white", none, none)
-        cprintln(global_val, "cyan", none, none)
-        missing_val = get_config_value(config_data, "Settings", "nonexistent", "MISSING")
-        cprint("Missing from [Settings]: ", "white", none, none)
-        cprintln(missing_val, "red", none, none)
+        # user_name = get_config_value(config_data, "Settings", "user", "default_user")
+        # cprint("User from [Settings]: ", "white", none, none)
+        # cprintln(user_name, "cyan", none, none)
+        # db_host = get_config_value(config_data, "Database", "host", "127.0.0.1")
+        # cprint("Host from [Database]: ", "white", none, none)
+        # cprintln(db_host, "cyan", none, none)
+        # global_val = get_config_value(config_data, "__global__", "name", "not_found")
+        # cprint("Name from __global__: ", "white", none, none)
+        # cprintln(global_val, "cyan", none, none)
+        # missing_val = get_config_value(config_data, "Settings", "nonexistent", "MISSING")
+        # cprint("Missing from [Settings]: ", "white", none, none)
+        # cprintln(missing_val, "red", none, none)
+        # --- Example --- #
     done
 done
 
