@@ -18,6 +18,9 @@
             --btn-bg: linear-gradient(90deg, #1ad1ff 60%, #1affb3 100%);
             --btn-text: #101522;
         }
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             font-family: 'Segoe UI', 'Fira Mono', 'Consolas', Arial, sans-serif;
             background: linear-gradient(135deg, #101522 0%, #16213a 100%);
@@ -503,7 +506,20 @@ COMMENT:
             <li>Example: <code>load "libs.math"</code></li>
             <li>Then call functions as documented above.</li>
         </ul>
-        <h2>Zerion Editor</h2>
+        <script>
+            window.addEventListener("load", () => {
+                setTimeout(() => {
+                const hash = window.location.hash;
+                if (hash) {
+                    const target = document.querySelector(decodeURIComponent(hash));
+                    if (target) {
+                    target.scrollIntoView({ behavior: "smooth" });
+                    }
+                }
+                }, 100);
+            });
+        </script>
+        <h2 id="Zerion-Editor">Zerion Editor</h2>
         <div class="howto" style="margin-bottom:2.5rem;">
             <h3>About Zerion Editor</h3>
             <ul>

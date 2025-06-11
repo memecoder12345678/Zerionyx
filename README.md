@@ -53,7 +53,7 @@ println(nums)
 >    ## Recommended Environment
 >    - **For learning:** Python 3.11.9 or newer (best for beginners and educational purposes)
 >    - **For automation:** PyPy 3.11.11 (recommended when running repetitive tasks or automation scripts)
->    - **IDE recommendation:** Use [Zerion Editor](https://memecoder12345678.github.io/zerion/docs.html#Zerion%20Editor) with syntax highlighting for the best learning experience
+>    - **IDE recommendation:** Use [Zerion Editor](https://memecoder12345678.github.io/zerion/docs.html#Zerion-Editor) with syntax highlighting for the best learning experience
 >    - **Note:** While the language is designed for simplicity, PyPy can significantly speed up automation tasks
 
 
