@@ -63,15 +63,13 @@ class BaseLexer(QsciLexerCustom):
         self.COMMENTS = 5
         self.CONSTANTS = 6
         self.FUNCTIONS = 7
-        self.FUNCTION_AND_CLASS_DEF = 8
-        self.CLASSES = 9
+        self.FUNCTION_DEFINE = 8
 
         self.default_names = [
             "default",
             "keyword",
             "functions",
-            "function_and_class_def",
-            "classes",
+            "function_define",
             "string",
             "types",
             "brackets",
@@ -88,8 +86,7 @@ class BaseLexer(QsciLexerCustom):
             "comments": self.COMMENTS,
             "constants": self.CONSTANTS,
             "functions": self.FUNCTIONS,
-            "function_and_class_def": self.FUNCTION_AND_CLASS_DEF,
-            "classes": self.CLASSES,
+            "function_define": self.FUNCTION_DEFINE,
         }
 
         self.font_weights = {
@@ -157,8 +154,6 @@ class BaseLexer(QsciLexerCustom):
     def description(self, style: int) -> str:
         if style == self.DEFAULT:
             return "DEFAULT"
-        elif style == self.CLASSES:
-            return "CLASSES"
         elif style == self.KEYWORD:
             return "KEYWORD"
         elif style == self.TYPES:
@@ -169,8 +164,8 @@ class BaseLexer(QsciLexerCustom):
             return "COMMENTS"
         elif style == self.FUNCTIONS:
             return "FUNCTIONS"
-        elif style == self.FUNCTION_AND_CLASS_DEF:
-            return "FUNCTION_AND_CLASS_DEF"
+        elif style == self.FUNCTION_DEFINE:
+            return "FUNCTION_DEFINE"
         elif style == self.BRACKETS:
             return "BRACKETS"
         elif style == self.CONSTANTS:
@@ -618,7 +613,7 @@ class ZerionLexer(BaseLexer):
                     self.setStyling(tok_len, self.KEYWORD)
                     for _ in range(num_tokens - 1):
                         self.setStyling(self.next_tok()[1], self.DEFAULT)
-                    self.setStyling(self.next_tok()[1], self.FUNCTION_AND_CLASS_DEF)
+                    self.setStyling(self.next_tok()[1], self.FUNCTION_DEFINE)
                 else:
                     self.setStyling(tok_len, self.KEYWORD)
             elif tok_str in self.keywords_list:
