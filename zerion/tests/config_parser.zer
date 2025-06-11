@@ -5,93 +5,190 @@ load "libs.list"
 load "libs.termcolor"
 
 defun parse_config(config_file)
-    config = []
+    parsed_config_data = []
+    current_section_name = "__global__"
+    current_section_items = []
+
     lines = split(read(config_file), "\n")
     for i = 0 to len(lines) do
         line = lines>i
         if line != "" do
             line = strip(line, " ")
-            if startswith(line, "#") do
+            if startswith(line, "#") or startswith(line, ";") do
                 continue
             done
+        if startswith(line, "[") do
+            if len(current_section_items) > 0 or current_section_name != "__global__" do
+                append(parsed_config_data, [current_section_name, current_section_items])
+            done
+            end_idx = index_of(split(line, ""), "]")
+            if end_idx == -1 or end_idx == none do
+                cprint("Error", "red", none, "bold")
+                println(": line " + to_str(i + 1) + " has malformed section (missing ']'). Skipping.")
+                continue
+            done
+            raw_section_name = str_slice(line, 1, end_idx)
+            current_section_name = strip(raw_section_name, " \t")
+            if current_section_name == "" do
+                cprint("Warning", "yellow", none, "bold")
+                println(": line " + to_str(i + 1) + " has an empty section name. Using '__empty_section__'.")
+                current_section_name = "__empty_section__"
+            done
+            current_section_items = []
+            continue
+        done
             vals = split(line, "=")
+            if len(vals) < 2 do
+                cprint("Warning", "yellow", none, "bold")
+                println(": line " + to_str(i + 1) + " is not a valid config line or section header. Skipping.")
+                continue
+            done
             if  len(vals) > 2 do
                 cprint("Error", "red", none, "bold")
-                println(": line " + to_str(i + 1) + " is not a valid config line")
+                println(": line " + to_str(i + 1) + " has too many '=' for a key-value pair.")
                 continue
             done
-            if vals>1 == ""  or vals>0 == "" do
+            key = strip(to_str(vals>0), " ")
+            val_str_raw = strip(to_str(join("", list_slice(vals, 1, len(vals)))), " ")
+            if key == "" or val_str_raw == "" do
                 cprint("Error", "red", none, "bold")
-                println(": line " + to_str(i + 1) + " is not a valid config line")
+                println(": line " + to_str(i + 1) + " has an empty key or value.")
                 continue
-            else
-                val = to_str(strip(to_str(join("", list_slice(vals, 1, len(vals)))), " "))
-                if is_num(to_int(val, true)) do
-                    if endswith(to_str(to_float(val, false)), ".0") do
-                        val = to_int(val, false)
-                    else
-                        val = to_float(val, false)
-                    done
-                elif val == "none" do
-                    val = none
-                elif val == "true" do
-                    val = true
-                elif val == "false" do
-                    val = false
-                elif (startswith(val, '"') and endswith(val, '"')) or (startswith(val, "'") and endswith(val, "'")) do
-                    val = to_str(str_slice(val, 1, -1))
-                elif len(split(val, "#")) > 1 do
-                    in_single_quote = false
-                    in_double_quote = false
-                    val_ = split(val, "")
-                    for i = 0 to len(val_) do
-                        c = val_>i
-                        if c == "'"  and not in_double_quote do
-                            in_single_quote = not in_single_quote
-                        elif c == '"' and not in_single_quote do
-                            in_double_quote = not in_double_quote
-                        elif c == '#' and not in_single_quote and not in_double_quote do
-                            val = strip(join("", list_slice(val_, 0, i)), " ")
-                            if (startswith(val, '"') and endswith(val, '"')) or (startswith(val, "'") and endswith(val, "'")) do
-                                val = to_str(str_slice(val, 1, -1))
-                            done
-                        done
+            done
+            val = val_str_raw 
+            val_str_processed = val_str_raw
+            if len(split(val_str_raw, "#")) > 1 or len(split(val_str_raw, ";")) > 1 do
+                in_single_quote = false
+                in_double_quote = false
+                val_chars = split(val_str_raw, "")
+                for char_idx = 0 to len(val_chars) do
+                    c = val_chars>char_idx
+                    if c == "'"  and not in_double_quote do
+                        in_single_quote = not in_single_quote
+                    elif c == '"' and not in_single_quote do
+                        in_double_quote = not in_double_quote
+                    elif (c == '#' or c == ';') and not in_single_quote and not in_double_quote do
+                        val_str_processed = strip(join("", list_slice(val_chars, 0, char_idx)), " ")
+                        break
                     done
                 done
             done
-            append(config, [strip(to_str(vals>0), " "), val])
+            if is_num(to_int(val_str_processed, true)) do
+                if endswith(to_str(to_float(val_str_processed, false)), ".0") do
+                    val = to_int(val_str_processed, false)
+                else
+                    val = to_float(val_str_processed, false)
+                done
+            elif val_str_processed == "none" do
+                val = none
+            elif val_str_processed == "true" do
+                val = true
+            elif val_str_processed == "false" do
+                val = false
+            elif (startswith(val_str_processed, '"') and endswith(val_str_processed, '"')) or (startswith(val_str_processed, "'") and endswith(val_str_processed, "'")) do
+                val = to_str(str_slice(val_str_processed, 1, -1))
+            else
+                val = to_str(val_str_processed)
+            done
+            append(current_section_items, [key, val])
         done
     done
-    return config
+    if len(current_section_items) > 0 or current_section_name != "__global__" or len(parsed_config_data) == 0 do
+        is_initial_global_and_empty = (current_section_name == "__global__" and len(current_section_items) == 0)
+        if not (is_initial_global_and_empty and len(parsed_config_data) > 0) do 
+            append(parsed_config_data, [current_section_name, current_section_items])
+        done
+    done
+    return parsed_config_data
 done
 
-# --- note: use this function get value from config --- #
-# defun get_config_value(config, key, default)
-#     for i = 0 to len(config) do
-#         if config>i>0 == key do
-#             return config>i>1
-#         done
-#     done
-#     return default
-# done
+# --- note: use this function to get value from config --- #
+defun get_config_value(config_data, section_name, key_name, default_value)
+    for i = 0 to len(config_data) do
+        current_section = config_data>i
+        if current_section>0 == section_name do
+            items_in_section = current_section>1
+            for j = 0 to len(items_in_section) do
+                kv_pair = items_in_section>j
+                if kv_pair>0 == key_name do
+                    return kv_pair>1
+                done
+            done
+            return default_value
+        done
+    done
+    return default_value
+done
 # --- end note --- #
 
 defun main()
+    if len(argv) < 2 do
+        cprintln("Usage: script_name <config_file_path>", "yellow", none, "bold")
+        exit(1)
+    done
     config_path = argv>1
     if not exists(config_path) do
-        cprintln("Error: File does not exist", 'red', none, 'bold')
+        cprintln("Error: File does not exist: " + config_path, 'red', none, 'bold')
         exit(1)
     done
     if not is_file(config_path) do
-        cprintln("Error: Path is not a file", 'red', none, 'bold')
+        cprintln("Error: Path is not a file: " + config_path, 'red', none, 'bold')
         exit(1)
     done
-    config = parse_config(config_path)
-    for i = 0 to len(config) do 
-        cprint((config>i>0), 'magenta', none, 'bold')
-        print(" = ")
-        cprint((config>i>1), 'green', none, none)
-        println("")
+    cprintln("Parsing configuration file: " + config_path, "cyan", none, none)
+    config_data = parse_config(config_path)
+    if len(config_data) == 0 do
+        cprintln("No configuration entries found or file is effectively empty.", "yellow")
+    else
+        println("\n--- Parsed Configuration ---")
+        for i = 0 to len(config_data) do
+            section_block = config_data>i
+            section_name = section_block>0
+            section_items = section_block>1
+            cprint("[", "yellow", none, "bold")
+            cprint(to_str(section_name), "yellow", none, "bold")
+            cprintln("]", "yellow", none, "bold")
+            if len(section_items) == 0 do
+                cprintln("  (empty section)", "grey", none, none)
+            else
+                for j = 0 to len(section_items) do
+                    kv_pair = section_items>j
+                    key = kv_pair>0
+                    value = kv_pair>1
+                    print("  ")
+                    cprint(to_str(key), 'magenta', none, 'bold')
+                    print(" = ")
+                    cprint(to_str(value), 'green', none, none)
+                    print(" (type: ")
+                    cprint(type(value), "blue", none, none)
+                    println(")")
+                done
+            done
+            if i < len(config_data) - 1 do
+                println("")
+            done
+        done
+        # Example usage of get_config_value
+        println("\n--- Example Get Config Value ---")
+        # Assuming you have a config file like:
+        # name = GlobalVal
+        # [Settings]
+        # user = Alice
+        # theme = dark
+        # [Database]
+        # host = localhost
+        user_name = get_config_value(config_data, "Settings", "user", "default_user")
+        cprint("User from [Settings]: ", "white", none, none)
+        cprintln(user_name, "cyan", none, none)
+        db_host = get_config_value(config_data, "Database", "host", "127.0.0.1")
+        cprint("Host from [Database]: ", "white", none, none)
+        cprintln(db_host, "cyan", none, none)
+        global_val = get_config_value(config_data, "__global__", "name", "not_found")
+        cprint("Name from __global__: ", "white", none, none)
+        cprintln(global_val, "cyan", none, none)
+        missing_val = get_config_value(config_data, "Settings", "nonexistent", "MISSING")
+        cprint("Missing from [Settings]: ", "white", none, none)
+        cprintln(missing_val, "red", none, none)
     done
 done
 
