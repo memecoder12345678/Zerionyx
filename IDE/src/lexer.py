@@ -328,7 +328,7 @@ class ZerionLexer(BaseLexer):
                 "int_seed",
                 "float_seed",
             ],
-            "libs.sys": ["exit", "system", "get_env", "set_env"],
+            "libs.sys": ["exit", "system", "get_env", "set_env", "osystem"],
             "libs.hash": ["md5", "sha1", "sha256", "sha512", "crc32"],
             "libs.memory": [
                 "remember",

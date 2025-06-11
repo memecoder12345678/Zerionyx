@@ -1006,6 +1006,19 @@ class BuiltInFunction(BaseFunction):
 
     execute_system_fp.arg_names = ["command"]
 
+
+    def execute_osystem_fp(self, exec_ctx):
+        cmd = exec_ctx.symbol_table.get("cmd")
+        result = subprocess.run(
+            cmd.value,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        return RTResult().success(List([String(result.stdout), String(result.stderr), Number(result.returncode)]))
+    execute_osystem_fp.arg_names = ["command"]
+
     def execute_panic(self, exec_ctx):
         msg = exec_ctx.symbol_table.get("message")
         err_type = exec_ctx.symbol_table.get("err_type")

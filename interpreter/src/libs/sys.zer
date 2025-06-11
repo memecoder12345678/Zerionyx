@@ -8,6 +8,10 @@ defun system(c)
     return none
 done
 
+defun osystem(c)
+    return osystem_fp(c)
+done
+
 defun get_env(n)
     return get_env_fp(n)
     return none
