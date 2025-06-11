@@ -1957,7 +1957,9 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(String(str(hashlib.md5(text.value.encode()).hexdigest())))
+        return RTResult().success(
+            String(str(hashlib.md5(text.value.encode()).hexdigest()))
+        )
 
     execute_md5_fp.arg_names = ["text"]
 

@@ -361,8 +361,9 @@ QAbstractItemView::item:selected {
                     self.editor.replaceSelectedText(self.toggle_comment(text))
                 else:
                     line, _ = self.editor.getCursorPosition()
-                    self.editor.setSelection(line, 0,
-                                            line, self.editor.lineLength(line))
+                    self.editor.setSelection(
+                        line, 0, line, self.editor.lineLength(line)
+                    )
                     text = self.editor.selectedText()
                     self.editor.replaceSelectedText(self.toggle_comment(text))
                 self.editor.setSelection(-1, -1, -1, -1)
@@ -381,10 +382,14 @@ QAbstractItemView::item:selected {
             if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_C:
                 if not self.editor.hasSelectedText():
                     line, _ = self.editor.getCursorPosition()
-                    self.editor.setSelection(line, 0, line, self.editor.lineLength(line))
+                    self.editor.setSelection(
+                        line, 0, line, self.editor.lineLength(line)
+                    )
                     self.editor.copy()
-                    self.editor.setCursorPosition(line, self.editor.getCursorPosition()[1])
-                    self.editor.setSelection(-1,-1,-1,-1)
+                    self.editor.setCursorPosition(
+                        line, self.editor.getCursorPosition()[1]
+                    )
+                    self.editor.setSelection(-1, -1, -1, -1)
                     return True
 
             if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_Space:
@@ -397,36 +402,37 @@ QAbstractItemView::item:selected {
     def toggle_comment(self, text):
         lines = text.splitlines(True)
 
-        to_comment = any(line.strip() and not line.strip().startswith('#') for line in lines)
+        to_comment = any(
+            line.strip() and not line.strip().startswith("#") for line in lines
+        )
 
         result = []
         for line in lines:
             stripped_line = line.lstrip()
 
             if to_comment:
-                if line.strip() and not stripped_line.startswith('#'):
+                if line.strip() and not stripped_line.startswith("#"):
                     indent_len = 0
                     while indent_len < len(line) and line[indent_len].isspace():
                         indent_len += 1
-                    result.append(line[:indent_len] + '# ' + line[indent_len:])
+                    result.append(line[:indent_len] + "# " + line[indent_len:])
                 else:
                     result.append(line)
             else:
-                if stripped_line.startswith('#'):
-                    hash_pos = line.find('#')
+                if stripped_line.startswith("#"):
+                    hash_pos = line.find("#")
 
                     if hash_pos != -1:
-                        if hash_pos + 1 < len(line) and line[hash_pos + 1] == ' ':
-                            result.append(line[:hash_pos] + line[hash_pos+2:])
+                        if hash_pos + 1 < len(line) and line[hash_pos + 1] == " ":
+                            result.append(line[:hash_pos] + line[hash_pos + 2 :])
                         else:
-                            result.append(line[:hash_pos] + line[hash_pos+1:])
+                            result.append(line[:hash_pos] + line[hash_pos + 1 :])
                     else:
                         result.append(line)
                 else:
                     result.append(line)
 
-        return ''.join(result)
-
+        return "".join(result)
 
     def update_cursor_position(self):
         line, col = self.editor.getCursorPosition()
