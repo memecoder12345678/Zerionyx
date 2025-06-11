@@ -2517,8 +2517,6 @@ class Interpreter:
         if res.should_return():
             return res
 
-        # Guard: prevent unary operations on none
-
         if isinstance(number, Number) and number.value is None:
             return res.failure(
                 TError(
@@ -2586,11 +2584,9 @@ class Interpreter:
         step = step_value.value
         should_return_none = node.should_return_none
 
-        # Tối ưu: chỉ tạo list nếu cần trả về list
         if not should_return_none:
             elements = []
 
-        # Tối ưu điều kiện lặp
         if step >= 0:
             cond = lambda: i < end
         else:
@@ -2629,7 +2625,6 @@ class Interpreter:
     def visit_WhileNode(self, node, context):
         res = RTResult()
         should_return_none = node.should_return_none
-        # Tối ưu: chỉ tạo list nếu cần trả về list
         if not should_return_none:
             elements = []
 

@@ -9,7 +9,6 @@ defun backup_folder(path, cbp, rbp)
         f = lf>i
         flp = path + os_sep + f
         fbd = cbp + os_sep + f
-
         if flp == rbp do
             cprintln("Skipping main backup directory itself: " + flp, "yellow", none, none)
             continue

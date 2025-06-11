@@ -349,10 +349,26 @@ QAbstractItemView::item:selected {
 
     def eventFilter(self, obj, event):
         if obj is self.editor and event.type() == QEvent.KeyPress:
-            if event.key() == Qt.Key_Slash and event.modifiers() == Qt.ControlModifier:
-                if self.filepath and self.filepath.endswith(".zer"):
-                    self.toggle_line_comment_zerion()
+            if event.modifiers() & Qt.ControlModifier and event.key() == Qt.Key_Slash:
+                orig_line, orig_idx = self.editor.getCursorPosition()
+                if self.editor.hasSelectedText():
+                    sl, _, el, _ = self.editor.getSelection()
+                    if el < self.editor.lines() - 1:
+                        self.editor.setSelection(sl, 0, el + 1, 0)
+                    else:
+                        self.editor.setSelection(sl, 0, el, self.editor.lineLength(el))
+                    text = self.editor.selectedText()
+                    self.editor.replaceSelectedText(self.toggle_comment(text))
+                else:
+                    line, _ = self.editor.getCursorPosition()
+                    self.editor.setSelection(line, 0,
+                                            line, self.editor.lineLength(line))
+                    text = self.editor.selectedText()
+                    self.editor.replaceSelectedText(self.toggle_comment(text))
+                self.editor.setSelection(-1, -1, -1, -1)
+                self.editor.setCursorPosition(orig_line, orig_idx)
                 return True
+
             if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_X:
                 if not self.editor.hasSelectedText():
                     line, _ = self.editor.getCursorPosition()
@@ -361,44 +377,56 @@ QAbstractItemView::item:selected {
                     )
                     self.editor.cut()
                     return True
+
+            if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_C:
+                if not self.editor.hasSelectedText():
+                    line, _ = self.editor.getCursorPosition()
+                    self.editor.setSelection(line, 0, line, self.editor.lineLength(line))
+                    self.editor.copy()
+                    self.editor.setCursorPosition(line, self.editor.getCursorPosition()[1])
+                    self.editor.setSelection(-1,-1,-1,-1)
+                    return True
+
+            if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_Space:
+                if self.filepath and self.filepath.endswith(".zer"):
+                    self.editor.autoCompleteFromAPIs()
+                    return True
+
         return super().eventFilter(obj, event)
 
-    def toggle_line_comment_zerion(self):
-        if self.editor.hasSelectedText():
-            line_from, _, line_to, _ = self.editor.getSelection()
-        else:
-            line_from = line_to = self.editor.getCursorPosition()[0]
-        all_commented = True
-        for line in range(line_from, line_to + 1):
-            text = self.editor.text(line)
-            stripped = text.lstrip()
-            if not stripped.startswith("#"):
-                all_commented = False
-                break
-        self.editor.beginUndoAction()
-        for line in range(line_from, line_to + 1):
-            text = self.editor.text(line)
-            stripped = text.lstrip()
-            indent = len(text) - len(stripped)
+    def toggle_comment(self, text):
+        lines = text.splitlines(True)
 
-            if all_commented:
-                if stripped.startswith("#"):
-                    new_text = text.replace("#", "", 1)
-                    self.editor.setSelection(line, 0, line, len(text))
-                    self.editor.replaceSelectedText(new_text)
+        to_comment = any(line.strip() and not line.strip().startswith('#') for line in lines)
+
+        result = []
+        for line in lines:
+            stripped_line = line.lstrip()
+
+            if to_comment:
+                if line.strip() and not stripped_line.startswith('#'):
+                    indent_len = 0
+                    while indent_len < len(line) and line[indent_len].isspace():
+                        indent_len += 1
+                    result.append(line[:indent_len] + '# ' + line[indent_len:])
+                else:
+                    result.append(line)
             else:
-                if not stripped.startswith("#"):
-                    new_text = text[:indent] + "#" + text[indent:]
-                    self.editor.setSelection(line, 0, line, len(text))
-                    self.editor.replaceSelectedText(new_text)
-        self.editor.endUndoAction()
-        if line_from != line_to:
-            final_line = self.editor.text(line_to)
-            self.editor.setSelection(line_from, 0, line_to, len(final_line))
-            self.editor.setCursorPosition(line_to, 0)
-        else:
-            self.editor.setCursorPosition(line_from, 0)
-        self.refresh_autocomplete()
+                if stripped_line.startswith('#'):
+                    hash_pos = line.find('#')
+
+                    if hash_pos != -1:
+                        if hash_pos + 1 < len(line) and line[hash_pos + 1] == ' ':
+                            result.append(line[:hash_pos] + line[hash_pos+2:])
+                        else:
+                            result.append(line[:hash_pos] + line[hash_pos+1:])
+                    else:
+                        result.append(line)
+                else:
+                    result.append(line)
+
+        return ''.join(result)
+
 
     def update_cursor_position(self):
         line, col = self.editor.getCursorPosition()

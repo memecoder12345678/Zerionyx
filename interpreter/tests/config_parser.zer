@@ -101,24 +101,25 @@ defun parse_config(config_file)
     return parsed_config_data
 done
 
-# --- note: use this function to get value from config --- #
-defun get_config_value(config_data, section_name, key_name, default_value)
-    for i = 0 to len(config_data) do
-        current_section = config_data>i
-        if current_section>0 == section_name do
-            items_in_section = current_section>1
-            for j = 0 to len(items_in_section) do
-                kv_pair = items_in_section>j
-                if kv_pair>0 == key_name do
-                    return kv_pair>1
-                done
-            done
-            return default_value
-        done
-    done
-    return default_value
-done
-# --- note --- #
+# --- Note --- #
+# use this function to get value from config
+# defun get_config_value(config_data, section_name, key_name, default_value)
+#     for i = 0 to len(config_data) do
+#         current_section = config_data>i
+#         if current_section>0 == section_name do
+#             items_in_section = current_section>1
+#             for j = 0 to len(items_in_section) do
+#                 kv_pair = items_in_section>j
+#                 if kv_pair>0 == key_name do
+#                     return kv_pair>1
+#                 done
+#             done
+#             return default_value
+#         done
+#     done
+#     return default_value
+# done
+# --- Note --- #
 
 defun main()
     if len(argv) < 2 do
@@ -169,7 +170,7 @@ defun main()
         done
         # ---  Example --- #
         # println("\n--- Example Get Config Value ---")
-        # Assuming you have a config file like:
+        # assuming you have a config file like:
         # name = GlobalVal
         # [Settings]
         # user = Alice

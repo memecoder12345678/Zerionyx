@@ -22,5 +22,7 @@ def build_autocomplete(lexer: ZerionLexer) -> QsciAPIs:
                 apis.add(func)
         for type_ in lexer.types:
             apis.add(type_)
+        for i in lexer.literals:
+            apis.add(i)
     apis.prepare()
     return apis
