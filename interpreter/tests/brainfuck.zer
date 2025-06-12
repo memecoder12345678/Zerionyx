@@ -24,10 +24,10 @@ defun brainfuck(nput)
                     append(memory, 0)
                 done
             done
-            pointer = pointer + 1
+            pointer += 1
         elif (nput>i) == "<" do
             if pointer > 0 do
-                pointer = pointer - 1
+                pointer -= 1
             done
         elif (nput>i) == "+" do
             change_value(memory, pointer, ((memory>pointer)+1) % 256)
@@ -43,11 +43,11 @@ defun brainfuck(nput)
             if (memory>pointer) == 0 do
                 count = 1
                 while count > 0 do
-                    i = i + 1
+                    i += 1
                     if (nput>i) == "[" do
-                        count = count + 1
+                        count += 1
                     elif (nput>i) == "]" do
-                        count = count - 1
+                        count -= 1
                     done
                 done
             done
@@ -55,18 +55,18 @@ defun brainfuck(nput)
             if (memory>pointer) != 0 do
                 count = 1
                 while count > 0 do
-                    i = i - 1
+                    i -= 1
                     if (nput>i) == "]" do
-                        count = count + 1
+                        count += 1
                     elif (nput>i) == "[" do
-                        count = count - 1
+                        count -= 1
                     done
                 done
             done
         else
             pass()
         done
-        i = i + 1
+        i += 1
     done
     return output
 done

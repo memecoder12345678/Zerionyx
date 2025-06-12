@@ -81,3 +81,75 @@ done
 defun dir_name(p)
     return dir_name_fp(p)
 done
+
+defun symlink(s, d)
+    symlink_fp(s, d)
+    return none
+done
+
+defun readlink(p)
+    return readlink_fp(p)
+done
+
+defun stat(p)
+    return stat_fp(p)
+done
+
+defun lstat(p)
+    return lstat_fp(p)
+done
+
+defun walk(t)
+    return walk_fp(t)
+done
+
+defun chmod(p, m)
+    chmod_fp(p, m)
+    return none
+done
+
+defun chown(p, u, g)
+    chown_fp(p, u, g)
+    return none
+done
+
+defun utime(p, t)
+    utime_fp(p, t)
+    return none
+done
+
+defun link(s, d)
+    link_fp(s, d)
+    return none
+done
+
+defun unlink(p)
+    unlink_fp(p)
+    return none
+done
+
+defun chdir(p)
+    chdir_fp(p)
+    return none
+done
+
+defun access(p, m)
+    return access_fp(p, m)
+done
+
+defun path_join(a)
+    return path_join_fp(a)
+done
+
+defun is_dir(p)
+    return is_dir_fp(p)
+done
+
+defun is_link(p)
+    return is_link_fp(p)
+done
+
+defun is_mount(p)
+    return is_mount_fp(p)
+done
+

@@ -215,6 +215,8 @@ class Object:
 
 
 class ThreadWrapper(Object):
+    __slots__ = "thread"
+
     def __init__(self, thread):
         super().__init__()
         self.thread = thread
@@ -701,7 +703,6 @@ class String(Object):
             )
 
     def _make_comparison(self, other, op, type_to_check):
-        """Helper chung cho các phép so sánh."""
         if isinstance(other, type_to_check):
             result = int(op(self.value, other.value))
             return Number(result).set_context(self.context), None
@@ -886,7 +887,6 @@ class File(Object):
         self.path = path
 
     def _make_comparison(self, other, op, type_to_check):
-        """Helper chung cho các phép so sánh."""
         if isinstance(other, type_to_check):
             result = int(op(self.path, other.path))
             return Number(result).set_context(self.context), None

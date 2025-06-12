@@ -65,9 +65,8 @@ while true do
             done
             remember(frame_id, frame_str)
         done
-        loop_count = set_reusable(loop_count + 1, true)
+        loop_count += 1
     done
-    A = set_reusable(A + 0.04, true)
-    B = set_reusable(B + 0.08, true)
-    sleep(0.03)
+    A += 0.04
+    B += 0.08
 done

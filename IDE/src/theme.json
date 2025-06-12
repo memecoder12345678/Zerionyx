@@ -71,8 +71,14 @@
             },
             {
                 "brackets": {
-                    "color": "#00ffff",
-                    "paper-color": "#181a1b"
+                    "color": "#00b3e6",
+                    "paper-color": "#181a1b",
+                    "font": {
+                        "family": "consolas",
+                        "font-size": 14,
+                        "font-weight": "bold",
+                        "italic": false
+                    }
                 }
             },
             {

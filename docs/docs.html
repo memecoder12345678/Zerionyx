@@ -208,75 +208,81 @@
             </ul>
         </div>
         <h2>Language Grammar</h2>
-            <pre><code class="highlight-zerion" style="color: #b2eff5;">STATEMENT:
-    | NEWLINE* statement (NEWLINE+ statement)* NEWLINE*
-    | 'load' STRING
-    | 'return' EXPR
-    | 'continue'
-    | 'break'
+            <pre><code class="highlight-zerion" style="color: #b2eff5;">PROGRAM         ::= (STATEMENT NEWLINE*)*
+
+STATEMENT          ::= SIMPLE_STATEMENT | COMPOUND_STATEMENT
+
+SIMPLE_STATEMENT   ::=
+      "load" STRING
+    | "return" EXPR
+    | "continue"
+    | "break"
     | EXPR
 
-EXPR:
-    | 'let' IDENTIFIER '=' EXPR
-    | IDENTIFIER '=' EXPR
-    | COMP_EXPR (('and' | 'or') COMP_EXPR)*
+COMPOUND_STATEMENT ::=
+      IF_EXPR
+    | FOR_EXPR
+    | WHILE_EXPR
+    | DEF_FUNC
 
-COMP_EXPR:
-    | ARITH_EXPR (('==' | '<' | '>' | '<=' | '>=' | '!=' ) ARITH_EXPR)*
-    | 'not' COMP_EXPR
+EXPR               ::= 
+      "let" IDENTIFIER "=" EXPR
+    | IDENTIFIER "=" EXPR
+    | IDENTIFIER ("+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^=") EXPR
+    | COMP_EXPR (("and" | "or") COMP_EXPR)*
 
-ARITH_EXPR:
-    | TERM (('+' | '-') TERM)*
+COMP_EXPR          ::= 
+      ARITH_EXPR (("==" | "<" | ">" | "<=" | ">=" | "!=") ARITH_EXPR)*
+    | "not" COMP_EXPR
 
-TERM:
-    | FACTOR (('*' | '/' | '//' | '%') FACTOR)*
+ARITH_EXPR         ::= TERM (("+" | "-") TERM)*
 
-FACTOR:
-    | ('+' | '-') FACTOR
-    | POWER
+TERM               ::= FACTOR (("*" | "/" | "//" | "%") FACTOR)*
 
-POWER:
-    | CALL ('^' FACTOR)*
+FACTOR             ::= ("+" | "-") FACTOR | POWER
 
-CALL:
-    | ATOM ('(' (EXPR (',' EXPR)*)? ')')?
+POWER              ::= CALL ("^" FACTOR)*
 
-ATOM:
-    | INT | FLOAT | STRING | IDENTIFIER
-    | '(' EXPR ')'
-    | LIST_EXPR | LIST_INDEX
-    | IF_EXPR | FOR_EXPR | WHILE_EXPR
-    | DEF_FUNC | COMMENT
+CALL               ::= ATOM ("(" (EXPR ("," EXPR)*)? ")")?
 
-LIST_INDEX:
-    | IDENTIFIER '>' EXPR
+ATOM               ::= 
+      INT | FLOAT | STRING | IDENTIFIER
+    | "(" EXPR ")"
+    | LIST_EXPR
+    | LIST_INDEX
+    | IF_EXPR
+    | FOR_EXPR
+    | WHILE_EXPR
+    | DEF_FUNC
+    | COMMENT
 
-LIST_EXPR:
-    | '[' (EXPR (',' EXPR)*)? ']'
+LIST_INDEX        ::= IDENTIFIER ">" EXPR
 
-IF_EXPR:
-    | 'if' EXPR 'do' STATEMENT
-      (NEWLINE 'elif' EXPR 'do' STATEMENT)*
-      (NEWLINE 'else' STATEMENT)?
-      NEWLINE 'done'
+LIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"
 
-FOR_EXPR:
-    | 'for' IDENTIFIER '=' EXPR 'to' EXPR
-      ('step' EXPR)?
-      'do' STATEMENT
-      NEWLINE 'done'
+IF_EXPR           ::= 
+      "if" EXPR "do" STATEMENT
+      (NEWLINE "elif" EXPR "do" STATEMENT)*
+      (NEWLINE "else" STATEMENT)?
+      NEWLINE "done"
 
-WHILE_EXPR:
-    | 'while' EXPR 'do' STATEMENT
-      NEWLINE 'done'
+FOR_EXPR          ::=
+      "for" IDENTIFIER "=" EXPR "to" EXPR
+      ("step" EXPR)?
+      "do" STATEMENT
+      NEWLINE "done"
 
-DEF_FUNC:
-    | 'defun' IDENTIFIER '(' (IDENTIFIER (',' IDENTIFIER)*)? ')'
-      ('->' EXPR)?
-      NEWLINE 'done'
+WHILE_EXPR        ::= 
+      "while" EXPR "do" STATEMENT
+      NEWLINE "done"
 
-COMMENT:
-    | '#' EXPR</code></pre>
+DEF_FUNC          ::= 
+      "defun" IDENTIFIER "(" (IDENTIFIER ("," IDENTIFIER)*)? ")"
+      ("->" EXPR)?
+      NEWLINE STATEMENT NEWLINE "done"
+
+COMMENT           ::= "#" /[^\n]*/
+</code></pre>
         <h2>Built-in Functions</h2>
         <ul>
             <li><b>append(obj, val)</b> &rarr; list &mdash; Add <code>val</code> to end of <code>obj</code> return <code>val</code></li>
@@ -408,6 +414,22 @@ COMMENT:
                 <li><b>abs_path(path)</b> &rarr; str &mdash; Get absolute path</li>
                 <li><b>base_name(file)</b> &rarr; str &mdash; Get file name</li>
                 <li><b>dir_name(file)</b> &rarr; str &mdash; Get parent folder</li>
+                <li><b>symlink(src, dst)</b> &rarr; none &mdash; Create symbolic link from <code>src</code> to <code>dst</code></li>
+                <li><b>readlink(path)</b> &rarr; str &mdash; Read destination of a symbolic link</li>
+                <li><b>stat(path)</b> &rarr; list &mdash; Get file or directory metadata (follow symlinks)</li>
+                <li><b>lstat(path)</b> &rarr; list &mdash; Get file or directory metadata (don't follow symlinks)</li>
+                <li><b>walk(top)</b> &rarr; list &mdash; Recursively walk through directory tree starting at <code>top</code></li>
+                <li><b>chmod(path, mode)</b> &rarr; none &mdash; Change permission bits of a file or directory</li>
+                <li><b>chown(path, uid, gid)</b> &rarr; none &mdash; Change owner and group of a file or directory</li>
+                <li><b>utime(path, times)</b> &rarr; none &mdash; Set access and modification times</li>
+                <li><b>link(src, dst)</b> &rarr; none &mdash; Create a hard link from <code>src</code> to <code>dst</code></li>
+                <li><b>unlink(path)</b> &rarr; none &mdash; Remove a file or symbolic link</li>
+                <li><b>chdir(path)</b> &rarr; none &mdash; Change the current working directory</li>
+                <li><b>access(path, mode)</b> &rarr; true/false &mdash; Check user's access permissions for a path</li>
+                <li><b>path_join(parts)</b> &rarr; str &mdash; Join multiple path components into one</li>
+                <li><b>is_dir(path)</b> &rarr; true/false &mdash; Check if the path is a directory</li>
+                <li><b>is_link(path)</b> &rarr; true/false &mdash; Check if the path is a symbolic link</li>
+                <li><b>is_mount(path)</b> &rarr; true/false &mdash; Check if the path is a mount point</li>
                 <li>Constants: <b>os_sep</b></li>
             </ul>
         </div>

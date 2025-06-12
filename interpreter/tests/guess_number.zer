@@ -8,7 +8,7 @@ sn = 0
 defun handle_input(m, m_)
     i = to_int(input("Enter a number from " + to_str(m) + " to " + to_str(m_) + ": "), true)
     while i == none or (i < m or i > m_) do
-        a = a + 1
+        a += 1
         if a >= ma do
             println("You have used all your attempts!\nThe secret number was: " + to_str(sn))
             exit(0)
@@ -20,11 +20,11 @@ defun handle_input(m, m_)
 done
 
 defun guess_number(m, m_)
-    attempt = 0
-    secret_number = rand_int(m, m_)
+    a = 0
+    sn = rand_int(m, m_)
     while a < ma do
         i = handle_input(m, m_)
-        attempt = attempt + 1
+        a += 1
         if i == sn do
             println("You guessed it right!\nAttempts: " + to_str(a))
             return none

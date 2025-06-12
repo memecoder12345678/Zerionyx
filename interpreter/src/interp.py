@@ -1428,7 +1428,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "keyboard module not available. Install with: pip install keyboard",
+                    "keyboard module not available\nTip: Install with: pip install keyboard",
                     exec_ctx,
                 )
             )
@@ -1459,7 +1459,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "keyboard module not available. Install with: pip install keyboard",
+                    "keyboard module not available\nTip: Install with: pip install keyboard",
                     exec_ctx,
                 )
             )
@@ -1490,7 +1490,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "keyboard module not available. Install with: pip install keyboard",
+                    "keyboard module not available\nTip: Install with: pip install keyboard",
                     exec_ctx,
                 )
             )
@@ -1521,7 +1521,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "keyboard module not available. Install with: pip install keyboard",
+                    "keyboard module not available\nTip: Install with: pip install keyboard",
                     exec_ctx,
                 )
             )
@@ -1553,7 +1553,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "keyboard module not available. Install with: pip install keyboard",
+                    "keyboard module not available\nTip: Install with: pip install keyboard",
                     exec_ctx,
                 )
             )
@@ -2388,24 +2388,6 @@ class BuiltInFunction(BaseFunction):
 
     execute_round_fp.arg_names = ["x"]
 
-    def execute_abs_path_fp(self, exec_ctx):
-        path = exec_ctx.symbol_table.get("path")
-        return RTResult().success(String(os.path.abspath(path.value)))
-
-    execute_abs_path_fp.arg_names = ["path"]
-
-    def execute_dir_name_fp(self, exec_ctx):
-        path = exec_ctx.symbol_table.get("path")
-        return RTResult().success(String(os.path.dirname(path.value)))
-
-    execute_dir_name_fp.arg_names = ["path"]
-
-    def execute_base_name_fp(self, exec_ctx):
-        path = exec_ctx.symbol_table.get("path")
-        return RTResult().success(String(os.path.basename(path.value)))
-
-    execute_base_name_fp.arg_names = ["path"]
-
     def validate_pyexec_result(self, obj):
         allowed = (bool, int, float, str)
         if obj is None:
@@ -2500,6 +2482,836 @@ class BuiltInFunction(BaseFunction):
 
     execute_pyexec.arg_names = ["code"]
 
+    def execute_abs_path_fp(self, exec_ctx):
+        path = exec_ctx.symbol_table.get("path")
+        if not isinstance(path, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'abs_path' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            return RTResult().success(String(os.path.abspath(path.value)))
+        except Exception as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to get absolute path for '{path.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_abs_path_fp.arg_names = ["path"]
+
+    def execute_dir_name_fp(self, exec_ctx):
+        path = exec_ctx.symbol_table.get("path")
+        if not isinstance(path, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'dir_name' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            return RTResult().success(String(os.path.dirname(path.value)))
+        except Exception as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to get directory name for '{path.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_dir_name_fp.arg_names = ["path"]
+
+    def execute_base_name_fp(self, exec_ctx):
+        path = exec_ctx.symbol_table.get("path")
+        if not isinstance(path, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'base_name' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            return RTResult().success(String(os.path.basename(path.value)))
+        except Exception as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to get base name for '{path.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_base_name_fp.arg_names = ["path"]
+
+    def execute_symlink_fp(self, exec_ctx):
+        src = exec_ctx.symbol_table.get("src")
+        dst = exec_ctx.symbol_table.get("dst")
+
+        if not isinstance(src, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'symlink' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(dst, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'symlink' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            if hasattr(os, "symlink"):
+                os.symlink(src.value, dst.value)
+                return RTResult().success(None_.none)
+            else:
+                return RTResult().failure(
+                    RTError(
+                        self.pos_start,
+                        self.pos_end,
+                        "Symbolic links are not supported on this system or require special privileges",
+                        exec_ctx,
+                    )
+                )
+        except OSError as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"OS error creating symlink '{src.value}' -> '{dst.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error creating symlink: {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_symlink_fp.arg_names = ["src", "dst"]
+
+    def execute_readlink_fp(self, exec_ctx):
+        path_arg = exec_ctx.symbol_table.get("path")
+        if not isinstance(path_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'readlink' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            if hasattr(os, "readlink"):
+                target_path = os.readlink(path_arg.value)
+                return RTResult().success(String(target_path))
+            else:
+                return RTResult().failure(
+                    RTError(
+                        self.pos_start,
+                        self.pos_end,
+                        "Reading symbolic links is not supported on this system",
+                        exec_ctx,
+                    )
+                )
+        except OSError as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"OS error reading link '{path_arg.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error reading link: {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_readlink_fp.arg_names = ["path"]
+
+    def _format_stat_result_to_list(self, stat_res, context):
+        return List(
+            [
+                Number(stat_res.st_mode),
+                Number(stat_res.st_ino),
+                Number(stat_res.st_dev),
+                Number(stat_res.st_nlink),
+                Number(stat_res.st_uid),
+                Number(stat_res.st_gid),
+                Number(stat_res.st_size),
+                Number(stat_res.st_atime),
+                Number(stat_res.st_mtime),
+                Number(stat_res.st_ctime),
+            ]
+        )
+
+    def execute_stat_fp(self, exec_ctx):
+        path_arg = exec_ctx.symbol_table.get("path")
+        if not isinstance(path_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'stat' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            stat_res_obj = os.stat(path_arg.value)
+            return RTResult().success(
+                self._format_stat_result_to_list(stat_res_obj, exec_ctx)
+            )
+        except OSError as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"OS error getting stat for '{path_arg.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error getting stat: {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_stat_fp.arg_names = ["path"]
+
+    def execute_lstat_fp(self, exec_ctx):
+        path_arg = exec_ctx.symbol_table.get("path")
+        if not isinstance(path_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'lstat' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            stat_res_obj = None
+            if hasattr(os, "lstat"):
+                stat_res_obj = os.lstat(path_arg.value)
+            else:
+                stat_res_obj = os.stat(path_arg.value)
+            return RTResult().success(
+                self._format_stat_result_to_list(stat_res_obj, exec_ctx)
+            )
+        except OSError as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"OS error getting lstat for '{path_arg.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error getting lstat: {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_lstat_fp.arg_names = ["path"]
+
+    def execute_walk_fp(self, exec_ctx):
+        top_path = exec_ctx.symbol_table.get("top")
+        if not isinstance(top_path, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'walk' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            walk_results_list_of_lists = []
+            for root, dirs, files in os.walk(top_path.value):
+                fun_root = String(root)
+                fun_dirs = List([String(d) for d in dirs])
+                fun_files = List([String(f) for f in files])
+                walk_results_list_of_lists.append(List([fun_root, fun_dirs, fun_files]))
+            return RTResult().success(List(walk_results_list_of_lists))
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error during directory walk starting at '{top_path.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_walk_fp.arg_names = ["top"]
+
+    def execute_chmod_fp(self, exec_ctx):
+        path_arg = exec_ctx.symbol_table.get("path")
+        mode_arg = exec_ctx.symbol_table.get("mode")
+
+        if not isinstance(path_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'chmod' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(mode_arg, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'chmod' must be a number",
+                    exec_ctx,
+                )
+            )
+        try:
+            os.chmod(path_arg.value, int(mode_arg.value))
+            return RTResult().success(None_.none)
+        except OSError as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"OS error changing mode for '{path_arg.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error changing mode: {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_chmod_fp.arg_names = ["path", "mode"]
+
+    def execute_chown_fp(self, exec_ctx):
+        path_arg = exec_ctx.symbol_table.get("path")
+        uid_arg = exec_ctx.symbol_table.get("uid")
+        gid_arg = exec_ctx.symbol_table.get("gid")
+
+        if not isinstance(path_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'chown' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(uid_arg, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'chown' must be a number",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(gid_arg, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Third argument of 'chown' must be a number",
+                    exec_ctx,
+                )
+            )
+        try:
+            if hasattr(os, "chown"):
+                os.chown(path_arg.value, int(uid_arg.value), int(gid_arg.value))
+                return RTResult().success(None_.none)
+            else:
+                return RTResult().failure(
+                    RTError(
+                        self.pos_start,
+                        self.pos_end,
+                        "Changing file ownership (chown) is not supported on this system",
+                        exec_ctx,
+                    )
+                )
+        except OSError as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"OS error changing ownership for '{path_arg.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error changing ownership: {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_chown_fp.arg_names = ["path", "uid", "gid"]
+
+    def execute_utime_fp(self, exec_ctx):
+        path_arg = exec_ctx.symbol_table.get("path")
+        times_arg = exec_ctx.symbol_table.get("times")
+
+        if not isinstance(path_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'utime' must be a string",
+                    exec_ctx,
+                )
+            )
+
+        actual_times_tuple = None
+        if isinstance(times_arg, List):
+            if (
+                len(times_arg.elements) == 2
+                and isinstance(times_arg.elements[0], Number)
+                and isinstance(times_arg.elements[1], Number)
+            ):
+                actual_times_tuple = (
+                    times_arg.elements[0].value,
+                    times_arg.elements[1].value,
+                )
+            else:
+                return RTResult().failure(
+                    TError(
+                        self.pos_start,
+                        self.pos_end,
+                        "Second argument of 'utime', if a list, must contain two numbers (access_time, modification_time)",
+                        exec_ctx,
+                    )
+                )
+        elif isinstance(times_arg, None_):
+            actual_times_tuple = None
+        else:
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'utime' must be a list of two numbers or none",
+                    exec_ctx,
+                )
+            )
+
+        try:
+            os.utime(path_arg.value, actual_times_tuple)
+            return RTResult().success(None_.none)
+        except OSError as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"OS error setting times for '{path_arg.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error setting times: {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_utime_fp.arg_names = ["path", "times"]
+
+    def execute_link_fp(self, exec_ctx):
+        src = exec_ctx.symbol_table.get("src")
+        dst = exec_ctx.symbol_table.get("dst")
+
+        if not isinstance(src, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'link' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(dst, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'link' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            if hasattr(os, "link"):
+                os.link(src.value, dst.value)
+                return RTResult().success(None_.none)
+            else:
+                return RTResult().failure(
+                    RTError(
+                        self.pos_start,
+                        self.pos_end,
+                        "Creating hard links is not supported on this system or requires special privileges",
+                        exec_ctx,
+                    )
+                )
+        except OSError as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"OS error creating hard link '{src.value}' -> '{dst.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error creating hard link: {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_link_fp.arg_names = ["src", "dst"]
+
+    def execute_unlink_fp(self, exec_ctx):
+        path_arg = exec_ctx.symbol_table.get("path")
+        if not isinstance(path_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'unlink' must be a string",
+                    exec_ctx,
+                )
+            )
+
+        if os.path.isdir(path_arg.value):
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Cannot unlink '{path_arg.value}': It is a directory\nTip: Use 'remove_dir' instead.",
+                    exec_ctx,
+                )
+            )
+        if not os.path.exists(path_arg.value) and not os.path.islink(path_arg.value):
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"File or link '{path_arg.value}' does not exist",
+                    exec_ctx,
+                )
+            )
+        try:
+            os.unlink(path_arg.value)
+            return RTResult().success(None_.none)
+        except OSError as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to remove file: {str(e)}",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error unlinking file/link: {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_unlink_fp.arg_names = ["path"]
+
+    def execute_chdir_fp(self, exec_ctx):
+        path_arg = exec_ctx.symbol_table.get("path")
+        if not isinstance(path_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'chdir' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not os.path.isdir(path_arg.value):
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Directory '{path_arg.value}' does not exist or is not a directory",
+                    exec_ctx,
+                )
+            )
+        try:
+            os.chdir(path_arg.value)
+            return RTResult().success(None_.none)
+        except OSError as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to set current directory to '{path_arg.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error changing directory: {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_chdir_fp.arg_names = ["path"]
+
+    def execute_access_fp(self, exec_ctx):
+        path_arg = exec_ctx.symbol_table.get("path")
+        mode_arg = exec_ctx.symbol_table.get("mode")
+
+        if not isinstance(path_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'access' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(mode_arg, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'access' must be a number",
+                    exec_ctx,
+                )
+            )
+        try:
+            has_access = os.access(path_arg.value, int(mode_arg.value))
+            return RTResult().success(Number.true if has_access else Number.false)
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error checking access for '{path_arg.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_access_fp.arg_names = ["path", "mode"]
+
+    def execute_path_join_fp(self, exec_ctx):
+        args_list_obj = exec_ctx.symbol_table.get("args")
+
+        if not isinstance(args_list_obj, List):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'path_join' must be a list of path components",
+                    exec_ctx,
+                )
+            )
+
+        path_components_str = []
+        for i, item in enumerate(args_list_obj.elements):
+            if not isinstance(item, String):
+                return RTResult().failure(
+                    TError(
+                        self.pos_start,
+                        self.pos_end,
+                        f"All path components for 'path_join' must be strings (component at index {i} is not)",
+                        exec_ctx,
+                    )
+                )
+            path_components_str.append(item.value)
+
+        if not path_components_str:
+            return RTResult().success(String(""))
+        try:
+            joined_path = os.path.join(*path_components_str)
+            return RTResult().success(String(joined_path))
+        except TypeError as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error joining path components: {str(e)}",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Unexpected error joining path: {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_path_join_fp.arg_names = ["args"]
+
+    def execute_is_file_fp(self, exec_ctx):
+        path_arg = exec_ctx.symbol_table.get("path")
+        if not isinstance(path_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'is_file' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            is_file = os.path.isfile(path_arg.value)
+            return RTResult().success(Number.true if is_file else Number.false)
+        except Exception as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to check if path is file '{path_arg.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_is_file_fp.arg_names = ["path"]
+
+    def execute_is_dir_fp(self, exec_ctx):
+        path_arg = exec_ctx.symbol_table.get("path")
+        if not isinstance(path_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'is_dir' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            is_dir = os.path.isdir(path_arg.value)
+            return RTResult().success(Number.true if is_dir else Number.false)
+        except Exception as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to check if path is directory '{path_arg.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_is_dir_fp.arg_names = ["path"]
+
+    def execute_is_link_fp(self, exec_ctx):
+        path_arg = exec_ctx.symbol_table.get("path")
+        if not isinstance(path_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'is_link' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            is_link = os.path.islink(path_arg.value)
+            return RTResult().success(Number.true if is_link else Number.false)
+        except Exception as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to check if path is symlink '{path_arg.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_is_link_fp.arg_names = ["path"]
+
+    def execute_is_mount_fp(self, exec_ctx):
+        path_arg = exec_ctx.symbol_table.get("path")
+        if not isinstance(path_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'is_mount' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            is_mount = os.path.ismount(path_arg.value)
+            return RTResult().success(Number.true if is_mount else Number.false)
+        except Exception as e:
+            return RTResult().failure(
+                FError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to check if path is mount point '{path_arg.value}': {str(e)}",
+                    exec_ctx,
+                )
+            )
+
+    execute_is_mount_fp.arg_names = ["path"]
+
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
     func_name = method_name[8:]
@@ -2510,36 +3322,10 @@ for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]
 
 
 class Interpreter:
-    def __init__(self):
-        self._visit_cache = {}
-
-        self.module_cache = {}
-
-        self._bin_op_methods = {
-            TT_PLUS: "added_to",
-            TT_MINUS: "subbed_by",
-            TT_MUL: "multed_by",
-            TT_DIV: "dived_by",
-            TT_POW: "powed_by",
-            TT_MOD: "moduled_by",
-            TT_FLOORDIV: "floordived_by",
-            TT_EE: "get_comparison_eq",
-            TT_NE: "get_comparison_ne",
-            TT_LT: "get_comparison_lt",
-            TT_GT: "get_comparison_gt",
-            TT_LTE: "get_comparison_lte",
-            TT_GTE: "get_comparison_gte",
-        }
 
     def visit(self, node, context):
-        node_type = type(node)
-        method = self._visit_cache.get(node_type)
-
-        if not method:
-            method_name = f"visit_{node_type.__name__}"
-            method = getattr(self, method_name, self.no_visit_method)
-            self._visit_cache[node_type] = method
-
+        method_name = f"visit_{type(node).__name__}"
+        method = getattr(self, method_name, self.no_visit_method)
         return method(node, context)
 
     def no_visit_method(self, node, context):
@@ -2561,13 +3347,13 @@ class Interpreter:
 
     def visit_ListNode(self, node, context: Context):
         res = RTResult()
-        elements = [
-            res.register(self.visit(element_node, context))
-            for element_node in node.element_nodes
-            if not res.should_return()
-        ]
-        if res.should_return():
-            return res
+        elements = []
+
+        for element_node in node.element_nodes:
+            elements.append(res.register(self.visit(element_node, context)))
+            if res.should_return():
+                return res
+
         return res.success(
             List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
         )
@@ -2575,23 +3361,22 @@ class Interpreter:
     def visit_VarAccessNode(self, node, context: Context):
         res = RTResult()
         var_name = node.var_name_tok.value
-        value = context.symbol_table.get(var_name) or context.private_symbol_table.get(
-            var_name
-        )
+        value = context.symbol_table.get(var_name)
 
         if value is None:
-            return res.failure(
-                RTError(
-                    node.pos_start,
-                    node.pos_end,
-                    f"'{var_name}' is not defined",
-                    context,
+            value = context.private_symbol_table.get(var_name)
+            if value is None:
+                return res.failure(
+                    RTError(
+                        node.pos_start,
+                        node.pos_end,
+                        f"'{var_name}' is not defined",
+                        context,
+                    )
                 )
-            )
 
-        return res.success(
-            value.copy().set_pos(node.pos_start, node.pos_end).set_context(context)
-        )
+        value = value.copy().set_pos(node.pos_start, node.pos_end).set_context(context)
+        return res.success(value)
 
     def visit_VarAssignNode(self, node, context: Context):
         res = RTResult()
@@ -2606,75 +3391,80 @@ class Interpreter:
 
     def visit_BinOpNode(self, node, context):
         res = RTResult()
-
-        op_tok = node.op_tok
-        if op_tok.matches(TT_KEYWORD, "and"):
-            left = res.register(self.visit(node.left_node, context))
-            if res.should_return():
-                return res
-            if not left.is_true():
-                return res.success(left.set_pos(node.pos_start, node.pos_end))
-            right = res.register(self.visit(node.right_node, context))
-            if res.should_return():
-                return res
-            result, error = left.anded_by(right)
-
-        elif op_tok.matches(TT_KEYWORD, "or"):
-            left = res.register(self.visit(node.left_node, context))
-            if res.should_return():
-                return res
-            if left.is_true():
-                return res.success(left.set_pos(node.pos_start, node.pos_end))
-            right = res.register(self.visit(node.right_node, context))
-            if res.should_return():
-                return res
-            result, error = left.ored_by(right)
-
-        else:
-            left = res.register(self.visit(node.left_node, context))
-            if res.should_return():
-                return res
-            right = res.register(self.visit(node.right_node, context))
-            if res.should_return():
-                return res
-
-            method_name = self._bin_op_methods.get(op_tok.type)
-            if not method_name:
-                return res.failure(
-                    RTError(
-                        op_tok.pos_start,
-                        op_tok.pos_end,
-                        "Invalid binary operator",
-                        context,
-                    )
-                )
-
-            operation_method = getattr(left, method_name)
-            result, error = operation_method(right)
-
-        if error:
-            return res.failure(error)
-
-        return res.success(result.set_pos(node.pos_start, node.pos_end))
-
-    def visit_UnaryOpNode(self, node, context):
-        res = RTResult()
-        value = res.register(self.visit(node.node, context))
+        left = res.register(self.visit(node.left_node, context))
+        if res.should_return():
+            return res
+        right = res.register(self.visit(node.right_node, context))
         if res.should_return():
             return res
 
-        error = None
-        if node.op_tok.type == TT_MINUS:
-            value, error = value.multed_by(Number(-1))
-        elif node.op_tok.matches(TT_KEYWORD, "not"):
-            value, error = value.notted()
+        if node.op_tok.type == TT_PLUS:
+            result, error = left.added_to(right)
+        elif node.op_tok.type == TT_MINUS:
+            result, error = left.subbed_by(right)
+        elif node.op_tok.type == TT_MUL:
+            result, error = left.multed_by(right)
+        elif node.op_tok.type == TT_DIV:
+            result, error = left.dived_by(right)
+        elif node.op_tok.type == TT_POW:
+            result, error = left.powed_by(right)
+        elif node.op_tok.type == TT_MOD:
+            result, error = left.moduled_by(right)
+        elif node.op_tok.type == TT_EE:
+            result, error = left.get_comparison_eq(right)
+        elif node.op_tok.type == TT_NE:
+            result, error = left.get_comparison_ne(right)
+        elif node.op_tok.type == TT_LT:
+            result, error = left.get_comparison_lt(right)
+        elif node.op_tok.type == TT_GT:
+            result, error = left.get_comparison_gt(right)
+        elif node.op_tok.type == TT_LTE:
+            result, error = left.get_comparison_lte(right)
+        elif node.op_tok.type == TT_GTE:
+            result, error = left.get_comparison_gte(right)
+        elif node.op_tok.matches(TT_KEYWORD, "and"):
+            result, error = left.anded_by(right)
+        elif node.op_tok.matches(TT_KEYWORD, "or"):
+            result, error = left.ored_by(right)
+        elif node.op_tok.type == TT_FLOORDIV:
+            result, error = left.floordived_by(right)
 
         if error:
             return res.failure(error)
-        return res.success(value.set_pos(node.pos_start, node.pos_end))
+        else:
+            return res.success(result.set_pos(node.pos_start, node.pos_end))
+
+    def visit_UnaryOpNode(self, node, context):
+        res = RTResult()
+        number = res.register(self.visit(node.node, context))
+        if res.should_return():
+            return res
+
+        if isinstance(number, Number) and number.value is None:
+            return res.failure(
+                TError(
+                    node.pos_start,
+                    node.pos_end,
+                    "Cannot perform arithmetic or logical operation on 'none'",
+                    context,
+                )
+            )
+
+        error = None
+
+        if node.op_tok.type == TT_MINUS:
+            number, error = number.multed_by(Number(-1))
+        elif node.op_tok.matches(TT_KEYWORD, "not"):
+            number, error = number.notted()
+
+        if error:
+            return res.failure(error)
+        else:
+            return res.success(number.set_pos(node.pos_start, node.pos_end))
 
     def visit_IfNode(self, node, context):
         res = RTResult()
+
         for condition, expr, should_return_none in node.cases:
             condition_value = res.register(self.visit(condition, context))
             if res.should_return():
@@ -2697,27 +3487,35 @@ class Interpreter:
 
     def visit_ForNode(self, node, context):
         res = RTResult()
-        elements = []
-
         start_value = res.register(self.visit(node.start_value_node, context))
         if res.should_return():
             return res
+
         end_value = res.register(self.visit(node.end_value_node, context))
         if res.should_return():
             return res
-        step_value = Number(1)
+
         if node.step_value_node:
             step_value = res.register(self.visit(node.step_value_node, context))
             if res.should_return():
                 return res
+        else:
+            step_value = Number(1)
 
         i = start_value.value
         end = end_value.value
         step = step_value.value
+        should_return_none = node.should_return_none
 
-        condition = (lambda: i < end) if step >= 0 else (lambda: i > end)
+        if not should_return_none:
+            elements = []
 
-        while condition():
+        if step >= 0:
+            cond = lambda: i < end
+        else:
+            cond = lambda: i > end
+
+        while cond():
             context.symbol_table.set(node.var_name_tok.value, Number(i))
             i += step
 
@@ -2728,28 +3526,37 @@ class Interpreter:
                 and not res.loop_should_break
             ):
                 return res
+
             if res.loop_should_continue:
                 continue
+
             if res.loop_should_break:
                 break
-            if not node.should_return_none:
+
+            if not should_return_none:
                 elements.append(value)
 
-        return res.success(
-            None_.none
-            if node.should_return_none
-            else List(elements)
-            .set_context(context)
-            .set_pos(node.pos_start, node.pos_end)
-        )
+        if should_return_none:
+            return res.success(None_.none)
+        else:
+            return res.success(
+                List(elements)
+                .set_context(context)
+                .set_pos(node.pos_start, node.pos_end)
+            )
 
     def visit_WhileNode(self, node, context):
         res = RTResult()
-        elements = []
+        should_return_none = node.should_return_none
+        if not should_return_none:
+            elements = []
 
         while True:
             condition = res.register(self.visit(node.condition_node, context))
-            if res.should_return() or not condition.is_true():
+            if res.should_return():
+                return res
+
+            if not condition.is_true():
                 break
 
             value = res.register(self.visit(node.body_node, context))
@@ -2759,44 +3566,47 @@ class Interpreter:
                 and not res.loop_should_break
             ):
                 return res
+
             if res.loop_should_continue:
                 continue
+
             if res.loop_should_break:
                 break
-            if not node.should_return_none:
+
+            if not should_return_none:
                 elements.append(value)
 
-        if res.should_return():
-            return res
-        return res.success(
-            None_.none
-            if node.should_return_none
-            else List(elements)
-            .set_context(context)
-            .set_pos(node.pos_start, node.pos_end)
-        )
+        if should_return_none:
+            return res.success(None_.none)
+        else:
+            return res.success(
+                List(elements)
+                .set_context(context)
+                .set_pos(node.pos_start, node.pos_end)
+            )
 
     def visit_FuncDefNode(self, node, context):
         res = RTResult()
+
         func_name = node.var_name_tok.value if node.var_name_tok else None
         body_node = node.body_node
-        arg_names = [arg.value for arg in node.arg_name_toks]
+        arg_names = [arg_name.value for arg_name in node.arg_name_toks]
         func_value = (
             Function(func_name, body_node, arg_names, node.should_auto_return)
             .set_context(context)
             .set_pos(node.pos_start, node.pos_end)
         )
 
-        if func_name:
+        if node.var_name_tok:
             context.symbol_table.set(func_name, func_value)
 
         return res.success(func_value)
 
     def visit_CallNode(self, node, context):
-        res = RTResult()
-        args = []
-
         try:
+            res = RTResult()
+            args = []
+
             value_to_call = res.register(self.visit(node.node_to_call, context))
             if res.should_return():
                 return res
@@ -2810,12 +3620,13 @@ class Interpreter:
             return_value = res.register(value_to_call.execute(args))
             if res.should_return():
                 return res
-
-            return res.success(
+            return_value = (
                 return_value.copy()
                 .set_pos(node.pos_start, node.pos_end)
                 .set_context(context)
             )
+
+            return res.success(return_value)
         except RecursionError:
             return res.failure(
                 RTError(
@@ -2828,11 +3639,14 @@ class Interpreter:
 
     def visit_ReturnNode(self, node, context):
         res = RTResult()
-        value = None_.none
+
         if node.node_to_return:
             value = res.register(self.visit(node.node_to_return, context))
             if res.should_return():
                 return res
+        else:
+            value = None_.none
+
         return res.success_return(value)
 
     def visit_ContinueNode(self, node, context):
@@ -2843,40 +3657,35 @@ class Interpreter:
 
     def visit_LoadNode(self, node: LoadNode, context: Context):
         res = RTResult()
-        file_path_raw = node.file_path
+        path = node.file_path
 
-        abs_path = os.path.abspath(file_path_raw)
-        if abs_path in self.module_cache:
-            return res.success(self.module_cache[abs_path].copy().set_context(context))
-
-        path = file_path_raw
         if not os.path.isfile(path):
-            tmp_path = os.path.join(LIBS_PATH, file_path_raw)
+            tmp_path = os.path.join(LIBS_PATH, node.file_path)
             if os.path.isfile(tmp_path):
-                path = tmp_path
+                path = os.path.join(LIBS_PATH, node.file_path)
             else:
                 return res.failure(
                     RTError(
                         node.pos_start,
                         node.pos_end,
-                        f"No module named '{file_path_raw}'",
+                        f"No module named '{tmp_path}'",
                         context,
                     )
                 )
 
-        abs_path = os.path.abspath(path)
-        if abs_path in self.module_cache:
-            return res.success(self.module_cache[abs_path].copy().set_context(context))
-
         result, err = load_module(path, self, context)
         if err:
+            if isinstance(err, Error):
+                return res.failure(err)
             return res.failure(
-                err
-                if isinstance(err, Error)
-                else RTError(node.pos_start, node.pos_end, err.error.details, context)
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    err.error.details,
+                    context,
+                )
             )
 
-        self.module_cache[abs_path] = result
         return res.success(result)
 
 

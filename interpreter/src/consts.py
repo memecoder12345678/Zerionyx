@@ -5,7 +5,7 @@ import string
 DIGITS = string.digits
 LETTERS = string.ascii_letters
 LETTERS_DIGITS = LETTERS + DIGITS
-INFO = "(v2.0.11, June 2025, 5:18:16)"
+INFO = "(v2.2.9, June 2025, 13:46:15)"
 if getattr(sys, "frozen", False):
     LIBS_PATH = os.path.dirname(sys.executable)
 else:

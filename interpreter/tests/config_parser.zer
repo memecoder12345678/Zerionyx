@@ -21,7 +21,7 @@ defun parse_config(config_file)
                 append(parsed_config_data, [current_section_name, current_section_items])
             done
             end_idx = index_of(split(line, ""), "]")
-            if end_idx == -1 or end_idx == none do
+            if end_idx == none do
                 cprint("Error", "red", none, "bold")
                 println(": line " + to_str(i + 1) + " has malformed section (missing ']'). Skipping.")
                 continue

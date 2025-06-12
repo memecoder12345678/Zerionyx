@@ -20,14 +20,19 @@ class Lexer:
             self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
         )
 
-    def make_tokens(self):
-        while self.current_char != None:
+    def make_tokens(self):  # (Đảm bảo gọi đúng các hàm xử lý)
+        while self.current_char is not None:
             if self.current_char in " \t":
                 self.advance()
             elif self.current_char == "#":
                 self.skip_comment()
             elif self.current_char in ";\n":
-                self.tokens.append(Token(TT_NEWLINE, pos_start=self.pos))
+                if (
+                    self.tokens and self.tokens[-1].type == TT_NEWLINE
+                ):  # Tránh nhiều NEWLINE liên tiếp
+                    self.advance()
+                    continue
+                self.tokens.append(Token(TT_NEWLINE, pos_start=self.pos.copy()))
                 self.advance()
             elif self.current_char in DIGITS:
                 self.tokens.append(self.make_number())
@@ -38,47 +43,48 @@ class Lexer:
             elif self.current_char == "'":
                 self.tokens.append(self.make_string_single())
             elif self.current_char == "+":
-                self.tokens.append(Token(TT_PLUS, pos_start=self.pos))
-                self.advance()
+                self.handle_plus_or_augmented()
             elif self.current_char == "-":
-                self.tokens.append(self.make_minus_or_arrow())
+                self.handle_minus_or_augmented()
             elif self.current_char == "*":
-                self.tokens.append(Token(TT_MUL, pos_start=self.pos))
-                self.advance()
+                self.handle_mul_or_augmented()
             elif self.current_char == "/":
-                self.div_or_floordiv()
+                self.div_or_floordiv_or_augmented()
             elif self.current_char == "^":
-                self.tokens.append(Token(TT_POW, pos_start=self.pos))
-                self.advance()
+                self.handle_pow_or_augmented()
             elif self.current_char == "%":
-                self.tokens.append(Token(TT_MOD, pos_start=self.pos))
-                self.advance()
+                self.handle_mod_or_augmented()
+            elif self.current_char == "=":
+                self.tokens.append(self.make_equals())
             elif self.current_char == "(":
-                self.tokens.append(Token(TT_LPAREN, pos_start=self.pos))
+                self.tokens.append(Token(TT_LPAREN, pos_start=self.pos.copy()))
                 self.advance()
+                self.tokens[-1].pos_end = self.pos.copy()  # Đặt pos_end sau advance
             elif self.current_char == ")":
-                self.tokens.append(Token(TT_RPAREN, pos_start=self.pos))
+                self.tokens.append(Token(TT_RPAREN, pos_start=self.pos.copy()))
                 self.advance()
+                self.tokens[-1].pos_end = self.pos.copy()
             elif self.current_char == "[":
-                self.tokens.append(Token(TT_LSQUARE, pos_start=self.pos))
+                self.tokens.append(Token(TT_LSQUARE, pos_start=self.pos.copy()))
                 self.advance()
+                self.tokens[-1].pos_end = self.pos.copy()
             elif self.current_char == "]":
-                self.tokens.append(Token(TT_RSQUARE, pos_start=self.pos))
+                self.tokens.append(Token(TT_RSQUARE, pos_start=self.pos.copy()))
                 self.advance()
+                self.tokens[-1].pos_end = self.pos.copy()
             elif self.current_char == "!":
                 token, error = self.make_not_equals()
                 if error:
                     return [], error
                 self.tokens.append(token)
-            elif self.current_char == "=":
-                self.tokens.append(self.make_equals())
             elif self.current_char == "<":
                 self.tokens.append(self.make_less_than())
             elif self.current_char == ">":
                 self.tokens.append(self.make_greater_than())
             elif self.current_char == ",":
-                self.tokens.append(Token(TT_COMMA, pos_start=self.pos))
+                self.tokens.append(Token(TT_COMMA, pos_start=self.pos.copy()))
                 self.advance()
+                self.tokens[-1].pos_end = self.pos.copy()
             else:
                 pos_start = self.pos.copy()
                 char = self.current_char
@@ -87,17 +93,6 @@ class Lexer:
 
         self.tokens.append(Token(TT_EOF, pos_start=self.pos))
         return self.tokens, None
-
-    def div_or_floordiv(self):
-        tok_type = TT_DIV
-        pos_start = self.pos.copy()
-        self.advance()
-
-        if self.current_char == "/":
-            self.advance()
-            tok_type = TT_FLOORDIV
-
-        self.tokens.append(Token(tok_type, pos_start=pos_start, pos_end=self.pos))
 
     def make_number(self):
         num_str = ""
@@ -257,31 +252,237 @@ class Lexer:
             peek_pos.idx -= 1
         return self.text[peek_pos.idx : peek_pos.idx + 1]
 
-    def previous_token(self) -> Token:
+    def previous_token(self) -> Token | None:
         try:
             return self.tokens[-1]
         except IndexError:
             return None
 
+    def _emit_augmented_assignment_tokens(
+        self, base_op_type: str, op_pos_start: Position, op_pos_end: Position
+    ):
+        if self.tokens and self.tokens[-1].type == TT_IDENTIFIER:
+            identifier_token = self.tokens[-1]
+            id_name = identifier_token.value
+            self.tokens.append(
+                Token(TT_EQ, pos_start=op_pos_start.copy(), pos_end=op_pos_end.copy())
+            )
+
+            rhs_element_pos = op_pos_end.copy()
+            self.tokens.append(
+                Token(
+                    TT_IDENTIFIER,
+                    value=id_name,
+                    pos_start=rhs_element_pos,
+                    pos_end=rhs_element_pos,
+                )
+            )
+
+            self.tokens.append(
+                Token(base_op_type, pos_start=rhs_element_pos, pos_end=rhs_element_pos)
+            )
+        else:
+            base_op_char_pos_start = op_pos_start.copy()
+            base_op_char_pos_end = op_pos_start.copy()
+
+            first_char_of_op = self.text[op_pos_start.idx]
+            base_op_char_pos_end.advance(first_char_of_op)
+
+            if base_op_type == TT_FLOORDIV:
+                if op_pos_start.idx + 1 < len(self.text):
+                    second_char_of_op = self.text[op_pos_start.idx + 1]
+                    base_op_char_pos_end.advance(second_char_of_op)
+
+            self.tokens.append(
+                Token(
+                    base_op_type,
+                    pos_start=base_op_char_pos_start,
+                    pos_end=base_op_char_pos_end.copy(),
+                )
+            )
+            self.tokens.append(
+                Token(
+                    TT_EQ,
+                    pos_start=base_op_char_pos_end.copy(),
+                    pos_end=op_pos_end.copy(),
+                )
+            )
+
+    def handle_plus_or_augmented(self):
+        pos_start = self.pos.copy()
+        self.advance()
+        if self.current_char == "=":
+            pos_op_start = pos_start
+            self.advance()
+            pos_op_end = self.pos.copy()
+            self._emit_augmented_assignment_tokens(TT_PLUS, pos_op_start, pos_op_end)
+        else:
+            self.tokens.append(
+                Token(TT_PLUS, pos_start=pos_start, pos_end=self.pos.copy())
+            )
+
+    def handle_minus_or_augmented(self):
+        pos_start = self.pos.copy()
+        self.advance()
+
+        if self.current_char == "=":
+            pos_op_start = pos_start
+            self.advance()
+            pos_op_end = self.pos.copy()
+            self._emit_augmented_assignment_tokens(TT_MINUS, pos_op_start, pos_op_end)
+        elif self.current_char == ">":
+            pos_arrow_start = pos_start
+            self.advance()
+            pos_arrow_end = self.pos.copy()
+            self.tokens.append(
+                Token(TT_ARROW, pos_start=pos_arrow_start, pos_end=pos_arrow_end)
+            )
+        else:
+            self.tokens.append(
+                Token(TT_MINUS, pos_start=pos_start, pos_end=self.pos.copy())
+            )
+
+    def handle_mul_or_augmented(self):
+        pos_start = self.pos.copy()
+        self.advance()
+        if self.current_char == "=":
+            pos_op_start = pos_start
+            self.advance()
+            pos_op_end = self.pos.copy()
+            self._emit_augmented_assignment_tokens(TT_MUL, pos_op_start, pos_op_end)
+        else:
+            self.tokens.append(
+                Token(TT_MUL, pos_start=pos_start, pos_end=self.pos.copy())
+            )
+
+    def handle_pow_or_augmented(self):
+        pos_start = self.pos.copy()
+        self.advance()
+        if self.current_char == "=":
+            pos_op_start = pos_start
+            self.advance()
+            pos_op_end = self.pos.copy()
+            self._emit_augmented_assignment_tokens(TT_POW, pos_op_start, pos_op_end)
+        else:
+            self.tokens.append(
+                Token(TT_POW, pos_start=pos_start, pos_end=self.pos.copy())
+            )
+
+    def handle_mod_or_augmented(self):
+        pos_start = self.pos.copy()
+        self.advance()
+        if self.current_char == "=":
+            pos_op_start = pos_start
+            self.advance()
+            pos_op_end = self.pos.copy()
+            self._emit_augmented_assignment_tokens(TT_MOD, pos_op_start, pos_op_end)
+        else:
+            self.tokens.append(
+                Token(TT_MOD, pos_start=pos_start, pos_end=self.pos.copy())
+            )
+
+    def div_or_floordiv_or_augmented(self):
+        pos_start_first_slash = self.pos.copy()
+        self.advance()
+
+        if self.current_char == "/":
+            pos_start_operator = pos_start_first_slash
+            self.advance()
+            pos_after_base_op = self.pos.copy()
+
+            if self.current_char == "=":
+                self.advance()
+                pos_op_end = self.pos.copy()
+                self._emit_augmented_assignment_tokens(
+                    TT_FLOORDIV, pos_start_operator, pos_op_end
+                )
+            else:
+                self.tokens.append(
+                    Token(
+                        TT_FLOORDIV,
+                        pos_start=pos_start_operator,
+                        pos_end=pos_after_base_op,
+                    )
+                )
+        elif self.current_char == "=":
+            pos_start_operator = pos_start_first_slash
+            self.advance()
+            pos_op_end = self.pos.copy()
+            self._emit_augmented_assignment_tokens(
+                TT_DIV, pos_start_operator, pos_op_end
+            )
+        else:
+            self.tokens.append(
+                Token(TT_DIV, pos_start=pos_start_first_slash, pos_end=self.pos.copy())
+            )
+
     def make_identifier(self) -> Token:
         id_str = ""
-        pos_start = self.pos.copy()
+        pos_start_identifier = self.pos.copy()
 
-        while self.current_char != None and self.current_char in LETTERS_DIGITS + "_":
+        while (
+            self.current_char is not None and self.current_char in LETTERS_DIGITS + "_"
+        ):
             id_str += self.current_char
             self.advance()
 
-        pt: Token = self.previous_token()
-        if self.peek_foward().strip() == "=":
-            if (pt is None or pt.type == TT_NEWLINE) and id_str not in KEYWORDS:
+        pos_end_identifier = self.pos.copy()
+
+        is_assignment_op_follows = False
+        peek_idx = self.pos.idx
+        while peek_idx < len(self.text) and self.text[peek_idx] in " \t":
+            peek_idx += 1
+
+        if peek_idx < len(self.text):
+            op_char1 = self.text[peek_idx]
+            op_char2 = (
+                self.text[peek_idx + 1] if peek_idx + 1 < len(self.text) else None
+            )
+            op_char3 = (
+                self.text[peek_idx + 2] if peek_idx + 2 < len(self.text) else None
+            )
+
+            if op_char1 == "=":
+                if op_char2 != "=":
+                    is_assignment_op_follows = True
+            elif op_char1 in ["+", "-", "*", "^", "%"]:
+                if op_char2 == "=":
+                    is_assignment_op_follows = True
+            elif op_char1 == "/":
+                if op_char2 == "=":
+                    is_assignment_op_follows = True
+                elif op_char2 == "/" and op_char3 == "=":
+                    is_assignment_op_follows = True
+
+        if is_assignment_op_follows:
+            pt: Token | None = self.previous_token()
+            allowed_preceding_keywords_for_let = {"do", "else"}
+            insert_let = False
+            if id_str not in KEYWORDS:
+                if pt is None:
+                    insert_let = True
+                elif pt.type == TT_NEWLINE:
+                    insert_let = True
+                elif (
+                    pt.type == TT_KEYWORD
+                    and pt.value in allowed_preceding_keywords_for_let
+                ):
+                    insert_let = True
+                elif pt.type == TT_ARROW:
+                    insert_let = True
+
+            if insert_let:
                 self.tokens.append(
                     Token(
-                        TT_KEYWORD, value="let", pos_start=pos_start, pos_end=self.pos
+                        TT_KEYWORD,
+                        value="let",
+                        pos_start=pos_start_identifier.copy(),
+                        pos_end=pos_end_identifier.copy(),
                     )
                 )
 
         tok_type = TT_KEYWORD if id_str in KEYWORDS else TT_IDENTIFIER
-        return Token(tok_type, id_str, pos_start, self.pos)
+        return Token(tok_type, id_str, pos_start_identifier, pos_end_identifier)
 
     def make_minus_or_arrow(self) -> Token:
         tok_type = TT_MINUS
