@@ -484,17 +484,6 @@ class Lexer:
         tok_type = TT_KEYWORD if id_str in KEYWORDS else TT_IDENTIFIER
         return Token(tok_type, id_str, pos_start_identifier, pos_end_identifier)
 
-    def make_minus_or_arrow(self) -> Token:
-        tok_type = TT_MINUS
-        pos_start = self.pos.copy()
-        self.advance()
-
-        if self.current_char == ">":
-            self.advance()
-            tok_type = TT_ARROW
-
-        return Token(tok_type, pos_start=pos_start, pos_end=self.pos)
-
     def make_not_equals(self):
         pos_start = self.pos.copy()
         self.advance()

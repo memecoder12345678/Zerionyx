@@ -291,6 +291,7 @@ COMMENT           ::= "#" /[^\n]*/
             <li><b>extend(a, b)</b> &rarr; none &mdash; Add all in <code>b</code> to <code>a</code> both must be list</li>
             <li><b>finally(f, a, final_f, final_a)</b> &rarr; list &mdash; Run <code>f</code> with <code>a</code> then always run <code>final_f</code> with <code>final_a</code> return like <code>catch</code></li>
             <li><b>input(prompt)</b> &rarr; string &mdash; Show <code>prompt</code> get user input</li>
+            <li><b>get_password(prompt)</b> &rarr; string &mdash; Show <code>prompt</code> get user password</li>
             <li><b>insert(lst, i, val)</b> &rarr; none &mdash; insert <code>val</code> to <code>lst</code> at index <code>i</code></li>
             <li><b>is_func(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is func</li>
             <li><b>is_list(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is list</li>
@@ -299,7 +300,7 @@ COMMENT           ::= "#" /[^\n]*/
             <li><b>is_str(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is string</li>
             <li><b>is_thread(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is thread</li>
             <li><b>len(x)</b> &rarr; number &mdash; Get length of <code>x</code></li>
-            <li><b>panic(msg, type)</b> &mdash; Stop with err <code>msg</code> and <code>type</code></li>
+            <li><b>panic(msg, type)</b> &mdash; Stop with err <code>msg</code> and <code>type ('RT': 'Runtime Error', 'M': 'Math Error', 'IO': 'IO Error' or 'T': 'Type Error')</code></li>
             <li><b>pop(lst, i)</b> &rarr; any &mdash; Remove and return item at <code>i</code> in <code>lst</code></li>
             <li><b>print(text)</b> &rarr; none &mdash; Prints <code>text</code> to the standard output with no newline</li>
             <li><b>println(text)</b> &rarr; none &mdash; Same as <code>print</code> but adds a newline</li>

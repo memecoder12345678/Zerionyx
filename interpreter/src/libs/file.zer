@@ -4,7 +4,7 @@ os_sep = os_sep_fp
 
 defun write(f, m, t)
     if m != "w" and m != "a" do
-        panic("Invalid mode for write operation", "F")
+        panic("Invalid mode for write operation", "IO")
     done
     if type(f) != str do
         panic("First argument of 'write' must be a string", "T")
@@ -15,7 +15,7 @@ done
 
 defun read(f)
     if not exists_fp(f) do
-        panic("File does not exist", "F")
+        panic("File does not exist", "IO")
     done
     if type(f) != str do
         panic("First argument of 'read' must be a string", "T")

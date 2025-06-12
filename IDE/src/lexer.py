@@ -241,6 +241,7 @@ class ZerionLexer(BaseLexer):
             "to_int",
             "to_str",
             "type",
+            "get_password"
         }
         self.lib_functions = {
             "libs.math": [

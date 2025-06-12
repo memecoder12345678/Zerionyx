@@ -117,10 +117,10 @@ class MError(Error):
         return "Traceback (most recent call last):\n" + result
 
 
-class FError(Error):
+class IOError(Error):
 
     def __init__(self, pos_start, pos_end, details, context):
-        super().__init__(pos_start, pos_end, "File Error", details)
+        super().__init__(pos_start, pos_end, "IO Error", details)
         self.context = context
 
     def __str__(self):
@@ -178,37 +178,3 @@ class TError(Error):
 
         return "Traceback (most recent call last):\n" + result
 
-
-class SError(Error):
-    def __init__(self, pos_start, pos_end, context):
-        super().__init__(
-            pos_start,
-            pos_end,
-            "Security Error",
-            "Function 'pyexec' is reserved for internal libraries only\nReason: Unsafe type injection. Zerion <=> Python type system mismatch may lead to memory corruption.",
-        )
-        self.context = context
-
-    def __str__(self):
-        result = self.generate_traceback()
-        result += string_with_arrows(
-            self.pos_start.ftxt, self.pos_start, self.pos_end, 4
-        )
-        result += f"\n{self.error_name}: {self.details}"
-        return result
-
-    def generate_traceback(self):
-        result = ""
-        pos = self.pos_start
-        ctx = self.context
-
-        while ctx:
-            if pos:
-                result = (
-                    f"  File '{pos.fn}', line {str(pos.ln + 1)}, in {ctx.display_name}\n"
-                    + result
-                )
-                pos = ctx.parent_entry_pos
-            ctx = ctx.parent
-
-        return "Traceback (most recent call last):\n" + result

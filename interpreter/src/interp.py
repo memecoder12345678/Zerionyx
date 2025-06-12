@@ -7,10 +7,11 @@ from .parser import *
 from .nodes import *
 from .types_ import *
 from .consts import *
-from .errors import TError, FError, MError, Error, RTError, SError
+from .errors import TError, IOError, MError, Error, RTError
 from shutil import rmtree, copy
 from .lexer import Lexer, RTResult
 
+from getpass import getpass
 import urllib.request
 import urllib.error
 from urllib.parse import unquote
@@ -163,10 +164,35 @@ class BuiltInFunction(BaseFunction):
 
     def execute_input(self, exec_ctx):
         prompt = exec_ctx.symbol_table.get("prompt")
-        text = input(prompt)
+        if not isinstance(prompt, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'input' must be a string",
+                    exec_ctx,
+                )
+            )
+        text = input(prompt.value)
         return RTResult().success(String(text))
 
     execute_input.arg_names = ["prompt"]
+
+    def execute_get_password(self, exec_ctx):
+        prompt = exec_ctx.symbol_table.get("prompt")
+        if not isinstance(prompt, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'input' must be a string",
+                    exec_ctx,
+                )
+            )
+        pass_ = getpass(prompt.value)
+        return RTResult().success(String(pass_))
+
+    execute_get_password.arg_names = ["prompt"]
 
     def execute_clear(self, exec_ctx):
         os.system("cls" if os.name == "nt" else "clear")
@@ -507,7 +533,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(File(file_name, file_path.value))
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f'Failed to open file "{file_path.value}": ' + str(e),
@@ -525,7 +551,7 @@ class BuiltInFunction(BaseFunction):
                 return RTResult().success(String(f.read()))
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f'Failed to read file "{file.path}"\n' + str(e),
@@ -546,7 +572,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(Number.none)
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f'Failed to write to file "{file.path}": ' + str(e),
@@ -581,7 +607,7 @@ class BuiltInFunction(BaseFunction):
             )
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to check if file exists '{file_path}': " + str(e),
@@ -669,7 +695,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(String(os.getcwd()))
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to get current directory: " + str(e),
@@ -694,7 +720,7 @@ class BuiltInFunction(BaseFunction):
 
         if not os.path.exists(name.value):
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Directory '{name.value}' does not exist",
@@ -707,7 +733,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(None_.none)
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to set current directory to '{name.value}': " + str(e),
@@ -1040,12 +1066,12 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "Second argument of 'panic' must be a string ['RT' (Runtime Error), 'M' (Math Error), 'F' (File Error) or 'T' (Type Error)]",
+                    "Second argument of 'panic' must be a string ('RT': 'Runtime Error', 'M': 'Math Error', 'IO': 'IO Error' or 'T': 'Type Error')",
                     exec_ctx,
                 )
             )
 
-        err_type_value = err_type.value.upper()
+        err_type_value = err_type.value.upper().strip()
 
         if err_type_value == "RT":
             return RTResult().failure(
@@ -1055,9 +1081,9 @@ class BuiltInFunction(BaseFunction):
             return RTResult().failure(
                 MError(self.pos_start, self.pos_end, msg, exec_ctx)
             )
-        elif err_type_value == "F":
+        elif err_type_value == "IO":
             return RTResult().failure(
-                FError(self.pos_start, self.pos_end, msg, exec_ctx)
+                IOError(self.pos_start, self.pos_end, msg, exec_ctx)
             )
         elif err_type_value == "T":
             return RTResult().failure(
@@ -1068,7 +1094,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "Second argument of 'panic' must be a 'RT' (Runtime Error), 'M' (Math Error), 'F' (File Error) or 'T' (Type Error)",
+                    "Second argument of 'panic' must be a string ('RT': 'Runtime Error', 'M': 'Math Error', 'IO': 'IO Error' or 'T': 'Type Error')",
                     exec_ctx,
                 )
             )
@@ -1197,7 +1223,7 @@ class BuiltInFunction(BaseFunction):
             )
         if not os.path.isdir(value.value):
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Directory '{value.value}' does not exist",
@@ -1210,7 +1236,7 @@ class BuiltInFunction(BaseFunction):
             )
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to list directory: {e}",
@@ -1233,7 +1259,7 @@ class BuiltInFunction(BaseFunction):
             )
         if os.path.exists(value.value):
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Directory '{value.value}' already exists",
@@ -1258,7 +1284,7 @@ class BuiltInFunction(BaseFunction):
             )
         if not os.path.exists(value.value):
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"File '{value.value}' does not exist",
@@ -1269,7 +1295,7 @@ class BuiltInFunction(BaseFunction):
             os.remove(value.value)
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to remove file: " + str(e),
@@ -1304,7 +1330,7 @@ class BuiltInFunction(BaseFunction):
 
         if not os.path.exists(value1.value):
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"File or directory '{value1.value}' does not exist",
@@ -1315,7 +1341,7 @@ class BuiltInFunction(BaseFunction):
             os.rename(value1.value, value2.value)
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to rename file: {e}",
@@ -1339,7 +1365,7 @@ class BuiltInFunction(BaseFunction):
             )
         if not os.path.isdir(value1.value):
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"'{value1.value}' is not a directory",
@@ -1350,7 +1376,7 @@ class BuiltInFunction(BaseFunction):
             rmtree(value1.value)
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to remove directory: {e}",
@@ -1384,7 +1410,7 @@ class BuiltInFunction(BaseFunction):
             )
         if not os.path.exists(value1.value):
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"'{value1.value}' does not exist",
@@ -1395,7 +1421,7 @@ class BuiltInFunction(BaseFunction):
             copy(value1.value, value2.value)
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to copy file: {e}",
@@ -2100,7 +2126,7 @@ class BuiltInFunction(BaseFunction):
             )
         try:
             res = func.execute(args.elements)
-            if res.error and isinstance(res.error, (RTError, FError, MError, TError)):
+            if res.error and isinstance(res.error, (RTError, IOError, MError, TError)):
                 err_str = str(res.error)
                 err_line = err_str.strip().split("\n")[-1]
                 return RTResult().success(List([None_.none, String(err_line)]))
@@ -2108,7 +2134,7 @@ class BuiltInFunction(BaseFunction):
                 return RTResult().failure(res.error)
             else:
                 return RTResult().success(List([res.value, None_.none]))
-        except (RTError, FError, MError, TError) as err:
+        except (RTError, IOError, MError, TError) as err:
             err_str = str(err)
             err_line = err_str.strip().split("\n")[-1]
             return RTResult().success(List([None_.none, String(err_line)]))
@@ -2171,7 +2197,7 @@ class BuiltInFunction(BaseFunction):
                 final_func.execute(final_args.elements)
             except Exception:
                 pass
-            if res.error and isinstance(res.error, (RTError, FError, MError, TError)):
+            if res.error and isinstance(res.error, (RTError, IOError, MError, TError)):
                 err_str = str(res.error)
                 err_line = err_str.strip().split("\n")[-1]
                 return RTResult().success(List([None_.none, String(err_line)]))
@@ -2179,7 +2205,7 @@ class BuiltInFunction(BaseFunction):
                 return RTResult().failure(res.error)
             else:
                 return RTResult().success(List([res.value, None_.none]))
-        except (RTError, FError, MError, TError) as err:
+        except (RTError, IOError, MError, TError) as err:
             try:
                 final_func.execute(final_args.elements)
             except Exception:
@@ -2407,21 +2433,25 @@ class BuiltInFunction(BaseFunction):
                 if not isinstance(
                     item, (bool, int, float, str, list, dict, tuple, type(None))
                 ):
-                    raise TypeError(
-                        f"Invalid type in list at index {idx}: {type(item).__name__}"
-                    )
-                items.append(self.validate_pyexec_result(item))
+                    items.append(String(str(item)))
+                else:
+                    items.append(self.validate_pyexec_result(item))
             return List(items)
         elif isinstance(obj, dict):
             items = []
             for k, v in obj.items():
                 if not isinstance(k, (str, int, float, bool)):
-                    raise TypeError(f"Invalid dict key type: {type(k).__name__}")
-                items.append(
+                    items.append(
                     List(
-                        [self.validate_pyexec_result(k), self.validate_pyexec_result(v)]
+                        [String(str(k)), String(str(v))]
                     )
                 )
+                else:
+                    items.append(
+                        List(
+                            [self.validate_pyexec_result(k), self.validate_pyexec_result(v)]
+                        )
+                    )
             return List(items)
         elif isinstance(obj, tuple):
             items = []
@@ -2429,24 +2459,15 @@ class BuiltInFunction(BaseFunction):
                 if not isinstance(
                     item, (bool, int, float, str, list, dict, tuple, type(None))
                 ):
-                    raise TypeError(
-                        f"Invalid type in tuple at index {idx}: {type(item).__name__}"
-                    )
-                items.append(self.validate_pyexec_result(item))
+                    items.append(self.validate_pyexec_result(String(str(obj))))
+                else:
+                    items.append(self.validate_pyexec_result(item))
             return List(items)
         else:
-            raise TypeError(f"Invalid type in pyexec result: {type(obj).__name__}")
+            return String(str(obj))
 
     def execute_pyexec(self, exec_ctx):
         code = exec_ctx.symbol_table.get("code")
-        if private_symbol_table.get("is_main").value == 1:
-            return RTResult().failure(
-                SError(
-                    self.pos_start,
-                    self.pos_end,
-                    exec_ctx,
-                )
-            )
         if not isinstance(code, String):
             return RTResult().failure(
                 TError(
@@ -2457,25 +2478,17 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         try:
-            raw = exec(code.value, globals(), locals())
+            local_env = {}
+            exec(code.value, {}, local_env)
+            # print(local_env)
+            fr = self.validate_pyexec_result(local_env)
+            return RTResult().success(fr)
         except Exception as e:
             return RTResult().failure(
                 RTError(
                     self.pos_start,
                     self.pos_end,
                     f"Error executing code: {e}",
-                    exec_ctx,
-                )
-            )
-        try:
-            fr = self.validate_pyexec_result(raw)
-            return RTResult().success(fr)
-        except TypeError as e:
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"pyexec returned invalid data: {e}",
                     exec_ctx,
                 )
             )
@@ -2497,7 +2510,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(String(os.path.abspath(path.value)))
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to get absolute path for '{path.value}': {str(e)}",
@@ -2522,7 +2535,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(String(os.path.dirname(path.value)))
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to get directory name for '{path.value}': {str(e)}",
@@ -2547,7 +2560,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(String(os.path.basename(path.value)))
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to get base name for '{path.value}': {str(e)}",
@@ -2594,7 +2607,7 @@ class BuiltInFunction(BaseFunction):
                 )
         except OSError as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error creating symlink '{src.value}' -> '{dst.value}': {str(e)}",
@@ -2639,7 +2652,7 @@ class BuiltInFunction(BaseFunction):
                 )
         except OSError as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error reading link '{path_arg.value}': {str(e)}",
@@ -2692,7 +2705,7 @@ class BuiltInFunction(BaseFunction):
             )
         except OSError as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error getting stat for '{path_arg.value}': {str(e)}",
@@ -2733,7 +2746,7 @@ class BuiltInFunction(BaseFunction):
             )
         except OSError as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error getting lstat for '{path_arg.value}': {str(e)}",
@@ -2810,7 +2823,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(None_.none)
         except OSError as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error changing mode for '{path_arg.value}': {str(e)}",
@@ -2876,7 +2889,7 @@ class BuiltInFunction(BaseFunction):
                 )
         except OSError as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error changing ownership for '{path_arg.value}': {str(e)}",
@@ -2946,7 +2959,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(None_.none)
         except OSError as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error setting times for '{path_arg.value}': {str(e)}",
@@ -3002,7 +3015,7 @@ class BuiltInFunction(BaseFunction):
                 )
         except OSError as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error creating hard link '{src.value}' -> '{dst.value}': {str(e)}",
@@ -3035,7 +3048,7 @@ class BuiltInFunction(BaseFunction):
 
         if os.path.isdir(path_arg.value):
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Cannot unlink '{path_arg.value}': It is a directory\nTip: Use 'remove_dir' instead.",
@@ -3044,7 +3057,7 @@ class BuiltInFunction(BaseFunction):
             )
         if not os.path.exists(path_arg.value) and not os.path.islink(path_arg.value):
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"File or link '{path_arg.value}' does not exist",
@@ -3056,7 +3069,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(None_.none)
         except OSError as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to remove file: {str(e)}",
@@ -3088,7 +3101,7 @@ class BuiltInFunction(BaseFunction):
             )
         if not os.path.isdir(path_arg.value):
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Directory '{path_arg.value}' does not exist or is not a directory",
@@ -3100,7 +3113,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(None_.none)
         except OSError as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to set current directory to '{path_arg.value}': {str(e)}",
@@ -3224,7 +3237,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(Number.true if is_file else Number.false)
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to check if path is file '{path_arg.value}': {str(e)}",
@@ -3250,7 +3263,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(Number.true if is_dir else Number.false)
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to check if path is directory '{path_arg.value}': {str(e)}",
@@ -3276,7 +3289,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(Number.true if is_link else Number.false)
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to check if path is symlink '{path_arg.value}': {str(e)}",
@@ -3302,7 +3315,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(Number.true if is_mount else Number.false)
         except Exception as e:
             return RTResult().failure(
-                FError(
+                IOError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to check if path is mount point '{path_arg.value}': {str(e)}",
