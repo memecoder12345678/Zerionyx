@@ -365,8 +365,10 @@ class MainWindow(QMainWindow):
         )
 
         self.file_tree.setIconSize(QSize(16, 16))
-        self.tree_delegate = FileTreeDelegate()
-        self.file_tree.setItemDelegate(self.tree_delegate)
+        self.file_tree_view = FileTreeView(self)
+
+        self.tree_delegate = FileTreeDelegate(self.file_tree_view)
+        self.file_tree_view.setItemDelegate(self.tree_delegate)
 
         left_layout.addWidget(self.file_tree)
 
