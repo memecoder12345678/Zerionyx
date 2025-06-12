@@ -12,11 +12,11 @@ Zerion is an educational programming language designed for learning and task aut
 - Simple file handling and system automation
 - Great for teaching programming concepts to children
 
->    ## Best Use Cases
->
->    - **Perfect for:** Learning programming, educational projects, and basic task automation
->    - **Easy syntax:** Designed for clarity and learning, not performance
->    - **Note:** Not recommended for computation-heavy tasks or production-level applications
+## Best Use Cases
+
+- **Perfect for**: Learning programming, educational projects, and basic task automation
+- **Easy syntax**: Designed for clarity and learning, not performance
+- **Note**: Not recommended for computation-heavy tasks or production-level applications
 
 ## Example
 
@@ -41,20 +41,20 @@ nums = [1, 2, 3, 4, 5]
 println(nums)
 ```
 
->    ## How to Use Zerion
->    - **Install:** Clone the repository from GitHub.
->    - **Setup:** Add Zerion to your PATH if you want to run it from anywhere.
->    - **Run a file:** python ./interpreter/zerion.py yourfile.zer
->    - **Open interactive shell:** Just run python ./interpreter/zerion.py and start typing Zerion code.
->    - **Get help:** Type grammar, license, or copyright in the shell for info.
->    - **Documentation:** Read the full docs here.
+## How to Use Zerion
+- **Install**: Clone the repository from GitHub.
+- **Setup**: Add Zerion to your PATH if you want to run it from anywhere.
+- **Run a file**: python ./interpreter/zerion.py yourfile.zer
+- **Open interactive shell**: Just run python ./interpreter/zerion.py and start typing Zerion code.
+- **Get help**: Type grammar, license, or copyright in the shell for info.
+- **Documentation**: Read the full docs here.
 
 
->    ## Recommended Environment
->    - **For learning:** Python 3.11.9 or newer (best for beginners and educational purposes)
->    - **For automation:** PyPy 3.11.11 (recommended when running repetitive tasks or automation scripts)
->    - **IDE recommendation:** Use [Zerion Editor](https://memecoder12345678.github.io/zerion/docs.html#Zerion-Editor) with syntax highlighting for the best learning experience
->    - **Note:** While the language is designed for simplicity, PyPy can significantly speed up automation tasks
+## Recommended Environment
+- **For learning**: Python 3.11.9 or newer (best for beginners and educational purposes)
+- **For automation**: PyPy 3.11.11 (recommended when running repetitive tasks or automation scripts)
+- **IDE recommendation**: Use [Zerion Editor](https://memecoder12345678.github.io/zerion/docs.html#Zerion-Editor) with syntax highlighting for the best learning experience
+- **Note**: While the language is designed for simplicity, PyPy can significantly speed up automation tasks
 
 
 ## Website
