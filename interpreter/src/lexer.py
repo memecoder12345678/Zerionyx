@@ -20,7 +20,7 @@ class Lexer:
             self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
         )
 
-    def make_tokens(self):  # (Đảm bảo gọi đúng các hàm xử lý)
+    def make_tokens(self):
         while self.current_char is not None:
             if self.current_char in " \t":
                 self.advance()
@@ -29,7 +29,7 @@ class Lexer:
             elif self.current_char in ";\n":
                 if (
                     self.tokens and self.tokens[-1].type == TT_NEWLINE
-                ):  # Tránh nhiều NEWLINE liên tiếp
+                ):
                     self.advance()
                     continue
                 self.tokens.append(Token(TT_NEWLINE, pos_start=self.pos.copy()))
@@ -59,7 +59,7 @@ class Lexer:
             elif self.current_char == "(":
                 self.tokens.append(Token(TT_LPAREN, pos_start=self.pos.copy()))
                 self.advance()
-                self.tokens[-1].pos_end = self.pos.copy()  # Đặt pos_end sau advance
+                self.tokens[-1].pos_end = self.pos.copy()
             elif self.current_char == ")":
                 self.tokens.append(Token(TT_RPAREN, pos_start=self.pos.copy()))
                 self.advance()
