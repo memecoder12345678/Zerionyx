@@ -7,13 +7,7 @@ from .parser import *
 from .nodes import *
 from .types_ import *
 from .consts import *
-from .errors import (
-    TError,
-    FError,
-    MError,
-    Error,
-    RTError,
-)
+from .errors import TError, FError, MError, Error, RTError, SError
 from shutil import rmtree, copy
 from .lexer import Lexer, RTResult
 
@@ -1006,7 +1000,6 @@ class BuiltInFunction(BaseFunction):
 
     execute_system_fp.arg_names = ["command"]
 
-
     def execute_osystem_fp(self, exec_ctx):
         cmd = exec_ctx.symbol_table.get("cmd")
         result = subprocess.run(
@@ -1014,9 +1007,18 @@ class BuiltInFunction(BaseFunction):
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
         )
-        return RTResult().success(List([String(result.stdout), String(result.stderr), Number(result.returncode)]))
+        return RTResult().success(
+            List(
+                [
+                    String(result.stdout),
+                    String(result.stderr),
+                    Number(result.returncode),
+                ]
+            )
+        )
+
     execute_osystem_fp.arg_names = ["command"]
 
     def execute_panic(self, exec_ctx):
@@ -2404,6 +2406,100 @@ class BuiltInFunction(BaseFunction):
 
     execute_base_name_fp.arg_names = ["path"]
 
+    def validate_pyexec_result(self, obj):
+        allowed = (bool, int, float, str)
+        if obj is None:
+            return None_.none
+        elif isinstance(obj, allowed):
+            if isinstance(obj, bool):
+                return Number(int(obj))
+            elif isinstance(obj, int):
+                return Number(obj)
+            elif isinstance(obj, float):
+                return Number(obj)
+            else:
+                return String(obj)
+        elif isinstance(obj, list):
+            items = []
+            for idx, item in enumerate(obj):
+                if not isinstance(
+                    item, (bool, int, float, str, list, dict, tuple, type(None))
+                ):
+                    raise TypeError(
+                        f"Invalid type in list at index {idx}: {type(item).__name__}"
+                    )
+                items.append(self.validate_pyexec_result(item))
+            return List(items)
+        elif isinstance(obj, dict):
+            items = []
+            for k, v in obj.items():
+                if not isinstance(k, (str, int, float, bool)):
+                    raise TypeError(f"Invalid dict key type: {type(k).__name__}")
+                items.append(
+                    List(
+                        [self.validate_pyexec_result(k), self.validate_pyexec_result(v)]
+                    )
+                )
+            return List(items)
+        elif isinstance(obj, tuple):
+            items = []
+            for idx, item in enumerate(obj):
+                if not isinstance(
+                    item, (bool, int, float, str, list, dict, tuple, type(None))
+                ):
+                    raise TypeError(
+                        f"Invalid type in tuple at index {idx}: {type(item).__name__}"
+                    )
+                items.append(self.validate_pyexec_result(item))
+            return List(items)
+        else:
+            raise TypeError(f"Invalid type in pyexec result: {type(obj).__name__}")
+
+    def execute_pyexec(self, exec_ctx):
+        code = exec_ctx.symbol_table.get("code")
+        if private_symbol_table.get("is_main").value == 1:
+            return RTResult().failure(
+                SError(
+                    self.pos_start,
+                    self.pos_end,
+                    exec_ctx,
+                )
+            )
+        if not isinstance(code, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'pyexec' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            raw = exec(code.value, globals(), locals())
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error executing code: {e}",
+                    exec_ctx,
+                )
+            )
+        try:
+            fr = self.validate_pyexec_result(raw)
+            return RTResult().success(fr)
+        except TypeError as e:
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"pyexec returned invalid data: {e}",
+                    exec_ctx,
+                )
+            )
+
+    execute_pyexec.arg_names = ["code"]
+
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
     func_name = method_name[8:]
@@ -2416,70 +2512,97 @@ for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]
 class Interpreter:
     def __init__(self):
         self._visit_cache = {}
-        
+
         self.module_cache = {}
-        
+
         self._bin_op_methods = {
-            TT_PLUS: 'added_to',
-            TT_MINUS: 'subbed_by',
-            TT_MUL: 'multed_by',
-            TT_DIV: 'dived_by',
-            TT_POW: 'powed_by',
-            TT_MOD: 'moduled_by',
-            TT_FLOORDIV: 'floordived_by',
-            TT_EE: 'get_comparison_eq',
-            TT_NE: 'get_comparison_ne',
-            TT_LT: 'get_comparison_lt',
-            TT_GT: 'get_comparison_gt',
-            TT_LTE: 'get_comparison_lte',
-            TT_GTE: 'get_comparison_gte',
+            TT_PLUS: "added_to",
+            TT_MINUS: "subbed_by",
+            TT_MUL: "multed_by",
+            TT_DIV: "dived_by",
+            TT_POW: "powed_by",
+            TT_MOD: "moduled_by",
+            TT_FLOORDIV: "floordived_by",
+            TT_EE: "get_comparison_eq",
+            TT_NE: "get_comparison_ne",
+            TT_LT: "get_comparison_lt",
+            TT_GT: "get_comparison_gt",
+            TT_LTE: "get_comparison_lte",
+            TT_GTE: "get_comparison_gte",
         }
+
     def visit(self, node, context):
         node_type = type(node)
         method = self._visit_cache.get(node_type)
-        
+
         if not method:
             method_name = f"visit_{node_type.__name__}"
             method = getattr(self, method_name, self.no_visit_method)
             self._visit_cache[node_type] = method
-            
+
         return method(node, context)
 
     def no_visit_method(self, node, context):
         raise Exception(f"No visit_{type(node).__name__} method defined")
 
     def visit_NumberNode(self, node, context: Context):
-        return RTResult().success(Number(node.tok.value).set_context(context).set_pos(node.pos_start, node.pos_end))
+        return RTResult().success(
+            Number(node.tok.value)
+            .set_context(context)
+            .set_pos(node.pos_start, node.pos_end)
+        )
 
     def visit_StringNode(self, node, context: Context):
-        return RTResult().success(String(node.tok.value).set_context(context).set_pos(node.pos_start, node.pos_end))
+        return RTResult().success(
+            String(node.tok.value)
+            .set_context(context)
+            .set_pos(node.pos_start, node.pos_end)
+        )
 
     def visit_ListNode(self, node, context: Context):
         res = RTResult()
-        elements = [res.register(self.visit(element_node, context)) for element_node in node.element_nodes if not res.should_return()]
-        if res.should_return(): return res
-        return res.success(List(elements).set_context(context).set_pos(node.pos_start, node.pos_end))
+        elements = [
+            res.register(self.visit(element_node, context))
+            for element_node in node.element_nodes
+            if not res.should_return()
+        ]
+        if res.should_return():
+            return res
+        return res.success(
+            List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
+        )
 
     def visit_VarAccessNode(self, node, context: Context):
         res = RTResult()
         var_name = node.var_name_tok.value
-        value = context.symbol_table.get(var_name) or context.private_symbol_table.get(var_name)
+        value = context.symbol_table.get(var_name) or context.private_symbol_table.get(
+            var_name
+        )
 
         if value is None:
-            return res.failure(RTError(node.pos_start, node.pos_end, f"'{var_name}' is not defined", context))
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"'{var_name}' is not defined",
+                    context,
+                )
+            )
 
-        return res.success(value.copy().set_pos(node.pos_start, node.pos_end).set_context(context))
+        return res.success(
+            value.copy().set_pos(node.pos_start, node.pos_end).set_context(context)
+        )
 
     def visit_VarAssignNode(self, node, context: Context):
         res = RTResult()
         var_name = node.var_name_tok.value
         value = res.register(self.visit(node.value_node, context))
-        if res.should_return(): return res
+        if res.should_return():
+            return res
 
         context.symbol_table.set(var_name, value)
         context.private_symbol_table.set(var_name, value)
         return res.success(value)
-    
 
     def visit_BinOpNode(self, node, context):
         res = RTResult()
@@ -2487,44 +2610,58 @@ class Interpreter:
         op_tok = node.op_tok
         if op_tok.matches(TT_KEYWORD, "and"):
             left = res.register(self.visit(node.left_node, context))
-            if res.should_return(): return res
+            if res.should_return():
+                return res
             if not left.is_true():
                 return res.success(left.set_pos(node.pos_start, node.pos_end))
             right = res.register(self.visit(node.right_node, context))
-            if res.should_return(): return res
+            if res.should_return():
+                return res
             result, error = left.anded_by(right)
-        
+
         elif op_tok.matches(TT_KEYWORD, "or"):
             left = res.register(self.visit(node.left_node, context))
-            if res.should_return(): return res
+            if res.should_return():
+                return res
             if left.is_true():
                 return res.success(left.set_pos(node.pos_start, node.pos_end))
             right = res.register(self.visit(node.right_node, context))
-            if res.should_return(): return res
+            if res.should_return():
+                return res
             result, error = left.ored_by(right)
-        
+
         else:
             left = res.register(self.visit(node.left_node, context))
-            if res.should_return(): return res
+            if res.should_return():
+                return res
             right = res.register(self.visit(node.right_node, context))
-            if res.should_return(): return res
+            if res.should_return():
+                return res
 
             method_name = self._bin_op_methods.get(op_tok.type)
             if not method_name:
-                return res.failure(RTError(op_tok.pos_start, op_tok.pos_end, "Invalid binary operator", context))
-            
+                return res.failure(
+                    RTError(
+                        op_tok.pos_start,
+                        op_tok.pos_end,
+                        "Invalid binary operator",
+                        context,
+                    )
+                )
+
             operation_method = getattr(left, method_name)
             result, error = operation_method(right)
-            
+
         if error:
             return res.failure(error)
-        
+
         return res.success(result.set_pos(node.pos_start, node.pos_end))
 
     def visit_UnaryOpNode(self, node, context):
         res = RTResult()
         value = res.register(self.visit(node.node, context))
-        if res.should_return(): return res
+        if res.should_return():
+            return res
 
         error = None
         if node.op_tok.type == TT_MINUS:
@@ -2540,17 +2677,20 @@ class Interpreter:
         res = RTResult()
         for condition, expr, should_return_none in node.cases:
             condition_value = res.register(self.visit(condition, context))
-            if res.should_return(): return res
+            if res.should_return():
+                return res
 
             if condition_value.is_true():
                 expr_value = res.register(self.visit(expr, context))
-                if res.should_return(): return res
+                if res.should_return():
+                    return res
                 return res.success(None_.none if should_return_none else expr_value)
 
         if node.else_case:
             expr, should_return_none = node.else_case
             expr_value = res.register(self.visit(expr, context))
-            if res.should_return(): return res
+            if res.should_return():
+                return res
             return res.success(None_.none if should_return_none else expr_value)
 
         return res.success(None_.none)
@@ -2560,14 +2700,17 @@ class Interpreter:
         elements = []
 
         start_value = res.register(self.visit(node.start_value_node, context))
-        if res.should_return(): return res
+        if res.should_return():
+            return res
         end_value = res.register(self.visit(node.end_value_node, context))
-        if res.should_return(): return res
+        if res.should_return():
+            return res
         step_value = Number(1)
         if node.step_value_node:
             step_value = res.register(self.visit(node.step_value_node, context))
-            if res.should_return(): return res
-        
+            if res.should_return():
+                return res
+
         i = start_value.value
         end = end_value.value
         step = step_value.value
@@ -2579,15 +2722,25 @@ class Interpreter:
             i += step
 
             value = res.register(self.visit(node.body_node, context))
-            if res.should_return() and not res.loop_should_continue and not res.loop_should_break:
+            if (
+                res.should_return()
+                and not res.loop_should_continue
+                and not res.loop_should_break
+            ):
                 return res
-            if res.loop_should_continue: continue
-            if res.loop_should_break: break
-            if not node.should_return_none: elements.append(value)
+            if res.loop_should_continue:
+                continue
+            if res.loop_should_break:
+                break
+            if not node.should_return_none:
+                elements.append(value)
 
         return res.success(
-            None_.none if node.should_return_none else
-            List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
+            None_.none
+            if node.should_return_none
+            else List(elements)
+            .set_context(context)
+            .set_pos(node.pos_start, node.pos_end)
         )
 
     def visit_WhileNode(self, node, context):
@@ -2596,19 +2749,31 @@ class Interpreter:
 
         while True:
             condition = res.register(self.visit(node.condition_node, context))
-            if res.should_return() or not condition.is_true(): break
+            if res.should_return() or not condition.is_true():
+                break
 
             value = res.register(self.visit(node.body_node, context))
-            if res.should_return() and not res.loop_should_continue and not res.loop_should_break:
+            if (
+                res.should_return()
+                and not res.loop_should_continue
+                and not res.loop_should_break
+            ):
                 return res
-            if res.loop_should_continue: continue
-            if res.loop_should_break: break
-            if not node.should_return_none: elements.append(value)
-        
-        if res.should_return(): return res
+            if res.loop_should_continue:
+                continue
+            if res.loop_should_break:
+                break
+            if not node.should_return_none:
+                elements.append(value)
+
+        if res.should_return():
+            return res
         return res.success(
-            None_.none if node.should_return_none else
-            List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
+            None_.none
+            if node.should_return_none
+            else List(elements)
+            .set_context(context)
+            .set_pos(node.pos_start, node.pos_end)
         )
 
     def visit_FuncDefNode(self, node, context):
@@ -2616,7 +2781,11 @@ class Interpreter:
         func_name = node.var_name_tok.value if node.var_name_tok else None
         body_node = node.body_node
         arg_names = [arg.value for arg in node.arg_name_toks]
-        func_value = Function(func_name, body_node, arg_names, node.should_auto_return).set_context(context).set_pos(node.pos_start, node.pos_end)
+        func_value = (
+            Function(func_name, body_node, arg_names, node.should_auto_return)
+            .set_context(context)
+            .set_pos(node.pos_start, node.pos_end)
+        )
 
         if func_name:
             context.symbol_table.set(func_name, func_value)
@@ -2629,26 +2798,41 @@ class Interpreter:
 
         try:
             value_to_call = res.register(self.visit(node.node_to_call, context))
-            if res.should_return(): return res
+            if res.should_return():
+                return res
             value_to_call = value_to_call.copy().set_pos(node.pos_start, node.pos_end)
 
             for arg_node in node.arg_nodes:
                 args.append(res.register(self.visit(arg_node, context)))
-                if res.should_return(): return res
+                if res.should_return():
+                    return res
 
             return_value = res.register(value_to_call.execute(args))
-            if res.should_return(): return res
-            
-            return res.success(return_value.copy().set_pos(node.pos_start, node.pos_end).set_context(context))
+            if res.should_return():
+                return res
+
+            return res.success(
+                return_value.copy()
+                .set_pos(node.pos_start, node.pos_end)
+                .set_context(context)
+            )
         except RecursionError:
-            return res.failure(RTError(node.pos_start, node.pos_end, f"Maximum recursion depth exceeded ({sys.getrecursionlimit()})", context))
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"Maximum recursion depth exceeded ({sys.getrecursionlimit()})",
+                    context,
+                )
+            )
 
     def visit_ReturnNode(self, node, context):
         res = RTResult()
         value = None_.none
         if node.node_to_return:
             value = res.register(self.visit(node.node_to_return, context))
-            if res.should_return(): return res
+            if res.should_return():
+                return res
         return res.success_return(value)
 
     def visit_ContinueNode(self, node, context):
@@ -2660,7 +2844,7 @@ class Interpreter:
     def visit_LoadNode(self, node: LoadNode, context: Context):
         res = RTResult()
         file_path_raw = node.file_path
-        
+
         abs_path = os.path.abspath(file_path_raw)
         if abs_path in self.module_cache:
             return res.success(self.module_cache[abs_path].copy().set_context(context))
@@ -2671,18 +2855,30 @@ class Interpreter:
             if os.path.isfile(tmp_path):
                 path = tmp_path
             else:
-                return res.failure(RTError(node.pos_start, node.pos_end, f"No module named '{file_path_raw}'", context))
-        
+                return res.failure(
+                    RTError(
+                        node.pos_start,
+                        node.pos_end,
+                        f"No module named '{file_path_raw}'",
+                        context,
+                    )
+                )
+
         abs_path = os.path.abspath(path)
         if abs_path in self.module_cache:
             return res.success(self.module_cache[abs_path].copy().set_context(context))
-            
+
         result, err = load_module(path, self, context)
         if err:
-            return res.failure(err if isinstance(err, Error) else RTError(node.pos_start, node.pos_end, err.error.details, context))
+            return res.failure(
+                err
+                if isinstance(err, Error)
+                else RTError(node.pos_start, node.pos_end, err.error.details, context)
+            )
 
         self.module_cache[abs_path] = result
         return res.success(result)
+
 
 global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv[1:]]))
 global_symbol_table.set("os_sep_fp", String(os.sep))

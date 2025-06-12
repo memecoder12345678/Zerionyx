@@ -330,6 +330,17 @@ class ZerionLexer(BaseLexer):
             ],
             "libs.sys": ["exit", "system", "get_env", "set_env", "osystem"],
             "libs.hash": ["md5", "sha1", "sha256", "sha512", "crc32"],
+            "libs.hashmap": [
+                "hashmap",
+                "get_hashmap_value",
+                "set_hashmap_value",
+                "has",
+                "del_key",
+                "get_hashmap_keys",
+                "get_hashmap_values",
+                "get_hashmap_items",
+                "clear_hashmap",
+            ],
             "libs.memory": [
                 "remember",
                 "forget",
