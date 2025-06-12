@@ -50,7 +50,7 @@ defun main()
         cprintln("Error: Path provided is not a folder: " + fp, "red", none, none)
         exit(1)
     done
-    abrp = fp + "\\backup"
+    abrp = fp + os_sep + "backup"
     emmb = catch(make_dir, [abrp])
     if not is_none(emmb > 1) do
         if exists(abrp) and not is_file(abrp) do
