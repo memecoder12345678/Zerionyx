@@ -29,7 +29,7 @@ def main():
         )
         try:
             while True:
-                text = input(">>> ")
+                text = input(f"{Fore.LIGHTMAGENTA_EX}>>> {Fore.RESET}")
                 text += " \n"
                 if (
                     text.strip() == ""

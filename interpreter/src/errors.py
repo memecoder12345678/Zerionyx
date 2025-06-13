@@ -1,3 +1,6 @@
+from colorama import init, Fore, Style
+init(autoreset=True)
+
 def string_with_arrows(text, pos_start, pos_end, indent):
     result = " " * indent
     idx_start = max(text.rfind("\n", 0, pos_start.idx), 0)
@@ -11,7 +14,7 @@ def string_with_arrows(text, pos_start, pos_end, indent):
         col_end = pos_end.col if i == line_count - 1 else len(line) - 1
         line: str
         result += line.replace("\n", "") + "\n"
-        result += " " * (col_start + indent) + "^" * (col_end - col_start)
+        result += " " * (col_start + indent) + f"{Fore.RED}^{Fore.RESET}" * (col_end - col_start)
         idx_start = idx_end
         idx_end = text.find("\n", idx_start + 1)
         if idx_end < 0:
@@ -29,11 +32,11 @@ class Error:
         self.details = details
 
     def __str__(self):
-        result = f"File '{self.pos_start.fn}', line {self.pos_start.ln + 1}\n"
+        result = f"File {Fore.MAGENTA}'{self.pos_start.fn}'{Fore.RESET}, line {Fore.MAGENTA}{self.pos_start.ln + 1}{Fore.RESET}\n"
         result += string_with_arrows(
             self.pos_start.ftxt, self.pos_start, self.pos_end, 2
-        ).rstrip()
-        result += f"\n{self.error_name}: {self.details}"
+        ).rstrip() + Fore.RESET
+        result += f"\n{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{self.error_name}{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{self.details}"
         return result
 
 
@@ -66,7 +69,7 @@ class RTError(Error):
         result += string_with_arrows(
             self.pos_start.ftxt, self.pos_start, self.pos_end, 4
         ).rstrip()
-        result += f"\n{self.error_name}: {self.details}"
+        result += f"\n{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{self.error_name}{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{self.details}"
         return result
 
     def generate_traceback(self):
@@ -77,7 +80,7 @@ class RTError(Error):
         while ctx:
             if pos:
                 result = (
-                    f"  File '{pos.fn}', line {str(pos.ln + 1)}, in {ctx.display_name}\n"
+                    f"  File {Fore.MAGENTA}'{pos.fn}'{Fore.RESET}, line {Fore.MAGENTA}{str(pos.ln + 1)}{Fore.RESET}, in {Fore.MAGENTA}{ctx.display_name}{Fore.RESET}\n"
                     + result
                 )
                 pos = ctx.parent_entry_pos
@@ -97,7 +100,7 @@ class MError(Error):
         result += string_with_arrows(
             self.pos_start.ftxt, self.pos_start, self.pos_end, 4
         ).rstrip()
-        result += f"\n{self.error_name}: {self.details}"
+        result += f"\n{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{self.error_name}{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{self.details}"
         return result
 
     def generate_traceback(self):
@@ -108,7 +111,7 @@ class MError(Error):
         while ctx:
             if pos:
                 result = (
-                    f"  File '{pos.fn}', line {str(pos.ln + 1)}, in {ctx.display_name}\n"
+                    f"  File {Fore.MAGENTA}'{pos.fn}'{Fore.RESET}, line {Fore.MAGENTA}{str(pos.ln + 1)}{Fore.RESET}, in {Fore.MAGENTA}{ctx.display_name}{Fore.RESET}\n"
                     + result
                 )
                 pos = ctx.parent_entry_pos
@@ -128,7 +131,7 @@ class IOError(Error):
         result += string_with_arrows(
             self.pos_start.ftxt, self.pos_start, self.pos_end, 4
         ).rstrip()
-        result += f"\n{self.error_name}: {self.details}"
+        result += f"\n{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{self.error_name}{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{self.details}"
         return result
 
     def generate_traceback(self):
@@ -139,7 +142,7 @@ class IOError(Error):
         while ctx:
             if pos:
                 result = (
-                    f"  File '{pos.fn}', line {str(pos.ln + 1)}, in {ctx.display_name}\n"
+                    f"  File {Fore.MAGENTA}'{pos.fn}'{Fore.RESET}, line {Fore.MAGENTA}{str(pos.ln + 1)}{Fore.RESET}, in {Fore.MAGENTA}{ctx.display_name}{Fore.RESET}\n"
                     + result
                 )
                 pos = ctx.parent_entry_pos
@@ -159,7 +162,7 @@ class TError(Error):
         result += string_with_arrows(
             self.pos_start.ftxt, self.pos_start, self.pos_end, 4
         ).rstrip()
-        result += f"\n{self.error_name}: {self.details}"
+        result += f"\n{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{self.error_name}{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{self.details}"
         return result
 
     def generate_traceback(self):
@@ -170,7 +173,7 @@ class TError(Error):
         while ctx:
             if pos:
                 result = (
-                    f"  File '{pos.fn}', line {str(pos.ln + 1)}, in {ctx.display_name}\n"
+                    f"  File {Fore.MAGENTA}'{pos.fn}'{Fore.RESET}, line {Fore.MAGENTA}{str(pos.ln + 1)}{Fore.RESET}, in {Fore.MAGENTA}{ctx.display_name}{Fore.RESET}\n"
                     + result
                 )
                 pos = ctx.parent_entry_pos
