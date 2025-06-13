@@ -14,7 +14,7 @@ def string_with_arrows(text, pos_start, pos_end, indent):
         col_end = pos_end.col if i == line_count - 1 else len(line) - 1
         line: str
         result += line.replace("\n", "") + "\n"
-        result += " " * (col_start + indent) + f"{Fore.RED}^{Fore.RESET}" * (col_end - col_start)
+        result += " " * (col_start + indent) + f"{Fore.LIGHTRED_EX}^{Fore.RESET}" * (col_end - col_start)
         idx_start = idx_end
         idx_end = text.find("\n", idx_start + 1)
         if idx_end < 0:
