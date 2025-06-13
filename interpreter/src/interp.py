@@ -474,28 +474,16 @@ class BuiltInFunction(BaseFunction):
 
     execute_exit_fp.arg_names = ["value"]
 
-    def execute_list_slice_fp(self, exec_ctx):
+    def execute_slice(self, exec_ctx):
         l = exec_ctx.symbol_table.get("l")
         start = exec_ctx.symbol_table.get("start")
         end = exec_ctx.symbol_table.get("end")
-        a = int(start.value) if not isinstance(start, None_) else None
-        b = int(end.value) if not isinstance(end, None_) else None
-        sliced_l = l.elements[a:b]
-        return RTResult().success(List(sliced_l))
-
-    execute_list_slice_fp.arg_names = ["l", "start", "end"]
-
-    def execute_str_slice_fp(self, exec_ctx):
-        string = exec_ctx.symbol_table.get("string")
-        start = exec_ctx.symbol_table.get("start")
-        end = exec_ctx.symbol_table.get("end")
-
-        if not isinstance(string, String):
+        if not isinstance(l, String | List):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'str_slice' must be a string",
+                    "First argument of 'slice' must be a string or list",
                     exec_ctx,
                 )
             )
@@ -505,7 +493,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "Second argument of 'str_slice' must be a number or none",
+                    "Second argument of 'slice' must be a number or none",
                     exec_ctx,
                 )
             )
@@ -515,16 +503,18 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "Third argument of 'str_slice' must be a number or none",
+                    "Third argument of 'slice' must be a number or none",
                     exec_ctx,
                 )
             )
         a = int(start.value) if not isinstance(start, None_) else None
         b = int(end.value) if not isinstance(end, None_) else None
-        sliced_string = string.value[a:b]
-        return RTResult().success(String(sliced_string))
+        sliced_l = l.elements[a:b]
+        if isinstance(l, string):
+            return RTResult().success(string(sliced_l))
+        return RTResult().success(List(sliced_l))
 
-    execute_str_slice_fp.arg_names = ["string", "start", "end"]
+    execute_slice.arg_names = ["l", "start", "end"]
 
     def execute_open_fp(self, exec_ctx):
         file_path = exec_ctx.symbol_table.get("file_path")

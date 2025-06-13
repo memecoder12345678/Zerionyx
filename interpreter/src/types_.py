@@ -819,6 +819,10 @@ class List(Object):
             new_list = self.copy()
             new_list.elements.extend(other.elements)
             return new_list, None
+        elif isinstance(other, Number):
+            new_list = self.copy()
+            new_list.elements = self.elements * other.value
+            return new_list, None
         else:
             return None, Object.illegal_operation(
                 self, other, f"Can't multiply a list by a type of '{other.type()}'"

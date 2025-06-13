@@ -310,6 +310,7 @@ COMMENT           ::= "#" /[^\n]*/
             <li><b>to_str(x)</b> &rarr; string &mdash; Convert <code>x</code> to string</li>
             <li><b>type(x)</b> &rarr; string/none &mdash; Return type of <code>x</code> as string or none</li>
             <li><b>pyexec(code)</b> &rarr; any &mdash; Executes embedded Python code and returns its result (use with caution)</li>
+            <li><b>slice(l, from, to)</b> &rarr; list/string &mdash; Slice list/string <code>l</code> from <code>from</code> to <code>to</code> (exclusive)</li>
         </ul>
         <h2>Standard Libraries</h2>
         <div class="lib-list">
@@ -336,7 +337,6 @@ COMMENT           ::= "#" /[^\n]*/
                 <li><b>reduce(f, l, i)</b> &rarr; any &mdash; Reduce list <code>l</code> with function <code>f</code> and initial value <code>i</code></li>
                 <li><b>min(l)</b> &rarr; number &mdash; Minimum value in list <code>l</code></li>
                 <li><b>max(l)</b> &rarr; number &mdash; Maximum value in list <code>l</code></li>
-                <li><b>list_slice(l, from, to)</b> &rarr; list &mdash; Slice list <code>l</code> from <code>from</code> to <code>to</code> (exclusive)</li>
                 <li><b>reverse(l)</b> &rarr; list &mdash; Reverse the list <code>l</code></li>
                 <li><b>zip(l1, l2)</b> &rarr; list &mdash; Pair elements from <code>l1</code> and <code>l2</code> (shortest length)</li>
                 <li><b>zip_longest(l1, l2)</b> &rarr; list &mdash; Pair elements from <code>l1</code> and <code>l2</code> (fill with <code>none</code> if lengths differ)</li>
@@ -345,7 +345,6 @@ COMMENT           ::= "#" /[^\n]*/
                 <li><b>count(l, v)</b> &rarr; number &mdash; Count occurrences of <code>v</code> in <code>l</code></li>
                 <li><b>index_of(l, v)</b> &rarr; number/none &mdash; Index of <code>v</code> in <code>l</code> or <code>none</code> if not found</li>
                 <li><b>clear_list(l)</b> &rarr; none &mdash; Remove all elements from <code>l</code></li>
-                <li><b>list_multiply(l, n)</b> &rarr; list &mdash; Repeat list <code>l</code> <code>n</code> times</li>
                 <li><b>rand_int_list(len, min, max)</b> &rarr; list &mdash; List of random integers</li>
                 <li><b>rand_float_list(len, min, max)</b> &rarr; list &mdash; List of random floats</li>
             </ul>
@@ -355,7 +354,6 @@ COMMENT           ::= "#" /[^\n]*/
             <ul>
                 <li><b>split(s, sep)</b> &rarr; list &mdash; Split string <code>s</code> by separator <code>sep</code></li>
                 <li><b>strip(s, sep)</b> &rarr; list &mdash; Trims <code>sep</code> from both ends of <code>s</code></li>
-                <li><b>str_slice(s, from, to)</b> &rarr; str &mdash; Slice string <code>s</code> from <code>from</code> to <code>to</code></li>
                 <li><b>join(sep, l)</b> &rarr; str &mdash; Join list <code>l</code> with separator <code>sep</code></li>
                 <li><b>replace(s, old, new)</b> &rarr; str &mdash; Replace <code>old</code> with <code>new</code> in <code>s</code></li>
                 <li><b>to_upper(s)</b> &rarr; str &mdash; Uppercase <code>s</code></li>
@@ -371,7 +369,6 @@ COMMENT           ::= "#" /[^\n]*/
                 <li><b>find_all(s, v)</b> &rarr; list &mdash; All indices of substring <code>v</code> in <code>s</code></li>
                 <li><b>startswith(s, v)</b> &rarr; true/false &mdash; <code>s</code> starts with <code>v</code></li>
                 <li><b>endswith(s, v)</b> &rarr; true/false &mdash; <code>s</code> ends with <code>v</code></li>
-                <li><b>str_multiply(s, n)</b> &rarr; str &mdash; Repeat string <code>s</code> <code>n</code> times</li>
             </ul>
         </div>
         <div id="lib-math" class="lib-content" style="display:none;">

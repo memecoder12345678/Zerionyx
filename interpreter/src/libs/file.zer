@@ -152,4 +152,3 @@ done
 defun is_mount(p)
     return is_mount_fp(p)
 done
-

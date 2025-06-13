@@ -1,6 +1,6 @@
 from .consts import *
 from .utils import Token, Position, RTResult
-from .errors import IllegalCharError, ExpectedCharError
+from .errors import IllegalCharError, ExpectedCharError, InvalidSyntaxError
 
 
 class Lexer:
@@ -37,9 +37,15 @@ class Lexer:
             elif self.current_char in LETTERS + "_":
                 self.tokens.append(self.make_identifier())
             elif self.current_char == '"':
-                self.tokens.append(self.make_string())
+                token, error = self.make_string()
+                if error:
+                    return [], error
+                self.tokens.append(token)
             elif self.current_char == "'":
-                self.tokens.append(self.make_string_single())
+                token, error = self.make_string_single()
+                if error:
+                    return [], error
+                self.tokens.append(token)
             elif self.current_char == "+":
                 self.handle_plus_or_augmented()
             elif self.current_char == "-":
@@ -110,7 +116,7 @@ class Lexer:
         else:
             return Token(TT_FLOAT, float(num_str), pos_start, self.pos)
 
-    def make_string_single(self):
+    def make_string_single(self): 
         string = ""
         pos_start = self.pos.copy()
         escape_character = False
@@ -145,10 +151,12 @@ class Lexer:
                     else:
                         string += self.current_char
                 self.advance()
+            else:
+                return [], InvalidSyntaxError(pos_start, self.pos, "Unterminated string literal")
 
-            return Token(TT_STRING, string, pos_start, self.pos)
+            return Token(TT_STRING, string, pos_start, self.pos), []
 
-        while self.current_char != None and (
+        while self.current_char is not None and (
             self.current_char != "'" or escape_character
         ):
             if escape_character:
@@ -164,8 +172,11 @@ class Lexer:
                     string += self.current_char
             self.advance()
 
+        if self.current_char != "'":
+            return [], InvalidSyntaxError(pos_start, self.pos, "Unterminated string literal")
+
         self.advance()
-        return Token(TT_STRING, string, pos_start, self.pos)
+        return Token(TT_STRING, string, pos_start, self.pos), []
 
     def make_string(self):
         string = ""
@@ -202,10 +213,12 @@ class Lexer:
                     else:
                         string += self.current_char
                 self.advance()
+            else:
+                return [], InvalidSyntaxError(pos_start, self.pos, "Unterminated string literal")
 
-            return Token(TT_STRING, string, pos_start, self.pos)
+            return Token(TT_STRING, string, pos_start, self.pos), []
 
-        while self.current_char != None and (
+        while self.current_char is not None and (
             self.current_char != '"' or escape_character
         ):
             if escape_character:
@@ -219,11 +232,13 @@ class Lexer:
                     escape_character = True
                 else:
                     string += self.current_char
-
             self.advance()
 
+        if self.current_char != '"':
+            return [], InvalidSyntaxError(pos_start, self.pos, "Unterminated string literal")
+
         self.advance()
-        return Token(TT_STRING, string, pos_start, self.pos)
+        return Token(TT_STRING, string, pos_start, self.pos), []
 
     def peek_foward(self) -> str | None:
         peek_pos = self.pos.copy()
@@ -271,8 +286,8 @@ class Lexer:
                 Token(
                     TT_IDENTIFIER,
                     value=id_name,
-                    pos_start=rhs_element_pos,
-                    pos_end=rhs_element_pos,
+                    pos_start=identifier_token.pos_start.copy(),
+                    pos_end=identifier_token.pos_end.copy()
                 )
             )
 

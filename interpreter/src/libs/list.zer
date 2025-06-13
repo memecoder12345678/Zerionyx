@@ -38,16 +38,6 @@ defun clear_list(l)
     done
 done
 
-defun list_multiply(l, n)
-    r = set_reusable([], true)
-    for _ = 0 to n do
-        for i = 0 to len(l) do
-            append(r, l>i)
-        done
-    done
-    return r
-done
-
 defun filter(f, l)
     if type(l) != list do
         panic("Second argument of 'filter' must be a list", "T")
@@ -117,19 +107,6 @@ defun max(l)
         done
     done
     return m
-done
-
-defun list_slice(l, f, t)
-    if type(l) != list do
-        panic("First argument of 'list_slice' must be a list", "T")
-    done
-    if type(f) != int and type(f) != float do
-        panic("Second argument of 'list_slice' must be an number", "T")
-    done
-    if type(t) != int and t != none and type(t) != float do
-        panic("Third argument of 'list_slice' must be an number or 'none'", "T")
-    done
-    return list_slice_fp(l, f, t)
 done
 
 defun reverse(l)

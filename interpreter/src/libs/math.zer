@@ -127,4 +127,3 @@ defun round(x)
     check_number(x, none, "round")
     return round_fp(x)
 done
-

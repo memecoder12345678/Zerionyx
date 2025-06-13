@@ -19,10 +19,6 @@ defun strip(s, s_)
     return strip_fp(s, s_)
 done 
 
-defun str_slice(s, t, e)
-    return str_slice_fp(s, t, e)
-done
-
 defun join(s, l)
     return join_fp(s, l)
 done
@@ -168,21 +164,4 @@ defun endswith(s, v)
     done
     let suffix = str_slice(s, len(s) - len(v), none) 
     return suffix == v
-done
-
-defun str_multiply(s, n)
-    if not is_str(s) do
-        panic("First argument of 'str_multiply' must be a string", "T")
-    done
-    if type(n) != int and type(n) != float do
-        panic("Second argument of 'str_multiply' must be a number", "T")
-    done
-    if n < 0 do
-        panic("Cannot multiply string by negative number", "M")
-    done
-    let result = ""
-    for i = 0 to to_int(n, false) do
-        result = result + s
-    done
-    return result
 done

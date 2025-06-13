@@ -32,7 +32,7 @@ class Error:
         result = f"File '{self.pos_start.fn}', line {self.pos_start.ln + 1}\n"
         result += string_with_arrows(
             self.pos_start.ftxt, self.pos_start, self.pos_end, 2
-        )
+        ).rstrip()
         result += f"\n{self.error_name}: {self.details}"
         return result
 
@@ -65,7 +65,7 @@ class RTError(Error):
         result = self.generate_traceback()
         result += string_with_arrows(
             self.pos_start.ftxt, self.pos_start, self.pos_end, 4
-        )
+        ).rstrip()
         result += f"\n{self.error_name}: {self.details}"
         return result
 
@@ -96,7 +96,7 @@ class MError(Error):
         result = self.generate_traceback()
         result += string_with_arrows(
             self.pos_start.ftxt, self.pos_start, self.pos_end, 4
-        )
+        ).rstrip()
         result += f"\n{self.error_name}: {self.details}"
         return result
 
@@ -127,7 +127,7 @@ class IOError(Error):
         result = self.generate_traceback()
         result += string_with_arrows(
             self.pos_start.ftxt, self.pos_start, self.pos_end, 4
-        )
+        ).rstrip()
         result += f"\n{self.error_name}: {self.details}"
         return result
 
@@ -158,7 +158,7 @@ class TError(Error):
         result = self.generate_traceback()
         result += string_with_arrows(
             self.pos_start.ftxt, self.pos_start, self.pos_end, 4
-        )
+        ).rstrip()
         result += f"\n{self.error_name}: {self.details}"
         return result
 
