@@ -1,0 +1,18 @@
+load "libs.hashmap"
+load "libs.sys"
+load "libs.file"
+
+if len(argv) != 2 do
+    println("Usage: " + abs_path(argv>0) + "<your-json-file>")
+    exit(1)
+done
+if not exists(argv>1) do
+    println("File not found: " + argv>1)
+    exit(1)
+done
+code = 'import json\nwith open(r"' + abs_path(argv>1)  + '", "r") as f:\n    r = json.load(f)'
+# println(code)
+r = get_hashmap_value(pyexec(code), "r", none)
+print("r = ")
+println(r)
+exit(0)

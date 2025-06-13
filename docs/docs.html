@@ -309,6 +309,7 @@ COMMENT           ::= "#" /[^\n]*/
             <li><b>to_int(x, silent)</b> &rarr; int/none &mdash; Convert <code>x</code> to int return <code>none</code> if fail and <code>silent</code> true else raise</li>
             <li><b>to_str(x)</b> &rarr; string &mdash; Convert <code>x</code> to string</li>
             <li><b>type(x)</b> &rarr; string/none &mdash; Return type of <code>x</code> as string or none</li>
+            <li><b>pyexec(code)</b> &rarr; any &mdash; Executes embedded Python code and returns its result (use with caution)</li>
         </ul>
         <h2>Standard Libraries</h2>
         <div class="lib-list">
@@ -465,6 +466,7 @@ COMMENT           ::= "#" /[^\n]*/
                 <li><b>downl(url, timeout)</b> &rarr; str &mdash; Download file from URL</li>
                 <li><b>get_local_ip()</b> &rarr; str &mdash; Get local IP address</li>
                 <li><b>get_hostname()</b> &rarr; str &mdash; Get hostname</li>
+                <li><b>request(url, method, headers, data, timeout)</b> &rarr; list &mdash; Send HTTP request and return response JSON as list of [key, value]</li>
             </ul>
         </div>
         <div id="lib-random" class="lib-content" style="display:none;">
@@ -482,7 +484,7 @@ COMMENT           ::= "#" /[^\n]*/
             <h3>sys.zer</h3>
             <ul>
                 <li><b>system(cmd)</b> &rarr; none &mdash; Execute system command</li>
-                <li><b>osystem(cmd)</b> &rarr; list &mdash; Same as <code>system</code> but return output</li>
+                <li><b>osystem(cmd)</b> &rarr; list &mdash; Same as <code>system</code> but returns its result</li>
                 <li><b>get_env(name)</b> &rarr; str &mdash; Get environment variable</li>
                 <li><b>set_env(name, value)</b> &rarr; none &mdash; Set environment variable</li>
                 <li><b>exit(code)</b> &rarr; none &mdash; Exit program</li>

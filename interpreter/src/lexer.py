@@ -27,9 +27,7 @@ class Lexer:
             elif self.current_char == "#":
                 self.skip_comment()
             elif self.current_char in ";\n":
-                if (
-                    self.tokens and self.tokens[-1].type == TT_NEWLINE
-                ):
+                if self.tokens and self.tokens[-1].type == TT_NEWLINE:
                     self.advance()
                     continue
                 self.tokens.append(Token(TT_NEWLINE, pos_start=self.pos.copy()))

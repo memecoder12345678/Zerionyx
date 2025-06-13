@@ -12,6 +12,7 @@ from shutil import rmtree, copy
 from .lexer import Lexer, RTResult
 
 from getpass import getpass
+import requests
 import urllib.request
 import urllib.error
 from urllib.parse import unquote
@@ -2441,15 +2442,14 @@ class BuiltInFunction(BaseFunction):
             items = []
             for k, v in obj.items():
                 if not isinstance(k, (str, int, float, bool)):
-                    items.append(
-                    List(
-                        [String(str(k)), String(str(v))]
-                    )
-                )
+                    items.append(List([String(str(k)), String(str(v))]))
                 else:
                     items.append(
                         List(
-                            [self.validate_pyexec_result(k), self.validate_pyexec_result(v)]
+                            [
+                                self.validate_pyexec_result(k),
+                                self.validate_pyexec_result(v),
+                            ]
                         )
                     )
             return List(items)
@@ -3324,6 +3324,76 @@ class BuiltInFunction(BaseFunction):
             )
 
     execute_is_mount_fp.arg_names = ["path"]
+
+    def execute_request_fp(self, exec_ctx):
+        url_arg = exec_ctx.symbol_table.get("url")
+        method_arg = exec_ctx.symbol_table.get("method")
+        headers_arg = exec_ctx.symbol_table.get("headers")
+        data_arg = exec_ctx.symbol_table.get("data")
+        timeout_arg = exec_ctx.symbol_table.get("timeout")
+        if not isinstance(url_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'request' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(method_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'request' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(headers_arg, List):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Third argument of 'request' must be a list",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(data_arg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Fourth argument of 'request' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(timeout_arg, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Fifth argument of 'request' must be a number",
+                    exec_ctx,
+                )
+            )
+        try:
+            response = requests.request(
+                method_arg.value,
+                url_arg.value,
+                headers=headers_arg.elements,
+                data=data_arg.value,
+                timeout=timeout_arg.value,
+            )
+            return RTResult().success(self.validate_pyexec_result(response.json()))
+        except requests.exceptions.RequestException as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Can not make request: {e}",
+                    exec_ctx,
+                )
+            )
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:

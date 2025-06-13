@@ -241,7 +241,8 @@ class ZerionLexer(BaseLexer):
             "to_int",
             "to_str",
             "type",
-            "get_password"
+            "get_password",
+            "pyexec",
         }
         self.lib_functions = {
             "libs.math": [
@@ -375,6 +376,7 @@ class ZerionLexer(BaseLexer):
                 "get_mac",
                 "ping",
                 "downl",
+                "request",
             ],
             "libs.threading": [
                 "thread_start",

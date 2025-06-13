@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+
 class FileTreeDelegate(QStyledItemDelegate):
     def __init__(self, tree_view, parent=None):
         super().__init__(parent)
@@ -19,8 +20,20 @@ class FileTreeDelegate(QStyledItemDelegate):
         path = index.model().filePath(index)
         option.text = os.path.basename(option.text)
         image_extensions = [
-            ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".ico", ".webp",
-            ".tiff", ".tif", ".svg", ".psd", ".raw", ".heif", ".heic"
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".gif",
+            ".bmp",
+            ".ico",
+            ".webp",
+            ".tiff",
+            ".tif",
+            ".svg",
+            ".psd",
+            ".raw",
+            ".heif",
+            ".heic",
         ]
         file_ext = os.path.splitext(path)[1].lower()
 
@@ -37,6 +50,7 @@ class FileTreeDelegate(QStyledItemDelegate):
             option.icon = self.md_icon
         else:
             option.icon = self.default_icon
+
 
 class FileTreeView(QTreeView):
     def __init__(self, parent=None):
@@ -87,6 +101,7 @@ class FileTreeView(QTreeView):
                 if os.path.exists(new_path):
                     self.main_window.close_file_tab(new_path)
                 import shutil
+
                 shutil.move(source_path, new_path)
             except Exception as e:
                 QMessageBox.warning(self, "Error", f"Could not move file: {str(e)}")

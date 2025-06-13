@@ -23,3 +23,7 @@ done
 defun get_hostname()
     return get_hostname_fp()
 done
+
+defun request(url, method, headers, data, timeout)
+    return request_fp(url, method, headers, data, timeout)
+end
