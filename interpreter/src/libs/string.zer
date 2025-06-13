@@ -36,11 +36,11 @@ defun to_lower(s)
 done
 
 defun ord(s)
-    return ord_fp(s)
+    return to_str(ord_fp(s))
 done
 
 defun chr(n)
-    return chr_fp(n)
+    return to_str(chr_fp(n))
 done
 
 defun is_digit(s)

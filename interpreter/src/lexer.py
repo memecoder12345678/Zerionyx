@@ -4,7 +4,7 @@ from .errors import IllegalCharError, ExpectedCharError, InvalidSyntaxError
 
 
 class Lexer:
-    __slots__ = ["fn", "text", "pos", "current_char", "tokens"]
+    __slots__ = ["fn", "text", "pos", "current_char", "tokens", "open_bracket_stack"]
 
     def __init__(self, fn, text):
         self.fn = fn
@@ -13,6 +13,7 @@ class Lexer:
         self.current_char = None
         self.advance()
         self.tokens = []
+        self.open_bracket_stack = []
 
     def advance(self):
         self.pos.advance(self.current_char)
@@ -27,11 +28,15 @@ class Lexer:
             elif self.current_char == "#":
                 self.skip_comment()
             elif self.current_char in ";\n":
-                if self.tokens and self.tokens[-1].type == TT_NEWLINE:
+                if self.open_bracket_stack:
                     self.advance()
-                    continue
-                self.tokens.append(Token(TT_NEWLINE, pos_start=self.pos.copy()))
-                self.advance()
+                else:
+                    if self.tokens and self.tokens[-1].type == TT_NEWLINE:
+                        self.advance()
+                        continue
+                    newline_pos_start = self.pos.copy()
+                    self.tokens.append(Token(TT_NEWLINE, pos_start=newline_pos_start))
+                    self.advance()
             elif self.current_char in DIGITS:
                 self.tokens.append(self.make_number())
             elif self.current_char in LETTERS + "_":
@@ -54,6 +59,14 @@ class Lexer:
                 self.handle_mul_or_augmented()
             elif self.current_char == "/":
                 self.div_or_floordiv_or_augmented()
+            elif self.current_char == '\\': 
+                if self.peek_foward_steps(1) == '\n':
+                    self.advance()
+                    self.advance()
+                else:
+                    pos_start = self.pos.copy()
+                    self.advance() 
+                    return [], IllegalCharError(pos_start, self.pos, "Stray '\\' character in program")
             elif self.current_char == "^":
                 self.handle_pow_or_augmented()
             elif self.current_char == "%":
@@ -61,21 +74,53 @@ class Lexer:
             elif self.current_char == "=":
                 self.tokens.append(self.make_equals())
             elif self.current_char == "(":
-                self.tokens.append(Token(TT_LPAREN, pos_start=self.pos.copy()))
+                pos_start = self.pos.copy()
+                self.tokens.append(Token(TT_LPAREN, pos_start=pos_start))
                 self.advance()
                 self.tokens[-1].pos_end = self.pos.copy()
+                self.open_bracket_stack.append((')', pos_start))
             elif self.current_char == ")":
-                self.tokens.append(Token(TT_RPAREN, pos_start=self.pos.copy()))
+                pos_start_closer = self.pos.copy()
+                self.tokens.append(Token(TT_RPAREN, pos_start=pos_start_closer))
                 self.advance()
                 self.tokens[-1].pos_end = self.pos.copy()
+
+                if not self.open_bracket_stack:
+                    return [], InvalidSyntaxError(pos_start_closer, self.pos, "Unmatched ')'")
+                
+                expected_closer, opener_pos = self.open_bracket_stack[-1]
+                if expected_closer == ')':
+                    self.open_bracket_stack.pop()
+                else:
+                    actual_opener_char = '['
+                    return [], InvalidSyntaxError(
+                        pos_start_closer, self.pos,
+                        f"Mismatched closing parenthesis ')'. Expected '{expected_closer}' to close '{actual_opener_char}' opened at line {opener_pos.ln + 1}, column {opener_pos.col + 1}"
+                    )
             elif self.current_char == "[":
-                self.tokens.append(Token(TT_LSQUARE, pos_start=self.pos.copy()))
+                pos_start = self.pos.copy()
+                self.tokens.append(Token(TT_LSQUARE, pos_start=pos_start))
                 self.advance()
                 self.tokens[-1].pos_end = self.pos.copy()
+                self.open_bracket_stack.append((']', pos_start))
             elif self.current_char == "]":
-                self.tokens.append(Token(TT_RSQUARE, pos_start=self.pos.copy()))
+                pos_start_closer = self.pos.copy()
+                self.tokens.append(Token(TT_RSQUARE, pos_start=pos_start_closer))
                 self.advance()
                 self.tokens[-1].pos_end = self.pos.copy()
+
+                if not self.open_bracket_stack:
+                    return [], InvalidSyntaxError(pos_start_closer, self.pos, "Unmatched ']'")
+
+                expected_closer, opener_pos = self.open_bracket_stack[-1]
+                if expected_closer == ']':
+                    self.open_bracket_stack.pop()
+                else:
+                    actual_opener_char = '('
+                    return [], InvalidSyntaxError(
+                        pos_start_closer, self.pos,
+                        f"Mismatched closing bracket ']'"
+                    )
             elif self.current_char == "!":
                 token, error = self.make_not_equals()
                 if error:
@@ -94,6 +139,15 @@ class Lexer:
                 char = self.current_char
                 self.advance()
                 return [], IllegalCharError(pos_start, self.pos, "'" + char + "'")
+
+        if self.open_bracket_stack:
+            expected_closer, opener_pos_start = self.open_bracket_stack[-1]
+            actual_opener_char = '(' if expected_closer == ')' else '['
+            return [], InvalidSyntaxError(
+                opener_pos_start,
+                self.pos,
+                f"Expected '{expected_closer}'"
+            )
 
         self.tokens.append(Token(TT_EOF, pos_start=self.pos))
         return self.tokens, None
@@ -246,24 +300,24 @@ class Lexer:
             peek_pos.idx += 1
         if peek_pos.idx > len(self.text):
             return None
-        forward = self.text[peek_pos.idx : peek_pos.idx + 1]
-        return forward
+        if peek_pos.idx < len(self.text):
+            forward = self.text[peek_pos.idx : peek_pos.idx + 1]
+            return forward
+        return None
+
 
     def peek_foward_steps(self, steps) -> str | None:
-        peek_pos = self.pos.copy()
-        for _ in range(steps):
-            if peek_pos.idx > len(self.text):
-                return None
-            peek_pos.idx += 1
-        return self.text[peek_pos.idx : peek_pos.idx + 1]
+        peek_pos_idx = self.pos.idx + steps
+        if peek_pos_idx < len(self.text) and peek_pos_idx >=0 :
+            return self.text[peek_pos_idx : peek_pos_idx + 1]
+        return None
+
 
     def peek_backward_steps(self, steps) -> str | None:
-        peek_pos = self.pos.copy()
-        for _ in range(steps):
-            if peek_pos.idx < 0:
-                return None
-            peek_pos.idx -= 1
-        return self.text[peek_pos.idx : peek_pos.idx + 1]
+        peek_pos_idx = self.pos.idx - steps
+        if peek_pos_idx >= 0 and peek_pos_idx < len(self.text):
+            return self.text[peek_pos_idx : peek_pos_idx + 1]
+        return None
 
     def previous_token(self) -> Token | None:
         try:
@@ -506,7 +560,8 @@ class Lexer:
             return Token(TT_NE, pos_start=pos_start, pos_end=self.pos), None
 
         self.advance()
-        return None, ExpectedCharError(pos_start, self.pos, "'=' (after '!')")
+        return None, ExpectedCharError(pos_start, self.pos.copy(), "'=' (after '!')")
+
 
     def make_equals(self) -> Token:
         tok_type = TT_EQ

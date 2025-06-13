@@ -3781,17 +3781,10 @@ for func in BUILTIN_FUNCTIONS:
 private_symbol_table = SymbolTable()
 private_symbol_table.set("is_main", Number(0))
 
-debug_mode = False
 def run(fn, text):
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
-    if debug_mode:
-        print(f"{Fore.LIGHTBLACK_EX}{Style.BRIGHT}--- Tokens ---")
-        for token in tokens:
-            print(token)
     if error:
-        if debug_mode:
-            print(f"{Fore.LIGHTBLACK_EX}{Style.BRIGHT}--- Error ---")
         return None, error
     result = None
     context = None
@@ -3800,22 +3793,13 @@ def run(fn, text):
         ast = parser.parse()
         if ast.error:
             return None, ast.error
-        if debug_mode:
-            print(f"{Fore.LIGHTBLACK_EX}{Style.BRIGHT}--- AST ---")
-            from rich import print_json
-            print_json(data=ast_to_dict(ast.node))
-            print(f"{Fore.LIGHTBLACK_EX}{Style.BRIGHT}--- Output ---")
         interpreter = Interpreter()
         context = Context("<program>")
         context.symbol_table = global_symbol_table
         context.private_symbol_table = private_symbol_table
         context.private_symbol_table.set("is_main", Number(1))
         result = interpreter.visit(ast.node, context)
-        if not debug_mode:
-            if str(result.value) == "none":
-                result.value = ""
-            else:
-                pass
+        result.value = "" if str(result.value) == "none" else result.value
         return result.value, result.error
     except KeyboardInterrupt:
         print("Interrupt Error: User Terminated")
