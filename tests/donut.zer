@@ -25,8 +25,8 @@ while true do
             println(cached)
         else
             print("Rendering donut... (" + to_str(loop_count) + "/" + to_str(max_loop) + " frames)\r")
-            z = list_multiply([0], 1760)
-            b = list_multiply([" "], 1760)
+            z = [0] * 1760
+            b = [" "] * 1760
             j_ = set_reusable(0, true)
             i_ = set_reusable(0, true)
             for j = j_ to 628 step 7 do
