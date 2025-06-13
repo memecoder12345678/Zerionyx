@@ -1,6 +1,6 @@
 import os
 import sys
-from src.interp import run, INFO
+from src.interp import run, INFO, Fore, Style, debug_mode
 
 
 def check_file_comments_or_empty(file_path):
@@ -67,6 +67,8 @@ def main():
                     continue
                 result, error = run("<stdin>", text)
                 if error:
+                    if debug_mode:
+                        print(f"{Fore.LIGHTBLACK_EX}{Style.BRIGHT}--- Error ---")
                     if hasattr(error, "as_string"):
                         print(f"{error.as_string()}")
                     else:
@@ -86,7 +88,8 @@ def main():
     else:
         file_name = os.path.abspath(sys.argv[1])
         if not file_name.endswith(".zer"):
-            print("Error: The file must have a '.zer' extension.")
+            if debug_mode:
+                print("Error: The file must have a '.zer' extension.")
             return
         if not os.path.isfile(file_name):
             print(f"Error: File '{os.path.abspath(file_name)}' does not exist.")
@@ -100,6 +103,7 @@ def main():
                 text[i] = text[i].strip()
             result, error = run(file_name, "\n".join(text))
             if error:
+                print(f"{Fore.LIGHTBLACK_EX}{Style.BRIGHT}--- Error ---")
                 if hasattr(error, "as_string"):
                     print(f"{error.as_string()}")
                 else:
