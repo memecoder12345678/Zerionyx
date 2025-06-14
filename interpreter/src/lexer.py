@@ -173,7 +173,7 @@ class Lexer:
         escape_character = False
         self.advance()
 
-        escape_characters = {"n": "\n", "t": "\t", "r": "\r"}
+        escape_characters = {"n": "\n", "t": "\t", "r": "\r", "'": "\'", '"': '\"'}
 
         if self.current_char == "'" and self.peek_foward_steps(1) == "'":
             self.advance()
@@ -235,7 +235,7 @@ class Lexer:
         escape_character = False
         self.advance()
 
-        escape_characters = {"n": "\n", "t": "\t", "r": "\r"}
+        escape_characters = {"n": "\n", "t": "\t", "r": "\r", "'": "\'", '"': '\"'}
 
         if self.current_char == '"' and self.peek_foward_steps(1) == '"':
             self.advance()
