@@ -86,16 +86,15 @@ class Lexer:
                 self.tokens[-1].pos_end = self.pos.copy()
 
                 if not self.open_bracket_stack:
-                    return [], InvalidSyntaxError(pos_start_closer, self.pos, "Unmatched ')'")
+                    return [], ExpectedCharError(pos_start_closer, self.pos, "')'")
                 
-                expected_closer, opener_pos = self.open_bracket_stack[-1]
+                expected_closer, _ = self.open_bracket_stack[-1]
                 if expected_closer == ')':
                     self.open_bracket_stack.pop()
                 else:
-                    actual_opener_char = '['
-                    return [], InvalidSyntaxError(
+                    return [], ExpectedCharError(
                         pos_start_closer, self.pos,
-                        f"Mismatched closing parenthesis ')'. Expected '{expected_closer}' to close '{actual_opener_char}' opened at line {opener_pos.ln + 1}, column {opener_pos.col + 1}"
+                        f"'{expected_closer}'"
                     )
             elif self.current_char == "[":
                 pos_start = self.pos.copy()
@@ -110,16 +109,15 @@ class Lexer:
                 self.tokens[-1].pos_end = self.pos.copy()
 
                 if not self.open_bracket_stack:
-                    return [], InvalidSyntaxError(pos_start_closer, self.pos, "Unmatched ']'")
+                    return [], ExpectedCharError(pos_start_closer, self.pos, "']'")
 
-                expected_closer, opener_pos = self.open_bracket_stack[-1]
+                expected_closer, _ = self.open_bracket_stack[-1]
                 if expected_closer == ']':
                     self.open_bracket_stack.pop()
                 else:
-                    actual_opener_char = '('
-                    return [], InvalidSyntaxError(
+                    return [], ExpectedCharError(
                         pos_start_closer, self.pos,
-                        f"Mismatched closing bracket ']'"
+                        f"']'"
                     )
             elif self.current_char == "!":
                 token, error = self.make_not_equals()
@@ -142,11 +140,10 @@ class Lexer:
 
         if self.open_bracket_stack:
             expected_closer, opener_pos_start = self.open_bracket_stack[-1]
-            actual_opener_char = '(' if expected_closer == ')' else '['
-            return [], InvalidSyntaxError(
+            return [], ExpectedCharError(
                 opener_pos_start,
                 self.pos,
-                f"Expected '{expected_closer}'"
+                f"'{expected_closer}'"
             )
 
         self.tokens.append(Token(TT_EOF, pos_start=self.pos))
@@ -206,7 +203,7 @@ class Lexer:
                         string += self.current_char
                 self.advance()
             else:
-                return [], InvalidSyntaxError(pos_start, self.pos, "Unterminated string literal")
+                return [], ExpectedCharError(pos_start, self.pos, "\"'\"")
 
             return Token(TT_STRING, string, pos_start, self.pos), []
 
@@ -227,7 +224,7 @@ class Lexer:
             self.advance()
 
         if self.current_char != "'":
-            return [], InvalidSyntaxError(pos_start, self.pos, "Unterminated string literal")
+            return [], ExpectedCharError(pos_start, self.pos, "\"'\"")
 
         self.advance()
         return Token(TT_STRING, string, pos_start, self.pos), []
@@ -268,7 +265,7 @@ class Lexer:
                         string += self.current_char
                 self.advance()
             else:
-                return [], InvalidSyntaxError(pos_start, self.pos, "Unterminated string literal")
+                return [], ExpectedCharError(pos_start, self.pos, "'\"'")
 
             return Token(TT_STRING, string, pos_start, self.pos), []
 
@@ -289,7 +286,7 @@ class Lexer:
             self.advance()
 
         if self.current_char != '"':
-            return [], InvalidSyntaxError(pos_start, self.pos, "Unterminated string literal")
+            return [], ExpectedCharError(pos_start, self.pos, "'\"'")
 
         self.advance()
         return Token(TT_STRING, string, pos_start, self.pos), []
