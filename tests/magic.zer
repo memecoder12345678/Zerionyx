@@ -93,3 +93,11 @@ temp_file = "temp.txt"
 
 # no 
 t = "temp.txt"
+
+# yes
+a = 1
+b = a + a
+
+# no
+_ = 1
+__ = _ + _
