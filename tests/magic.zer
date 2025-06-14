@@ -1,0 +1,22 @@
+# WTF
+
+load "libs.sys"
+
+a = 1
+b = (
+    a
+    +
+    a
+    ^
+    2
+)
+c = b \
+    + \
+    b \
+    ^ \
+    3
+
+println("a: " + to_str(a))
+println("b: " + to_str(b))
+println("c: " + to_str(c))
+exit(0)
