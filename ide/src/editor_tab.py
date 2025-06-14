@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.Qsci import QsciScintilla
-from src.lexer import ZerionLexer
+from src.lexer import ZerionLexer, JsonLexer
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 
@@ -37,6 +37,8 @@ class EditorTab(QWidget):
 
         if filepath and filepath.endswith(".zer"):
             self.setup_zerion_features()
+        elif filepath and filepath.endswith(".json"):
+            self.setup_json_features()
 
         self.editor.installEventFilter(self)
         self.preview_mode = False
@@ -156,6 +158,19 @@ QAbstractItemView::item:selected {
         self.auto_timer = QTimer(self)
         self.auto_timer.timeout.connect(self.refresh_autocomplete)
         self.auto_timer.start(500)
+
+    def setup_json_features(self):
+        font = self.editor.font()
+        self.lexer = JsonLexer(self.editor)
+        self.lexer.setDefaultFont(font)
+        self.editor.setLexer(self.lexer)
+        from src.autocomplete import build_autocomplete
+
+        build_autocomplete(self.lexer)
+        self.editor.setAutoCompletionSource(QsciScintilla.AcsAPIs)
+        self.editor.setAutoCompletionThreshold(1)
+        self.editor.setAutoCompletionCaseSensitivity(False)
+        self.editor.setAutoCompletionUseSingle(QsciScintilla.AcusNever)
 
     def toggle_markdown_preview(self):
         if not self.is_markdown:

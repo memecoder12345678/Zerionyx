@@ -12,6 +12,7 @@ class FileTreeDelegate(QStyledItemDelegate):
         self.folder_open_icon = QIcon("icons:/folder-open.png")
         self.zer_icon = QIcon("icons:/zerion-icon.ico")
         self.default_icon = QIcon("icons:/default-icon.ico")
+        self.json_icon = QIcon("icons:/json-icon.ico")
         self.image_icon = QIcon("icons:/image-icon.ico")
         self.md_icon = QIcon("icons:/markdown-icon.png")
 
@@ -44,6 +45,8 @@ class FileTreeDelegate(QStyledItemDelegate):
                 option.icon = self.folder_closed_icon
         elif file_ext == ".zer":
             option.icon = self.zer_icon
+        elif file_ext == ".json":
+            option.icon = self.json_icon
         elif file_ext in image_extensions:
             option.icon = self.image_icon
         elif file_ext == ".md":

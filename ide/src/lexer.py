@@ -394,7 +394,7 @@ class ZerionLexer(BaseLexer):
             ],
             "libs.termcolor": ["cprintln", "cprint"],
         }
-        self.operators = ["+", "-", "*", "/", "%", "^", "=", "<", ">", "!"]
+        self.operators = ["+", "-", "*", "/", "%", "^", "=", "<", ">", "!", "\\"]
         self.types = ["list", "str", "int", "float", "func"]
         self.literals = ["true", "false", "none"]
         self.user_functions = set()
@@ -567,7 +567,6 @@ class ZerionLexer(BaseLexer):
             return
 
         self.update_definitions(full_text)
-
         self._scan_to_restore_state(start)
 
         self.startStyling(start)
@@ -583,24 +582,27 @@ class ZerionLexer(BaseLexer):
             if previous_style == self.COMMENTS and full_text[start - 1] != "\n":
                 line_comment_active = True
 
-        while True:
-            curr_token = self.next_tok()
-            if curr_token is None:
-                break
-
-            tok_str: str = curr_token[0]
-            tok_len: int = curr_token[1]
+        while len(self.token_list) > 0:
 
             if line_comment_active:
-                self.setStyling(tok_len, self.COMMENTS)
-                if "\n" in tok_str:
+                curr_token = self.next_tok()
+                if curr_token is None:
+                    break
+                self.setStyling(curr_token[1], self.COMMENTS)
+                if "\n" in curr_token[0]:
                     line_comment_active = False
                 continue
 
             if self.in_string_mode:
-                self.setStyling(tok_len, self.STRING)
+                curr_token = self.next_tok()
+                if curr_token is None:
+                    break
+                tok_str_mode = curr_token[0]
+                tok_len_mode = curr_token[1]
+                self.setStyling(tok_len_mode, self.STRING)
+
                 if self.is_triple_string:
-                    if tok_str == self.string_quote_char:
+                    if tok_str_mode == self.string_quote_char:
                         self.triple_closing_match_count += 1
                         if self.triple_closing_match_count == 3:
                             self.in_string_mode = False
@@ -610,11 +612,41 @@ class ZerionLexer(BaseLexer):
                 else:
                     if self.is_escape_sequence_char:
                         self.is_escape_sequence_char = False
-                    elif tok_str == "\\":
+                    elif tok_str_mode == "\\":
                         self.is_escape_sequence_char = True
-                    elif tok_str == self.string_quote_char:
+                    elif tok_str_mode == self.string_quote_char:
                         self.in_string_mode = False
                 continue
+
+            tok_num1_peek = self.peek_tok(0)
+            tok_dot_peek = self.peek_tok(1)
+            tok_num2_peek = self.peek_tok(2)
+
+            if (
+                tok_num1_peek
+                and tok_num1_peek[0].isnumeric()
+                and tok_dot_peek
+                and tok_dot_peek[0] == "."
+                and tok_num2_peek
+                and tok_num2_peek[0].isnumeric()
+            ):
+
+                num1_tok = self.next_tok()
+                self.setStyling(num1_tok[1], self.CONSTANTS)
+
+                dot_tok = self.next_tok()
+                self.setStyling(dot_tok[1], self.CONSTANTS)
+
+                num2_tok = self.next_tok()
+                self.setStyling(num2_tok[1], self.CONSTANTS)
+                continue
+
+            if tok_num1_peek is None:
+                break
+
+            curr_token = self.next_tok()
+            tok_str: str = curr_token[0]
+            tok_len: int = curr_token[1]
 
             if tok_str == "#":
                 self.setStyling(tok_len, self.COMMENTS)
@@ -622,11 +654,19 @@ class ZerionLexer(BaseLexer):
                 continue
 
             if tok_str in ['"', "'"]:
-                p1, p2 = self.peek_tok(0), self.peek_tok(1)
-                if p1 and p2 and p1[0] == tok_str and p2[0] == tok_str:
-                    combined_len = tok_len + p1[1] + p2[1]
-                    self.setStyling(combined_len, self.STRING)
-                    _, _ = self.next_tok(), self.next_tok()
+                p1_quote = self.peek_tok(0)
+                p2_quote = self.peek_tok(1)
+
+                if (
+                    p1_quote
+                    and p1_quote[0] == tok_str
+                    and p2_quote
+                    and p2_quote[0] == tok_str
+                ):
+                    self.setStyling(tok_len, self.STRING)
+                    self.setStyling(self.next_tok()[1], self.STRING)
+                    self.setStyling(self.next_tok()[1], self.STRING)
+
                     self.in_string_mode = True
                     self.is_triple_string = True
                     self.string_quote_char = tok_str
@@ -636,32 +676,116 @@ class ZerionLexer(BaseLexer):
                     self.in_string_mode = True
                     self.is_triple_string = False
                     self.string_quote_char = tok_str
+                    self.is_escape_sequence_char = False
                 continue
 
             if tok_str == "defun":
-                name_candidate, num_tokens = self.skip_spaces_peek()
-                if name_candidate and name_candidate[0].isidentifier():
-                    self.setStyling(tok_len, self.KEYWORD)
-                    for _ in range(num_tokens - 1):
-                        self.setStyling(self.next_tok()[1], self.DEFAULT)
-                    self.setStyling(self.next_tok()[1], self.FUNCTION_DEFINE)
-                else:
-                    self.setStyling(tok_len, self.KEYWORD)
-            elif tok_str in self.keywords_list:
+                self.setStyling(tok_len, self.KEYWORD)
+                num_space_tokens = 0
+                while True:
+                    peeked_space = self.peek_tok(0)
+                    if peeked_space and peeked_space[0].isspace():
+                        space_t = self.next_tok()
+                        self.setStyling(space_t[1], self.DEFAULT)
+                        num_space_tokens += 1
+                    else:
+                        break
+
+                func_name_peek = self.peek_tok(0)
+                if func_name_peek and func_name_peek[0].isidentifier():
+                    func_name_tok = self.next_tok()
+                    self.setStyling(func_name_tok[1], self.FUNCTION_DEFINE)
+                continue
+
+            if tok_str in self.keywords_list:
                 self.setStyling(tok_len, self.KEYWORD)
             elif tok_str in self.available_functions or tok_str in self.user_functions:
                 self.setStyling(tok_len, self.FUNCTIONS)
-            elif tok_str.isnumeric() or (
-                tok_str.count(".") == 1 and tok_str.replace(".", "").isnumeric()
-            ):
+            elif tok_str.isnumeric():
                 self.setStyling(tok_len, self.CONSTANTS)
             elif tok_str in self.types or tok_str in self.literals:
                 self.setStyling(tok_len, self.TYPES)
-            elif tok_str in "()[]":
+            elif tok_str in "()[]{}":
                 self.setStyling(tok_len, self.BRACKETS)
             elif tok_str in self.operators:
                 self.setStyling(tok_len, self.TYPES)
+            elif tok_str.isspace():
+                self.setStyling(tok_len, self.DEFAULT)
             else:
                 self.setStyling(tok_len, self.DEFAULT)
 
         self.last_scanned_pos = end
+
+
+class JsonLexer(BaseLexer):
+    def __init__(self, editor):
+        super(JsonLexer, self).__init__("JSON", editor)
+
+    def styleText(self, start, end):
+        self.startStyling(start)
+        text = self.editor.text()[start:end]
+
+        self.generate_tokens(text)
+
+        string_mode = False
+
+        while len(self.token_list) > 0:
+            if string_mode:
+                curr_token = self.next_tok()
+                if curr_token is None:
+                    break
+                tok_str_mode, tok_len_mode = curr_token
+
+                self.setStyling(tok_len_mode, self.STRING)
+                if tok_str_mode == '"':
+                    string_mode = False
+                continue
+
+            tok_num1_peek = self.peek_tok(0)
+            tok_dot_peek = self.peek_tok(1)
+            tok_num2_peek = self.peek_tok(2)
+
+            if (
+                tok_num1_peek
+                and tok_num1_peek[0].isnumeric()
+                and tok_dot_peek
+                and tok_dot_peek[0] == "."
+                and tok_num2_peek
+                and tok_num2_peek[0].isnumeric()
+            ):
+
+                num1_tok = self.next_tok()
+                self.setStyling(num1_tok[1], self.CONSTANTS)
+
+                dot_tok = self.next_tok()
+                self.setStyling(dot_tok[1], self.CONSTANTS)
+
+                num2_tok = self.next_tok()
+                self.setStyling(num2_tok[1], self.CONSTANTS)
+                continue
+
+            if tok_num1_peek is None:
+                break
+
+            curr_token_data = self.next_tok()
+            if curr_token_data is None:
+                break
+
+            tok: str = curr_token_data[0]
+            tok_len: int = curr_token_data[1]
+
+            if tok == '"':
+                self.setStyling(tok_len, self.STRING)
+                string_mode = True
+                continue
+
+            if tok == "-":
+                self.setStyling(tok_len, self.TYPES)
+            if tok in "()[]{}":
+                self.setStyling(tok_len, self.BRACKETS)
+            elif tok.isnumeric():
+                self.setStyling(tok_len, self.CONSTANTS)
+            elif tok in ["true", "false", "null"]:
+                self.setStyling(tok_len, self.TYPES)
+            else:
+                self.setStyling(tok_len, self.DEFAULT)
