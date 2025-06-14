@@ -1,7 +1,7 @@
 # libs.math
 
-let PI = PI_fp
-let E = E_fp
+PI = PI_fp
+E = E_fp
 
 defun pass()
     none
@@ -53,7 +53,7 @@ done
 
 defun tan(x)
     check_number(x, none, "tan")
-    let k = to_int(x / (PI / 2), false)
+    k = to_int(x / (PI / 2), false)
     if k % 2 != 0 and abs(x - (k * PI / 2)) < (1 * 10^-15) do
         panic("'tan' is undefined at this value", "M")
     done
@@ -106,7 +106,7 @@ defun log(x)
     return log_fp(x)
 done
 
-let ln2 = log(2)
+ln2 = log(2)
 
 defun sinh(x)
     check_number(x, none, "sinh")

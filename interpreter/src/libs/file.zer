@@ -9,7 +9,7 @@ defun write(f, m, t)
     if type(f) != str do
         panic("First argument of 'write' must be a string", "T")
     done
-    let f_ = open_fp(f)
+    f_ = open_fp(f)
     write_fp(f_, m, t)
 done
 
@@ -20,7 +20,7 @@ defun read(f)
     if type(f) != str do
         panic("First argument of 'read' must be a string", "T")
     done
-    let f_ = open_fp(f)
+    f_ = open_fp(f)
     return read_fp(f_)
 done
 

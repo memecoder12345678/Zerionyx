@@ -3,11 +3,11 @@
 load "libs.list"
 load "libs.string"
 
-let mem_ = []
+mem_ = []
 
 defun remember(k, v)
     for i = 0 to len(mem_) do 
-        let pair = mem_>i
+        pair = mem_>i
         if pair>0 == k do 
             change_value(pair, 1, v)
             return none
@@ -19,7 +19,7 @@ done
 
 defun recall(k)
     for i = 0 to len(mem_) do
-        let pair = mem_>i
+        pair = mem_>i
         if pair>0 == k do
             return pair>1
         done
@@ -28,9 +28,9 @@ defun recall(k)
 done
 
 defun forget(k)
-    let i = 0
+    i = 0
     while i < len(mem_) do
-        let pair = mem_>i
+        pair = mem_>i
         if pair>0 == k do
             pop(mem_, i)
         else
@@ -46,7 +46,7 @@ defun clear_memory()
 done
 
 defun keys()
-    let l = []
+    l = []
     for i = 0 to len(mem_) do
         append(l, mem_>i>0)
     done

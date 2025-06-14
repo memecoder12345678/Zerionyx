@@ -2,21 +2,21 @@
 
 load "libs.string"
 
-let color_map = [
+color_map = [
     ['black', 30], ['red', 31], ['green', 32], ['yellow', 33],
     ['blue', 34], ['magenta', 35], ['cyan', 36], ['white', 37]
 ]
-let bg_map = [
+bg_map = [
     ['on_black', 40], ['on_red', 41], ['on_green', 42], ['on_yellow', 43],
     ['on_blue', 44], ['on_magenta', 45], ['on_cyan', 46], ['on_white', 47]
 ]
-let style_map = [
+style_map = [
     ['bold', 1], ['underline', 4], ['reverse', 7]
 ]
 
 defun get_color(name)
     for i = 0 to len(color_map) do
-        let color = color_map>i
+        color = color_map>i
         if color>0 == name do
             return to_str(color>1)
         done
@@ -26,7 +26,7 @@ done
 
 defun get_bg(name)
     for i = 0 to len(bg_map) do
-        let bg = bg_map>i
+        bg = bg_map>i
         if bg>0 == name do
             return to_str(bg>1)
         done
@@ -36,7 +36,7 @@ done
 
 defun get_style(name)
     for i = 0 to len(style_map) do
-        let style = style_map>i
+        style = style_map>i
         if style>0 == name do
             return to_str(style>1)
         done
@@ -45,9 +45,9 @@ defun get_style(name)
 done
 
 defun get_code(c, b, s)
-    let color_code = ''
-    let bg_code = ''
-    let style_code = ''
+    color_code = ''
+    bg_code = ''
+    style_code = ''
     if not is_none(c) do
         color_code = get_color(c)
     done
@@ -57,7 +57,7 @@ defun get_code(c, b, s)
     if not is_none(s) do
         style_code = get_style(s)
     done
-    let all_codes = []
+    all_codes = []
     if color_code != '' do
         all_codes = all_codes + [color_code]
     done
@@ -71,7 +71,7 @@ defun get_code(c, b, s)
 done
 
 defun cprint(t, c, b, s)
-    let code_str = get_code(c, b, s)
+    code_str = get_code(c, b, s)
     if not is_none(code_str) do
         print(chr(27) + '[' + code_str + 'm' + to_str(t) + chr(27) + '[0m')
     else
@@ -81,7 +81,7 @@ defun cprint(t, c, b, s)
 done
 
 defun cprintln(t, c, b, s)
-    let code_str = get_code(c, b, s)
+    code_str = get_code(c, b, s)
     if not is_none(code_str) do
         println(chr(27) + '[' + code_str + 'm' + to_str(t) + chr(27) + '[0m')
     else

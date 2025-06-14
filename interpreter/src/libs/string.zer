@@ -2,14 +2,14 @@
 
 load "libs.math"
 
-let digits = "0123456789"
-let ascii_lowercase = "abcdefghijklmnopqrstuvwxyz"
-let ascii_uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-let ascii_letters = ascii_lowercase + ascii_uppercase
-let list_digits = split_fp(digits, "")
-let list_ascii_lowercase = split_fp(ascii_lowercase, "")
-let list_ascii_uppercase = split_fp(ascii_uppercase, "")
-let list_ascii_letters = split_fp(ascii_letters, "")
+digits = "0123456789"
+ascii_lowercase = "abcdefghijklmnopqrstuvwxyz"
+ascii_uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ascii_letters = ascii_lowercase + ascii_uppercase
+list_digits = split_fp(digits, "")
+list_ascii_lowercase = split_fp(ascii_lowercase, "")
+list_ascii_uppercase = split_fp(ascii_uppercase, "")
+list_ascii_letters = split_fp(ascii_letters, "")
 
 defun split(s, s_)
     return split_fp(s, s_)
@@ -118,11 +118,11 @@ defun find(s, v)
 done
 
 defun find_all(s, v)
-    let result = []
-    let start = 0
+    result = []
+    start = 0
     while true do
-        let sub = slice(s, start, none)
-        let idx = find(sub, v)
+        sub = slice(s, start, none)
+        idx = find(sub, v)
         if is_none(idx) do
             break
         done
@@ -145,7 +145,7 @@ defun startswith(s, v)
     if len(v) > len(s) do
         return false
     done
-    let prefix = slice(s, 0, len(v))
+    prefix = slice(s, 0, len(v))
     return prefix == v
 done
 
@@ -162,6 +162,6 @@ defun endswith(s, v)
     if len(v) > len(s) do
         return false
     done
-    let suffix = slice(s, len(s) - len(v), none) 
+    suffix = slice(s, len(s) - len(v), none) 
     return suffix == v
 done

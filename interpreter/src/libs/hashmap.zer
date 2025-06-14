@@ -12,17 +12,17 @@ defun hashmap(l1, l2, df)
         panic("Length of 'l1' must be >= length of 'l2'", "RT")
     done
     for i = 0 to len(l1) do
-        let key = l1>i
+        key = l1>i
         if index_of(l1, key) != i do
             panic("Duplicate key detected in 'l1'", "RT")
         done
     done
-    let r = []
-    let zipped = zip_longest(l1, l2)
+    r = []
+    zipped = zip_longest(l1, l2)
     for i = 0 to len(zipped) do
-        let pair = zipped>i
-        let k = pair>0
-        let v = pair>1
+        pair = zipped>i
+        k = pair>0
+        v = pair>1
         if v == none do
             v = df
         done
@@ -36,7 +36,7 @@ defun get_hashmap_value(h, k, df)
         panic("First argument of 'get_hashmap_value' must be a list", "T")
     done
     for i = 0 to len(h) do
-        let pair = h>i
+        pair = h>i
         if pair>0 == k do
             return pair>1
         done
@@ -85,7 +85,7 @@ defun get_hashmap_keys(h)
     if type(h) != list do
         panic("First argument of 'get_hashmap_keys' must be a list", "T")
     done
-    let r = []
+    r = []
     for i = 0 to len(h) do
         append(r, h>i>0)
     done
@@ -96,7 +96,7 @@ defun get_hashmap_values(h)
     if type(h) != list do
         panic("First argument of 'get_hashmap_values' must be a list", "T")
     done
-    let r = []
+    r = []
     for i = 0 to len(h) do
         append(r, h>i>1)
     done

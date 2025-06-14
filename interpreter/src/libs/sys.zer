@@ -1,7 +1,7 @@
 # libs.sys
 
-let argv = argv_fp
-let os_name = os_name_fp
+argv = argv_fp
+os_name = os_name_fp
 
 defun system(c)
     system_fp(c)
