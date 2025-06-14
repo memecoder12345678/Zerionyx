@@ -242,6 +242,7 @@ class ZerionLexer(BaseLexer):
             "to_str",
             "type",
             "get_password",
+            "slice",
             "pyexec",
         }
         self.lib_functions = {
@@ -283,8 +284,6 @@ class ZerionLexer(BaseLexer):
                 "find_all",
                 "startswith",
                 "endswith",
-                "str_multiply",
-                "str_slice",
             ],
             "libs.list": [
                 "map",
@@ -300,7 +299,6 @@ class ZerionLexer(BaseLexer):
                 "count",
                 "index_of",
                 "clear_list",
-                "list_multiply",
                 "rand_int_list",
                 "rand_float_list",
             ],

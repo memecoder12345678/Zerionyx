@@ -509,9 +509,11 @@ class BuiltInFunction(BaseFunction):
             )
         a = int(start.value) if not isinstance(start, None_) else None
         b = int(end.value) if not isinstance(end, None_) else None
+        
+        if isinstance(l, String):
+            sliced_l = l.value[a:b]
+            return RTResult().success(String(sliced_l))
         sliced_l = l.elements[a:b]
-        if isinstance(l, string):
-            return RTResult().success(string(sliced_l))
         return RTResult().success(List(sliced_l))
 
     execute_slice.arg_names = ["l", "start", "end"]

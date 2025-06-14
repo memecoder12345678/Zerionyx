@@ -121,7 +121,7 @@ defun find_all(s, v)
     let result = []
     let start = 0
     while true do
-        let sub = str_slice(s, start, none)
+        let sub = slice(s, start, none)
         let idx = find(sub, v)
         if is_none(idx) do
             break
@@ -145,7 +145,7 @@ defun startswith(s, v)
     if len(v) > len(s) do
         return false
     done
-    let prefix = str_slice(s, 0, len(v))
+    let prefix = slice(s, 0, len(v))
     return prefix == v
 done
 
@@ -162,6 +162,6 @@ defun endswith(s, v)
     if len(v) > len(s) do
         return false
     done
-    let suffix = str_slice(s, len(s) - len(v), none) 
+    let suffix = slice(s, len(s) - len(v), none) 
     return suffix == v
 done

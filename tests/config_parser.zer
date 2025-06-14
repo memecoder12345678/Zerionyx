@@ -26,7 +26,7 @@ defun parse_config(config_file)
                 println(": line " + to_str(i + 1) + " has malformed section (missing ']'). Skipping.")
                 continue
             done
-            raw_section_name = str_slice(line, 1, end_idx)
+            raw_section_name = slice(line, 1, end_idx)
             current_section_name = strip(raw_section_name, " \t")
             if current_section_name == "" do
                 cprint("Warning", "yellow", none, "bold")
@@ -48,7 +48,7 @@ defun parse_config(config_file)
                 continue
             done
             key = strip(to_str(vals>0), " ")
-            val_str_raw = strip(to_str(join("", list_slice(vals, 1, len(vals)))), " ")
+            val_str_raw = strip(to_str(join("", slice(vals, 1, len(vals)))), " ")
             if key == "" or val_str_raw == "" do
                 cprint("Error", "red", none, "bold")
                 println(": line " + to_str(i + 1) + " has an empty key or value.")
@@ -67,7 +67,7 @@ defun parse_config(config_file)
                     elif c == '"' and not in_single_quote do
                         in_double_quote = not in_double_quote
                     elif (c == '#' or c == ';') and not in_single_quote and not in_double_quote do
-                        val_str_processed = strip(join("", list_slice(val_chars, 0, char_idx)), " ")
+                        val_str_processed = strip(join("", slice(val_chars, 0, char_idx)), " ")
                         break
                     done
                 done
@@ -85,7 +85,7 @@ defun parse_config(config_file)
             elif val_str_processed == "false" do
                 val = false
             elif (startswith(val_str_processed, '"') and endswith(val_str_processed, '"')) or (startswith(val_str_processed, "'") and endswith(val_str_processed, "'")) do
-                val = to_str(str_slice(val_str_processed, 1, -1))
+                val = to_str(slice(val_str_processed, 1, -1))
             else
                 val = to_str(val_str_processed)
             done

@@ -1,4 +1,5 @@
 # libs.hashmap
+load "libs.list"
 
 defun hashmap(l1, l2, df)
     if type(l1) != list do
