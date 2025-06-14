@@ -1,22 +1,30 @@
-# WTF
+x = 1
+y = 2
+z = 3
+a = 4
+b = 2
+c = 1
 
-load "libs.sys"
-
-a = 1
-b = (
-    a
-    +
-    a
-    ^
-    2
+result = (
+    x
+    + y * z
+    - a / b ^ 2
 )
-c = b \
-    + \
-    b \
-    ^ \
-    3
 
-println("a: " + to_str(a))
-println("b: " + to_str(b))
-println("c: " + to_str(c))
-exit(0)
+result = x \
+    + y * z \
+    - a / b ^ 2 \
+
+if x > 10 \
+    and y < 5 \
+    or z == 99 do
+    println("OK")
+done
+
+if (
+        x > 10
+        and y < 5
+        or z == 99
+    ) do
+    println("OK")
+done
