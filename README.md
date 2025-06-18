@@ -1,4 +1,8 @@
 # Zerion Programming Language
+![MIT License](https://img.shields.io/badge/license-MIT-00ffcc?style=for-the-badge&logo=Open%20Source%20Initiative&logoColor=white)
+![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-00ffcc?style=for-the-badge&logo=python&logoColor=white)
+![Zerion Version](https://img.shields.io/badge/zerion-v2.2.9-00ffcc?style=for-the-badge&logo=lightning&logoColor=white)
+
 ![Zerion](docs/favicon.ico)
 
 Zerion is an educational programming language designed for learning and task automation.
@@ -20,6 +24,7 @@ Zerion is an educational programming language designed for learning and task aut
 
 ## Example
 
+<!-- Ruby syntax highlighting is used because Zerion's syntax is quite similar to Ruby -->
 ```ruby
 # Hello World
 println("Hello, World!")
@@ -34,6 +39,9 @@ defun add(a, b)
     return a + b
 done
 
+# Or, for one-line functions
+defun add(a, b) -> a + b
+
 println(add(5, 3))
 
 # Lists
@@ -44,15 +52,15 @@ println(nums)
 ## How to Use Zerion
 - **Install**: Clone the repository from GitHub.
 - **Setup**: Add Zerion to your PATH if you want to run it from anywhere.
-- **Run a file**: python ./interpreter/zerion.py yourfile.zer
-- **Open interactive shell**: Just run python ./interpreter/zerion.py and start typing Zerion code.
+- **Run a file**: `python ./interpreter/zerion.py yourfile.zer`
+- **Open interactive shell**: Just run `python ./interpreter/zerion.py` and start typing Zerion code.
 - **Get help**: Type grammar, license, or copyright in the shell for info.
 - **Documentation**: Read the full docs here.
 
 
 ## Recommended Environment
-- **For learning**: Python 3.11.9 or newer (best for beginners and educational purposes)
-- **For automation**: PyPy 3.11.11 (recommended when running repetitive tasks or automation scripts)
+- **For learning**: Python 3.11+ or newer (best for beginners and educational purposes)
+- **For automation**: PyPy 3.11 (recommended when running repetitive tasks or automation scripts)
 - **IDE recommendation**: Use [Zerion Editor](https://memecoder12345678.github.io/zerion/docs.html#Zerion-Editor) with syntax highlighting for the best learning experience
 - **Note**: While the language is designed for simplicity, PyPy can significantly speed up automation tasks
 
@@ -65,6 +73,18 @@ Visit the official Zerion website for an introduction and more information: [Zer
 ## Documentation
 
 The official Zerion documentation is available at [Zerion Documentation Website](https://memecoder12345678.github.io/zerion/docs.html)
+
+## Zerion Philosophy
+
+> Clarity is better than cleverness.
+> 
+> Consistency is better than chaos.
+> 
+> Freedom in syntax, but not in structure.
+> 
+
+See full [Zen of Zerion](https://memecoder12345678.github.io/zerion/docs.html#Zen-of-Zerion)
+
 
 ## License
 
