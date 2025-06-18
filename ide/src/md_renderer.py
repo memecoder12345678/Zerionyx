@@ -1,7 +1,7 @@
 from mistune import HTMLRenderer, create_markdown
 
 
-class CustomListRenderer(HTMLRenderer):
+class ZerionyxCustomRenderer(HTMLRenderer):
     def list_item(self, text, checked=None):
         text_list = text.split("\n")
         parts = []
@@ -33,5 +33,5 @@ class CustomListRenderer(HTMLRenderer):
 
 
 markdown = create_markdown(
-    renderer=CustomListRenderer(), plugins=["table", "task_lists"]
+    renderer=ZerionyxCustomRenderer(), plugins=["table", "task_lists"]
 )
