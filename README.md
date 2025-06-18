@@ -1,9 +1,17 @@
-# Zerion Programming Language
-![MIT License](https://img.shields.io/badge/license-MIT-00ffcc?style=for-the-badge&logo=Open%20Source%20Initiative&logoColor=white)
-![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-00ffcc?style=for-the-badge&logo=python&logoColor=white)
-![Zerion Version](https://img.shields.io/badge/zerion-v2.2.9-00ffcc?style=for-the-badge&logo=lightning&logoColor=white)
+<h1 align="center">Zerion Programming Language</h1>
 
-![Zerion](docs/favicon.ico)
+
+<div align="center">
+    <img src="docs/favicon.ico" alt="Zerion">
+</div>
+
+
+<div align="center">
+    <img src="https://img.shields.io/badge/license-MIT-00ffcc?style=for-the-badge&logo=Open%20Source%20Initiative&logoColor=white" alt="License">
+    <img src="https://img.shields.io/badge/python-3.11%2B-00ffcc?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11+">
+    <img src="https://img.shields.io/badge/zerion-v2.2.9-00ffcc?style=for-the-badge&logo=lightning&logoColor=white" alt="Zerion Version">
+</div>
+
 
 Zerion is an educational programming language designed for learning and task automation.
 
