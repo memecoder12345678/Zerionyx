@@ -509,7 +509,7 @@ class BuiltInFunction(BaseFunction):
             )
         a = int(start.value) if not isinstance(start, None_) else None
         b = int(end.value) if not isinstance(end, None_) else None
-        
+
         if isinstance(l, String):
             sliced_l = l.value[a:b]
             return RTResult().success(String(sliced_l))
@@ -3782,6 +3782,7 @@ for func in BUILTIN_FUNCTIONS:
 
 private_symbol_table = SymbolTable()
 private_symbol_table.set("is_main", Number(0))
+
 
 def run(fn, text):
     lexer = Lexer(fn, text)

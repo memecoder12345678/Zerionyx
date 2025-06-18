@@ -1,5 +1,7 @@
 from colorama import init, Fore, Style
+
 init(autoreset=True)
+
 
 def string_with_arrows(text, pos_start, pos_end, indent):
     result = " " * indent
@@ -14,7 +16,9 @@ def string_with_arrows(text, pos_start, pos_end, indent):
         col_end = pos_end.col if i == line_count - 1 else len(line) - 1
         line: str
         result += line.replace("\n", "") + "\n"
-        result += " " * (col_start + indent) + f"{Fore.LIGHTRED_EX}^{Fore.RESET}" * (col_end - col_start)
+        result += " " * (col_start + indent) + f"{Fore.LIGHTRED_EX}^{Fore.RESET}" * (
+            col_end - col_start
+        )
         idx_start = idx_end
         idx_end = text.find("\n", idx_start + 1)
         if idx_end < 0:
@@ -33,9 +37,12 @@ class Error:
 
     def __str__(self):
         result = f"File {Fore.MAGENTA}'{self.pos_start.fn}'{Fore.RESET}, line {Fore.MAGENTA}{self.pos_start.ln + 1}{Fore.RESET}\n"
-        result += string_with_arrows(
-            self.pos_start.ftxt, self.pos_start, self.pos_end, 2
-        ).rstrip() + Fore.RESET
+        result += (
+            string_with_arrows(
+                self.pos_start.ftxt, self.pos_start, self.pos_end, 2
+            ).rstrip()
+            + Fore.RESET
+        )
         result += f"\n{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{self.error_name}{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{self.details}"
         return result
 
