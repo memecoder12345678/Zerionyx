@@ -1,5 +1,5 @@
 load "libs.sys"
-load "libs.colorterm"
+load "libs.termcolor"
 
 defun main()
     cprintln("Halo, World!", "blue", none, "bold")
