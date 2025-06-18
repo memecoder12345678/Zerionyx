@@ -25,7 +25,7 @@ class WelcomeScreen(QWidget):
         title_wrapper_layout.setContentsMargins(0, 0, 0, 0)
         title_wrapper_layout.setSpacing(10)
 
-        title_label = QLabel("Zerionyx EDITOR")
+        title_label = QLabel("ZERIONYX EDITOR")
         title_label.setStyleSheet(
             """
             QLabel {
