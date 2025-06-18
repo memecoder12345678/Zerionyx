@@ -1,8 +1,8 @@
 from PyQt5.Qsci import QsciAPIs
-from .lexer import ZerionLexer, JsonLexer
+from .lexer import ZerionyxLexer, JsonLexer
 
 
-def build_autocomplete(lexer: ZerionLexer | JsonLexer) -> QsciAPIs:
+def build_autocomplete(lexer: ZerionyxLexer | JsonLexer) -> QsciAPIs:
     apis = QsciAPIs(lexer)
     apis.clear()
 
@@ -14,7 +14,7 @@ def build_autocomplete(lexer: ZerionLexer | JsonLexer) -> QsciAPIs:
         apis.prepare()
         return apis
 
-    if isinstance(lexer, ZerionLexer):
+    if isinstance(lexer, ZerionyxLexer):
         for token in lexer.keywords_list:
             apis.add(token)
         for func in lexer.available_functions:

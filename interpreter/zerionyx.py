@@ -23,7 +23,7 @@ def check_file_comments_or_empty(file_path):
 
 def main():
     if len(sys.argv) == 1:
-        print(f"Zerion {INFO}")
+        print(f"Zerionyx {INFO}")
         print(
             "Type 'grammar', 'copyright', 'license' for more information or 'exit' to exit."
         )
@@ -75,7 +75,7 @@ def main():
         except Exception as e:
             print(f"Shell error: {e}")
     elif len(sys.argv) == 2 and sys.argv[1] == "--version":
-        print(f"Zerion {INFO}")
+        print(f"Zerionyx {INFO}")
         return
     else:
         file_name = os.path.abspath(sys.argv[1])

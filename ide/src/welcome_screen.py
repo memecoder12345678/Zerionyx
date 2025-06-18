@@ -25,7 +25,7 @@ class WelcomeScreen(QWidget):
         title_wrapper_layout.setContentsMargins(0, 0, 0, 0)
         title_wrapper_layout.setSpacing(10)
 
-        title_label = QLabel("ZERION EDITOR")
+        title_label = QLabel("Zerionyx EDITOR")
         title_label.setStyleSheet(
             """
             QLabel {
@@ -38,7 +38,7 @@ class WelcomeScreen(QWidget):
         title_label.setAlignment(Qt.AlignLeft)
 
         icon_label = QLabel()
-        icon_pixmap = QPixmap("icons:/zerion-gray-icon.ico")
+        icon_pixmap = QPixmap("icons:/Zerionyx-gray-icon.ico")
         icon_label.setPixmap(
             icon_pixmap.scaled(52, 52, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         )
@@ -49,7 +49,7 @@ class WelcomeScreen(QWidget):
 
         title_layout.addWidget(title_wrapper)
 
-        subtitle_label = QLabel("Welcome to Zerion Editor!")
+        subtitle_label = QLabel("Welcome to Zerionyx Editor!")
         subtitle_label.setStyleSheet(
             """
             QLabel {

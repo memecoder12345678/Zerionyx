@@ -213,9 +213,9 @@ class BaseLexer(QsciLexerCustom):
             return ("", 0), temp_idx + 1
 
 
-class ZerionLexer(BaseLexer):
+class ZerionyxLexer(BaseLexer):
     def __init__(self, editor):
-        super(ZerionLexer, self).__init__("Zerion", editor)
+        super(ZerionyxLexer, self).__init__("Zerionyx", editor)
         self.current_file = None
         self.core_functions = {
             "append",

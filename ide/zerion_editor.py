@@ -22,12 +22,12 @@ class MainWindow(QMainWindow):
     def __init__(self):
 
         super().__init__()
-        self.setWindowTitle("Zerion Editor")
+        self.setWindowTitle("Zerionyx Editor")
         QDir.addSearchPath(
             "icons",
             os.path.join(os.path.dirname(__file__), f".{os.sep}src{os.sep}icons"),
         )
-        self.setWindowIcon(QIcon("icons:/zerion-icon.ico"))
+        self.setWindowIcon(QIcon("icons:/Zerionyx-icon.ico"))
         self.resize(1300, 900)
         self.status_bar = QStatusBar()
         self.status_bar.setStyleSheet(
@@ -550,7 +550,7 @@ class MainWindow(QMainWindow):
             root_index = self.fs_model.index(folder)
             self.file_tree.setRootIndex(root_index)
             self.folder_label.setText(os.path.basename(folder).upper())
-            self.setWindowTitle(f"Zerion Editor - {os.path.basename(folder)}")
+            self.setWindowTitle(f"Zerionyx Editor - {os.path.basename(folder)}")
 
             self.fs_watcher.addPath(folder)
 
@@ -600,7 +600,7 @@ class MainWindow(QMainWindow):
     def update_folder_title(self):
         folder_name = os.path.basename(self.current_project_dir)
         self.folder_label.setText(folder_name.upper())
-        self.setWindowTitle(f"Zerion Editor - {folder_name}")
+        self.setWindowTitle(f"Zerionyx Editor - {folder_name}")
 
     def select_all(self):
         if editor := self.get_current_editor():
@@ -638,7 +638,7 @@ class MainWindow(QMainWindow):
 
     def open_file(self):
         fname, _ = QFileDialog.getOpenFileName(
-            self, "Open File", "", "Zerion Files (*.zer);;All Files (*.*)"
+            self, "Open File", "", "Zerionyx Files (*.zer);;All Files (*.*)"
         )
         if fname:
             self.open_specific_file(fname)
@@ -718,7 +718,7 @@ class MainWindow(QMainWindow):
         if isinstance(current, ImageViewer):
             return
         fname, _ = QFileDialog.getSaveFileName(
-            self, "Save File", "", "Zerion Files (*.zer);;All Files (*.*)"
+            self, "Save File", "", "Zerionyx Files (*.zer);;All Files (*.*)"
         )
         if fname:
             current.filepath = fname
@@ -1083,7 +1083,7 @@ class MainWindow(QMainWindow):
         self.folder_section.hide()
         self.splitter.setSizes([0, self.width()])
 
-        self.setWindowTitle("Zerion Editor")
+        self.setWindowTitle("Zerionyx Editor")
         self.show_status_message("Folder closed")
         self.status_folder.clear()
 

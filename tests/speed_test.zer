@@ -12,7 +12,7 @@ let start = time()
     done
 end = time()
 println("Sum: " + to_str(total))
-println("Zerion ran in: " + to_str(end - start) + " seconds")
+println("Zerionyx ran in: " + to_str(end - start) + " seconds")
 exit(0)
 
 # Fastest: 1.2033976 seconds

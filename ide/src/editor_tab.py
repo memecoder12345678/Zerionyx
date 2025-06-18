@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.Qsci import QsciScintilla
-from src.lexer import ZerionLexer, JsonLexer
+from src.lexer import ZerionyxLexer, JsonLexer
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 
@@ -36,7 +36,7 @@ class EditorTab(QWidget):
         self.setup_basic_editor()
 
         if filepath and filepath.endswith(".zer"):
-            self.setup_zerion_features()
+            self.setup_Zerionyx_features()
         elif filepath and filepath.endswith(".json"):
             self.setup_json_features()
 
@@ -142,9 +142,9 @@ QAbstractItemView::item:selected {
         elif line_count > 0:
             self.editor.setMarginWidth(0, "000")
 
-    def setup_zerion_features(self):
+    def setup_Zerionyx_features(self):
         font = self.editor.font()
-        self.lexer = ZerionLexer(self.editor)
+        self.lexer = ZerionyxLexer(self.editor)
         self.lexer.setDefaultFont(font)
         self.editor.setLexer(self.lexer)
         from src.autocomplete import build_autocomplete

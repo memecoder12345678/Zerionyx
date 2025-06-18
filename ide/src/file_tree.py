@@ -10,7 +10,7 @@ class FileTreeDelegate(QStyledItemDelegate):
         self.tree_view = tree_view
         self.folder_closed_icon = QIcon("icons:/folder-closed.png")
         self.folder_open_icon = QIcon("icons:/folder-open.png")
-        self.zer_icon = QIcon("icons:/zerion-icon.ico")
+        self.zer_icon = QIcon("icons:/Zerionyx-icon.ico")
         self.default_icon = QIcon("icons:/default-icon.ico")
         self.json_icon = QIcon("icons:/json-icon.ico")
         self.image_icon = QIcon("icons:/image-icon.ico")
