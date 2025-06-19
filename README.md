@@ -102,7 +102,7 @@ Then type commands like `grammar`, `license`, etc.
 
 ### 4. Full Documentation
 
- [Zerionyx Docs](https://memecoder12345678.github.io/Zerionyx/docs.html)
+👉 [Zerionyx Docs](https://memecoder12345678.github.io/Zerionyx/docs.html)
 
 ---
 
