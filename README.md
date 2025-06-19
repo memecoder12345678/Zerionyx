@@ -119,7 +119,6 @@ Then type commands like `grammar`, `license`, etc.
 * [x] Add basic REPL and shell commands
 * [x] Add algorithms & data structure libraries
 * [ ] Add OOP support  
-* [ ] Load libraries from DLLs
 * [ ] Integrate debugger support
 * [ ] Create syntax highlighting plugin for VSCode
 * [ ] Implement optional VM (performance upgrade)
