@@ -16,6 +16,7 @@
 ---
 
 ## Overview
+![Zerionyx Demo](demo.svg)
 
 **Zerionyx** is an educational programming language designed for learning and lightweight task automation, offering beginner-friendly syntax, immediate visual feedback, and helpful error messages.
 
