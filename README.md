@@ -51,7 +51,7 @@
 
 ## Code Samples
 
-```zerionyx
+```ruby
 # Hello World
 println("Hello, World!")
 
