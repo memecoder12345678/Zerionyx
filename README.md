@@ -137,6 +137,33 @@ Contributions are welcome! To get involved:
 
 ---
 
+## Looking for Contributors
+
+Zerionyx is growing fast — and we're looking for awesome people to help shape its future.
+
+We're especially looking for contributors interested in: 
+
+- Designing and implementing a **custom bytecode virtual machine**  
+- Integrating **dynamic library loading (.dll / .so)** into the language  
+- Debugging and stabilizing the **experimental OOP system** (currently buggy!)  
+- Writing test suites and improving interpreter performance  
+- Creating developer tools (debuggers, profilers, code formatters)  
+
+**Requirements?**  
+
+> No strict rules — if you're passionate about compilers, VMs, or language design, join in!
+
+### How to join:
+
+1. Fork the repo & check open issues  
+2. Pick a task or open a proposal  
+3. Join the project by opening a Pull Request  
+4. Or reach out via [GitHub issues](https://github.com/memecoder12345678/Zerionyx/issues)
+
+Let’s make Zerionyx better, together 💚
+
+---
+
 ## Acknowledgments
 
 Thanks to the open-source makers and template authors (Owne Readme, Jeff Nyman) for README inspiration ([github.com][2], [en.wikipedia.org][1], [makeareadme.com][3]).
