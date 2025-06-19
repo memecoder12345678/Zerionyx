@@ -4,6 +4,7 @@
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-00ffcc?style=for-the-badge&logo=Open%20Source%20Initiative&logoColor=white" alt="License" />
   </a>
+  <img src="https://img.shields.io/badge/build-passing-00ffcc?style=for-the-badge&logo=githubactions&logoColor=white" alt="Build Status">
   <img src="https://img.shields.io/badge/python-3.11%2B-00ffcc?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Zerionyx-v2.2.9-00ffcc?style=for-the-badge&logo=lightning&logoColor=white" alt="Zerionyx v2.2.9">
 </p>
@@ -120,3 +121,15 @@ Explore the full [Zen of Zerionyx](https://memecoder12345678.github.io/Zerionyx/
 ## License
 
 Zerionyx is open-source under the [MIT License](LICENSE). Feel free to use, modify, and distribute.
+
+---
+
+## Contributing
+
+Contributions, ideas, and improvements are welcome!  
+Feel free to fork this repo and open a pull request.
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/my-feature`)
+3. Commit your changes and push
+4. Open a pull request 🎉
