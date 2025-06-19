@@ -1,4 +1,4 @@
-<h1 align="center">Zerionyxyx Programming Language</h1>
+<h1 align="center">Zerionyx Programming Language</h1>
 
 <p align="center">
   <a href="LICENSE">
@@ -16,7 +16,7 @@
 
 ## Overview
 
-**Zerionyxyx** is an educational programming language designed for learning and lightweight task automation, offering beginner-friendly syntax, immediate visual feedback, and helpful error messages.
+**Zerionyx** is an educational programming language designed for learning and lightweight task automation, offering beginner-friendly syntax, immediate visual feedback, and helpful error messages.
 
 ---
 
@@ -109,12 +109,9 @@ println(nums)
 
 ##  Zerionyx Philosophy
 
-> *Clarity is better than cleverness.*
->
-> *Consistency is better than chaos.*
-> 
-> *Freedom in syntax, not in structure.*
-> 
+> - *Clarity is better than cleverness.*
+> - *Consistency is better than chaos.*
+> - *Freedom in syntax, not in structure.*
 
 Explore the full [Zen of Zerionyx](https://memecoder12345678.github.io/Zerionyx/docs.html#Zen-of-Zerionyx) in our docs.
 
@@ -122,4 +119,4 @@ Explore the full [Zen of Zerionyx](https://memecoder12345678.github.io/Zerionyx/
 
 ## License
 
-Zerionyxyx is open-source under the **MIT License**. Feel free to use, modify, and distribute.
+Zerionyx is open-source under the [MIT License](LICENSE). Feel free to use, modify, and distribute.
