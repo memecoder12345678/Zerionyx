@@ -162,7 +162,14 @@ We're especially looking for contributors interested in:
 Let’s make Zerionyx better, together 💚
 
 ---
+## Support Zerionyx 💸
 
+If you find this project useful and want to support its development, you can donate via Bitcoin:
+
+**Bitcoin Address:** `bc1qft6dt6wz7kpd2dkpc5r2g4p60jsm649l6u9k4j`
+
+Thank you for your support! 💚
+---
 ## Acknowledgments
 
 Thanks to the open-source makers and template authors (Owne Readme, Jeff Nyman) for README inspiration ([github.com][2], [en.wikipedia.org][1], [makeareadme.com][3]).
@@ -181,6 +188,6 @@ Zerionyx is released under the **MIT License**. See [LICENSE](LICENSE).
 * Docs: [memecoder12345678.github.io/Zerionyx](https://memecoder12345678.github.io/Zerionyx)
 
 ---
-[1]: https://en.wikipedia.org/wiki/README?utm_source=chatgpt.com "README"
-[2]: https://github.com/jehna/readme-best-practices?utm_source=chatgpt.com "Best practices for writing a README for your open source project - GitHub"
-[3]: https://www.makeareadme.com/?utm_source=chatgpt.com "Make a README"
+[1]: https://en.wikipedia.org/wiki/README "README"
+[2]: https://github.com/jehna/readme-best-practices "Best practices for writing a README for your open source project - GitHub"
+[3]: https://www.makeareadme.com/ "Make a README"
