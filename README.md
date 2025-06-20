@@ -77,7 +77,7 @@ println(nums)
 
 ---
 
-Check (tests)[tests] folder for more information / Full Overview
+Check [tests](tests) folder for more information / Full Overview
 
 ## Getting Started
 
