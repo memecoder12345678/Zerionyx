@@ -169,6 +169,7 @@ If you find this project useful and want to support its development, you can don
 **Bitcoin Address:** `bc1qft6dt6wz7kpd2dkpc5r2g4p60jsm649l6u9k4j`
 
 Thank you for your support! 💚
+
 ---
 ## Acknowledgments
 
