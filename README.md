@@ -2,10 +2,11 @@
   <img src="docs/favicon.ico" alt="Zerionyx Logo" width="200" />
   <h1 align="center">Zerionyx Programming Language</h1>
   <p align="center">
-    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-00ffcc?style=for-the-badge&logo=Open%20Source%20Initiative" alt="License" /></a>
-    <img src="https://img.shields.io/badge/build-passing-00ffcc?style=for-the-badge&logo=githubactions" alt="Build Status" />
     <img src="https://img.shields.io/badge/python-3.11%2B-00ffcc?style=for-the-badge&logo=python" alt="Python 3.11+" />
+    <img src="https://img.shields.io/badge/donate-Monero-00ffcc?style=for-the-badge&logo=monero" />
     <img src="https://img.shields.io/badge/Zerionyx-v2.2.9-00ffcc?style=for-the-badge&logo=lightning" alt="Zerionyx v2.2.9" />
+    <img src="https://img.shields.io/badge/build-passing-00ffcc?style=for-the-badge&logo=githubactions" alt="Build Status" />
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-00ffcc?style=for-the-badge&logo=Open%20Source%20Initiative" alt="License" /></a>
   </p>
 </p>
 
@@ -166,11 +167,21 @@ Let’s make Zerionyx better, together 💚
 ---
 ## Support Zerionyx 💸
 
-If you find this project useful and want to support its development, you can donate via Bitcoin:
+If you find this project useful and want to support its development **anonymously and securely**, you can donate via **Monero (XMR)**:
 
-**Bitcoin Address:** `bc1qft6dt6wz7kpd2dkpc5r2g4p60jsm649l6u9k4j`
+**Monero Address:**  
+```
+49vK21oktPG6TXymtpzPNcWh9u2nBCJ4v9wcX2Xo5iWJf8p4ZFBVhv6Y2SLo6qxCmsPMi3Q14RcXsf8USjtrgmyzJubFfpm
+```
 
-Thank you for your support! 💚
+**Monero QR:**  
+<p align="center">
+  <img src="qr.png" alt="Monero Donation QR Code" width="200"/>
+</p>
+
+> Use wallets like [Feather Wallet](https://featherwallet.org/) or [Monero GUI](https://www.getmonero.org/downloads/) to send donations.
+
+
 
 ---
 ## Acknowledgments
