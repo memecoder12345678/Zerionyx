@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/favicon.ico" alt="Zerionyx Logo" width="175" />
+  <img src="docs/favicon.ico" alt="Zerionyx Logo" width="200" />
   <h1 align="center">Zerionyx Programming Language</h1>
   <p align="center">
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-00ffcc?style=for-the-badge&logo=Open%20Source%20Initiative" alt="License" /></a>
@@ -76,6 +76,8 @@ println(nums)
 ```
 
 ---
+
+Check (tests)[tests] folder for more information / Full Overview
 
 ## Getting Started
 
