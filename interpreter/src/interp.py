@@ -9,6 +9,7 @@ from .types_ import *
 from .consts import *
 from .errors import TError, IOError, MError, Error, RTError
 from shutil import rmtree, copy
+from functools import lru_cache
 from .lexer import Lexer, RTResult
 
 from getpass import getpass
@@ -3395,7 +3396,7 @@ for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]
         setattr(BuiltInFunction, func_name, BuiltInFunction(func_name))
         BUILTIN_FUNCTIONS.append(func_name)
 
-
+@lru_cache(maxsize=None)
 class Interpreter:
 
     def visit(self, node, context):
