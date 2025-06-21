@@ -12,23 +12,45 @@
 
 ---
 
+## 📑 Table of Contents
+
+- [Overview](#overview)
+- [Why Zerionyx?](#why-zerionyx)
+- [Interactive Shell Demo](#interactive-shell-demo)
+- [Features](#features)
+- [Code Samples](#code-samples)
+- [Getting Started](#getting-started)
+- [Recommended Setup](#recommended-setup)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [Looking for Contributors](#looking-for-contributors)
+- [Support Zerionyx 💸](#support-zerionyx-)
+- [Acknowledgments](#acknowledgments)
+- [License](#license)
+- [Contact](#contact)
+
+---
+
 ## Overview
 
-**Zerionyx** is an educational programming language built in Python, designed for **learning** and **lightweight task automation**. It offers:
+**Zerionyx** is an educational programming language built in Python, designed for **learning** and **lightweight task automation**.  
+Designed to be minimal yet powerful — **Zerionyx bridges the gap between learning and real-world scripting.**
 
-* Beginner-friendly syntax
-* Immediate visual feedback and clear error diagnostics
-* Built-in libraries (math, algorithms, data structures)
-* File handling and scripting support
+It offers:
+
+* Beginner-friendly syntax  
+* Immediate visual feedback and clear error diagnostics  
+* Built-in libraries (math, algorithms, data structures)  
+* File handling and scripting support  
 * Lightweight yet expressive—ideal for teaching and prototyping
 
 ---
 
 ## Why Zerionyx?
 
-* **Great for learners** who want to understand programming fundamentals
-* **Perfect for educators** to create interactive demos and tools
-* **Not suited** for high-performance or production-scale applications
+* **Great for learners** who want to understand programming fundamentals  
+* **Perfect for educators** to create interactive demos and tools  
+* **Optimized for simplicity over performance** — not intended for large-scale production systems
 
 ---
 
@@ -42,10 +64,10 @@
 
 ## Features
 
-* Intuitive and consistent syntax
-* Educational standard libraries (e.g., math, algorithms)
-* Visual error diagnostics to help learners
-* File I/O and automation commands
+* Intuitive and consistent syntax  
+* Educational standard libraries (e.g., math, algorithms)  
+* Visual error diagnostics to help learners  
+* File I/O and automation commands  
 * Interactive shell with REPL support
 
 ---
@@ -74,12 +96,24 @@ println(add(5, 3))
 # Lists
 nums = [1, 2, 3, 4, 5]
 println(nums)
-```
 
----
+# Conditional
+if x > y do
+    println("X is greater")
+else
+    println("Y is greater")
+done
+
+# Loop
+for i = 0 to len(nums) do
+    println("Index: " + to_str(i))
+    println("Value: " + to_str(nums>i) + "\n")
+done
+```
 
 Check [tests](tests) folder for more information / Full Overview
 
+---
 ## Getting Started
 
 ### 1. Clone this repo
