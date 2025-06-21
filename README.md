@@ -12,7 +12,7 @@
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Why Zerionyx?](#why-zerionyx)
