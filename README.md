@@ -126,7 +126,7 @@ cd Zerionyx
 ### 2. Install required packages
 
 ```bash
-python3 -m pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ### 3. Run a Zerionyx script
