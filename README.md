@@ -34,7 +34,7 @@
 ## Overview
 
 **Zerionyx** is an educational programming language built in Python, designed for **learning** and **lightweight task automation**.  
-Designed to be minimal yet powerful — **Zerionyx bridges the gap between learning and real-world scripting.**
+Designed to be minimal yet powerful &mdash; **Zerionyx bridges the gap between learning and real-world scripting.**
 
 It offers:
 
@@ -42,7 +42,7 @@ It offers:
 * Immediate visual feedback and clear error diagnostics  
 * Built-in libraries (math, algorithms, data structures)  
 * File handling and scripting support  
-* Lightweight yet expressive-ideal for teaching and prototyping
+* Lightweight yet expressive &mdash; ideal for teaching and prototyping
 
 ---
 
@@ -50,7 +50,7 @@ It offers:
 
 * **Great for learners** who want to understand programming fundamentals  
 * **Perfect for educators** to create interactive demos and tools  
-* **Optimized for simplicity over performance** — not intended for large-scale production systems
+* **Optimized for simplicity over performance** &mdash; not intended for large-scale production systems
 
 ---
 
@@ -111,7 +111,7 @@ for i = 0 to len(nums) do
 done
 ```
 
-Check [tests](tests) folder for more information / Full Overview
+For more examples, check the [`tests`](tests) folder for a full overview.
 
 ---
 ## Getting Started
@@ -181,7 +181,7 @@ Contributions are welcome! To get involved:
 
 ## Looking for Contributors
 
-Zerionyx is growing fast — and we're looking for awesome people to help shape its future.
+Zerionyx is growing fast &mdash; and we're looking for awesome people to help shape its future.
 
 We're especially looking for contributors interested in: 
 
@@ -193,7 +193,7 @@ We're especially looking for contributors interested in:
 
 **Requirements?**  
 
-> No strict rules — if you're passionate about compilers, VMs, or language design, join in!
+> No strict rules &mdash; if you're passionate about compilers, VMs, or language design, join in!
 
 ### How to join:
 
