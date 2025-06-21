@@ -108,7 +108,7 @@ class WelcomeScreen(QWidget):
         center_layout.addWidget(title_container)
         center_layout.addWidget(actions_widget)
         center_layout.addStretch()
-        center_container.setFixedWidth(565)
+        center_container.setFixedWidth(650)
         layout.addWidget(center_container)
 
         layout.addStretch(2)
