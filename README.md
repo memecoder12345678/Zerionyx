@@ -6,6 +6,8 @@
     <img src="https://img.shields.io/badge/donate-Monero-00ffcc?style=for-the-badge&logo=monero" />
     <img src="https://img.shields.io/badge/Zerionyx-v2.2.9-00ffcc?style=for-the-badge&logo=lightning" alt="Zerionyx v2.2.9" />
     <img src="https://img.shields.io/badge/build-passing-00ffcc?style=for-the-badge&logo=githubactions" alt="Build Status" />
+    <img src="https://img.shields.io/github/contributors/memecoder12345678/Zerionyx?style=for-the-badge&color=00ffcc">
+    <img src="https://img.shields.io/github/stars/memecoder12345678/Zerionyx?style=for-the-badge&color=00ffcc">
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-00ffcc?style=for-the-badge&logo=Open%20Source%20Initiative" alt="License" /></a>
   </p>
 </p>
