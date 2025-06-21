@@ -199,7 +199,8 @@ Zerionyx is released under the **MIT License**. See [LICENSE](LICENSE).
 ## Contact
 
 * GitHub: [memecoder12345678](https://github.com/memecoder12345678)
-* Docs: [memecoder12345678.github.io/Zerionyx](https://memecoder12345678.github.io/Zerionyx)
+* Official website: [memecoder12345678.github.io/Zerionyx](https://memecoder12345678.github.io/Zerionyx)
+* Docs: [memecoder12345678.github.io/Zerionyx/docs.html](https://memecoder12345678.github.io/Zerionyx/docs.html)
 
 ---
 [1]: https://en.wikipedia.org/wiki/README "README"
