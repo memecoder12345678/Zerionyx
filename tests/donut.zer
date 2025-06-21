@@ -23,6 +23,7 @@ while true do
         if cached != none do
             clear()
             println(cached)
+            sleep(0.03)
         else
             print("Rendering donut... (" + to_str(loop_count) + "/" + to_str(max_loop) + " frames)\r")
             z = [0] * 1760
