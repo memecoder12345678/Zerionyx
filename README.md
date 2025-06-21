@@ -141,7 +141,7 @@ python ./interpreter/Zerionyx.py tests/HaloWorld.zer
 python ./interpreter/Zerionyx.py
 ```
 
-Use commands such as 'grammar', 'license', etc. for more details.
+Use commands such as `grammar`, `license`, etc. for more details.
 
 ### 5. Full Documentation
 
