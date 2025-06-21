@@ -165,7 +165,6 @@ Use commands such as `grammar`, `license`, etc. for more details.
 * [x] Add algorithms & data structure libraries
 * [ ] Integrate debugger support
 * [ ] Create syntax highlighting plugin for VSCode
-* [ ] Implement optional VM (performance upgrade)
 
 ---
 
@@ -186,7 +185,6 @@ Zerionyx is growing fast &mdash; and we're looking for awesome people to help sh
 
 We're especially looking for contributors interested in: 
 
-- Designing and implementing a **custom bytecode virtual machine**  
 - Integrating **dynamic library loading (.dll / .so)** into the language  
 - Writing test suites and improving interpreter performance  
 - Creating developer tools (debuggers, profilers, code formatters)  
