@@ -163,7 +163,6 @@ Use commands such as `grammar`, `license`, etc. for more details.
 
 * [x] Add basic REPL and shell commands
 * [x] Add algorithms & data structure libraries
-* [ ] Add OOP support (see [Pseudo-OOP.md](https://github.com/memecoder12345678/Zerionyx/blob/main/docs/Pseudo-OOP.md) for more details)
 * [ ] Integrate debugger support
 * [ ] Create syntax highlighting plugin for VSCode
 * [ ] Implement optional VM (performance upgrade)
@@ -189,7 +188,6 @@ We're especially looking for contributors interested in:
 
 - Designing and implementing a **custom bytecode virtual machine**  
 - Integrating **dynamic library loading (.dll / .so)** into the language  
-- Debugging and stabilizing the **experimental OOP system** (currently buggy!)  
 - Writing test suites and improving interpreter performance  
 - Creating developer tools (debuggers, profilers, code formatters)  
 
