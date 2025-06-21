@@ -155,7 +155,7 @@ Then type commands like `grammar`, `license`, etc.
 
 * [x] Add basic REPL and shell commands
 * [x] Add algorithms & data structure libraries
-* [ ] Add OOP support  
+* [ ] Add OOP support (see [Pseudo-OOP.md](https://github.com/memecoder12345678/Zerionyx/blob/main/docs/Pseudo-OOP.md) for more details)
 * [ ] Integrate debugger support
 * [ ] Create syntax highlighting plugin for VSCode
 * [ ] Implement optional VM (performance upgrade)
