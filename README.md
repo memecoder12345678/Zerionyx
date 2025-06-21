@@ -123,21 +123,27 @@ git clone https://github.com/memecoder12345678/Zerionyx.git
 cd Zerionyx
 ```
 
-### 2. Run a Zerionyx script
+### 2. Install required packages
 
 ```bash
-python ./interpreter/Zerionyx.py examples/demo.zer
+python3 -m pip install -r requirements.txt
 ```
 
-### 3. Launch interactive shell
+### 3. Run a Zerionyx script
+
+```bash
+python ./interpreter/Zerionyx.py tests/HaloWorld.zer
+```
+
+### 4. Launch interactive shell
 
 ```bash
 python ./interpreter/Zerionyx.py
 ```
 
-Then type commands like `grammar`, `license`, etc.
+Use commands such as 'grammar', 'license', etc. for more details.
 
-### 4. Full Documentation
+### 5. Full Documentation
 
 👉 [Zerionyx Docs](https://memecoder12345678.github.io/Zerionyx/docs.html)
 
@@ -147,7 +153,7 @@ Then type commands like `grammar`, `license`, etc.
 
 * **Python 3.11+** for best compatibility
 * **PyPy 3.11** for faster performance (optional)
-* Use with **Zerionyx Editor** for syntax highlighting (**recommended**)
+* Use with [Zerionyx Editor](https://memecoder12345678.github.io/Zerionyx/docs.html#Zerionyx-Editor) for syntax highlighting (**recommended**)
 
 ---
 
