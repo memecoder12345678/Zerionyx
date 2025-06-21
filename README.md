@@ -42,7 +42,7 @@ It offers:
 * Immediate visual feedback and clear error diagnostics  
 * Built-in libraries (math, algorithms, data structures)  
 * File handling and scripting support  
-* Lightweight yet expressive—ideal for teaching and prototyping
+* Lightweight yet expressive-ideal for teaching and prototyping
 
 ---
 
