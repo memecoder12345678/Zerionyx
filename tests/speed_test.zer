@@ -8,7 +8,7 @@ i = 1
 i = set_reusable(i, true) # Reusable variable to avoid reallocation
 let start = time()
     for i_ = i to N + 1 do
-        total += i
+        total += i_
     done
 end = time()
 println("Sum: " + to_str(total))
