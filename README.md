@@ -163,7 +163,7 @@ Use commands such as `grammar`, `license`, etc. for more details.
 
 * [x] Add basic REPL and shell commands
 * [x] Add algorithms & data structure libraries
-* [ ] Integrate debugger support
+* [X] Integrate debugger support
 * [ ] Integrating **dynamic library loading (.dll / .so)** into the language
 * [ ] Create syntax highlighting plugin for VSCode
 
