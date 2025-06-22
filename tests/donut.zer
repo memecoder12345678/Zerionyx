@@ -4,13 +4,14 @@ load "libs.string"
 load "libs.list"
 load "libs.time"
 load "libs.memory"
+load "libs.keyboard"
 
 A = set_reusable(0, true)
 B = set_reusable(0, true)
 loop_count = set_reusable(0, true)
 max_loop = to_int(2 * PI / 0.04, false) # 157 frames
 shading = [".", ",", "-", "~", ":", ";", "=", "!", "*", "#", "$", "@"]
-clear()
+print(chr(27) + "[2J" + chr(27) + "[H")
 while true do
     frame_id = "frame_" + to_str(loop_count)
     cached = recall(frame_id)
@@ -21,9 +22,14 @@ while true do
         continue
     else
         if cached != none do
-            clear()
+            print(chr(27) + "[2J" + chr(27) + "[H")
             println(cached)
+            println("\n\nPress q to exit...")
             sleep(0.03)
+            if keyboard_is_pressed("q") do
+                print(chr(27) + "[2J" + chr(27) + "[H")
+                exit(0)
+            done
         else
             print("Rendering donut... (" + to_str(loop_count) + "/" + to_str(max_loop) + " frames)\r")
             z = [0] * 1760
