@@ -246,6 +246,9 @@ class ThreadWrapper(Object):
         if self.thread.is_alive():
             self.thread._stop()
 
+    def type(self):
+        return "<thread>"
+
 
 class BaseFunction(Object):
 
