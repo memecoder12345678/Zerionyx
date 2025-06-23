@@ -165,8 +165,7 @@ Use commands such as `grammar`, `license`, etc. for more details.
 * [x] Add algorithms & data structure libraries
 * [X] Integrate debugger support
 * [ ] Integrating **dynamic library loading (.dll / .so)** into the language
-* [ ] Create syntax highlighting plugin for VSCode
-
+* [ ] Improving interpreter performance  
 ---
 
 ## Contributing
