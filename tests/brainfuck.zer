@@ -15,8 +15,8 @@ defun brainfuck(nput)
     output = ""
     i = 0
     while i < len(nput) do
-        # println("i: " + to_str(i) + ", " + "nput>i: " + ", " + to_str(nput>i) + ", " + "memory: " + to_str(memory)+ ", " + "pointer: " + to_str(pointer))
-        if (nput>i) == ">" do
+        # println("i: " + to_str(i) + ", " + "nput.i: " + ", " + to_str(nput.i) + ", " + "memory: " + to_str(memory)+ ", " + "pointer: " + to_str(pointer))
+        if (nput.i) == ">" do
             if pointer >= 30000 do
                 println("Memory Error")
             else
@@ -25,40 +25,40 @@ defun brainfuck(nput)
                 done
             done
             pointer += 1
-        elif (nput>i) == "<" do
+        elif (nput.i) == "<" do
             if pointer > 0 do
                 pointer -= 1
             done
-        elif (nput>i) == "+" do
+        elif (nput.i) == "+" do
             change_value(memory, pointer, ((memory>pointer)+1) % 256)
-        elif (nput>i) == "-" do
+        elif (nput.i) == "-" do
             if memory>pointer > 0 do
                 change_value(memory, pointer, (memory>pointer)-1)
             done
-        elif (nput>i) == "." do
+        elif (nput.i) == "." do
             output = output + chr(memory>pointer)
-        elif (nput>i) == "," do
+        elif (nput.i) == "," do
             change_value(memory, pointer, ord(input("> ")))
-        elif (nput>i) == "[" do
+        elif (nput.i) == "[" do
             if (memory>pointer) == 0 do
                 count = 1
                 while count > 0 do
                     i += 1
-                    if (nput>i) == "[" do
+                    if (nput.i) == "[" do
                         count += 1
-                    elif (nput>i) == "]" do
+                    elif (nput.i) == "]" do
                         count -= 1
                     done
                 done
             done
-        elif (nput>i) == "]" do
+        elif (nput.i) == "]" do
             if (memory>pointer) != 0 do
                 count = 1
                 while count > 0 do
                     i -= 1
-                    if (nput>i) == "]" do
+                    if (nput.i) == "]" do
                         count += 1
-                    elif (nput>i) == "[" do
+                    elif (nput.i) == "[" do
                         count -= 1
                     done
                 done

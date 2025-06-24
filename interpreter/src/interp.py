@@ -224,9 +224,15 @@ class BuiltInFunction(BaseFunction):
 
     execute_is_num.arg_names = ["value"]
 
+    def execute_is_bool(self, exec_ctx):
+        is_bool = isinstance(exec_ctx.symbol_table.get("value"), Bool)
+        return RTResult().success(Number.true if is_bool else Number.false)
+
+    execute_is_bool.arg_names = ["value"]
+
     def execute_is_str(self, exec_ctx):
-        is_number = isinstance(exec_ctx.symbol_table.get("value"), String)
-        return RTResult().success(Number.true if is_number else Number.false)
+        is_str = isinstance(exec_ctx.symbol_table.get("value"), String)
+        return RTResult().success(Number.true if is_str else Number.false)
 
     execute_is_str.arg_names = ["value"]
 
@@ -479,7 +485,8 @@ class BuiltInFunction(BaseFunction):
         l = exec_ctx.symbol_table.get("l")
         start = exec_ctx.symbol_table.get("start")
         end = exec_ctx.symbol_table.get("end")
-        if not isinstance(l, String | List):
+        step = exec_ctx.symbol_table.get("step")
+        if not isinstance(l, String | List | HashMap):
             return RTResult().failure(
                 TError(
                     self.pos_start,
@@ -508,13 +515,26 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
+        if not isinstance(step, Number) and not isinstance(step, None_):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Fourth argument of 'slice' must be a number or none",
+                    exec_ctx,
+                )
+            )
         a = int(start.value) if not isinstance(start, None_) else None
         b = int(end.value) if not isinstance(end, None_) else None
+        s = int(step.value) if not isinstance(step, None_) else None
 
         if isinstance(l, String):
-            sliced_l = l.value[a:b]
+            sliced_l = l.value[a:b:s]
             return RTResult().success(String(sliced_l))
-        sliced_l = l.elements[a:b]
+        elif isinstance(l, HashMap):
+            sliced_l = dict(l.values.items()[a:b:s])
+            return RTResult().success(HashMap(sliced_l))
+        sliced_l = l.elements[a:b:s]
         return RTResult().success(List(sliced_l))
 
     execute_slice.arg_names = ["l", "start", "end"]
@@ -1869,7 +1889,7 @@ class BuiltInFunction(BaseFunction):
         try:
             t0 = time.time()
             subprocess.check_output(
-                ["ping", "-n", "1", host], stderr=subprocess.DEVNULL
+                ["ping", "-n", "1", host], stderr=subprocess.DEVnone
             )
             t1 = time.time()
             return [str(round((t1 - t0) * 1000)) + " ms"]
@@ -2240,49 +2260,6 @@ class BuiltInFunction(BaseFunction):
 
     execute_is_file_fp.arg_names = ["path"]
 
-    def execute_set_reusable(self, exec_ctx):
-        value = exec_ctx.symbol_table.get("value")
-        reusable = exec_ctx.symbol_table.get("reusable")
-        if not isinstance(value, Number) and not isinstance(value, List):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'set_reusable' must be a list or a number",
-                    exec_ctx,
-                )
-            )
-        if not isinstance(reusable, Number):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'set_reusable' must be a number",
-                    exec_ctx,
-                )
-            )
-        if reusable.value == 0:
-            if isinstance(value, List):
-                return RTResult().success(List(value.elements, reusable=False))
-            elif isinstance(value, Number):
-                return RTResult().success(Number(value.value, reusable=False))
-        elif reusable.value == 1:
-            if isinstance(value, List):
-                return RTResult().success(List(value.elements, reusable=True))
-            elif isinstance(value, Number):
-                return RTResult().success(Number(value.value, reusable=True))
-        else:
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'set_reusable' must be a boolean",
-                    exec_ctx,
-                )
-            )
-
-    execute_set_reusable.arg_names = ["value", "reusable"]
-
     def execute_sqrt_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
         return RTResult().success(Number(math.sqrt(a.value)))
@@ -2423,7 +2400,7 @@ class BuiltInFunction(BaseFunction):
                 return String(obj)
         elif isinstance(obj, list):
             items = []
-            for idx, item in enumerate(obj):
+            for item in obj:
                 if not isinstance(
                     item, (bool, int, float, str, list, dict, tuple, type(None))
                 ):
@@ -2432,23 +2409,21 @@ class BuiltInFunction(BaseFunction):
                     items.append(self.validate_pyexec_result(item))
             return List(items)
         elif isinstance(obj, dict):
-            items = []
+            new_dict = {}
             for k, v in obj.items():
                 if not isinstance(k, (str, int, float, bool)):
-                    items.append(List([String(str(k)), String(str(v))]))
+                    key = String(str(k))
+                    value = String(str(v))
                 else:
-                    items.append(
-                        List(
-                            [
-                                self.validate_pyexec_result(k),
-                                self.validate_pyexec_result(v),
-                            ]
-                        )
-                    )
-            return List(items)
+                    key = self.validate_pyexec_result(k)
+                    value = self.validate_pyexec_result(v)
+
+                new_dict[key] = value
+
+            return HashMap(new_dict)
         elif isinstance(obj, tuple):
             items = []
-            for idx, item in enumerate(obj):
+            for item in obj:
                 if not isinstance(
                     item, (bool, int, float, str, list, dict, tuple, type(None))
                 ):
@@ -2473,7 +2448,6 @@ class BuiltInFunction(BaseFunction):
         try:
             local_env = {}
             exec(code.value, {}, local_env)
-            # print(local_env)
             fr = self.validate_pyexec_result(local_env)
             return RTResult().success(fr)
         except Exception as e:
@@ -3387,6 +3361,166 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
+    execute_request_fp.arg_names = ["url", "method", "headers", "data", "timeout"]
+    
+    def execute_keys(self, exec_ctx):
+        hm = exec_ctx.symbol_table.get("hm")
+        if not isinstance(hm, HashMap):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'keys' must be a hashmap",
+                    exec_ctx,
+                )
+            )
+        return RTResult().success(List(hm.keys()))
+    execute_keys.arg_names = ["hm"]
+    
+    def execute_values(self, exec_ctx):
+        hm = exec_ctx.symbol_table.get("hm")
+        if not isinstance(hm, HashMap):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'values' must be a hashmap",
+                    exec_ctx,
+                )
+            )
+        return RTResult().success(List(hm.values()))
+    execute_values.arg_names = ["hm"]
+
+    def execute_items(self, exec_ctx):
+        hm = exec_ctx.symbol_table.get("hm")
+        if not isinstance(hm, HashMap):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'items' must be a hashmap",
+                    exec_ctx,
+                )
+            )
+        return RTResult().success(List(hm.items()))
+    execute_items.arg_names = ["hm"]
+    
+    def execute_has(self, exec_ctx):
+        hm = exec_ctx.symbol_table.get("hm")
+        key = exec_ctx.symbol_table.get("key")
+        if not isinstance(hm, HashMap):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'has' must be a hashmap",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(key, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'has' must be a string",
+                    exec_ctx,
+                )
+            )
+        return RTResult().success(Bool(hm.has(key.value)))
+    execute_has.arg_names = ["hm", "key"]
+
+    def execute_get(self, exec_ctx):
+        hm = exec_ctx.symbol_table.get("hm")
+        key = exec_ctx.symbol_table.get("key")
+        default = exec_ctx.symbol_table.get("default")
+
+        if not isinstance(hm, HashMap):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'get' must be a hashmap",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(key, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'get' must be a string",
+                    exec_ctx,
+                )
+            )
+        return RTResult().success(hm.get_index(key.value, default))
+    execute_get.arg_names = ["hm", "key", "default"]
+    
+    def execute_set(self, exec_ctx):
+        hm = exec_ctx.symbol_table.get("hm")
+        key = exec_ctx.symbol_table.get("key")
+        value = exec_ctx.symbol_table.get("value")
+
+        if not isinstance(hm, HashMap):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'set' must be a hashmap",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(key, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'set' must be a string",
+                    exec_ctx,
+                )
+            )
+        hm.set_index(key.value, value)
+        return RTResult().success(value)
+    execute_set.arg_names = ["hm", "key", "value"]
+    
+    
+    def execute_del(self, exec_ctx):
+        hm = exec_ctx.symbol_table.get("hm")
+        key = exec_ctx.symbol_table.get("key")
+
+        if not isinstance(hm, HashMap):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'del' must be a hashmap",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(key, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'del' must be a string",
+                    exec_ctx,
+                )
+            )
+        hm.remove(key.value)
+        return RTResult().success(None_.none)
+    execute_del.arg_names = ["hm", "key"]
+
+#=======================================================================#
+# Hàm	                 | Mô tả                                        #
+#=======================================================================#
+# keys(hm)	             |  Trả về danh sách key                        #
+# values(hm)	         |  Trả về danh sách value                      #
+# items(hm)	             |  Trả về list các cặp [key, value]            #
+# has(hm, key)	         |  Trả về true nếu tồn tại key                 #
+# get(hm, key, default)  | 	Trả về value hoặc default nếu không tồn tại #
+# set(hm, key, value)    | Thêm hoặc cập nhật key với value             #
+# remove(hm, key)	     |  Xoá key và value tương ứng                  #
+#=======================================================================#
+
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -3498,12 +3632,15 @@ class Interpreter:
             result, error = left.get_comparison_lte(right)
         elif node.op_tok.type == TT_GTE:
             result, error = left.get_comparison_gte(right)
+        elif node.op_tok.type == TT_DOT:
+            result, error = left.dotted_by(right)
         elif node.op_tok.matches(TT_KEYWORD, "and"):
             result, error = left.anded_by(right)
         elif node.op_tok.matches(TT_KEYWORD, "or"):
             result, error = left.ored_by(right)
         elif node.op_tok.type == TT_FLOORDIV:
             result, error = left.floordived_by(right)
+
 
         if error:
             return res.failure(error)
@@ -3763,6 +3900,73 @@ class Interpreter:
             )
 
         return res.success(result)
+    
+    def visit_HashMapNode(self, node, context):
+        res = RTResult()
+        values = {}
+
+        for key_node, value_node in node.pairs:
+            key = res.register(self.visit(key_node, context))
+            if res.should_return():
+                return res
+
+            if not isinstance(key, String):
+                return res.failure(
+                    RTError(key_node.pos_start, key_node.pos_end, f"Non-string key for hashmap: '{key!r}'", context)
+                )
+
+            value = res.register(self.visit(value_node, context))
+            if res.should_return():
+                return res
+            assert value is not None
+
+            values[key.value] = value
+
+        return res.success(HashMap(values))
+    def visit_ForInNode(self, node: ForInNode, context: Context) -> RTResult:
+        res = RTResult()
+        var_name = node.var_name_tok.value
+        body = node.body_node
+        should_return_none = node.should_return_none
+
+        iterable = res.register(self.visit(node.iterable_node, context))
+        if res.should_return():
+            return res
+
+        iterator, error = iterable.iter()
+        if error:
+            return res.failure(error)
+
+        elements = []
+
+        try:
+            while True:
+                current = next(iterator)
+                context.symbol_table.set(var_name, current)
+
+                value = res.register(self.visit(body, context))
+                if res.should_return() and not res.loop_should_continue and not res.loop_should_break:
+                    return res
+                    
+
+                if res.loop_should_break:
+                    break
+
+                if res.loop_should_continue:
+                    continue
+
+                if not should_return_none:
+                    elements.append(value)
+        except StopIteration:
+            pass
+
+        if should_return_none:
+            return res.success(None_.none)
+        else:
+            return res.success(
+                List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
+            )
+
 
 
 global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv[1:]]))
@@ -3775,6 +3979,8 @@ global_symbol_table.set("str", String("<str>"))
 global_symbol_table.set("int", String("<int>"))
 global_symbol_table.set("float", String("<float>"))
 global_symbol_table.set("func", String("<func>"))
+global_symbol_table.set("bool", String("<bool>"))
+global_symbol_table.set("hashmap", String("<hashmap>"))
 global_symbol_table.set("thread", String("<thread>"))
 global_symbol_table.set("os_name_fp", String(os.name))
 global_symbol_table.set("PI_fp", Number(math.pi))
@@ -3805,6 +4011,7 @@ def run(fn, text):
         context.private_symbol_table.set("is_main", Number(1))
         result = interpreter.visit(ast.node, context)
         result.value = "" if str(result.value) == "none" else result.value
+
         return result.value, result.error
     except KeyboardInterrupt:
         print("Interrupt Error: User Terminated")

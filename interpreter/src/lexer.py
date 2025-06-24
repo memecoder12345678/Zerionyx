@@ -148,10 +148,25 @@ class Lexer:
                 self.tokens.append(self.make_less_than())
             elif self.current_char == ">":
                 self.tokens.append(self.make_greater_than())
+            elif self.current_char == ".":
+                self.tokens.append(Token(TT_DOT, pos_start=self.pos.copy()))
+                self.advance()
             elif self.current_char == ",":
                 self.tokens.append(Token(TT_COMMA, pos_start=self.pos.copy()))
                 self.advance()
                 self.tokens[-1].pos_end = self.pos.copy()
+            elif self.current_char == "{":
+                pos_start = self.pos.copy()
+                self.tokens.append(Token(TT_LBRACE, pos_start=pos_start))
+                self.advance()
+            elif self.current_char == "}":
+                pos_start_closer = self.pos.copy()
+                self.tokens.append(Token(TT_RBRACE, pos_start=pos_start_closer))
+                self.advance()
+            elif self.current_char == ":":
+                pos_start = self.pos.copy()
+                self.tokens.append(Token(TT_COLON, pos_start=pos_start))
+                self.advance()
             else:
                 pos_start = self.pos.copy()
                 char = self.current_char
@@ -197,6 +212,8 @@ class Lexer:
             return Token(TT_INT, int(num_str), pos_start, self.pos)
         else:
             return Token(TT_FLOAT, float(num_str), pos_start, self.pos)
+
+
 
     def make_string_single(self):
         string = ""

@@ -1,6 +1,6 @@
 # libs.threading
 
-defun thread_start(f, a)
+defun start(f, a)
     return thread_start_fp(f, a)
 done
 
@@ -14,11 +14,11 @@ defun thread_join(h, t)
     return none
 done
 
-defun thread_is_alive(t)
+defun is_alive(t)
     return thread_is_alive_fp(t)
 done
 
-defun thread_cancel(t)
+defun cancel(t)
     thread_cancel_fp(t)
     return none
 done

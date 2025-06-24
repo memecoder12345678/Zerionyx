@@ -225,9 +225,16 @@ class ZerionyxLexer(BaseLexer):
             "input",
             "insert",
             "is_func",
-            "set_reusable",
             "is_list",
             "is_num",
+            "is_bool",
+            "keys",
+            "values",
+            "items",
+            "has",
+            "get",
+            "set",
+            "del",
             "is_thread",
             "is_str",
             "len",
@@ -302,7 +309,7 @@ class ZerionyxLexer(BaseLexer):
                 "rand_int_list",
                 "rand_float_list",
             ],
-            "libs.file": [
+            "libs.ffio": [
                 "read",
                 "write",
                 "remove_file",
@@ -347,17 +354,6 @@ class ZerionyxLexer(BaseLexer):
             ],
             "libs.sys": ["exit", "system", "get_env", "set_env", "osystem"],
             "libs.hash": ["md5", "sha1", "sha256", "sha512", "crc32"],
-            "libs.hashmap": [
-                "hashmap",
-                "get_hashmap_value",
-                "set_hashmap_value",
-                "has",
-                "del_key",
-                "get_hashmap_keys",
-                "get_hashmap_values",
-                "get_hashmap_items",
-                "clear_hashmap",
-            ],
             "libs.memory": [
                 "remember",
                 "forget",
@@ -377,23 +373,23 @@ class ZerionyxLexer(BaseLexer):
                 "request",
             ],
             "libs.threading": [
-                "thread_start",
+                "start",
                 "thread_join",
                 "thread_sleep",
-                "thread_is_alive",
-                "thread_cancel",
+                "is_alive",
+                "cancel",
             ],
             "libs.keyboard": [
                 "keyboard_write",
-                "keyboard_press",
-                "keyboard_release",
+                "press",
+                "release",
                 "keyboard_wait",
-                "keyboard_is_pressed",
+                "is_pressed",
             ],
             "libs.termcolor": ["cprintln", "cprint"],
         }
-        self.operators = ["+", "-", "*", "/", "%", "^", "=", "<", ">", "!", "\\"]
-        self.types = ["list", "str", "int", "float", "func"]
+        self.operators = ["+", "-", "*", "/", "%", "^", "=", "<", ">", "!", "\\", "."]
+        self.types = ["list", "str", "int", "float", "func", "bool", "thread", "hashmap"]
         self.literals = ["true", "false", "none"]
         self.user_functions = set()
         self.available_functions = set(self.core_functions)
@@ -417,6 +413,7 @@ class ZerionyxLexer(BaseLexer):
                 "continue",
                 "break",
                 "load",
+                "in",
             ]
         )
 

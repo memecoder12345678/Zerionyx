@@ -1,4 +1,4 @@
-load "libs.file"
+load "libs.ffio"
 load "libs.sys"
 load "libs.string"
 load "libs.list"
@@ -10,7 +10,7 @@ defun parse_config(config_file)
     current_section_items = []
     lines = split(read(config_file), "\n")
     for i = 0 to len(lines) do
-        line = lines>i
+        line = lines.i
         if line != "" do
             line = strip(line, " ")
             if startswith(line, "#") or startswith(line, ";") do
@@ -47,7 +47,7 @@ defun parse_config(config_file)
                 println(": line " + to_str(i + 1) + " has too many '=' for a key-value pair.")
                 continue
             done
-            key = strip(to_str(vals>0), " ")
+            key = strip(to_str(vals.0), " ")
             val_str_raw = strip(to_str(join("", slice(vals, 1, len(vals)))), " ")
             if key == "" or val_str_raw == "" do
                 cprint("Error", "red", none, "bold")
@@ -61,7 +61,7 @@ defun parse_config(config_file)
                 in_double_quote = false
                 val_chars = split(val_str_raw, "")
                 for char_idx = 0 to len(val_chars) do
-                    c = val_chars>char_idx
+                    c = val_chars.char_idx
                     if c == "'"  and not in_double_quote do
                         in_single_quote = not in_single_quote
                     elif c == '"' and not in_single_quote do
@@ -105,13 +105,13 @@ done
 # use this function to get value from config
 # defun get_config_value(config_data, section_name, key_name, default_value)
 #     for i = 0 to len(config_data) do
-#         current_section = config_data>i
-#         if current_section>0 == section_name do
-#             items_in_section = current_section>1
+#         current_section = config_data.i
+#         if current_section.0 == section_name do
+#             items_in_section = current_section.1
 #             for j = 0 to len(items_in_section) do
-#                 kv_pair = items_in_section>j
-#                 if kv_pair>0 == key_name do
-#                     return kv_pair>1
+#                 kv_pair = items_in_section.j
+#                 if kv_pair.0 == key_name do
+#                     return kv_pair.1
 #                 done
 #             done
 #             return default_value
@@ -126,7 +126,7 @@ defun main()
         cprintln("Usage: script_name <config_file_path>", "yellow", none, "bold")
         exit(1)
     done
-    config_path = argv>1
+    config_path = argv.1
     if not exists(config_path) do
         cprintln("Error: File does not exist: " + config_path, 'red', none, 'bold')
         exit(1)
@@ -142,9 +142,9 @@ defun main()
     else
         println("\n--- Parsed Configuration ---")
         for i = 0 to len(config_data) do
-            section_block = config_data>i
-            section_name = section_block>0
-            section_items = section_block>1
+            section_block = config_data.i
+            section_name = section_block.0
+            section_items = section_block.1
             cprint("[", "yellow", none, "bold")
             cprint(to_str(section_name), "yellow", none, "bold")
             cprintln("]", "yellow", none, "bold")
@@ -152,9 +152,9 @@ defun main()
                 cprintln("  (empty section)", "grey", none, none)
             else
                 for j = 0 to len(section_items) do
-                    kv_pair = section_items>j
-                    key = kv_pair>0
-                    value = kv_pair>1
+                    kv_pair = section_items.j
+                    key = kv_pair.0
+                    value = kv_pair.1
                     print("  ")
                     cprint(to_str(key), 'magenta', none, 'bold')
                     print(" = ")

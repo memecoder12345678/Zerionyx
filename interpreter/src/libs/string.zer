@@ -51,7 +51,7 @@ defun is_digit(s)
         return false
     done
     for i = 0 to len(list_digits) do
-        if s == list_digits>i do
+        if s == list_digits.i do
             return true
         done
     done
@@ -66,7 +66,7 @@ defun is_ascii_lowercase(s)
         return false
     done
     for i = 0 to len(list_ascii_lowercase) do
-        if s == list_ascii_lowercase>i do
+        if s == list_ascii_lowercase.i do
             return true
         done
     done
@@ -81,7 +81,7 @@ defun is_ascii_uppercase(s)
         return false
     done
     for i = 0 to len(list_ascii_uppercase) do
-        if s == list_ascii_uppercase>i do
+        if s == list_ascii_uppercase.i do
             return true
         done
     done
@@ -96,7 +96,7 @@ defun is_ascii_letter(s)
         return false
     done
     for i = 0 to len(list_ascii_letter) do
-        if s == list_ascii_letter>i do
+        if s == list_ascii_letter.i do
             return true
         done
     done

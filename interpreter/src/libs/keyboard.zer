@@ -5,12 +5,12 @@ defun keyboard_write(t)
     return none
 done
 
-defun keyboard_press(k)
+defun press(k)
     keyboard_press_fp(k)
     return none
 done
 
-defun keyboard_release(k)
+defun release(k)
     keyboard_release_fp(k)
     return none
 done
@@ -20,6 +20,6 @@ defun keyboard_wait(k)
     return none
 done
 
-defun keyboard_is_pressed(k)
+defun is_pressed(k)
     return keyboard_is_pressed_fp(k)
 done

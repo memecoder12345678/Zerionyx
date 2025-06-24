@@ -5,7 +5,7 @@ import string
 DIGITS = string.digits
 LETTERS = string.ascii_letters
 LETTERS_DIGITS = LETTERS + DIGITS
-INFO = "(v2.2.9, June 2025, 13:46:15)"
+INFO = "(v2.3.0, 2025-06-25 03:06:34)"
 if getattr(sys, "frozen", False):
     LIBS_PATH = os.path.dirname(sys.executable)
 else:
@@ -36,7 +36,11 @@ TT_GTE = "GTE"
 TT_COMMA = "COMMA"
 TT_ARROW = "ARROW"
 TT_NEWLINE = "NEWLINE"
+TT_DOT = "DOT"
+TT_LBRACE = "LBRACE"
+TT_RBRACE = "RBRACE"
 TT_EOF = "EOF"
+TT_COLON = "COLON"
 KEYWORDS = [
     "let",
     "and",
@@ -56,4 +60,5 @@ KEYWORDS = [
     "continue",
     "break",
     "load",
+    "in"
 ]

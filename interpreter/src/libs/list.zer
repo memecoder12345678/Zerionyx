@@ -11,7 +11,7 @@ defun map(f, l)
     done
     r = []
     for i = 0 to len(l) do
-        append(r, f(l>i))
+        append(r, f(l.i))
     done
     return r
 done
@@ -47,8 +47,8 @@ defun filter(f, l)
     done
     r = []
     for i = 0 to len(l) do
-        if f(l>i) do
-            append(r, l>i)
+        if f(l.i) do
+            append(r, l.i)
         done
     done
     return r
@@ -66,7 +66,7 @@ defun reduce(f, l, i)
     done
     acc = i
     for i = 0 to len(l) do
-        acc = f(acc, l>i)
+        acc = f(acc, l.i)
     done
     return acc
 done
@@ -78,13 +78,13 @@ defun min(l)
     if len(l) == 0 do
         panic("First argument of 'min' must be a list of numbers", "T")
     done
-    m = l>0
+    m = l.0
     for i = 0 to len(l) do
-        if type(l>i) != int and type(l>i) != float do
+        if type(l.i) != int and type(l.i) != float do
             panic("First argument of 'min' must be a list of numbers", "T")
         done
-        if (l>i) < m do
-            m = l>i
+        if (l.i) < m do
+            m = l.i
         done
     done
     return m
@@ -97,13 +97,13 @@ defun max(l)
     if len(l) == 0 do
         panic("First argument of 'max' must be a list of numbers", "T")
     done
-    m = l>0
+    m = l.0
     for i = 0 to len(l) do
-        if type(l>i) != int and type(l>i) != float do
+        if type(l.i) != int and type(l.i) != float do
             panic("First argument of 'max' must be a list of numbers", "T")
         done
-        if (l>i) > m do
-            m = l>i
+        if (l.i) . m do
+            m = l.i
         done
     done
     return m
@@ -115,7 +115,7 @@ defun reverse(l)
         panic("First argument of 'reverse' must be a list", "T")
     done
     for i = len(l) - 1 to -1 step -1 do
-        append(r, l>i)
+        append(r, l.i)
     done
     return r
 done
@@ -129,7 +129,7 @@ defun zip(l, l_)
     done
     _l = min([len(l), len(l_)])
     for i = 0 to _l do
-        append(r, [l>i, l_>i])
+        append(r, [l.i, l_.i])
     done
     return r
 done
@@ -147,10 +147,10 @@ defun zip_longest(l, l_)
         v1 = none
         v2 = none
         if i < len(l) do
-            v1 = l>i
+            v1 = l.i
         done
         if i < len(l_) do
-            v2 = l_>i
+            v2 = l_.i
         done
         append(r, [v1, v2])
     done
@@ -180,12 +180,12 @@ defun count(l, v)
     done
     c = 0
     for i = 0 to len(l) do
-        if type(l>i) != str and type(v) == str do
-            if to_str(l>i) == v do
+        if type(l.i) != str and type(v) == str do
+            if to_str(l.i) == v do
                 c = c + 1
             done
         else
-            if l>i == v do
+            if l.i == v do
                 c = c + 1
             done
         done
@@ -198,12 +198,12 @@ defun index_of(l, v)
         panic("First argument of 'index_of' must be a list", "T")
     done
     for i = 0 to len(l) do
-        if type(l>i) != str and type(v) == str do
-            if to_str(l>i) == v do
+        if type(l.i) != str and type(v) == str do
+            if to_str(l.i) == v do
                 return i
             done
         else
-            if l>i == v do
+            if l.i == v do
                 return i
             done
         done

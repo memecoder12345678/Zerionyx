@@ -256,9 +256,11 @@ ATOM               ::=
     | DEF_FUNC
     | COMMENT
 
-LIST_INDEX        ::= IDENTIFIER ">" EXPR
+GET_INDEX         ::= IDENTIFIER "." EXPR
 
 LIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"
+
+HASHMAP_EXPR      ::= "{" (EXPR ("," STRING ":" EXPR)*)? "}"
 
 IF_EXPR           ::= 
       "if" EXPR "do" STATEMENT
@@ -319,31 +321,38 @@ Zerionyx may be magical, but its syntax must be real.
             <li><b>input(prompt)</b> &rarr; string &mdash; Show <code>prompt</code> get user input</li>
             <li><b>get_password(prompt)</b> &rarr; string &mdash; Show <code>prompt</code> get user password</li>
             <li><b>insert(lst, i, val)</b> &rarr; none &mdash; insert <code>val</code> to <code>lst</code> at index <code>i</code></li>
-            <li><b>is_func(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is func</li>
-            <li><b>is_list(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is list</li>
-            <li><b>is_none(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is none</li>
-            <li><b>is_num(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is number</li>
-            <li><b>is_str(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is string</li>
-            <li><b>is_thread(x)</b> &rarr; true/false &mdash; Check if <code>x</code> is thread</li>
+            <li><b>is_func(x)</b> &rarr; bool &mdash; Check if <code>x</code> is func</li>
+            <li><b>is_list(x)</b> &rarr; bool &mdash; Check if <code>x</code> is list</li>
+            <li><b>is_none(x)</b> &rarr; bool &mdash; Check if <code>x</code> is none</li>
+            <li><b>is_num(x)</b> &rarr; bool &mdash; Check if <code>x</code> is number</li>
+            <li><b>is_str(x)</b> &rarr; bool &mdash; Check if <code>x</code> is string</li>
+            <li><b>is_bool(x)</b> &rarr; bool &mdash; Check if <code>x</code> is boolean</li>
+            <li><b>is_thread(x)</b> &rarr; bool &mdash; Check if <code>x</code> is thread</li>
+            <li><b>keys(hm)</b> &rarr; list &mdash; Return list of all keys in <code>hm</code> (a hashmap)</li>
+            <li><b>values(hm)</b> &rarr; list &mdash; Return list of all values in <code>hm</code></li>
+            <li><b>items(hm)</b> &rarr; list &mdash; Return list of <code>[key, value]</code> pairs in <code>hm</code></li>
+            <li><b>has(hm, key)</b> &rarr; bool &mdash; Return <code>true</code> if <code>key</code> exists in <code>hm</code></li>
+            <li><b>get(hm, key, default)</b> &rarr; any &mdash; Return value for <code>key</code> or <code>default</code> if not found</li>
+            <li><b>set(hm, key, value)</b> &rarr; none &mdash; Add or update <code>key</code> in <code>hm</code> with <code>value</code></li>
+            <li><b>del(hm, key)</b> &rarr; none &mdash; Delete <code>key</code> and its value from <code>hm</code></li>
             <li><b>len(x)</b> &rarr; number &mdash; Get length of <code>x</code></li>
             <li><b>panic(msg, type)</b> &mdash; Stop with err <code>msg</code> and <code>type ('RT': 'Runtime Error', 'M': 'Math Error', 'IO': 'IO Error' or 'T': 'Type Error')</code></li>
             <li><b>pop(lst, i)</b> &rarr; any &mdash; Remove and return item at <code>i</code> in <code>lst</code></li>
             <li><b>print(text)</b> &rarr; none &mdash; Prints <code>text</code> to the standard output with no newline</li>
             <li><b>println(text)</b> &rarr; none &mdash; Same as <code>print</code> but adds a newline</li>
-            <li><b>set_reusable(val, re)</b> &rarr; list/num &mdash; Set reuse flag of <code>val</code> to <code>re</code> (<code>true</code>/<code>false</code>)</li>
             <li><b>to_float(x, silent)</b> &rarr; float/none &mdash; Convert <code>x</code> to float return <code>none</code> if fail and <code>silent</code> true else raise</li>
             <li><b>to_int(x, silent)</b> &rarr; int/none &mdash; Convert <code>x</code> to int return <code>none</code> if fail and <code>silent</code> true else raise</li>
             <li><b>to_str(x)</b> &rarr; string &mdash; Convert <code>x</code> to string</li>
             <li><b>type(x)</b> &rarr; string/none &mdash; Return type of <code>x</code> as string or none</li>
             <li><b>pyexec(code)</b> &rarr; any &mdash; Executes embedded Python code and returns its result (use with caution)</li>
-            <li><b>slice(l, from, to)</b> &rarr; list/string &mdash; Slice list/string <code>l</code> from <code>from</code> to <code>to</code> (exclusive)</li>
+            <li><b>slice(l, from, to, step)</b> &rarr; list/string/hashmap &mdash; Slice list/string/hashmap <code>l</code> from <code>from</code> to <code>to</code> step <code>step</code> (exclusive)</li>
         </ul>
         <h2>Standard Libraries</h2>
         <div class="lib-list">
             <a href="javascript:void(0)" id="btn-list" onclick="showLib('list')">list</a>
             <a href="javascript:void(0)" id="btn-string" onclick="showLib('string')">string</a>
             <a href="javascript:void(0)" id="btn-math" onclick="showLib('math')">math</a>
-            <a href="javascript:void(0)" id="btn-file" onclick="showLib('file')">file</a>
+            <a href="javascript:void(0)" id="btn-ffio" onclick="showLib('ffio')">ffio</a>
             <a href="javascript:void(0)" id="btn-hash" onclick="showLib('hash')">hash</a>
             <a href="javascript:void(0)" id="btn-memory" onclick="showLib('memory')">memory</a>
             <a href="javascript:void(0)" id="btn-net" onclick="showLib('net')">net</a>
@@ -353,7 +362,7 @@ Zerionyx may be magical, but its syntax must be real.
             <a href="javascript:void(0)" id="btn-time" onclick="showLib('time')">time</a>
             <a href="javascript:void(0)" id="btn-keyboard" onclick="showLib('keyboard')">keyboard</a>
             <a href="javascript:void(0)" id="btn-termcolor" onclick="showLib('termcolor')">termcolor</a>
-            <a href="javascript:void(0)" id="btn-hashmap" onclick="showLib('hashmap')">hashmap</a>
+            <!-- <a href="javascript:void(0)" id="btn-hashmap" onclick="showLib('hashmap')">hashmap</a> -->
         </div>
         <div id="lib-list" class="lib-content" style="display:none;">
             <h3>list.zer</h3>
@@ -386,15 +395,15 @@ Zerionyx may be magical, but its syntax must be real.
                 <li><b>to_lower(s)</b> &rarr; str &mdash; Lowercase <code>s</code></li>
                 <li><b>ord(s)</b> &rarr; number &mdash; Unicode code point of character <code>s</code></li>
                 <li><b>chr(n)</b> &rarr; str &mdash; Character from code <code>n</code></li>
-                <li><b>is_digit(s)</b> &rarr; true/false &mdash; Is <code>s</code> a digit</li>
-                <li><b>is_ascii_lowercase(s)</b> &rarr; true/false &mdash; Is <code>s</code> a lowercase letter</li>
-                <li><b>is_ascii_uppercase(s)</b> &rarr; true/false &mdash; Is <code>s</code> an uppercase letter</li>
-                <li><b>is_ascii_letter(s)</b> &rarr; true/false &mdash; Is <code>s</code> a letter</li>
-                <li><b>is_space(s)</b> &rarr; true/false &mdash; Is <code>s</code> a whitespace character</li>
+                <li><b>is_digit(s)</b> &rarr; bool &mdash; Is <code>s</code> a digit</li>
+                <li><b>is_ascii_lowercase(s)</b> &rarr; bool &mdash; Is <code>s</code> a lowercase letter</li>
+                <li><b>is_ascii_uppercase(s)</b> &rarr; bool &mdash; Is <code>s</code> an uppercase letter</li>
+                <li><b>is_ascii_letter(s)</b> &rarr; bool &mdash; Is <code>s</code> a letter</li>
+                <li><b>is_space(s)</b> &rarr; bool &mdash; Is <code>s</code> a whitespace character</li>
                 <li><b>find(s, v)</b> &rarr; number/none &mdash; Index of substring <code>v</code> in <code>s</code></li>
                 <li><b>find_all(s, v)</b> &rarr; list &mdash; All indices of substring <code>v</code> in <code>s</code></li>
-                <li><b>startswith(s, v)</b> &rarr; true/false &mdash; <code>s</code> starts with <code>v</code></li>
-                <li><b>endswith(s, v)</b> &rarr; true/false &mdash; <code>s</code> ends with <code>v</code></li>
+                <li><b>startswith(s, v)</b> &rarr; bool &mdash; <code>s</code> starts with <code>v</code></li>
+                <li><b>endswith(s, v)</b> &rarr; bool &mdash; <code>s</code> ends with <code>v</code></li>
             </ul>
         </div>
         <div id="lib-math" class="lib-content" style="display:none;">
@@ -409,7 +418,7 @@ Zerionyx may be magical, but its syntax must be real.
                 <li><b>gcd(a, b)</b> &rarr; number &mdash; GCD of <code>a</code> and <code>b</code></li>
                 <li><b>lcm(a, b)</b> &rarr; number &mdash; LCM of <code>a</code> and <code>b</code></li>
                 <li><b>fib(n)</b> &rarr; number &mdash; <code>n</code>-th Fibonacci number</li>
-                <li><b>is_prime(n)</b> &rarr; true/false &mdash; Is <code>n</code> prime</li>
+                <li><b>is_prime(n)</b> &rarr; bool &mdash; Is <code>n</code> prime</li>
                 <li><b>deg2rad(d)</b> &rarr; number &mdash; Degrees to radians</li>
                 <li><b>rad2deg(r)</b> &rarr; number &mdash; Radians to degrees</li>
                 <li><b>exp(x)</b> &rarr; number &mdash; Exponential of <code>x</code></li>
@@ -421,12 +430,12 @@ Zerionyx may be magical, but its syntax must be real.
                 <li>Constants: <b>PI</b>, <b>E</b>, <b>ln2</b></li>
             </ul>
         </div>
-        <div id="lib-file" class="lib-content" style="display:none;">
-            <h3>file.zer</h3>
+        <div id="lib-ffio" class="lib-content" style="display:none;">
+            <h3>ffio.zer</h3>
             <ul>
                 <li><b>write(file, mode, text)</b> &rarr; none &mdash; Write <code>text</code> to <code>file</code> with mode <code>mode</code> ("w" or "a")</li>
                 <li><b>read(file)</b> &rarr; str &mdash; Read contents of <code>file</code></li>
-                <li><b>exists(file)</b> &rarr; true/false &mdash; Check if <code>file</code> exists</li>
+                <li><b>exists(file)</b> &rarr; bool &mdash; Check if <code>file</code> exists</li>
                 <li><b>get_cdir()</b> &rarr; str &mdash; Get current directory</li>
                 <li><b>set_cdir(dir)</b> &rarr; none &mdash; Change current directory</li>
                 <li><b>list_dir(dir)</b> &rarr; list &mdash; List files in directory</li>
@@ -435,7 +444,7 @@ Zerionyx may be magical, but its syntax must be real.
                 <li><b>rename(old, new)</b> &rarr; none &mdash; Rename file or directory</li>
                 <li><b>remove_dir(dir)</b> &rarr; none &mdash; Remove directory</li>
                 <li><b>copy(src, dst)</b> &rarr; none &mdash; Copy file</li>
-                <li><b>is_file(file)</b> &rarr; true/false &mdash; Is path a file</li>
+                <li><b>is_file(file)</b> &rarr; bool &mdash; Is path a file</li>
                 <li><b>abs_path(path)</b> &rarr; str &mdash; Get absolute path</li>
                 <li><b>base_name(file)</b> &rarr; str &mdash; Get file name</li>
                 <li><b>dir_name(file)</b> &rarr; str &mdash; Get parent folder</li>
@@ -450,11 +459,11 @@ Zerionyx may be magical, but its syntax must be real.
                 <li><b>link(src, dst)</b> &rarr; none &mdash; Create a hard link from <code>src</code> to <code>dst</code></li>
                 <li><b>unlink(path)</b> &rarr; none &mdash; Remove a file or symbolic link</li>
                 <li><b>chdir(path)</b> &rarr; none &mdash; Change the current working directory</li>
-                <li><b>access(path, mode)</b> &rarr; true/false &mdash; Check user's access permissions for a path</li>
+                <li><b>access(path, mode)</b> &rarr; bool &mdash; Check user's access permissions for a path</li>
                 <li><b>path_join(parts)</b> &rarr; str &mdash; Join multiple path components into one</li>
-                <li><b>is_dir(path)</b> &rarr; true/false &mdash; Check if the path is a directory</li>
-                <li><b>is_link(path)</b> &rarr; true/false &mdash; Check if the path is a symbolic link</li>
-                <li><b>is_mount(path)</b> &rarr; true/false &mdash; Check if the path is a mount point</li>
+                <li><b>is_dir(path)</b> &rarr; bool &mdash; Check if the path is a directory</li>
+                <li><b>is_link(path)</b> &rarr; bool &mdash; Check if the path is a symbolic link</li>
+                <li><b>is_mount(path)</b> &rarr; bool &mdash; Check if the path is a mount point</li>
                 <li>Constants: <b>os_sep</b></li>
             </ul>
         </div>
@@ -476,7 +485,7 @@ Zerionyx may be magical, but its syntax must be real.
                 <li><b>forget(key)</b> &rarr; none &mdash; Remove <code>key</code> from memory</li>
                 <li><b>clear_memory()</b> &rarr; none &mdash; Clear all memory</li>
                 <li><b>keys()</b> &rarr; list &mdash; List all keys</li>
-                <li><b>is_empty()</b> &rarr; true/false &mdash; Is memory empty</li>
+                <li><b>is_empty()</b> &rarr; bool &mdash; Is memory empty</li>
                 <li><b>size()</b> &rarr; number &mdash; Number of keys</li>
             </ul>
         </div>
@@ -489,7 +498,7 @@ Zerionyx may be magical, but its syntax must be real.
                 <li><b>downl(url, timeout)</b> &rarr; str &mdash; Download file from URL</li>
                 <li><b>get_local_ip()</b> &rarr; str &mdash; Get local IP address</li>
                 <li><b>get_hostname()</b> &rarr; str &mdash; Get hostname</li>
-                <li><b>request(url, method, headers, data, timeout)</b> &rarr; list &mdash; Send HTTP request and return response JSON as list of [key, value]</li>
+                <li><b>request(url, method, headers, data, timeout)</b> &rarr; list/hashmap &mdash; Send HTTP request and return response JSON</li>
             </ul>
         </div>
         <div id="lib-random" class="lib-content" style="display:none;">
@@ -518,11 +527,11 @@ Zerionyx may be magical, but its syntax must be real.
         <div id="lib-threading" class="lib-content" style="display:none;">
             <h3>threading.zer</h3>
             <ul>
-                <li><b>thread_start(func, args)</b> &rarr; thread &mdash; Start a new thread</li>
+                <li><b>start(func, args)</b> &rarr; thread &mdash; Start a new thread</li>
                 <li><b>thread_sleep(seconds)</b> &rarr; none &mdash; Sleep current thread</li>
                 <li><b>thread_join(thread, timeout)</b> &rarr; none &mdash; Wait for thread to finish</li>
-                <li><b>thread_is_alive(thread)</b> &rarr; true/false &mdash; Is thread alive</li>
-                <li><b>thread_cancel(thread)</b> &rarr; none &mdash; Cancel thread</li>
+                <li><b>is_alive(thread)</b> &rarr; bool &mdash; Is thread alive</li>
+                <li><b>cancel(thread)</b> &rarr; none &mdash; Cancel thread</li>
             </ul>
         </div>
         <div id="lib-time" class="lib-content" style="display:none;">
@@ -537,10 +546,10 @@ Zerionyx may be magical, but its syntax must be real.
             <h3>keyboard.zer</h3>
             <ul>
                 <li><b>keyboard_write(text)</b> &rarr; none &mdash; Type <code>text</code> as keyboard input</li>
-                <li><b>keyboard_press(key)</b> &rarr; none &mdash; Press a key</li>
-                <li><b>keyboard_release(key)</b> &rarr; none &mdash; Release a key</li>
+                <li><b>press(key)</b> &rarr; none &mdash; Press a key</li>
+                <li><b>release(key)</b> &rarr; none &mdash; Release a key</li>
                 <li><b>keyboard_wait(key)</b> &rarr; none &mdash; Wait for key press</li>
-                <li><b>keyboard_is_pressed(key)</b> &rarr; true/false &mdash; Is key pressed</li>
+                <li><b>is_pressed(key)</b> &rarr; bool &mdash; Is key pressed</li>
             </ul>
         </div>
         <div id="lib-termcolor" class="lib-content" style="display:none;">
@@ -548,20 +557,6 @@ Zerionyx may be magical, but its syntax must be real.
             <ul>
                 <li><b>cprint(text, color, bg, style)</b> &rarr; none &mdash; Prints <code>text</code> with color, background, and style with no newline</li>
                 <li><b>cprintln(text, color, bg, style)</b> &rarr; none &mdash; Same as <code>cprint</code> but adds a newline</li>
-            </ul>
-        </div>
-        <div id="lib-hashmap" class="lib-content" style="display:none;">
-            <h3>hashmap.zer</h3>
-            <ul>
-                <li><b>hashmap(l1, l2, default)</b> &rarr; list &mdash; Create a new hashmap (a list of [key, value] pairs) from <code>l1</code> (keys) and <code>l2</code> (values); missing values are filled with <code>default</code></li>
-                <li><b>get_hashmap_value(hm, key, default)</b> &rarr; any &mdash; Return the value for <code>key</code> in <code>hm</code>, or <code>default</code> if the key is not present</li>
-                <li><b>set_hashmap_value(hm, key, value)</b> &rarr; none &mdash; Insert or update the entry for <code>key</code> in <code>hm</code> with <code>value</code></li>
-                <li><b>has(hm, key)</b> &rarr; true/false &mdash; Check if <code>key</code> exists in <code>hm</code></li>
-                <li><b>del_key(hm, key)</b> &rarr; none &mdash; Remove the entry for <code>key</code> from <code>hm</code> if it exists</li>
-                <li><b>get_hashmap_keys(hm)</b> &rarr; list &mdash; Return a list of all keys in <code>hm</code></li>
-                <li><b>get_hashmap_values(hm)</b> &rarr; list &mdash; Return a list of all values in <code>hm</code></li>
-                <li><b>get_hashmap_items(hm)</b> &rarr; list &mdash; Return the raw list of <code>[key, value]</code> pairs in <code>hm</code></li>
-                <li><b>clear_hashmap(hm)</b> &rarr; none &mdash; Remove all entries from <code>hm</code>, leaving it empty</li>
             </ul>
         </div>
         <h2>How to Use Libraries</h2>

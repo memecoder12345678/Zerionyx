@@ -94,6 +94,7 @@ class SymbolTable:
     def copy(self):
 
         return SymbolTable().change(self)
+    
 
 
 class Object:
@@ -199,6 +200,14 @@ class Object:
     def prequaled_by(self, other: "Object"):
 
         return None, self.illegal_operation(other)
+
+    def dotted_by(self, other):
+        return None, self.illegal_operation(other)
+    
+    def iter(self):
+        return None, self.illegal_operation(
+            error_str="Iteration is not supported for this type"
+        )
 
     def illegal_operation(self, other=None, error_str=None):
 
@@ -407,6 +416,64 @@ class None_(Object):
 
 
 None_.none = None_("none")
+
+
+class Bool(Object):
+    __slots__ = ("value",)
+
+    def __init__(self, value):
+        super().__init__()
+        self.value = bool(value)
+
+    def copy(self):
+        copy = Bool(self.value)
+        copy.set_pos(self.pos_start, self.pos_end)
+        copy.set_context(self.context)
+        return copy
+
+    def is_true(self):
+        return self.value
+
+    def type(self):
+        return "<bool>"
+
+    def notted(self):
+        return Number(0 if self.value else 1).set_context(self.context), None
+
+    def get_comparison_eq(self, other):
+        if isinstance(other, Bool):
+            return Number(1 if self.value == other.value else 0).set_context(self.context), None
+        return Number(0).set_context(self.context), None
+
+    def get_comparison_ne(self, other):
+        if isinstance(other, Bool):
+            return Number(1 if self.value != other.value else 0).set_context(self.context), None
+        return Number(1).set_context(self.context), None
+
+    def get_comparison_lt(self, other):
+        return Number(0).set_context(self.context), None
+
+    def get_comparison_gt(self, other):
+        return Number(0).set_context(self.context), None
+
+    def get_comparison_lte(self, other):
+        if isinstance(other, None_):
+            return Number(1).set_context(self.context), None
+        return Number(0).set_context(self.context), None
+
+    def get_comparison_gte(self, other):
+        if isinstance(other, None_):
+            return Number(1).set_context(self.context), None
+        return Number(0).set_context(self.context), None
+
+    def __str__(self):
+        return "true" if self.value else "false"
+
+    def __repr__(self):
+        return str(self).lower()
+
+Bool.true = Bool(True)
+Bool.false = Bool(False)
 
 
 class Number(Object):
@@ -656,8 +723,8 @@ class Number(Object):
         return str(self.value).replace("e", "*10^")
 
 
-Number.false = Number(0, reusable=True)
-Number.true = Number(1, reusable=True)
+Number.false = Bool.false
+Number.true = Bool.true
 Number.none = None_.none
 
 
@@ -719,18 +786,6 @@ class String(Object):
     def get_comparison_ne(self, other):
         return self._make_comparison(other, operator.ne, String)
 
-    def get_comparison_lt(self, other):
-        return self._make_comparison(other, operator.lt, String)
-
-    def get_comparison_gt(self, other):
-        return self._make_comparison(other, operator.gt, String)
-
-    def get_comparison_lte(self, other):
-        return self._make_comparison(other, operator.le, String)
-
-    def get_comparison_gte(self, other):
-        return self._make_comparison(other, operator.ge, String)
-
     def is_true(self):
 
         return len(self.value) > 0
@@ -752,6 +807,23 @@ class String(Object):
     def __str__(self):
 
         return self.value.replace("\n", "\\n")
+
+    def dotted_by(self, index):
+        if not isinstance(index, Number):
+            return None, self.illegal_operation(
+                index, "Index must be a number"
+            )
+        if index.value < 0 or index.value >= len(self.value):
+            return None, RTError(
+                        index.pos_start,
+                        index.pos_end,
+                        "Element at this index could not be removed from String because index is out of bounds",
+                        self.context,
+            )
+        return self.value[index]
+
+    def iter(self):
+        return iter([String(ch) for ch in self.value]), None
 
     def __repr__(self):
 
@@ -831,7 +903,7 @@ class List(Object):
                 self, other, f"Can't multiply a list by a type of '{other.type()}'"
             )
 
-    def get_comparison_gt(self, other):
+    def dotted_by(self, other):
 
         if isinstance(other, Number):
 
@@ -851,7 +923,7 @@ class List(Object):
         else:
 
             return None, Object.illegal_operation(
-                self, other, "Index must be a number type"
+                self, other, "Index must be a number"
             )
 
     def copy(self):
@@ -871,6 +943,9 @@ class List(Object):
     def type(self):
 
         return "<list>"
+    
+    def iter(self):
+        return iter(self.copy()), None
 
     def __str__(self):
 
@@ -879,6 +954,117 @@ class List(Object):
     def __repr__(self):
 
         return f'[{", ".join([repr(x) for x in self.elements])}]'
+
+
+class HashMap(Object):
+
+    def __init__(self, values) -> None:
+        super().__init__()
+        self.values = values
+
+    def is_true(self):
+        return len(self.values) > 0
+
+    def added_to(self, other):
+        if not isinstance(other, HashMap):
+            return None, self.illegal_operation(other)
+
+        new_dict = self.copy()
+        for key, value in other.values.items():
+            new_dict.values[key] = value
+
+        return new_dict, None
+    
+    def type(self):
+        return "<hashmap>"
+
+
+    def dotted_by(self, index):
+        if not isinstance(index, String):
+            return None, self.illegal_operation(index)
+
+        try:
+            return self.values[index.value], None
+        except KeyError:
+            return None, RTError(
+                self.pos_start, self.pos_end, f"Key '{index.value}' not found in HashMap", self.context
+            )
+
+    def set_index(self, index, value):
+        if not isinstance(index, String):
+            return None, self.illegal_operation(index)
+
+        self.values[index.value] = value
+
+        return self, None
+
+    def get_index(self, index, default):
+        if not isinstance(index, String):
+            return None, self.illegal_operation(index)
+
+        return self.values.get(index.value, default), None
+
+    def iter(self):
+        pairs = [List([String(str(k)), v]) for k, v in self.values.items()]
+        return iter(pairs), None
+
+    def get_comparison_eq(self, other):
+        if not isinstance(other, HashMap):
+            return None, self.illegal_operation(other)
+
+        if len(self.values) != len(other.values):
+            return Number.false, None
+
+        for key, value in self.values.items():
+            if key not in other.values:
+                return Number.false, None
+
+            cmp, err = value.get_comparison_eq(other.values[key])
+            if err:
+                return None, err
+            assert cmp is not None
+            if not cmp.is_true():
+                return Number.false, None
+
+        return Number.true, None
+
+    def get_comparison_ne(self, other):
+        if not isinstance(other, HashMap):
+            return None, self.illegal_operation(other)
+
+        if len(self.values) != len(other.values):
+            return Number.true, None
+
+        for key, value in self.values.items():
+            if key not in other.values:
+                return Number.true, None
+
+            cmp, err = value.get_comparison_ne(other.values[key])
+            if err:
+                return None, err
+            assert cmp is not None
+            if cmp.is_true():
+                return Number.true, None
+
+        return Number.false, None
+
+    def __len__(self) -> int:
+        return len(self.values)
+
+    def copy(self):
+        copy = HashMap(self.values)
+        copy.set_pos(self.pos_start, self.pos_end)
+        copy.set_context(self.context)
+        return copy
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
+
+    def __repr__(self) -> str:
+        __val = ", ".join([f"{repr(k)}: {repr(v)}" for k, v in self.values.items()])
+        return f"{{{__val}}}"
+
 
 
 class File(Object):

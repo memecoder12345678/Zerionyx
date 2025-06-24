@@ -3,19 +3,20 @@ load "libs.sys"
 
 N = 1000000
 total = 0
-total = set_reusable(total, true) # Reusable variable to avoid reallocation
 i = 1
-i = set_reusable(i, true) # Reusable variable to avoid reallocation
 let start = time()
-    for i_ = i to N + 1 do
-        total += i_
-    done
+
+for i = 1 to N + 1 do
+    total += i
+done
+
 end = time()
+
 println("Sum: " + to_str(total))
 println("Zerionyx ran in: " + to_str(end - start) + " seconds")
 exit(0)
 
-# Fastest: 2.45214009284973 seconds
-# Slowest: 3.82103085517883 seconds
-# Average: 3.13658547401428 seconds
+# Fastest: 1.63242268562317 seconds
+# Slowest: 2.20334911346436 seconds
+# Average: 1.91788589954376 seconds
 # NOTE: all tests were run using PyPy
