@@ -286,7 +286,7 @@ class LoadNode:
 
     def __str__(self):
         return f'LoadNode("{self.file_path}")'
-    
+
 
 class HashMapNode:
     __slots__ = ["pairs", "pos_start", "pos_end"]
@@ -298,6 +298,8 @@ class HashMapNode:
 
     def __str__(self):
         return f"HashMapNode({', '.join(f'{k}: {v}' for k, v in self.pairs)})"
+
+
 class ForInNode:
     __slots__ = [
         "var_name_tok",
@@ -308,7 +310,15 @@ class ForInNode:
         "should_return_none",
     ]
 
-    def __init__(self, var_name_tok, iterable_node, body_node, should_return_none, pos_start=None, pos_end=None):
+    def __init__(
+        self,
+        var_name_tok,
+        iterable_node,
+        body_node,
+        should_return_none,
+        pos_start=None,
+        pos_end=None,
+    ):
         self.var_name_tok = var_name_tok
         self.iterable_node = iterable_node
         self.body_node = body_node

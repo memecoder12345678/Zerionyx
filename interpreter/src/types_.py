@@ -94,7 +94,6 @@ class SymbolTable:
     def copy(self):
 
         return SymbolTable().change(self)
-    
 
 
 class Object:
@@ -203,7 +202,7 @@ class Object:
 
     def dotted_by(self, other):
         return None, self.illegal_operation(other)
-    
+
     def iter(self):
         return None, self.illegal_operation(
             error_str="Iteration is not supported for this type"
@@ -442,12 +441,18 @@ class Bool(Object):
 
     def get_comparison_eq(self, other):
         if isinstance(other, Bool):
-            return Number(1 if self.value == other.value else 0).set_context(self.context), None
+            return (
+                Number(1 if self.value == other.value else 0).set_context(self.context),
+                None,
+            )
         return Number(0).set_context(self.context), None
 
     def get_comparison_ne(self, other):
         if isinstance(other, Bool):
-            return Number(1 if self.value != other.value else 0).set_context(self.context), None
+            return (
+                Number(1 if self.value != other.value else 0).set_context(self.context),
+                None,
+            )
         return Number(1).set_context(self.context), None
 
     def get_comparison_lt(self, other):
@@ -471,6 +476,7 @@ class Bool(Object):
 
     def __repr__(self):
         return str(self).lower()
+
 
 Bool.true = Bool(True)
 Bool.false = Bool(False)
@@ -810,15 +816,13 @@ class String(Object):
 
     def dotted_by(self, index):
         if not isinstance(index, Number):
-            return None, self.illegal_operation(
-                index, "Index must be a number"
-            )
+            return None, self.illegal_operation(index, "Index must be a number")
         if index.value < 0 or index.value >= len(self.value):
             return None, RTError(
-                        index.pos_start,
-                        index.pos_end,
-                        "Element at this index could not be removed from String because index is out of bounds",
-                        self.context,
+                index.pos_start,
+                index.pos_end,
+                "Element at this index could not be removed from String because index is out of bounds",
+                self.context,
             )
         return self.value[index]
 
@@ -922,9 +926,7 @@ class List(Object):
 
         else:
 
-            return None, Object.illegal_operation(
-                self, other, "Index must be a number"
-            )
+            return None, Object.illegal_operation(self, other, "Index must be a number")
 
     def copy(self):
 
@@ -943,7 +945,7 @@ class List(Object):
     def type(self):
 
         return "<list>"
-    
+
     def iter(self):
         return iter(self.copy()), None
 
@@ -974,10 +976,9 @@ class HashMap(Object):
             new_dict.values[key] = value
 
         return new_dict, None
-    
+
     def type(self):
         return "<hashmap>"
-
 
     def dotted_by(self, index):
         if not isinstance(index, String):
@@ -987,7 +988,10 @@ class HashMap(Object):
             return self.values[index.value], None
         except KeyError:
             return None, RTError(
-                self.pos_start, self.pos_end, f"Key '{index.value}' not found in HashMap", self.context
+                self.pos_start,
+                self.pos_end,
+                f"Key '{index.value}' not found in HashMap",
+                self.context,
             )
 
     def set_index(self, index, value):
@@ -1060,11 +1064,9 @@ class HashMap(Object):
     def __str__(self) -> str:
         return self.__repr__()
 
-
     def __repr__(self) -> str:
         __val = ", ".join([f"{repr(k)}: {repr(v)}" for k, v in self.values.items()])
         return f"{{{__val}}}"
-
 
 
 class File(Object):

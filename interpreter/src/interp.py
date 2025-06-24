@@ -3361,8 +3361,9 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
+
     execute_request_fp.arg_names = ["url", "method", "headers", "data", "timeout"]
-    
+
     def execute_keys(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         if not isinstance(hm, HashMap):
@@ -3375,8 +3376,9 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         return RTResult().success(List(hm.keys()))
+
     execute_keys.arg_names = ["hm"]
-    
+
     def execute_values(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         if not isinstance(hm, HashMap):
@@ -3389,6 +3391,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         return RTResult().success(List(hm.values()))
+
     execute_values.arg_names = ["hm"]
 
     def execute_items(self, exec_ctx):
@@ -3403,8 +3406,9 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         return RTResult().success(List(hm.items()))
+
     execute_items.arg_names = ["hm"]
-    
+
     def execute_has(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         key = exec_ctx.symbol_table.get("key")
@@ -3427,6 +3431,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         return RTResult().success(Bool(hm.has(key.value)))
+
     execute_has.arg_names = ["hm", "key"]
 
     def execute_get(self, exec_ctx):
@@ -3453,8 +3458,9 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         return RTResult().success(hm.get_index(key.value, default))
+
     execute_get.arg_names = ["hm", "key", "default"]
-    
+
     def execute_set(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         key = exec_ctx.symbol_table.get("key")
@@ -3480,9 +3486,9 @@ class BuiltInFunction(BaseFunction):
             )
         hm.set_index(key.value, value)
         return RTResult().success(value)
+
     execute_set.arg_names = ["hm", "key", "value"]
-    
-    
+
     def execute_del(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         key = exec_ctx.symbol_table.get("key")
@@ -3507,20 +3513,8 @@ class BuiltInFunction(BaseFunction):
             )
         hm.remove(key.value)
         return RTResult().success(None_.none)
+
     execute_del.arg_names = ["hm", "key"]
-
-#=======================================================================#
-# Hàm	                 | Mô tả                                        #
-#=======================================================================#
-# keys(hm)	             |  Trả về danh sách key                        #
-# values(hm)	         |  Trả về danh sách value                      #
-# items(hm)	             |  Trả về list các cặp [key, value]            #
-# has(hm, key)	         |  Trả về true nếu tồn tại key                 #
-# get(hm, key, default)  | 	Trả về value hoặc default nếu không tồn tại #
-# set(hm, key, value)    | Thêm hoặc cập nhật key với value             #
-# remove(hm, key)	     |  Xoá key và value tương ứng                  #
-#=======================================================================#
-
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -3529,6 +3523,7 @@ for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]
     if hasattr(method, "arg_names"):
         setattr(BuiltInFunction, func_name, BuiltInFunction(func_name))
         BUILTIN_FUNCTIONS.append(func_name)
+
 
 @lru_cache(maxsize=None)
 class Interpreter:
@@ -3640,7 +3635,6 @@ class Interpreter:
             result, error = left.ored_by(right)
         elif node.op_tok.type == TT_FLOORDIV:
             result, error = left.floordived_by(right)
-
 
         if error:
             return res.failure(error)
@@ -3900,7 +3894,7 @@ class Interpreter:
             )
 
         return res.success(result)
-    
+
     def visit_HashMapNode(self, node, context):
         res = RTResult()
         values = {}
@@ -3912,7 +3906,12 @@ class Interpreter:
 
             if not isinstance(key, String):
                 return res.failure(
-                    RTError(key_node.pos_start, key_node.pos_end, f"Non-string key for hashmap: '{key!r}'", context)
+                    RTError(
+                        key_node.pos_start,
+                        key_node.pos_end,
+                        f"Non-string key for hashmap: '{key!r}'",
+                        context,
+                    )
                 )
 
             value = res.register(self.visit(value_node, context))
@@ -3923,6 +3922,7 @@ class Interpreter:
             values[key.value] = value
 
         return res.success(HashMap(values))
+
     def visit_ForInNode(self, node: ForInNode, context: Context) -> RTResult:
         res = RTResult()
         var_name = node.var_name_tok.value
@@ -3945,9 +3945,12 @@ class Interpreter:
                 context.symbol_table.set(var_name, current)
 
                 value = res.register(self.visit(body, context))
-                if res.should_return() and not res.loop_should_continue and not res.loop_should_break:
+                if (
+                    res.should_return()
+                    and not res.loop_should_continue
+                    and not res.loop_should_break
+                ):
                     return res
-                    
 
                 if res.loop_should_break:
                     break
@@ -3964,9 +3967,10 @@ class Interpreter:
             return res.success(None_.none)
         else:
             return res.success(
-                List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
+                List(elements)
+                .set_context(context)
+                .set_pos(node.pos_start, node.pos_end)
             )
-
 
 
 global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv[1:]]))

@@ -389,7 +389,16 @@ class ZerionyxLexer(BaseLexer):
             "libs.termcolor": ["cprintln", "cprint"],
         }
         self.operators = ["+", "-", "*", "/", "%", "^", "=", "<", ">", "!", "\\", "."]
-        self.types = ["list", "str", "int", "float", "func", "bool", "thread", "hashmap"]
+        self.types = [
+            "list",
+            "str",
+            "int",
+            "float",
+            "func",
+            "bool",
+            "thread",
+            "hashmap",
+        ]
         self.literals = ["true", "false", "none"]
         self.user_functions = set()
         self.available_functions = set(self.core_functions)

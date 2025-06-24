@@ -60,5 +60,5 @@ KEYWORDS = [
     "continue",
     "break",
     "load",
-    "in"
+    "in",
 ]

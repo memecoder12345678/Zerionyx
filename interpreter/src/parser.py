@@ -73,6 +73,7 @@ class Parser:
         return res
 
     def parse(self):
+        self.skip_newlines()
         res = self.statements()
         if not res.error and self.current_tok.type != TT_EOF:
             return res.failure(
@@ -88,6 +89,8 @@ class Parser:
         res = ParseResult()
         statements = []
         pos_start = self.current_tok.pos_start.copy()
+
+        self.skip_newlines()
 
         while self.current_tok.type == TT_NEWLINE:
             res.register_advancement()
@@ -111,6 +114,7 @@ class Parser:
 
             if not more_statements:
                 break
+            self.skip_newlines()
             statement = res.try_register(self.statement())
             if not statement:
                 self.reverse(res.to_reverse_count)
@@ -125,6 +129,8 @@ class Parser:
     def statement(self):
         res = ParseResult()
         pos_start = self.current_tok.pos_start.copy()
+
+        self.skip_newlines()
 
         if self.current_tok.matches(TT_KEYWORD, "return"):
             res.register_advancement()
@@ -171,6 +177,7 @@ class Parser:
         return self.tokens[self.tok_idx - 1]
 
     def expr(self):
+        self.skip_newlines()
         res = ParseResult()
 
         if self.current_tok.matches(TT_KEYWORD, "let"):
@@ -250,11 +257,10 @@ class Parser:
                 )
             )
 
-
-
         return res.success(node)
 
     def comp_expr(self):
+        self.skip_newlines()
         res = ParseResult()
 
         if self.current_tok.matches(TT_KEYWORD, "not"):
@@ -281,15 +287,17 @@ class Parser:
             )
 
         return res.success(node)
-    
 
     def arith_expr(self):
+        self.skip_newlines()
         return self.bin_op(self.term, (TT_PLUS, TT_MINUS))
 
     def term(self):
+        self.skip_newlines()
         return self.bin_op(self.factor, (TT_MUL, TT_DIV, TT_FLOORDIV, TT_MOD))
 
     def factor(self):
+        self.skip_newlines()
         res = ParseResult()
         tok = self.current_tok
 
@@ -304,9 +312,11 @@ class Parser:
         return self.power()
 
     def power(self):
+        self.skip_newlines()
         return self.bin_op(self.call, (TT_POW, TT_DOT), self.factor)
 
     def call(self):
+        self.skip_newlines()
         res = ParseResult()
         atom = res.register(self.atom())
         if res.error:
@@ -354,6 +364,7 @@ class Parser:
         return res.success(atom)
 
     def atom(self):
+        self.skip_newlines()
         res = ParseResult()
         tok = self.current_tok
 
@@ -420,7 +431,7 @@ class Parser:
             if res.error:
                 return res
             return res.success(func_def)
-        
+
         elif tok.type == TT_LBRACE:
             hashmap_expr = res.register(self.hashmap_expr())
             if res.error:
@@ -435,12 +446,11 @@ class Parser:
             )
         )
 
-
     def hashmap_expr(self) -> ParseResult:
+        self.skip_newlines()
         res = ParseResult()
         pairs = []
         pos_start = self.current_tok.pos_start.copy()
-
 
         res.register_advancement()
         self.advance()
@@ -449,14 +459,22 @@ class Parser:
         if self.current_tok.type == TT_RBRACE:
             res.register_advancement()
             self.advance()
-            return res.success(HashMapNode(pairs, pos_start, self.current_tok.pos_end.copy()))
+            return res.success(
+                HashMapNode(pairs, pos_start, self.current_tok.pos_end.copy())
+            )
         else:
             key = res.register(self.expr())
             if res.error:
                 return res
 
             if self.current_tok.type != TT_COLON:
-                return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected ':'"))
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected ':'",
+                    )
+                )
 
             res.register_advancement()
             self.advance()
@@ -479,7 +497,11 @@ class Parser:
 
                 if self.current_tok.type != TT_COLON:
                     return res.failure(
-                        InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected ':'")
+                        InvalidSyntaxError(
+                            self.current_tok.pos_start,
+                            self.current_tok.pos_end,
+                            "Expected ':'",
+                        )
                     )
 
                 res.register_advancement()
@@ -496,16 +518,22 @@ class Parser:
             self.skip_newlines()
             if self.current_tok.type != TT_RBRACE:
                 return res.failure(
-                    InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected ',' or '}'")
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected ',' or '}'",
+                    )
                 )
 
             res.register_advancement()
             self.advance()
 
-            return res.success(HashMapNode(pairs, pos_start, self.current_tok.pos_end.copy()))
-
+            return res.success(
+                HashMapNode(pairs, pos_start, self.current_tok.pos_end.copy())
+            )
 
     def list_expr(self):
+        self.skip_newlines()
         res = ParseResult()
         element_nodes = []
         pos_start = self.current_tok.pos_start.copy()
@@ -562,6 +590,7 @@ class Parser:
         )
 
     def if_expr(self):
+        self.skip_newlines()
         res = ParseResult()
 
         all_cases = res.register(self.if_expr_cases("if"))
@@ -571,9 +600,11 @@ class Parser:
         return res.success(IfNode(cases, else_case))
 
     def if_expr_b(self):
+        self.skip_newlines()
         return self.if_expr_cases("elif")
 
     def if_expr_c(self):
+        self.skip_newlines()
         res = ParseResult()
         else_case = None
 
@@ -610,6 +641,7 @@ class Parser:
         return res.success(else_case)
 
     def if_expr_b_or_c(self):
+        self.skip_newlines()
         res = ParseResult()
         cases, else_case = [], None
 
@@ -626,6 +658,7 @@ class Parser:
         return res.success((cases, else_case))
 
     def if_expr_cases(self, case_keyword):
+        self.skip_newlines()
         res = ParseResult()
         cases = []
         else_case = None
@@ -693,8 +726,9 @@ class Parser:
             cases.extend(new_cases)
 
         return res.success((cases, else_case))
-    
+
     def for_expr(self):
+        self.skip_newlines()
         res = ParseResult()
 
         if not self.current_tok.matches(TT_KEYWORD, "for"):
@@ -767,7 +801,14 @@ class Parser:
                 self.advance()
 
                 return res.success(
-                    ForInNode(var_name, iterable_node, body, True, var_name.pos_start, body.pos_end)
+                    ForInNode(
+                        var_name,
+                        iterable_node,
+                        body,
+                        True,
+                        var_name.pos_start,
+                        body.pos_end,
+                    )
                 )
 
             body = res.register(self.statement())
@@ -775,7 +816,14 @@ class Parser:
                 return res
 
             return res.success(
-                ForInNode(var_name, iterable_node, body, False, var_name.pos_start, body.pos_end)
+                ForInNode(
+                    var_name,
+                    iterable_node,
+                    body,
+                    False,
+                    var_name.pos_start,
+                    body.pos_end,
+                )
             )
 
         if self.current_tok.type != TT_EQ:
@@ -865,6 +913,7 @@ class Parser:
         )
 
     def while_expr(self):
+        self.skip_newlines()
         res = ParseResult()
 
         if not self.current_tok.matches(TT_KEYWORD, "while"):
@@ -924,6 +973,7 @@ class Parser:
         return res.success(WhileNode(condition, body, False))
 
     def func_def(self):
+        self.skip_newlines()
         res = ParseResult()
 
         if not self.current_tok.matches(TT_KEYWORD, "defun"):
@@ -1049,6 +1099,7 @@ class Parser:
         return res.success(FuncDefNode(var_name_tok, arg_name_toks, body, False))
 
     def bin_op(self, func_a, ops, func_b=None):
+        self.skip_newlines()
         if func_b == None:
             func_b = func_a
 
