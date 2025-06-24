@@ -23,6 +23,7 @@ class Lexer:
 
     def make_tokens(self):
         while self.current_char is not None:
+            print(self.open_bracket_stack)
             if self.current_char in " \t":
                 self.advance()
             elif self.current_char == "#":
@@ -109,7 +110,7 @@ class Lexer:
                     return [], InvalidSyntaxError(
                         pos_start_closer,
                         self.pos,
-                        "Unexpected ')' in augmented assignment context. Expected end of expression or newline.",
+                        "Expected end of expression or newline",
                     )
                 else:
                     return [], ExpectedCharError(
@@ -159,10 +160,26 @@ class Lexer:
                 pos_start = self.pos.copy()
                 self.tokens.append(Token(TT_LBRACE, pos_start=pos_start))
                 self.advance()
+                self.tokens[-1].pos_end = self.pos.copy()
+                self.open_bracket_stack.append(("}", pos_start))
             elif self.current_char == "}":
                 pos_start_closer = self.pos.copy()
                 self.tokens.append(Token(TT_RBRACE, pos_start=pos_start_closer))
                 self.advance()
+                self.tokens[-1].pos_end = self.pos.copy()
+
+                if not self.open_bracket_stack:
+                    return [], ExpectedCharError(
+                        pos_start_closer, self.pos, "'}' without matching opener"
+                    )
+
+                expected_closer, _ = self.open_bracket_stack[-1]
+                if expected_closer == "}":
+                    self.open_bracket_stack.pop()
+                else:
+                    return [], ExpectedCharError(
+                        pos_start_closer, self.pos, f"'{expected_closer}'"
+                    )
             elif self.current_char == ":":
                 pos_start = self.pos.copy()
                 self.tokens.append(Token(TT_COLON, pos_start=pos_start))

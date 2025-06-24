@@ -1009,8 +1009,7 @@ class HashMap(Object):
         return self.values.get(index.value, default), None
 
     def iter(self):
-        pairs = [List([String(str(k)), v]) for k, v in self.values.items()]
-        return iter(pairs), None
+        return iter(self.values.values()), None
 
     def get_comparison_eq(self, other):
         if not isinstance(other, HashMap):
