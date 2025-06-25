@@ -4009,6 +4009,8 @@ def run(fn, text):
     tokens, error = lexer.make_tokens()
     if error:
         return None, error
+    # for token in tokens:
+    #     print(token)
     result = None
     context = None
     try:
@@ -4016,6 +4018,7 @@ def run(fn, text):
         ast = parser.parse()
         if ast.error:
             return None, ast.error
+        # print(astpretty(ast.node))
         interpreter = Interpreter()
         context = Context("<program>")
         context.symbol_table = global_symbol_table

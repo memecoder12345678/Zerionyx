@@ -1,3 +1,6 @@
+from colorama import Fore, Style
+
+
 class NumberNode:
     __slots__ = ["tok", "pos_start", "pos_end"]
 
@@ -328,3 +331,132 @@ class ForInNode:
 
     def __str__(self):
         return f"ForInNode({self.var_name_tok.value} in {self.iterable_node} do {self.body_node})"
+    
+
+def astpretty(node, indent=0):
+    pad = '  ' * indent
+    if node is None:
+        return pad + f'{Fore.LIGHTBLACK_EX}None{Style.RESET_ALL}'
+
+    def colorize_type(node_type):
+        return f"{Fore.BLUE}{node_type}{Style.RESET_ALL}"
+
+    def colorize_value(value):
+        return f"{Fore.YELLOW}{value}{Style.RESET_ALL}"
+
+    def colorize_string(value):
+        return f'{Fore.GREEN}"{value}"{Style.RESET_ALL}'
+
+    def colorize_keyword(keyword):
+        return f"{Fore.CYAN}{keyword}{Style.RESET_ALL}"
+
+    if isinstance(node, ListNode):
+        node_type = colorize_type("ListNode")
+        res = pad + f"{node_type}(\n"
+        for elem in node.element_nodes:
+            res += astpretty(elem, indent + 1) + ',\n'
+        res += pad + ")"
+        return res
+
+    if isinstance(node, LoadNode):
+        node_type = colorize_type("LoadNode")
+        return pad + f'{node_type}({colorize_string(node.file_path)})'
+
+    if isinstance(node, StringNode):
+        node_type = colorize_type("StringNode")
+        return pad + f'{node_type}({colorize_string(node.tok.value)})'
+    if isinstance(node, NumberNode):
+        node_type = colorize_type("NumberNode")
+        return pad + f"{node_type}({colorize_value(node.tok.value)})"
+
+    if isinstance(node, VarAccessNode):
+        node_type = colorize_type("VarAccessNode")
+        return pad + f"{node_type}({colorize_value(node.var_name_tok.value)})"
+    if isinstance(node, VarAssignNode):
+        node_type = colorize_type("VarAssignNode")
+        return pad + f"{node_type}({colorize_value(node.var_name_tok.value)} {colorize_keyword('=')} {astpretty(node.value_node, 0)})"
+
+    if isinstance(node, BinOpNode):
+        node_type = colorize_type("BinOpNode")
+        return pad + f"{node_type}(\n{astpretty(node.left_node, indent + 1)},\n{pad + '  ' + colorize_value(node.op_tok.type)},\n{astpretty(node.right_node, indent + 1)}\n{pad})"
+    if isinstance(node, UnaryOpNode):
+        node_type = colorize_type("UnaryOpNode")
+        return pad + f"{node_type}({colorize_value(node.op_tok.type)}, {astpretty(node.node, indent + 1)})"
+
+    if isinstance(node, CallNode):
+        node_type = colorize_type("CallNode")
+        res = pad + f"{node_type}(\n{astpretty(node.node_to_call, indent + 1)}"
+        if node.arg_nodes:
+            res += ",\n" + pad + f"  {colorize_keyword('args')}=[\n"
+            for arg in node.arg_nodes:
+                res += astpretty(arg, indent + 2) + ",\n"
+            res += pad + "  ]"
+        res += f"\n{pad})"
+        return res
+
+    if isinstance(node, IfNode):
+        node_type = colorize_type("IfNode")
+        res = pad + f"{node_type}(\n"
+        for condition, expr, _ in node.cases:
+            res += pad + f"  {colorize_keyword('IF')}\n" + astpretty(condition, indent + 2) + ",\n"
+            res += pad + f"  {colorize_keyword('THEN')}\n" + astpretty(expr, indent + 2) + ",\n"
+        if node.else_case:
+            expr, _ = node.else_case
+            res += pad + f"  {colorize_keyword('ELSE')}\n" + astpretty(expr, indent + 2) + ",\n"
+        res += pad + ")"
+        return res
+
+    if isinstance(node, ForNode):
+        node_type = colorize_type("ForNode")
+        return pad + (
+            f"{node_type}({colorize_value(node.var_name_tok.value)} "
+            f"{colorize_keyword('from')} {astpretty(node.start_value_node, 0)} "
+            f"{colorize_keyword('to')} {astpretty(node.end_value_node, 0)} "
+            f"{colorize_keyword('step')} {astpretty(node.step_value_node, 0)} "
+            f"{colorize_keyword('do')} {astpretty(node.body_node, indent + 1)})"
+        )
+
+    if isinstance(node, ForInNode):
+        node_type = colorize_type("ForInNode")
+        return pad + (
+            f"{node_type}({colorize_value(node.var_name_tok.value)} "
+            f"{colorize_keyword('in')} {astpretty(node.iterable_node, 0)} "
+            f"{colorize_keyword('do')} {astpretty(node.body_node, indent + 1)})"
+        )
+
+    if isinstance(node, WhileNode):
+        node_type = colorize_type("WhileNode")
+        return pad + (
+            f"{node_type}({colorize_keyword('while')} {astpretty(node.condition_node, 0)} "
+            f"{colorize_keyword('do')} {astpretty(node.body_node, indent + 1)})"
+        )
+
+    if isinstance(node, FuncDefNode):
+        node_type = colorize_type("FuncDefNode")
+        args = ', '.join(colorize_value(tok.value) for tok in node.arg_name_toks)
+        name = colorize_value(node.var_name_tok.value) if node.var_name_tok else colorize_keyword('anonymous')
+        return pad + f"{node_type}({name}({args}) {astpretty(node.body_node, indent + 1)})"
+
+    if isinstance(node, ReturnNode):
+        node_type = colorize_type("ReturnNode")
+        return pad + f"{node_type}({astpretty(node.node_to_return, indent + 1)})"
+    if isinstance(node, ContinueNode):
+        node_type = colorize_type("ContinueNode")
+        return pad + f"{node_type}()"
+    if isinstance(node, BreakNode):
+        node_type = colorize_type("BreakNode")
+        return pad + f"{node_type}()"
+
+    if isinstance(node, AccessNode):
+        node_type = colorize_type("AccessNode")
+        return pad + f"{node_type}({astpretty(node.obj, 0)}[{astpretty(node.index, 0)}])"
+
+    if isinstance(node, HashMapNode):
+        node_type = colorize_type("HashMapNode")
+        res = pad + f"{node_type}(\n"
+        for k, v in node.pairs:
+            res += pad + f"  {astpretty(k, 0)}: {astpretty(v, 0)},\n"
+        res += pad + ")"
+        return res
+
+    return pad + repr(node)
