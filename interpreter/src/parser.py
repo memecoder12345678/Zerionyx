@@ -309,11 +309,15 @@ class Parser:
                 return res
             return res.success(UnaryOpNode(tok, factor))
 
-        return self.power()
+        return self.dot_op()
+
+    def dot_op(self):
+        self.skip_newlines()
+        return self.bin_op(self.power, (TT_DOT,))
 
     def power(self):
         self.skip_newlines()
-        return self.bin_op(self.call, (TT_POW, TT_DOT), self.factor)
+        return self.bin_op(self.call, (TT_POW,))
 
     def call(self):
         self.skip_newlines()

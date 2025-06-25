@@ -2409,7 +2409,6 @@ class BuiltInFunction(BaseFunction):
                     items.append(self.validate_pyexec_result(item))
             return List(items)
         elif isinstance(obj, dict):
-            print("0m")
             new_dict = {}
             for k, v in obj.items():
                 if not isinstance(k, (str, int, float, bool)):
@@ -2450,7 +2449,6 @@ class BuiltInFunction(BaseFunction):
             local_env = {}
             exec(code.value, {}, local_env)
             fr = self.validate_pyexec_result(local_env)
-            print(type(fr))
             return RTResult().success(fr)
         except Exception as e:
             return RTResult().failure(
@@ -3460,11 +3458,11 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        for k, v in hm.values:
-            if k == key.value:
+        for k, v in hm.values.items():
+            if k.value == key.value:
                 return RTResult().success(v)
 
-        return RTResult().success(default if default is not None else None_.none)
+        return RTResult().success(default)
     execute_get.arg_names = ["hm", "key", "default"]
 
 
