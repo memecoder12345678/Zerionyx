@@ -227,20 +227,10 @@ class Parser:
                 )
 
             module = self.current_tok
-            v2 = module.value
             module.value = module.value.replace(".", os.sep)
             if module.value.endswith(os.sep):
                 module.value = module.value[:-1]
-            if not module.value.endswith(".zer"):
-                module.value += ".zer"
-            if os.path.basename(os.path.dirname(module.value)) != "libs":
-                return res.failure(
-                    InvalidSyntaxError(
-                        module.pos_start,
-                        module.pos_end,
-                        f"Expected module to be in 'libs' directory, got '{v2}'",
-                    )
-                )
+            module.value += ".zer"
             res.register_advancement()
             self.advance()
             return res.success(LoadNode(module))

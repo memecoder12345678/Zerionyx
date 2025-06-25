@@ -118,10 +118,10 @@ class IfNode:
 
     def __str__(self):
         result = "IfNode("
-        for condition, expr, should_return in self.cases:
+        for condition, expr, _ in self.cases:
             result += f"\nIF {condition} THEN {expr}"
         if self.else_case:
-            expr, should_return = self.else_case
+            expr, _ = self.else_case
             result += f"\nELSE {expr}"
         return result + ")"
 
@@ -179,7 +179,7 @@ class WhileNode:
         self.pos_end = self.body_node.pos_end
 
     def __str__(self):
-        return f"WhileNode(WHILE {self.condition_node} DO {self.body_node})"
+        return f"WhileNode(while {self.condition_node} do {self.body_node})"
 
 
 class FuncDefNode:

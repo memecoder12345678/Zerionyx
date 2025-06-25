@@ -6,10 +6,7 @@ DIGITS = string.digits
 LETTERS = string.ascii_letters
 LETTERS_DIGITS = LETTERS + DIGITS
 INFO = "(v2.3.0, 2025-06-25 03:06:34)"
-if getattr(sys, "frozen", False):
-    LIBS_PATH = os.path.dirname(sys.executable)
-else:
-    LIBS_PATH = os.path.dirname(os.path.abspath(__file__))
+LIBS_PATH = os.path.join(os.getcwd(), 'src/libs')
 TT_INT = "INT"
 TT_FLOAT = "FLOAT"
 TT_STRING = "STRING"

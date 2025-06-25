@@ -130,7 +130,7 @@ class BuiltInFunction(BaseFunction):
             return res
         return res.success(return_value)
 
-    def no_visit_method(self, node, context):
+    def no_visit_method(self, _, __):
         raise Exception(f"No execute_{self.name} method defined")
 
     def copy(self):
@@ -196,7 +196,7 @@ class BuiltInFunction(BaseFunction):
 
     execute_get_password.arg_names = ["prompt"]
 
-    def execute_clear(self, exec_ctx):
+    def execute_clear(self, _):
         os.system("cls" if os.name == "nt" else "clear")
         return RTResult().success(None_.none)
 
@@ -631,7 +631,7 @@ class BuiltInFunction(BaseFunction):
 
     execute_exists_fp.arg_names = ["file_path"]
 
-    def execute_time_fp(self, exec_ctx):
+    def execute_time_fp(self, _):
         return RTResult().success(Number(time.time()))
 
     execute_time_fp.arg_names = []
@@ -757,7 +757,7 @@ class BuiltInFunction(BaseFunction):
 
     execute_set_cdir_fp.arg_names = ["name"]
 
-    def execute_rand_fp(self, exec_ctx):
+    def execute_rand_fp(self, _):
         return RTResult().success(Number(random.random()))
 
     execute_rand_fp.arg_names = []
@@ -3864,10 +3864,10 @@ class Interpreter:
 
         return res.success_return(value)
 
-    def visit_ContinueNode(self, node, context):
+    def visit_ContinueNode(self, _, __):
         return RTResult().success_continue()
 
-    def visit_BreakNode(self, node, context):
+    def visit_BreakNode(self, _, __):
         return RTResult().success_break()
 
     def visit_LoadNode(self, node: LoadNode, context: Context):
