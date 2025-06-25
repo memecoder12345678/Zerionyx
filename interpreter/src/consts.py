@@ -1,12 +1,11 @@
 import os
-import sys
 import string
 
 DIGITS = string.digits
 LETTERS = string.ascii_letters
 LETTERS_DIGITS = LETTERS + DIGITS
 INFO = "(v2.3.0, 2025-06-25 03:06:34)"
-LIBS_PATH = os.path.join(os.getcwd(), 'src/libs')
+LIBS_PATH = os.path.dirname(os.path.abspath(__file__))
 TT_INT = "INT"
 TT_FLOAT = "FLOAT"
 TT_STRING = "STRING"
