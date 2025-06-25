@@ -3,7 +3,6 @@ load "libs.sys"
 
 N = 1000000
 total = 0
-i = 1
 let start = time()
 
 for i = 1 to N + 1 do
@@ -16,7 +15,7 @@ println("Sum: " + to_str(total))
 println("Zerionyx ran in: " + to_str(end - start) + " seconds")
 exit(0)
 
-# Fastest: 1.63242268562317 seconds
-# Slowest: 2.20334911346436 seconds
-# Average: 1.91788589954376 seconds
+# Fastest: 1.16324806213379 seconds
+# Slowest: 1.29593896865845 seconds
+# Average: 1.22959351539612 seconds
 # NOTE: all tests were run using PyPy

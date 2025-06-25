@@ -122,10 +122,10 @@ class IfNode:
     def __str__(self):
         result = "IfNode("
         for condition, expr, _ in self.cases:
-            result += f"\nIF {condition} THEN {expr}"
+            result += f"\nif {condition} do {expr}"
         if self.else_case:
             expr, _ = self.else_case
-            result += f"\nELSE {expr}"
+            result += f"\nelse {expr}"
         return result + ")"
 
 
@@ -333,6 +333,19 @@ class ForInNode:
         return f"ForInNode({self.var_name_tok.value} in {self.iterable_node} do {self.body_node})"
     
 
+class VarAssignAsNode:
+    __slots__ = ["var_name_tok", "var_name_tok2", "pos_start", "pos_end"]
+
+    def __init__(self, var_name_tok, var_name_tok2):
+        self.var_name_tok = var_name_tok
+        self.var_name_tok2 = var_name_tok2
+
+        self.pos_start = self.var_name_tok.pos_start
+        self.pos_end = self.var_name_tok2.pos_end
+
+    def __str__(self):
+        return f"VarAssignAsNode({self.var_name_tok.value} = {self.var_name_tok2.value})"
+
 def astpretty(node, indent=0):
     pad = '  ' * indent
     if node is None:
@@ -398,11 +411,11 @@ def astpretty(node, indent=0):
         node_type = colorize_type("IfNode")
         res = pad + f"{node_type}(\n"
         for condition, expr, _ in node.cases:
-            res += pad + f"  {colorize_keyword('IF')}\n" + astpretty(condition, indent + 2) + ",\n"
-            res += pad + f"  {colorize_keyword('THEN')}\n" + astpretty(expr, indent + 2) + ",\n"
+            res += pad + f"  {colorize_keyword('if')}\n" + astpretty(condition, indent + 2) + ",\n"
+            res += pad + f"  {colorize_keyword('do')}\n" + astpretty(expr, indent + 2) + ",\n"
         if node.else_case:
             expr, _ = node.else_case
-            res += pad + f"  {colorize_keyword('ELSE')}\n" + astpretty(expr, indent + 2) + ",\n"
+            res += pad + f"  {colorize_keyword('else')}\n" + astpretty(expr, indent + 2) + ",\n"
         res += pad + ")"
         return res
 
@@ -422,6 +435,13 @@ def astpretty(node, indent=0):
             f"{node_type}({colorize_value(node.var_name_tok.value)} "
             f"{colorize_keyword('in')} {astpretty(node.iterable_node, 0)} "
             f"{colorize_keyword('do')} {astpretty(node.body_node, indent + 1)})"
+        )
+    
+    if isinstance(node, VarAssignAsNode):
+        node_type = colorize_type("VarAssignAsNode")
+        return pad + (
+            f"{node_type}({colorize_value(node.var_name_tok.value)} "
+            f"{colorize_keyword('as')} {astpretty(node.var_name_tok2, 0)})"
         )
 
     if isinstance(node, WhileNode):

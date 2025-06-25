@@ -21,7 +21,7 @@ defun backup_folder(path, cbp, rbp)
             else
                 ems = e.1 
                 if startswith(ems, "File ") do
-                    msg = slice(ems, len("File "), len(ems))
+                    msg = slice(ems, len("File "), len(ems), none)
                     cprintln(msg, "red", none, none)
                 done
             done

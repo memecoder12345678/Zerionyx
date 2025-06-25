@@ -503,44 +503,55 @@ class Lexer:
 
         pos_end_identifier = self.pos.copy()
 
-        is_assignment_op_follows = False
         peek_idx = self.pos.idx
         while peek_idx < len(self.text) and self.text[peek_idx] in " \t":
             peek_idx += 1
 
+        should_insert_let = False
         if peek_idx < len(self.text):
-            op_char1 = self.text[peek_idx]
-            op_char2 = (
-                self.text[peek_idx + 1] if peek_idx + 1 < len(self.text) else None
-            )
-            op_char3 = (
-                self.text[peek_idx + 2] if peek_idx + 2 < len(self.text) else None
-            )
-
-            if op_char1 == "=" and op_char2 != "=":
-                is_assignment_op_follows = True
-            elif op_char1 in ["+", "-", "*", "^", "%"] and op_char2 == "=":
-                is_assignment_op_follows = True
-            elif op_char1 == "/" and (
-                op_char2 == "=" or (op_char2 == "/" and op_char3 == "=")
+            if (
+                peek_idx + 1 < len(self.text)
+                and self.text[peek_idx:peek_idx+2] == "as"
+                and (peek_idx + 2 >= len(self.text) or self.text[peek_idx+2] not in LETTERS_DIGITS + "_")
             ):
-                is_assignment_op_follows = True
+                should_insert_let = True
 
-        if is_assignment_op_follows:
-            pt: Token | None = self.previous_token()
-            allowed_preceding_keywords_for_let = {"do", "else"}
-            insert_let = False
-            if id_str not in KEYWORDS:
-                if (
-                    pt is None
-                    or pt.type == TT_NEWLINE
-                    or (
-                        pt.type == TT_KEYWORD
-                        and pt.value in allowed_preceding_keywords_for_let
-                    )
-                    or pt.type == TT_ARROW
+            if not should_insert_let:
+                op_char1 = self.text[peek_idx]
+                op_char2 = self.text[peek_idx+1] if peek_idx+1 < len(self.text) else None
+                op_char3 = self.text[peek_idx+2] if peek_idx+2 < len(self.text) else None
+
+                if op_char1 == "=" and op_char2 != "=":
+                    should_insert_let = True
+                elif op_char1 in ["+", "-", "*", "^", "%"] and op_char2 == "=":
+                    should_insert_let = True
+                elif op_char1 == "/" and (
+                    op_char2 == "=" or (op_char2 == "/" and op_char3 == "=")
                 ):
-                    insert_let = True
+                    should_insert_let = True
+
+        if should_insert_let and id_str not in KEYWORDS:
+            pt: Token | None = self.previous_token()
+            allowed_preceding_keywords_for_let = {
+                "do", "else", "as"
+            }
+            insert_let = False
+
+            if (
+                pt is None
+                or pt.type == TT_NEWLINE
+                or (
+                    pt.type == TT_KEYWORD
+                    and pt.value in allowed_preceding_keywords_for_let
+                )
+                or pt.type == TT_ARROW
+                or pt.type == TT_COMMA
+                or pt.type == TT_COLON
+                or pt.type == TT_LPAREN
+                or pt.type == TT_LSQUARE
+                or pt.type == TT_LBRACE
+            ):
+                insert_let = True
 
             if insert_let:
                 self.tokens.append(

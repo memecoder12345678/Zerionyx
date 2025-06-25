@@ -43,7 +43,7 @@ def main():
                 if text.strip() == "grammar":
                     print(
                         ("=" * 96)
-                        + '\n\nPROGRAM            ::= (STATEMENT NEWLINE*)*\n\nSTATEMENT          ::= SIMPLE_STATEMENT | COMPOUND_STATEMENT\n\nSIMPLE_STATEMENT   ::=\n      "load" STRING\n    | "return" EXPR\n    | "continue"\n    | "break"\n    | EXPR\n\nCOMPOUND_STATEMENT ::=\n      IF_EXPR\n    | FOR_EXPR\n    | WHILE_EXPR\n    | DEF_FUNC\n\nEXPR               ::= \n      "let" IDENTIFIER "=" EXPR\n    | IDENTIFIER "=" EXPR\n    | IDENTIFIER ("+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^=") EXPR\n    | COMP_EXPR (("and" | "or") COMP_EXPR)*\n\nCOMP_EXPR          ::= \n      ARITH_EXPR (("==" | "<" | ">" | "<=" | ">=" | "!=") ARITH_EXPR)*\n    | "not" COMP_EXPR\n\nARITH_EXPR         ::= TERM (("+" | "-") TERM)*\n\nTERM               ::= FACTOR (("*" | "/" | "//" | "%") FACTOR)*\n\nFACTOR             ::= ("+" | "-") FACTOR | POWER\n\nPOWER              ::= CALL ("^" FACTOR)*\n\nCALL               ::= ATOM ("(" (EXPR ("," EXPR)*)? ")")?\n\nATOM               ::= \n      INT | FLOAT | STRING | IDENTIFIER\n    | "(" EXPR ")"\n    | LIST_EXPR\n    | LIST_INDEX\n    | IF_EXPR\n    | FOR_EXPR\n    | WHILE_EXPR\n    | DEF_FUNC\n    | COMMENT\n\nLIST_INDEX        ::= IDENTIFIER ">" EXPR\n\nLIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"\n\nIF_EXPR           ::= \n      "if" EXPR "do" STATEMENT\n      (NEWLINE "elif" EXPR "do" STATEMENT)*\n      (NEWLINE "else" STATEMENT)?\n      NEWLINE "done"\n\nFOR_EXPR          ::=\n      "for" IDENTIFIER "=" EXPR "to" EXPR\n      ("step" EXPR)?\n      "do" STATEMENT\n      NEWLINE "done"\n\nWHILE_EXPR        ::= \n      "while" EXPR "do" STATEMENT\n      NEWLINE "done"\n\nDEF_FUNC          ::= \n      "defun" IDENTIFIER "(" (IDENTIFIER ("," IDENTIFIER)*)? ")"\n      ("->" EXPR)?\n      NEWLINE STATEMENT NEWLINE "done"\n\nCOMMENT           ::= "#" /[^\\n]*/\n\n'
+                        + '\n\\nPROGRAM            ::= (STATEMENT NEWLINE*)*\n\nSTATEMENT          ::= SIMPLE_STATEMENT | COMPOUND_STATEMENT\n\nSIMPLE_STATEMENT   ::=\n      "load" STRING\n    | "return" EXPR\n    | "continue"\n    | "break"\n    | EXPR\n\nCOMPOUND_STATEMENT ::=\n      IF_EXPR\n    | FOR_EXPR\n    | WHILE_EXPR\n    | DEF_FUNC\n\nEXPR               ::= \n      "let" IDENTIFIER "=" EXPR\n    | IDENTIFIER "=" EXPR\n      "let" IDENTIFIER "as" EXPR\n    | IDENTIFIER "as" EXPR\n    | IDENTIFIER ("+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^=") EXPR\n    | COMP_EXPR (("and" | "or") COMP_EXPR)*\n\nCOMP_EXPR          ::= \n      ARITH_EXPR (("==" | "<" | ">" | "<=" | ">=" | "!=") ARITH_EXPR)*\n    | "not" COMP_EXPR\n\nARITH_EXPR         ::= TERM (("+" | "-") TERM)*\n\nTERM               ::= FACTOR (("*" | "/" | "//" | "%") FACTOR)*\n\nFACTOR             ::= ("+" | "-") FACTOR | POWER\n\nPOWER              ::= CALL ("^" FACTOR)*\n\nCALL               ::= ATOM ("(" (EXPR ("," EXPR)*)? ")")?\n\nATOM               ::= \n      INT | FLOAT | STRING | IDENTIFIER\n    | "(" EXPR ")"\n    | LIST_EXPR\n    | LIST_INDEX\n    | IF_EXPR\n    | FOR_EXPR\n    | WHILE_EXPR\n    | DEF_FUNC\n    | COMMENT\n\nGET_INDEX         ::= IDENTIFIER "." EXPR\n\nLIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"\n\nHASHMAP_EXPR      ::= "{" (EXPR ("," STRING ":" EXPR)*)? "}"\n\nIF_EXPR           ::= \n      "if" EXPR "do" STATEMENT\n      (NEWLINE "elif" EXPR "do" STATEMENT)*\n      (NEWLINE "else" STATEMENT)?\n      NEWLINE "done"\n\nFOR_EXPR          ::=\n      "for" IDENTIFIER "=" EXPR "to" EXPR\n      ("step" EXPR)?\n      "do" STATEMENT\n      NEWLINE "done"\n\nWHILE_EXPR        ::= \n      "while" EXPR "do" STATEMENT\n      NEWLINE "done"\n\nDEF_FUNC          ::= \n      "defun" IDENTIFIER "(" (IDENTIFIER ("," IDENTIFIER)*)? ")"\n      ("->" EXPR)?\n      NEWLINE STATEMENT NEWLINE "done"\n\nCOMMENT           ::= "#" /[^\n]*/\n\n'
                         + ("=" * 96)
                         + "\n\nPlease scroll up to read from the beginning.\n"
                     )
@@ -72,8 +72,8 @@ def main():
                         print(f"{repr(result)}")
         except KeyboardInterrupt:
             print("\nexit...")
-        except Exception as e:
-            print(f"Shell error: {e}")
+        # except Exception as e:
+        #     print(f"Shell error: {e}")
     elif len(sys.argv) == 2 and sys.argv[1] == "--version":
         print(f"Zerionyx {INFO}")
         return
@@ -107,9 +107,9 @@ def main():
         except IOError as e:
             print(f"Error reading file '{file_name}': {e}.")
             return
-        # except Exception as e:
-        #     print(f"Interpreter error: {e}.")
-        #     return
+        except Exception as e:
+            print(f"Interpreter error: {e}.")
+            return
 
 
 if __name__ == "__main__":

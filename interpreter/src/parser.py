@@ -197,21 +197,40 @@ class Parser:
             res.register_advancement()
             self.advance()
 
-            if self.current_tok.type != TT_EQ:
+            if self.current_tok.type == TT_EQ:
+                res.register_advancement()
+                self.advance()
+                expr = res.register(self.expr())
+                if res.error:
+                    return res
+                return res.success(VarAssignNode(var_name, expr))
+            
+            elif self.current_tok.matches(TT_KEYWORD, "as"):
+                res.register_advancement()
+                self.advance()
+                
+                if self.current_tok.type != TT_IDENTIFIER:
+                    return res.failure(
+                        InvalidSyntaxError(
+                            self.current_tok.pos_start,
+                            self.current_tok.pos_end,
+                            "Expected identifier for alias",
+                        )
+                    )
+                
+                alias_name = self.current_tok
+                res.register_advancement()
+                self.advance()
+                return res.success(VarAssignAsNode(var_name, alias_name))
+            
+            else:
                 return res.failure(
                     InvalidSyntaxError(
                         self.current_tok.pos_start,
                         self.current_tok.pos_end,
-                        "Expected '='",
+                        "Expected '=' or 'as'",
                     )
                 )
-
-            res.register_advancement()
-            self.advance()
-            expr = res.register(self.expr())
-            if res.error:
-                return res
-            return res.success(VarAssignNode(var_name, expr))
         if self.current_tok.matches(TT_KEYWORD, "load"):
             res.register_advancement()
             self.advance()
@@ -228,37 +247,35 @@ class Parser:
             module = self.current_tok
             raw_path = module.value.replace('.', os.sep)
 
-            # Remove trailing slashes
             if raw_path.endswith(("\\", "/")):
                 raw_path = raw_path[:-1]
 
-            # Add .zer extension if missing
-            if not raw_path.endswith('.zer'):
-                raw_path += '.zer'
+            raw_path += '.zer'
 
-            # Handle libs prefix and path resolution
             candidates = []
             if module.value.startswith("libs."):
-                # Prefixed module: use raw_path directly (already includes 'libs/')
                 candidates.append(raw_path)
-            else:
-                # Non-prefixed: try local path first, then libs path
-                candidates.append(os.path.join(".", raw_path))  # Local path
-                candidates.append(os.path.join("libs", raw_path))  # Libs path
+            elif module.value.startswith("local."):
+                if self.current_tok.pos_start.fn == "<stdin>":
+                    local_path = os.path.join(
+                        os.path.dirname(os.path.abspath(__file__)), raw_path[6:]
+                    )
+                else:
+                    local_path = os.path.join(os.path.dirname(os.path.abspath(self.current_tok.pos_start.fn)), raw_path[6:])
+                candidates.append(local_path)
 
-            # Find first existing candidate
             chosen_path = None
             for path in candidates:
                 if os.path.exists(path):
                     chosen_path = path
                     break
 
-            # Fallback to first candidate if none exist
             module.value = os.path.normpath(chosen_path or candidates[0])
 
             res.register_advancement()
             self.advance()
             return res.success(LoadNode(module))
+        
       
         node = res.register(
             self.bin_op(self.comp_expr, ((TT_KEYWORD, "and"), (TT_KEYWORD, "or")))

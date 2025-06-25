@@ -5,7 +5,7 @@ import random
 import math
 from .parser import *
 from .nodes import *
-from .types_ import *
+from .datatypes import *
 from .consts import *
 from .errors import TError, IOError, MError, Error, RTError
 from shutil import rmtree, copy
@@ -90,7 +90,7 @@ class Function(BaseFunction):
         ret_value = (
             (value if self.should_auto_return else None)
             or res.func_return_value
-            or None_.none
+            or NoneObject.none
         )
         return res.success(ret_value)
 
@@ -146,10 +146,10 @@ class BuiltInFunction(BaseFunction):
         value = exec_ctx.symbol_table.get("value")
         if isinstance(value, String):
             print(value.value)
-            return RTResult().success(None_.none)
+            return RTResult().success(NoneObject.none)
 
         print(repr(exec_ctx.symbol_table.get("value")))
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_println.arg_names = ["value"]
 
@@ -157,10 +157,10 @@ class BuiltInFunction(BaseFunction):
         value = exec_ctx.symbol_table.get("value")
         if isinstance(value, String):
             print(value.value, end="")
-            return RTResult().success(None_.none)
+            return RTResult().success(NoneObject.none)
 
         print(repr(exec_ctx.symbol_table.get("value")), end="")
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_print.arg_names = ["value"]
 
@@ -198,14 +198,12 @@ class BuiltInFunction(BaseFunction):
 
     def execute_clear(self, _):
         os.system("cls" if os.name == "nt" else "clear")
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_clear.arg_names = []
 
     def execute_type(self, exec_ctx):
         data = exec_ctx.symbol_table.get("value")
-        if isinstance(data, None_):
-            return RTResult().success(None_.none)
         return RTResult().success(String(data.type()))
 
     execute_type.arg_names = ["value"]
@@ -213,7 +211,7 @@ class BuiltInFunction(BaseFunction):
     def execute_is_none(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
         return RTResult().success(
-            Number.true if isinstance(value, None_) else Number.false
+            Number.true if isinstance(value, NoneObject) else Number.false
         )
 
     execute_is_none.arg_names = ["value"]
@@ -369,7 +367,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         listA.elements.extend(listB.elements)
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_extend.arg_names = ["listA", "listB"]
 
@@ -397,7 +395,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         list_.elements.insert(int(index.value), element)
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_insert.arg_names = ["list_", "index", "element"]
 
@@ -471,7 +469,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         time.sleep(seconds.value)
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_sleep_fp.arg_names = ["seconds"]
 
@@ -496,7 +494,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        if not isinstance(start, Number) and not isinstance(start, None_):
+        if not isinstance(start, Number) and not isinstance(start, NoneObject):
             return RTResult().failure(
                 TError(
                     self.pos_start,
@@ -506,7 +504,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        if not isinstance(end, Number) and not isinstance(end, None_):
+        if not isinstance(end, Number) and not isinstance(end, NoneObject):
             return RTResult().failure(
                 TError(
                     self.pos_start,
@@ -515,7 +513,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        if not isinstance(step, Number) and not isinstance(step, None_):
+        if not isinstance(step, Number) and not isinstance(step, NoneObject):
             return RTResult().failure(
                 TError(
                     self.pos_start,
@@ -524,9 +522,9 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        a = int(start.value) if not isinstance(start, None_) else None
-        b = int(end.value) if not isinstance(end, None_) else None
-        s = int(step.value) if not isinstance(step, None_) else None
+        a = int(start.value) if not isinstance(start, NoneObject) else None
+        b = int(end.value) if not isinstance(end, NoneObject) else None
+        s = int(step.value) if not isinstance(step, NoneObject) else None
 
         if isinstance(l, String):
             sliced_l = l.value[a:b:s]
@@ -537,7 +535,7 @@ class BuiltInFunction(BaseFunction):
         sliced_l = l.elements[a:b:s]
         return RTResult().success(List(sliced_l))
 
-    execute_slice.arg_names = ["l", "start", "end"]
+    execute_slice.arg_names = ["l", "start", "end", "step"]
 
     def execute_open_fp(self, exec_ctx):
         file_path = exec_ctx.symbol_table.get("file_path")
@@ -691,7 +689,7 @@ class BuiltInFunction(BaseFunction):
 
         try:
             os.environ[name.value] = value.value
-            return RTResult().success(None_.none)
+            return RTResult().success(NoneObject.none)
         except Exception as e:
             return RTResult().failure(
                 RTError(
@@ -744,7 +742,7 @@ class BuiltInFunction(BaseFunction):
 
         try:
             os.chdir(name.value)
-            return RTResult().success(None_.none)
+            return RTResult().success(NoneObject.none)
         except Exception as e:
             return RTResult().failure(
                 IOError(
@@ -1036,7 +1034,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_system_fp.arg_names = ["command"]
 
@@ -1281,7 +1279,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         os.mkdir(value.value)
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_mkdir_fp.arg_names = ["dir_path"]
 
@@ -1316,7 +1314,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_remove_fp.arg_names = ["file_path"]
 
@@ -1362,7 +1360,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_rename_fp.arg_names = ["old_file_path", "new_file_path"]
 
@@ -1397,7 +1395,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_rmtree_fp.arg_names = ["dir_path"]
 
@@ -1442,7 +1440,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_copy_fp.arg_names = ["src_path", "dst_path"]
 
@@ -1473,7 +1471,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_keyboard_write_fp.arg_names = ["text"]
 
@@ -1504,7 +1502,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_keyboard_press_fp.arg_names = ["key"]
 
@@ -1535,7 +1533,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_keyboard_release_fp.arg_names = ["key"]
 
@@ -1566,7 +1564,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
     execute_keyboard_wait_fp.arg_names = ["key"]
 
@@ -1681,7 +1679,7 @@ class BuiltInFunction(BaseFunction):
             import time
 
             time.sleep(seconds.value)
-            return RTResult().success(None_.none)
+            return RTResult().success(NoneObject.none)
         except Exception as e:
             return RTResult().failure(
                 RTError(
@@ -1720,7 +1718,7 @@ class BuiltInFunction(BaseFunction):
 
         try:
             thread.join(timeout.value)
-            return RTResult().success(None_.none)
+            return RTResult().success(NoneObject.none)
         except Exception as e:
             return RTResult().failure(
                 RTError(
@@ -1765,7 +1763,7 @@ class BuiltInFunction(BaseFunction):
 
         try:
             thread.cancel()
-            return RTResult().success(None_.none)
+            return RTResult().success(NoneObject.none)
         except Exception as e:
             return RTResult().failure(
                 RTError(
@@ -2112,7 +2110,7 @@ class BuiltInFunction(BaseFunction):
 
         index = text.value.find(substring.value)
         if index == -1:
-            return RTResult().success(None_.none)
+            return RTResult().success(NoneObject.none)
         return RTResult().success(Number(index))
 
     execute_find_fp.arg_names = ["text", "substring"]
@@ -2143,15 +2141,15 @@ class BuiltInFunction(BaseFunction):
             if res.error and isinstance(res.error, (RTError, IOError, MError, TError)):
                 err_str = str(res.error)
                 err_line = err_str.strip().split("\n")[-1]
-                return RTResult().success(List([None_.none, String(err_line)]))
+                return RTResult().success(List([NoneObject.none, String(err_line)]))
             elif res.error:
                 return RTResult().failure(res.error)
             else:
-                return RTResult().success(List([res.value, None_.none]))
+                return RTResult().success(List([res.value, NoneObject.none]))
         except (RTError, IOError, MError, TError) as err:
             err_str = str(err)
             err_line = err_str.strip().split("\n")[-1]
-            return RTResult().success(List([None_.none, String(err_line)]))
+            return RTResult().success(List([NoneObject.none, String(err_line)]))
         except Exception as err:
             return RTResult().failure(
                 RTError(
@@ -2214,11 +2212,11 @@ class BuiltInFunction(BaseFunction):
             if res.error and isinstance(res.error, (RTError, IOError, MError, TError)):
                 err_str = str(res.error)
                 err_line = err_str.strip().split("\n")[-1]
-                return RTResult().success(List([None_.none, String(err_line)]))
+                return RTResult().success(List([NoneObject.none, String(err_line)]))
             elif res.error:
                 return RTResult().failure(res.error)
             else:
-                return RTResult().success(List([res.value, None_.none]))
+                return RTResult().success(List([res.value, NoneObject.none]))
         except (RTError, IOError, MError, TError) as err:
             try:
                 final_func.execute(final_args.elements)
@@ -2226,7 +2224,7 @@ class BuiltInFunction(BaseFunction):
                 pass
             err_str = str(err)
             err_line = err_str.strip().split("\n")[-1]
-            return RTResult().success(List([None_.none, String(err_line)]))
+            return RTResult().success(List([NoneObject.none, String(err_line)]))
         except Exception as err:
             try:
                 final_func.execute(final_args.elements)
@@ -2388,7 +2386,7 @@ class BuiltInFunction(BaseFunction):
     def validate_pyexec_result(self, obj):
         allowed = (bool, int, float, str)
         if obj is None:
-            return None_.none
+            return NoneObject.none
         elif isinstance(obj, allowed):
             if isinstance(obj, bool):
                 if obj:
@@ -2565,7 +2563,7 @@ class BuiltInFunction(BaseFunction):
         try:
             if hasattr(os, "symlink"):
                 os.symlink(src.value, dst.value)
-                return RTResult().success(None_.none)
+                return RTResult().success(NoneObject.none)
             else:
                 return RTResult().failure(
                     RTError(
@@ -2790,7 +2788,7 @@ class BuiltInFunction(BaseFunction):
             )
         try:
             os.chmod(path_arg.value, int(mode_arg.value))
-            return RTResult().success(None_.none)
+            return RTResult().success(NoneObject.none)
         except OSError as e:
             return RTResult().failure(
                 IOError(
@@ -2847,7 +2845,7 @@ class BuiltInFunction(BaseFunction):
         try:
             if hasattr(os, "chown"):
                 os.chown(path_arg.value, int(uid_arg.value), int(gid_arg.value))
-                return RTResult().success(None_.none)
+                return RTResult().success(NoneObject.none)
             else:
                 return RTResult().failure(
                     RTError(
@@ -2912,7 +2910,7 @@ class BuiltInFunction(BaseFunction):
                         exec_ctx,
                     )
                 )
-        elif isinstance(times_arg, None_):
+        elif isinstance(times_arg, NoneObject):
             actual_times_tuple = None
         else:
             return RTResult().failure(
@@ -2926,7 +2924,7 @@ class BuiltInFunction(BaseFunction):
 
         try:
             os.utime(path_arg.value, actual_times_tuple)
-            return RTResult().success(None_.none)
+            return RTResult().success(NoneObject.none)
         except OSError as e:
             return RTResult().failure(
                 IOError(
@@ -2973,7 +2971,7 @@ class BuiltInFunction(BaseFunction):
         try:
             if hasattr(os, "link"):
                 os.link(src.value, dst.value)
-                return RTResult().success(None_.none)
+                return RTResult().success(NoneObject.none)
             else:
                 return RTResult().failure(
                     RTError(
@@ -3036,7 +3034,7 @@ class BuiltInFunction(BaseFunction):
             )
         try:
             os.unlink(path_arg.value)
-            return RTResult().success(None_.none)
+            return RTResult().success(NoneObject.none)
         except OSError as e:
             return RTResult().failure(
                 IOError(
@@ -3080,7 +3078,7 @@ class BuiltInFunction(BaseFunction):
             )
         try:
             os.chdir(path_arg.value)
-            return RTResult().success(None_.none)
+            return RTResult().success(NoneObject.none)
         except OSError as e:
             return RTResult().failure(
                 IOError(
@@ -3522,7 +3520,7 @@ class BuiltInFunction(BaseFunction):
         if key.value in hm.values:
             del hm.values[key.value]
             return RTResult().success(hm)
-        return RTResult().success(None_.none)
+        return RTResult().success(NoneObject.none)
 
 
     execute_del.arg_names = ["hm", "key"]
@@ -3604,6 +3602,25 @@ class Interpreter:
         context.symbol_table.set(var_name, value)
         context.private_symbol_table.set(var_name, value)
         return res.success(value)
+
+    def visit_VarAssignAsNode(self, node, context: Context):
+        res = RTResult()
+        orig_name  = node.var_name_tok.value
+        alias_name = node.var_name_tok2.value
+
+        value = context.symbol_table.get(orig_name)
+        if value is None:
+            return res.failure(RTError(
+                node.pos_start, node.pos_end,
+                f"Variable '{orig_name}' is not defined",
+                context
+            ))
+
+        context.symbol_table.set(alias_name, value)
+        context.private_symbol_table.set(alias_name, value)
+
+        return res.success(value)
+
 
     def visit_BinOpNode(self, node, context):
         res = RTResult()
@@ -3692,16 +3709,16 @@ class Interpreter:
                 expr_value = res.register(self.visit(expr, context))
                 if res.should_return():
                     return res
-                return res.success(None_.none if should_return_none else expr_value)
+                return res.success(NoneObject.none if should_return_none else expr_value)
 
         if node.else_case:
             expr, should_return_none = node.else_case
             expr_value = res.register(self.visit(expr, context))
             if res.should_return():
                 return res
-            return res.success(None_.none if should_return_none else expr_value)
+            return res.success(NoneObject.none if should_return_none else expr_value)
 
-        return res.success(None_.none)
+        return res.success(NoneObject.none)
 
     def visit_ForNode(self, node, context):
         res = RTResult()
@@ -3755,7 +3772,7 @@ class Interpreter:
                 elements.append(value)
 
         if should_return_none:
-            return res.success(None_.none)
+            return res.success(NoneObject.none)
         else:
             return res.success(
                 List(elements)
@@ -3795,7 +3812,7 @@ class Interpreter:
                 elements.append(value)
 
         if should_return_none:
-            return res.success(None_.none)
+            return res.success(NoneObject.none)
         else:
             return res.success(
                 List(elements)
@@ -3863,7 +3880,7 @@ class Interpreter:
             if res.should_return():
                 return res
         else:
-            value = None_.none
+            value = NoneObject.none
 
         return res.success_return(value)
 
@@ -3975,7 +3992,7 @@ class Interpreter:
             pass
 
         if should_return_none:
-            return res.success(None_.none)
+            return res.success(NoneObject.none)
         else:
             return res.success(
                 List(elements)
@@ -3986,7 +4003,7 @@ class Interpreter:
 
 global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv[1:]]))
 global_symbol_table.set("os_sep_fp", String(os.sep))
-global_symbol_table.set("none", None_.none)
+global_symbol_table.set("none", NoneObject.none)
 global_symbol_table.set("false", Number.false)
 global_symbol_table.set("true", Number.true)
 global_symbol_table.set("list", String("<list>"))
@@ -4000,6 +4017,8 @@ global_symbol_table.set("thread", String("<thread>"))
 global_symbol_table.set("os_name_fp", String(os.name))
 global_symbol_table.set("PI_fp", Number(math.pi))
 global_symbol_table.set("E_fp", Number(math.e))
+global_symbol_table.set("none_type", String("<none>"))
+
 for func in BUILTIN_FUNCTIONS:
     global_symbol_table.set(func, getattr(BuiltInFunction, func))
 

@@ -121,7 +121,7 @@ defun find_all(s, v)
     result = []
     start = 0
     while true do
-        sub = slice(s, start, none)
+        sub = slice(s, start, none, none)
         idx = find(sub, v)
         if is_none(idx) do
             break
@@ -145,7 +145,7 @@ defun startswith(s, v)
     if len(v) > len(s) do
         return false
     done
-    prefix = slice(s, 0, len(v))
+    prefix = slice(s, 0, len(v), none)
     return prefix == v
 done
 
@@ -162,6 +162,6 @@ defun endswith(s, v)
     if len(v) > len(s) do
         return false
     done
-    suffix = slice(s, len(s) - len(v), none) 
+    suffix = slice(s, len(s) - len(v), none, none) 
     return suffix == v
 done

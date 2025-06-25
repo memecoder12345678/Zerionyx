@@ -57,4 +57,5 @@ KEYWORDS = [
     "break",
     "load",
     "in",
+    "as",
 ]
