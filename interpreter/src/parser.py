@@ -212,7 +212,6 @@ class Parser:
             if res.error:
                 return res
             return res.success(VarAssignNode(var_name, expr))
-
         if self.current_tok.matches(TT_KEYWORD, "load"):
             res.register_advancement()
             self.advance()
@@ -227,14 +226,40 @@ class Parser:
                 )
 
             module = self.current_tok
-            module.value = module.value.replace(".", os.sep)
-            if module.value.endswith(os.sep):
-                module.value = module.value[:-1]
-            module.value += ".zer"
+            raw_path = module.value.replace('.', os.sep)
+
+            # Remove trailing slashes
+            if raw_path.endswith(("\\", "/")):
+                raw_path = raw_path[:-1]
+
+            # Add .zer extension if missing
+            if not raw_path.endswith('.zer'):
+                raw_path += '.zer'
+
+            # Handle libs prefix and path resolution
+            candidates = []
+            if module.value.startswith("libs."):
+                # Prefixed module: use raw_path directly (already includes 'libs/')
+                candidates.append(raw_path)
+            else:
+                # Non-prefixed: try local path first, then libs path
+                candidates.append(os.path.join(".", raw_path))  # Local path
+                candidates.append(os.path.join("libs", raw_path))  # Libs path
+
+            # Find first existing candidate
+            chosen_path = None
+            for path in candidates:
+                if os.path.exists(path):
+                    chosen_path = path
+                    break
+
+            # Fallback to first candidate if none exist
+            module.value = os.path.normpath(chosen_path or candidates[0])
+
             res.register_advancement()
             self.advance()
             return res.success(LoadNode(module))
-
+      
         node = res.register(
             self.bin_op(self.comp_expr, ((TT_KEYWORD, "and"), (TT_KEYWORD, "or")))
         )

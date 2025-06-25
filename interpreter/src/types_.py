@@ -710,7 +710,7 @@ class Number(Object):
 
             return "1"
 
-        return str(self.value).replace("e", "*10^")
+        return str(self.value).replace("e", "*10^(").replace("E", "*10^(") + ")"
 
     def __repr__(self):
 

@@ -54,7 +54,7 @@ done
 defun tan(x)
     check_number(x, none, "tan")
     k = to_int(x / (PI / 2), false)
-    if k % 2 != 0 and abs(x - (k * PI / 2)) < (1 * 10^-15) do
+    if (k % 2 != 0) and (abs(x - (k * PI / 2)) < (1 * 10^ (-15))) do
         panic("'tan' is undefined at this value", "M")
     done
     return tan_fp(x)

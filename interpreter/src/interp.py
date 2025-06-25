@@ -260,19 +260,19 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        if not isinstance(reverse, Number):
+        if not isinstance(reverse, Bool):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "Second argument of 'sort' must be a number",
+                    "Second argument of 'sort' must be a boolean",
                     exec_ctx,
                 )
             )
 
-        if reverse.value == 1:
+        if int(reverse.value) == 1:
             lst.elements.sort(key=lambda x: x.value, reverse=True)
-        elif reverse.value == 0:
+        elif int(reverse.value) == 0:
             lst.elements.sort(key=lambda x: x.value)
         else:
             return RTResult().failure(
@@ -858,18 +858,18 @@ class BuiltInFunction(BaseFunction):
         value = exec_ctx.symbol_table.get("value")
         supress_error = exec_ctx.symbol_table.get("supress_error")
 
-        if not isinstance(supress_error, Number):
+        if not isinstance(supress_error, Bool):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "Second argument of 'to_int' must be a number",
+                    "Second argument of 'to_int' must be a boolean",
                     exec_ctx,
                 )
             )
-        if supress_error.value == 1:
+        if int(supress_error.value) == 1:
             supress_error_ = True
-        elif supress_error.value == 0:
+        elif int(supress_error.value) == 0:
             supress_error_ = False
         else:
             return RTResult().failure(
@@ -917,19 +917,19 @@ class BuiltInFunction(BaseFunction):
         value = exec_ctx.symbol_table.get("value")
         supress_error = exec_ctx.symbol_table.get("supress_error")
 
-        if not isinstance(supress_error, Number):
+        if not isinstance(supress_error, Bool):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "Second argument of 'to_float' must be a number",
+                    "Second argument of 'to_float' must be a boolean",
                     exec_ctx,
                 )
             )
 
-        if supress_error.value == 1:
+        if int(supress_error.value) == 1:
             supress_error_ = True
-        elif supress_error.value == 0:
+        elif int(supress_error.value) == 0:
             supress_error_ = False
         else:
             return RTResult().failure(
@@ -2391,7 +2391,10 @@ class BuiltInFunction(BaseFunction):
             return None_.none
         elif isinstance(obj, allowed):
             if isinstance(obj, bool):
-                return Number(int(obj))
+                if obj:
+                    return Number.true
+                else:
+                    return Number.false
             elif isinstance(obj, int):
                 return Number(obj)
             elif isinstance(obj, float):
