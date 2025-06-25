@@ -262,7 +262,7 @@ class BaseFunction(Object):
         res = RTResult()
 
         if len(args) > len(arg_names):
-
+            self.pos_end.col += 1
             return res.failure(
                 RTError(
                     self.pos_start,
@@ -272,8 +272,11 @@ class BaseFunction(Object):
                 )
             )
 
-        if len(args) < len(arg_names):
 
+        if len(args) < len(arg_names):
+            self.pos_end.col += 1
+            if len(args) == 0:
+                self.pos_end.col += 1
             return res.failure(
                 RTError(
                     self.pos_start,
