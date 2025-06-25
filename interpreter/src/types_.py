@@ -957,12 +957,16 @@ class List(Object):
 
         return f'[{", ".join([repr(x) for x in self.elements])}]'
 
-
 class HashMap(Object):
 
     def __init__(self, values) -> None:
         super().__init__()
-        self.values = values
+        if isinstance(values, HashMap):
+            self.values: dict[str, Object] = values.values.copy()
+        elif isinstance(values, dict):
+            self.values: dict[str, Object] = values.copy()
+        else:
+            self.values: dict[str, Object] = {}
 
     def is_true(self):
         return len(self.values) > 0
@@ -971,11 +975,11 @@ class HashMap(Object):
         if not isinstance(other, HashMap):
             return None, self.illegal_operation(other)
 
-        new_dict = self.copy()
+        new_map_values = self.values.copy()
         for key, value in other.values.items():
-            new_dict.values[key] = value
+            new_map_values[key] = value
 
-        return new_dict, None
+        return HashMap(new_map_values), None
 
     def type(self):
         return "<hashmap>"
@@ -988,28 +992,23 @@ class HashMap(Object):
             return self.values[index.value], None
         except KeyError:
             return None, RTError(
-                self.pos_start,
-                self.pos_end,
-                f"Key '{index.value}' not found in HashMap",
-                self.context,
-            )
+                    index.pos_start,
+                    index.pos_end,
+                    "Value at this key could not be retrieved from hashmap because key is not found",
+                    self.context,
+                )
 
     def set_index(self, index, value):
         if not isinstance(index, String):
             return None, self.illegal_operation(index)
 
-        self.values[index.value] = value
-
-        return self, None
-
-    def get_index(self, index, default):
-        if not isinstance(index, String):
-            return None, self.illegal_operation(index)
-
-        return self.values.get(index.value, default), None
+        new_values = self.values.copy()
+        new_values[index.value] = value
+        return HashMap(new_values)
 
     def iter(self):
-        return iter(self.values.values()), None
+        pairs = [List([String(str(k)), v]) for k, v in self.values.items()]
+        return iter(pairs), None
 
     def get_comparison_eq(self, other):
         if not isinstance(other, HashMap):
@@ -1032,33 +1031,22 @@ class HashMap(Object):
         return Number.true, None
 
     def get_comparison_ne(self, other):
-        if not isinstance(other, HashMap):
-            return None, self.illegal_operation(other)
+        eq_result, err = self.get_comparison_eq(other)
+        if err:
+            return None, err
+        if eq_result == Number.true:
+            return Number.false, None
+        return Number.true, None
 
-        if len(self.values) != len(other.values):
-            return Number.true, None
-
-        for key, value in self.values.items():
-            if key not in other.values:
-                return Number.true, None
-
-            cmp, err = value.get_comparison_ne(other.values[key])
-            if err:
-                return None, err
-            assert cmp is not None
-            if cmp.is_true():
-                return Number.true, None
-
-        return Number.false, None
 
     def __len__(self) -> int:
         return len(self.values)
 
     def copy(self):
-        copy = HashMap(self.values)
-        copy.set_pos(self.pos_start, self.pos_end)
-        copy.set_context(self.context)
-        return copy
+        copied_map = HashMap(self.values.copy())
+        copied_map.set_pos(self.pos_start, self.pos_end)
+        copied_map.set_context(self.context)
+        return copied_map
 
     def __str__(self) -> str:
         return self.__repr__()

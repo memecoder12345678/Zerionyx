@@ -23,7 +23,7 @@ class Lexer:
 
     def make_tokens(self):
         while self.current_char is not None:
-            print(self.open_bracket_stack)
+            # print(self.open_bracket_stack)
             if self.current_char in " \t":
                 self.advance()
             elif self.current_char == "#":

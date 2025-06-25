@@ -2409,6 +2409,7 @@ class BuiltInFunction(BaseFunction):
                     items.append(self.validate_pyexec_result(item))
             return List(items)
         elif isinstance(obj, dict):
+            print("0m")
             new_dict = {}
             for k, v in obj.items():
                 if not isinstance(k, (str, int, float, bool)):
@@ -2449,6 +2450,7 @@ class BuiltInFunction(BaseFunction):
             local_env = {}
             exec(code.value, {}, local_env)
             fr = self.validate_pyexec_result(local_env)
+            print(type(fr))
             return RTResult().success(fr)
         except Exception as e:
             return RTResult().failure(
@@ -3375,7 +3377,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(List(hm.keys()))
+        return RTResult().success(List(hm.values.keys()))
 
     execute_keys.arg_names = ["hm"]
 
@@ -3390,7 +3392,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(List(hm.values()))
+        return RTResult().success(List(hm.values.values()))
 
     execute_values.arg_names = ["hm"]
 
@@ -3405,7 +3407,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(List(hm.items()))
+        return RTResult().success(List(hm.values.items()))
 
     execute_items.arg_names = ["hm"]
 
@@ -3430,10 +3432,9 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(Bool(hm.has(key.value)))
+        return RTResult().success(Bool(hm.values.has(key.value)))
 
     execute_has.arg_names = ["hm", "key"]
-
     def execute_get(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         key = exec_ctx.symbol_table.get("key")
@@ -3448,6 +3449,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
+
         if not isinstance(key, String):
             return RTResult().failure(
                 TError(
@@ -3457,9 +3459,15 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(hm.get_index(key.value, default))
 
+        for k, v in hm.values:
+            if k == key.value:
+                return RTResult().success(v)
+
+        return RTResult().success(default if default is not None else None_.none)
     execute_get.arg_names = ["hm", "key", "default"]
+
+
 
     def execute_set(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
@@ -3484,8 +3492,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        hm.set_index(key.value, value)
-        return RTResult().success(value)
+        return RTResult().success(HashMap(hm.set_index(key, value)))
 
     execute_set.arg_names = ["hm", "key", "value"]
 
@@ -3511,8 +3518,11 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        hm.remove(key.value)
+        if key.value in hm.values:
+            del hm.values[key.value]
+            return RTResult().success(hm)
         return RTResult().success(None_.none)
+
 
     execute_del.arg_names = ["hm", "key"]
 
