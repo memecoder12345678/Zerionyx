@@ -386,7 +386,7 @@ class ZerionyxLexer(BaseLexer):
                 "keyboard_wait",
                 "is_pressed",
             ],
-            "libs.termcolor": ["cprintln", "cprint"],
+            "libs.termcolor": ["cprintln", "cprint", "get_code"],
         }
         self.operators = ["+", "-", "*", "/", "%", "^", "=", "<", ">", "!", "\\", "."]
         self.types = [
