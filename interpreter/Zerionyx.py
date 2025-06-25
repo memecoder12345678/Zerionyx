@@ -72,8 +72,8 @@ def main():
                         print(f"{repr(result)}")
         except KeyboardInterrupt:
             print("\nexit...")
-        # except Exception as e:
-        #     print(f"Shell error: {e}")
+        except Exception as e:
+            print(f"Shell error: {e}")
     elif len(sys.argv) == 2 and sys.argv[1] == "--version":
         print(f"Zerionyx {INFO}")
         return
