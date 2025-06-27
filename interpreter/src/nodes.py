@@ -346,6 +346,20 @@ class VarAssignAsNode:
     def __str__(self):
         return f"VarAssignAsNode({self.var_name_tok.value} = {self.var_name_tok2.value})"
 
+
+class NameSpaceNode:
+    __slots__ = ["namespace_name", "statements", "pos_start", "pos_end"]
+
+    def __init__(self, namespace_name, statements, pos_start, pos_end):
+        # Đảm bảo namespace_name là string, không phải token
+        self.namespace_name = namespace_name if isinstance(namespace_name, str) else namespace_name.value
+        self.statements = statements
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+
+    def __repr__(self):
+        return f"NameSpaceNode({self.namespace_name}, {self.statements})"
+
 def astpretty(node, indent=0):
     pad = '  ' * indent
     if node is None:
@@ -480,3 +494,26 @@ def astpretty(node, indent=0):
         return res
 
     return pad + repr(node)
+
+class CallMemberAccessNode:
+    __slots__ = ["object_node", "member_name", "arg_nodes", "pos_start", "pos_end"]
+    def __init__(self, object_node, member_name, arg_nodes, pos_start, pos_end):
+        self.object_node = object_node
+        self.member_name = member_name
+        self.arg_nodes = arg_nodes
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+
+    def __repr__(self):
+        return f"(CallMemberAccessNode {self.object_node}.{self.member_name}({self.arg_nodes}))"
+
+class MemberAccessNode:
+    __slots__ = ["object_node", "member_name", "pos_start", "pos_end"]
+    def __init__(self, object_node, member_name, pos_start, pos_end):
+        self.object_node = object_node
+        self.member_name = member_name
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+
+    def __repr__(self):
+        return f"(MemberAccessNode {self.object_node}.{self.member_name})"

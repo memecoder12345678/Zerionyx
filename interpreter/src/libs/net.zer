@@ -1,29 +1,31 @@
 # libs.net
 
-defun get_ip()
-    return get_ip_fp()
-done
+namespace net
+    defun get_ip()
+        return get_ip_fp()
+    done
 
-defun get_mac()
-    return get_mac_fp()
-done
+    defun get_mac()
+        return get_mac_fp()
+    done
 
-defun ping(h)
-    return ping_fp(h)
-done
+    defun ping(h)
+        return ping_fp(h)
+    done
 
-defun downl(u)
-    return downl_fp(u)
-done
+    defun downl(u)
+        return downl_fp(u)
+    done
 
-defun get_local_ip()
-    return get_local_ip_fp()
-done
+    defun get_local_ip()
+        return get_local_ip_fp()
+    done
 
-defun get_hostname()
-    return get_hostname_fp()
-done
+    defun get_hostname()
+        return get_hostname_fp()
+    done
 
-defun request(url, method, headers, data, timeout)
-    return request_fp(url, method, headers, data, timeout)
+    defun request(url, method, headers, data, timeout)
+        return request_fp(url, method, headers, data, timeout)
+    done
 done

@@ -1,24 +1,26 @@
 # libs.threading
 
-defun start(f, a)
-    return thread_start_fp(f, a)
-done
+namespace threading
+    defun start(f, a)
+        return thread_start_fp(f, a)
+    done
 
-defun thread_sleep(s)
-    thread_sleep_fp(s)
-    return none
-done
+    defun sleep(s)
+        thread_sleep_fp(s)
+        return none
+    done
 
-defun thread_join(h, t)
-    thread_join(h, t)
-    return none
-done
+    defun join(h, t)
+        thread_join(h, t)
+        return none
+    done
 
-defun is_alive(t)
-    return thread_is_alive_fp(t)
-done
+    defun is_alive(t)
+        return thread_is_alive_fp(t)
+    done
 
-defun cancel(t)
-    thread_cancel_fp(t)
-    return none
+    defun cancel(t)
+        thread_cancel_fp(t)
+        return none
+    done
 done

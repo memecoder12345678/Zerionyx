@@ -3621,6 +3621,90 @@ class Interpreter:
 
         return res.success(value)
 
+    def visit_CallMemberAccessNode(self, node, context):
+        res = RTResult()
+        obj = res.register(self.visit(node.object_node, context))
+        if res.should_return():
+            return res
+        member = obj.get(node.member_name)
+        if member is None:
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"'{obj}' has no member '{node.member_name}'",
+                    context,
+                )
+            )
+        if isinstance(member, Error):
+            return res.failure(member)
+        if not isinstance(member, Function):
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"'{node.member_name}' is not a function",
+                    context,
+                )
+            )
+        args = []
+        for arg_node in node.arg_nodes:
+            args.append(res.register(self.visit(arg_node, context)))
+            if res.should_return():
+                return res
+        return_value = res.register(member.execute(args))
+        if res.should_return():
+            return res
+        return res.success(return_value)
+    
+    def visit_NameSpaceNode(self, node, context):
+        res = RTResult()
+        namespace = NameSpace(node.namespace_name)
+        namespace.set_pos(node.pos_start, node.pos_end)
+        namespace.set_context(context)
+
+        ns_context = Context(node.namespace_name, context, node.pos_start)
+        ns_context.symbol_table = SymbolTable(context.symbol_table)
+        ns_context.private_symbol_table = SymbolTable(context.private_symbol_table)
+
+        stmts = node.statements
+        if hasattr(stmts, "element_nodes"):
+            stmts = stmts.element_nodes
+
+        for stmt in stmts:
+            res.register(self.visit(stmt, ns_context))
+            if res.should_return():
+                return res
+
+        for var_name, value in ns_context.symbol_table.symbols.items():
+            namespace.set(var_name, value)
+        for var_name, value in ns_context.private_symbol_table.symbols.items():
+            namespace.set(var_name, value)
+        context.symbol_table.set(node.namespace_name, namespace)
+        context.private_symbol_table.set(node.namespace_name, namespace)
+
+        return res.success(namespace)
+    
+    def visit_MemberAccessNode(self, node, context):
+        res = RTResult()
+        obj = res.register(self.visit(node.object_node, context))
+        if res.should_return():
+            return res
+        member = obj.get(node.member_name)
+        if member is None:
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"'{obj}' has no member '{node.member_name}'",
+                    context,
+                )
+            )
+        if isinstance(member, Error):
+            return res.failure(member)
+        return res.success(member)
+
+
 
     def visit_BinOpNode(self, node, context):
         res = RTResult()
@@ -3655,8 +3739,6 @@ class Interpreter:
             result, error = left.get_comparison_lte(right)
         elif node.op_tok.type == TT_GTE:
             result, error = left.get_comparison_gte(right)
-        elif node.op_tok.type == TT_DOT:
-            result, error = left.dotted_by(right)
         elif node.op_tok.matches(TT_KEYWORD, "and"):
             result, error = left.anded_by(right)
         elif node.op_tok.matches(TT_KEYWORD, "or"):
@@ -3836,6 +3918,7 @@ class Interpreter:
             context.symbol_table.set(func_name, func_value)
 
         return res.success(func_value)
+        
 
     def visit_CallNode(self, node, context):
         try:

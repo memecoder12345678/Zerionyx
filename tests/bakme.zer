@@ -6,7 +6,7 @@ load "libs.termcolor"
 defun backup_folder(path, cbp, rbp)
     lf = list_dir(path)
     for i = 0 to len(lf) do
-        f = lf.i
+        f = lf>i
         flp = path + os_sep + f
         fbd = cbp + os_sep + f
         if flp == rbp do
@@ -16,10 +16,10 @@ defun backup_folder(path, cbp, rbp)
         if is_file(flp) do
             e = catch(copy, [flp, fbd + ".bak"])
             
-            if is_none(e.1) do
+            if is_none(e>1) do
                 cprintln("Backup created: " + fbd + ".bak", "green", none, none)
             else
-                ems = e.1 
+                ems = e>1 
                 if startswith(ems, "File ") do
                     msg = slice(ems, len("File "), len(ems), none)
                     cprintln(msg, "red", none, none)
@@ -27,8 +27,8 @@ defun backup_folder(path, cbp, rbp)
             done
         else
             e = catch(make_dir, [fbd])
-            if not is_none(e.1) do
-                cprintln("Error: Can not make subfolder in backup: " + fbd + " (Reason: " + (e.1) + ")", "red", none, none)
+            if not is_none(e>1) do
+                cprintln("Error: Can not make subfolder in backup: " + fbd + " (Reason: " + (e>1) + ")", "red", none, none)
             else
                 backup_folder(flp, fbd, rbp)
             done
@@ -41,7 +41,7 @@ defun main()
         cprintln("Usage: bakme.zer <folder_to_backup>", "yellow", none, none)
         exit(1)
     done
-    fp = argv.1
+    fp = argv>1
     if not exists(fp) do 
         cprintln("Error: Folder does not exist: " + fp, "red", none, none) 
         exit(1) 
@@ -52,11 +52,11 @@ defun main()
     done
     abrp = fp + os_sep + "backup"
     emmb = catch(make_dir, [abrp])
-    if not is_none(emmb.1) do
+    if not is_none(emmb>1) do
         if exists(abrp) and not is_file(abrp) do
             cprintln("Main backup folder already exists (and is a directory): " + abrp, "cyan", none, none)
         else
-            cprintln("Error: Can not make main backup folder: " + abrp + " (Reason: " + (emmb.1) + ")", "red", none, none)
+            cprintln("Error: Can not make main backup folder: " + abrp + " (Reason: " + (emmb>1) + ")", "red", none, none)
             exit(1)
         done
     else

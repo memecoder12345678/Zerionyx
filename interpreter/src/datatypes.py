@@ -179,7 +179,8 @@ class Object:
 
         return None, self.illegal_operation(other)
 
-    def dotted_by(self, other):
+    
+    def get(self, other):
         return None, self.illegal_operation(other)
 
     def iter(self):
@@ -767,7 +768,7 @@ class String(Object):
 
         return self.value.replace("\n", "\\n")
 
-    def dotted_by(self, index):
+    def get_comparison_gt(self, index):
         if not isinstance(index, Number):
             return None, self.illegal_operation(index, "Index must be a number")
         if index.value < 0 or index.value >= len(self.value):
@@ -778,6 +779,7 @@ class String(Object):
                 self.context,
             )
         return self.value[index]
+
 
     def iter(self):
         return iter([String(ch) for ch in self.value]), None
@@ -842,7 +844,7 @@ class List(Object):
                 self, other, f"Can't multiply a list by a type of '{other.type()}'"
             )
 
-    def dotted_by(self, other):
+    def get_comparison_gt(self, other):
 
         if isinstance(other, Number):
 
@@ -851,7 +853,6 @@ class List(Object):
                 return self.elements[other.value], None
 
             except IndexError:
-
                 return None, RTError(
                     other.pos_start,
                     other.pos_end,
@@ -862,6 +863,7 @@ class List(Object):
         else:
 
             return None, Object.illegal_operation(self, other, "Index must be a number")
+        
 
     def copy(self):
 
@@ -919,7 +921,7 @@ class HashMap(Object):
     def type(self):
         return "<hashmap>"
 
-    def dotted_by(self, index):
+    def get_comparison_gt(self, index):
         if not isinstance(index, String):
             return None, self.illegal_operation(index)
 
@@ -932,6 +934,22 @@ class HashMap(Object):
                     "Value at this key could not be retrieved from hashmap because key is not found",
                     self.context,
                 )
+        
+
+        
+    def get_index(self, index):
+        if not isinstance(index, String):
+            return None, self.illegal_operation(index)
+
+        try:
+            return self.values[index.value], None
+        except KeyError:
+            return None, RTError(
+                index.pos_start,
+                index.pos_end,
+                "Value at this key could not be retrieved from hashmap because key is not found",
+                self.context,
+            )
 
     def set_index(self, index, value):
         if not isinstance(index, String):
@@ -1037,3 +1055,64 @@ class File(Object):
 
 
 List.empty = List([])
+
+# class NameSpace(Object):
+#     def __init__(self, name):
+#         super().__init__()
+#         self.name = name
+#         self.variables = HashMap({})
+
+#     def get_comparison_gt(self, name, value):
+#         self.variables.set_index(String(name), value)
+
+#     def get(self, name):
+#         return self.variables.get_index(String(name))
+
+#     def copy(self):
+#         copied_ns = NameSpace(self.name)
+#         copied_ns.variables = self.variables.copy()
+#         return copied_ns
+
+#     def __repr__(self):
+#         return f"<NameSpace {self.name}>"
+
+class NameSpace(Object):
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
+        self.variables = HashMap({})
+
+    # def get_comparison_gt(self, name, value=None):
+    #     # Nếu value là None: get, ngược lại: set
+    #     if value is None:
+    #         return self.variables.get_comparison_gt(String(name))
+    #     else:
+    #         self.variables = self.variables.set_index(String(name), value)
+    #         return self
+
+    def get(self, name):
+        # print(self.variables)
+        # print(self.variables.get_index(String(name)))
+        r, err = self.variables.get_comparison_gt(String(name))
+        if err:
+            return None
+        
+
+        return r
+
+    def set(self, name, value):
+        self.variables = self.variables.set_index(String(name), value)
+        return self
+
+    def copy(self):
+        copied_ns = NameSpace(self.name)
+        copied_ns.variables = self.variables.copy()
+        copied_ns.set_pos(self.pos_start, self.pos_end)
+        copied_ns.set_context(self.context)
+        return copied_ns
+
+    def type(self):
+        return "<namespace>"
+
+    def __repr__(self):
+        return f"<namespace {self.name}>"

@@ -58,4 +58,5 @@ KEYWORDS = [
     "load",
     "in",
     "as",
+    "namespace"
 ]

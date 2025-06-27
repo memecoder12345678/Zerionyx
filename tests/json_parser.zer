@@ -2,16 +2,16 @@ load "libs.sys"
 load "libs.ffio"
 
 if len(argv) != 2 do
-    println("Usage: " + abs_path(argv.0) + "<your-json-file>")
+    println("Usage: " + abs_path(argv>0) + "<your-json-file>")
     exit(1)
 done
 
-if not exists(argv.1) do
-    println("File not found: " + abs_path(argv.1))
+if not exists(argv>1) do
+    println("File not found: " + abs_path(argv>1))
     exit(1)
 done
 
-code = 'import json\nwith open(r"' + abs_path(argv.1)  + '", "r") as f:\n    r = json.load(f)'
+code = 'import json\nwith open(r"' + abs_path(argv>1)  + '", "r") as f:\n    r = json.load(f)'
 r = get(pyexec(code), "r", none)
 
 print("r = ")

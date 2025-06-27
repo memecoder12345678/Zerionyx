@@ -5,7 +5,7 @@ defun main()
         cprintln("Usage: script_name <config_file_path>", "yellow", none, "bold")
         exit(1)
     done
-    config_path = argv.1
+    config_path = argv>1
     if not exists(config_path) do
         cprintln("Error: File does not exist: " + config_path, 'red', none, 'bold')
         exit(1)
@@ -21,9 +21,9 @@ defun main()
     else
         println("\n--- Parsed Configuration ---")
         for i = 0 to len(config_data) do
-            section_block = config_data.i
-            section_name = section_block.0
-            section_items = section_block.1
+            section_block = config_data>i
+            section_name = section_block>0
+            section_items = section_block>1
             cprint("[", "yellow", none, "bold")
             cprint(to_str(section_name), "yellow", none, "bold")
             cprintln("]", "yellow", none, "bold")
@@ -31,9 +31,9 @@ defun main()
                 cprintln("  (empty section)", "grey", none, none)
             else
                 for j = 0 to len(section_items) do
-                    kv_pair = section_items.j
-                    key = kv_pair.0
-                    value = kv_pair.1
+                    kv_pair = section_items>j
+                    key = kv_pair>0
+                    value = kv_pair>1
                     print("  ")
                     cprint(to_str(key), 'magenta', none, 'bold')
                     print(" = ")

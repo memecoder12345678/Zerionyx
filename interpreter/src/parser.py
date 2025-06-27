@@ -358,42 +358,77 @@ class Parser:
         if res.error:
             return res
 
+        while self.current_tok.type == TT_DOT:
+            res.register_advancement()
+            self.advance()
+            # if self.current_tok.type != TT_IDENTIFIER:
+            #     return res.failure(
+            #         InvalidSyntaxError(
+            #             self.current_tok.pos_start,
+            #             self.current_tok.pos_end,
+            #             "Expected identifier after '.'",
+            #         )
+            #     )
+            member_name = self.current_tok.value
+            res.register_advancement()
+            self.advance()
+
+            if self.current_tok.type == TT_LPAREN:
+                res.register_advancement()
+                self.advance()
+                arg_nodes = []
+                if self.current_tok.type == TT_RPAREN:
+                    res.register_advancement()
+                    self.advance()
+                else:
+                    arg_nodes.append(res.register(self.expr()))
+                    if res.error:
+                        return res
+                    while self.current_tok.type == TT_COMMA:
+                        res.register_advancement()
+                        self.advance()
+                        arg_nodes.append(res.register(self.expr()))
+                        if res.error:
+                            return res
+                    if self.current_tok.type != TT_RPAREN:
+                        return res.failure(
+                            InvalidSyntaxError(
+                                self.current_tok.pos_start,
+                                self.current_tok.pos_end,
+                                "Expected ',' or ')'",
+                            )
+                        )
+                    res.register_advancement()
+                    self.advance()
+                atom = CallMemberAccessNode(atom, member_name, arg_nodes, atom.pos_start, self.current_tok.pos_end.copy())
+            else:
+                atom = MemberAccessNode(atom, member_name, atom.pos_start, self.current_tok.pos_end.copy())
+
         if self.current_tok.type == TT_LPAREN:
             res.register_advancement()
             self.advance()
             arg_nodes = []
-
             if self.current_tok.type == TT_RPAREN:
                 res.register_advancement()
                 self.advance()
             else:
                 arg_nodes.append(res.register(self.expr()))
                 if res.error:
-                    return res.failure(
-                        InvalidSyntaxError(
-                            self.current_tok.pos_start,
-                            self.current_tok.pos_end,
-                            "Expected ')', 'let', 'if', 'for', 'while', 'defun', int, float, identifier, '+', '-', '(', '[', '{' or 'not'",
-                        )
-                    )
-
+                    return res
                 while self.current_tok.type == TT_COMMA:
                     res.register_advancement()
                     self.advance()
-
                     arg_nodes.append(res.register(self.expr()))
                     if res.error:
                         return res
-
                 if self.current_tok.type != TT_RPAREN:
                     return res.failure(
                         InvalidSyntaxError(
                             self.current_tok.pos_start,
                             self.current_tok.pos_end,
-                            f"Expected ',' or ')'",
+                            "Expected ',' or ')'",
                         )
                     )
-
                 res.register_advancement()
                 self.advance()
             return res.success(CallNode(atom, arg_nodes))
@@ -468,6 +503,12 @@ class Parser:
                 return res
             return res.success(func_def)
 
+        elif tok.matches(TT_KEYWORD, "namespace"):
+            namespace = res.register(self.namespace())
+            if res.error:
+                return res
+            return res.success(namespace)
+
         elif tok.type == TT_LBRACE:
             hashmap_expr = res.register(self.hashmap_expr())
             if res.error:
@@ -481,6 +522,67 @@ class Parser:
                 "Expected int, float, identifier, '+', '-', '(', '[', '{', 'if', 'for', 'while' or 'defun'",
             )
         )
+    
+    def namespace(self):
+        self.skip_newlines()
+        res = ParseResult()
+        pos_start = self.current_tok.pos_start.copy()
+
+        if not self.current_tok.matches(TT_KEYWORD, "namespace"):
+            return res.failure(
+                InvalidSyntaxError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "Expected 'namespace'",
+                )
+            )
+
+        res.register_advancement()
+        self.advance()
+
+        if self.current_tok.type != TT_IDENTIFIER:
+            return res.failure(
+                InvalidSyntaxError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "Expected identifier",
+                )
+            )
+
+        namespace_name = self.current_tok.value  # <-- Lấy value là string
+        res.register_advancement()
+        self.advance()
+
+        if self.current_tok.type != TT_NEWLINE:
+            return res.failure(
+                InvalidSyntaxError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "Expected NEWLINE",
+                )
+            )
+
+        res.register_advancement()
+        self.advance()
+
+        statements = res.register(self.statements())
+        if res.error:
+            return res
+
+        if not self.current_tok.matches(TT_KEYWORD, "done"):
+            return res.failure(
+                InvalidSyntaxError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "Expected 'done'",
+                )
+            )
+
+        res.register_advancement()
+        self.advance()
+
+        # Trả về node với tên là string
+        return res.success(NameSpaceNode(namespace_name, statements, pos_start, self.current_tok.pos_end.copy()))
 
     def hashmap_expr(self) -> ParseResult:
         self.skip_newlines()

@@ -258,11 +258,17 @@ ATOM               ::=
     | DEF_FUNC
     | COMMENT
 
-GET_INDEX         ::= IDENTIFIER "." EXPR
+GET_INDEX         ::= "(" IDENTIFIER ">" EXPR ")
+
+GET_MEMBER        ::= IDENTIFIER  "." CALL
 
 LIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"
 
 HASHMAP_EXPR      ::= "{" (EXPR ("," STRING ":" EXPR)*)? "}"
+
+NAMESPACE_EXPR    ::=
+      "namespace" IDENTIFIER
+      NEWLINE STATEMENT NEWLINE "done"
 
 IF_EXPR           ::= 
       "if" EXPR "do" STATEMENT
