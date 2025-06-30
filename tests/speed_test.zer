@@ -3,17 +3,17 @@ load "libs.sys"
 
 N = 1000000
 total = 0
-let start = time()
+let start = time.time()
 
 for i = 1 to N + 1 do
     total += i
 done
 
-end = time()
+end = time.time()
 
 println("Sum: " + to_str(total))
 println("Zerionyx ran in: " + to_str(end - start) + " seconds")
-exit(0)
+sys.exit(0)
 
 # Fastest: 1.16324806213379 seconds
 # Slowest: 1.29593896865845 seconds
