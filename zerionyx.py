@@ -3,6 +3,95 @@ import sys
 from src.interp import run, INFO, Fore, Style
 
 
+G = """
+
+PROGRAM            ::= (STATEMENT NEWLINE*)*
+
+STATEMENT          ::= SIMPLE_STATEMENT | COMPOUND_STATEMENT
+
+SIMPLE_STATEMENT   ::=
+      "load" STRING
+    | "return" EXPR
+    | "continue"
+    | "break"
+    | EXPR
+
+COMPOUND_STATEMENT ::=
+      IF_EXPR
+    | FOR_EXPR
+    | WHILE_EXPR
+    | DEF_FUNC
+
+EXPR               ::= 
+      "let" IDENTIFIER "=" EXPR
+    | IDENTIFIER "=" EXPR
+      "let" IDENTIFIER "as" EXPR
+    | IDENTIFIER "as" EXPR
+    | IDENTIFIER ("+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^=") EXPR
+    | COMP_EXPR (("and" | "or") COMP_EXPR)*
+
+COMP_EXPR          ::= 
+      ARITH_EXPR (("==" | "<" | ">" | "<=" | ">=" | "!=") ARITH_EXPR)*
+    | "not" COMP_EXPR
+
+ARITH_EXPR         ::= TERM (("+" | "-") TERM)*
+
+TERM               ::= FACTOR (("*" | "/" | "//" | "%") FACTOR)*
+
+FACTOR             ::= ("+" | "-") FACTOR | POWER
+
+POWER              ::= CALL ("^" FACTOR)*
+
+CALL               ::= ATOM ("(" (EXPR ("," EXPR)*)? ")")?
+
+ATOM               ::= 
+      INT | FLOAT | STRING | IDENTIFIER
+    | "(" EXPR ")"
+    | LIST_EXPR
+    | LIST_INDEX
+    | IF_EXPR
+    | FOR_EXPR
+    | WHILE_EXPR
+    | DEF_FUNC
+    | COMMENT
+
+GET_INDEX         ::= "(" IDENTIFIER ">" EXPR ")
+
+GET_MEMBER        ::= IDENTIFIER  "." CALL
+
+LIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"
+
+HASHMAP_EXPR      ::= "{" (EXPR ("," STRING ":" EXPR)*)? "}"
+
+NAMESPACE_EXPR    ::=
+      "namespace" IDENTIFIER
+      NEWLINE STATEMENT NEWLINE "done"
+
+IF_EXPR           ::= 
+      "if" EXPR "do" STATEMENT
+      (NEWLINE "elif" EXPR "do" STATEMENT)*
+      (NEWLINE "else" STATEMENT)?
+      NEWLINE "done"
+
+FOR_EXPR          ::=
+      "for" IDENTIFIER "=" EXPR "to" EXPR
+      ("step" EXPR)?
+      "do" STATEMENT
+      NEWLINE "done"
+
+WHILE_EXPR        ::= 
+      "while" EXPR "do" STATEMENT
+      NEWLINE "done"
+
+DEF_FUNC          ::= 
+      "defun" IDENTIFIER "(" (IDENTIFIER ("," IDENTIFIER)*)? ")"
+      ("->" EXPR)?
+      NEWLINE STATEMENT NEWLINE "done"
+
+COMMENT           ::= "#" /[^\n]*/
+
+"""
+
 def check_file_comments_or_empty(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
         lines = file.readlines()
@@ -43,7 +132,7 @@ def main():
                 if text.strip() == "grammar":
                     print(
                         ("=" * 96)
-                        + '\n\\nPROGRAM            ::= (STATEMENT NEWLINE*)*\n\nSTATEMENT          ::= SIMPLE_STATEMENT | COMPOUND_STATEMENT\n\nSIMPLE_STATEMENT   ::=\n      "load" STRING\n    | "return" EXPR\n    | "continue"\n    | "break"\n    | EXPR\n\nCOMPOUND_STATEMENT ::=\n      IF_EXPR\n    | FOR_EXPR\n    | WHILE_EXPR\n    | DEF_FUNC\n\nEXPR               ::= \n      "let" IDENTIFIER "=" EXPR\n    | IDENTIFIER "=" EXPR\n      "let" IDENTIFIER "as" EXPR\n    | IDENTIFIER "as" EXPR\n    | IDENTIFIER ("+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^=") EXPR\n    | COMP_EXPR (("and" | "or") COMP_EXPR)*\n\nCOMP_EXPR          ::= \n      ARITH_EXPR (("==" | "<" | ">" | "<=" | ">=" | "!=") ARITH_EXPR)*\n    | "not" COMP_EXPR\n\nARITH_EXPR         ::= TERM (("+" | "-") TERM)*\n\nTERM               ::= FACTOR (("*" | "/" | "//" | "%") FACTOR)*\n\nFACTOR             ::= ("+" | "-") FACTOR | POWER\n\nPOWER              ::= CALL ("^" FACTOR)*\n\nCALL               ::= ATOM ("(" (EXPR ("," EXPR)*)? ")")?\n\nATOM               ::= \n      INT | FLOAT | STRING | IDENTIFIER\n    | "(" EXPR ")"\n    | LIST_EXPR\n    | LIST_INDEX\n    | IF_EXPR\n    | FOR_EXPR\n    | WHILE_EXPR\n    | DEF_FUNC\n    | COMMENT\n\nGET_INDEX         ::= IDENTIFIER "." EXPR\n\nLIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"\n\nHASHMAP_EXPR      ::= "{" (EXPR ("," STRING ":" EXPR)*)? "}"\n\nIF_EXPR           ::= \n      "if" EXPR "do" STATEMENT\n      (NEWLINE "elif" EXPR "do" STATEMENT)*\n      (NEWLINE "else" STATEMENT)?\n      NEWLINE "done"\n\nFOR_EXPR          ::=\n      "for" IDENTIFIER "=" EXPR "to" EXPR\n      ("step" EXPR)?\n      "do" STATEMENT\n      NEWLINE "done"\n\nWHILE_EXPR        ::= \n      "while" EXPR "do" STATEMENT\n      NEWLINE "done"\n\nDEF_FUNC          ::= \n      "defun" IDENTIFIER "(" (IDENTIFIER ("," IDENTIFIER)*)? ")"\n      ("->" EXPR)?\n      NEWLINE STATEMENT NEWLINE "done"\n\nCOMMENT           ::= "#" /[^\n]*/\n\n'
+                        + G
                         + ("=" * 96)
                         + "\n\nPlease scroll up to read from the beginning.\n"
                     )
