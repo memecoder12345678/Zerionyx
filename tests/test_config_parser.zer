@@ -1,45 +1,45 @@
 load "local.config_parser"
 
 defun main()
-    if len(argv) < 2 do
-        cprintln("Usage: script_name <config_file_path>", "yellow", none, "bold")
-        exit(1)
+    if len(sys.argv) < 2 do
+        termcolor.cprintln("Usage: script_name <config_file_path>", "yellow", none, "bold")
+        sys.exit(1)
     done
-    config_path = argv>1
-    if not exists(config_path) do
-        cprintln("Error: File does not exist: " + config_path, 'red', none, 'bold')
-        exit(1)
+    config_path = sys.argv>1
+    if not ffio.exists(config_path) do
+        termcolor.cprintln("Error: File does not exist: " + config_path, 'red', none, 'bold')
+        sys.exit(1)
     done
-    if not is_file(config_path) do
-        cprintln("Error: Path is not a file: " + config_path, 'red', none, 'bold')
-        exit(1)
+    if not ffio.is_file(config_path) do
+        termcolor.cprintln("Error: Path is not a file: " + config_path, 'red', none, 'bold')
+        sys.exit(1)
     done
-    cprintln("Parsing configuration file: " + config_path, "cyan", none, none)
+    termcolor.cprintln("Parsing configuration file: " + config_path, "cyan", none, none)
     config_data = parse_config(config_path)
     if len(config_data) == 0 do
-        cprintln("No configuration entries found or file is effectively empty.", "yellow")
+        termcolor.cprintln("No configuration entries found or file is effectively empty.", "yellow")
     else
         println("\n--- Parsed Configuration ---")
         for i = 0 to len(config_data) do
             section_block = config_data>i
             section_name = section_block>0
             section_items = section_block>1
-            cprint("[", "yellow", none, "bold")
-            cprint(to_str(section_name), "yellow", none, "bold")
-            cprintln("]", "yellow", none, "bold")
+            termcolor.cprint("[", "yellow", none, "bold")
+            termcolor.cprint(to_str(section_name), "yellow", none, "bold")
+            termcolor.cprintln("]", "yellow", none, "bold")
             if len(section_items) == 0 do
-                cprintln("  (empty section)", "grey", none, none)
+                termcolor.cprintln("  (empty section)", "grey", none, none)
             else
                 for j = 0 to len(section_items) do
                     kv_pair = section_items>j
                     key = kv_pair>0
                     value = kv_pair>1
                     print("  ")
-                    cprint(to_str(key), 'magenta', none, 'bold')
+                    termcolor.cprint(to_str(key), 'magenta', none, 'bold')
                     print(" = ")
-                    cprint(to_str(value), 'green', none, none)
+                    termcolor.cprint(to_str(value), 'green', none, none)
                     print(" (type: ")
-                    cprint(type(value), "blue", none, none)
+                    termcolor.cprint(type(value), "blue", none, none)
                     println(")")
                 done
             done
@@ -57,22 +57,22 @@ defun main()
         # [Database]
         # host = localhost
         # user_name = get_config_value(config_data, "Settings", "user", "default_user")
-        # cprint("User from [Settings]: ", "white", none, none)
-        # cprintln(user_name, "cyan", none, none)
+        # termcolor.cprint("User from [Settings]: ", "white", none, none)
+        # termcolor.cprintln(user_name, "cyan", none, none)
         # db_host = get_config_value(config_data, "Database", "host", "127.0.0.1")
-        # cprint("Host from [Database]: ", "white", none, none)
-        # cprintln(db_host, "cyan", none, none)
+        # termcolor.cprint("Host from [Database]: ", "white", none, none)
+        # termcolor.cprintln(db_host, "cyan", none, none)
         # global_val = get_config_value(config_data, "__global__", "name", "not_found")
-        # cprint("Name from __global__: ", "white", none, none)
-        # cprintln(global_val, "cyan", none, none)
+        # termcolor.cprint("Name from __global__: ", "white", none, none)
+        # termcolor.cprintln(global_val, "cyan", none, none)
         # missing_val = get_config_value(config_data, "Settings", "nonexistent", "MISSING")
-        # cprint("Missing from [Settings]: ", "white", none, none)
-        # cprintln(missing_val, "red", none, none)
+        # termcolor.cprint("Missing from [Settings]: ", "white", none, none)
+        # termcolor.cprintln(missing_val, "red", none, none)
         # --- Example --- #
     done
 done
 
 if is_main do
     main()
-    exit(0)
+    sys.exit(0)
 done
