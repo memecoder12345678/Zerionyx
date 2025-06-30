@@ -1,6 +1,6 @@
 load "libs.sys"
 load "libs.string"
-load "libs.list"
+load "libs.mlist"
 
 memory = [0]
 pointer = 0
@@ -11,7 +11,7 @@ defun brainfuck(nput)
     if not is_str(nput) do
         panic("'nput' must be a string", "T")
     done
-    nput = split(nput, "")
+    nput = string.split(nput, "")
     output = ""
     i = 0
     while i < len(nput) do
@@ -30,15 +30,15 @@ defun brainfuck(nput)
                 pointer -= 1
             done
         elif (nput>i) == "+" do
-            change_value(memory, pointer, ((memory>pointer)+1) % 256)
+            mlist.change_value(memory, pointer, ((memory>pointer)+1) % 256)
         elif (nput>i) == "-" do
             if memory>pointer > 0 do
-                change_value(memory, pointer, (memory>pointer)-1)
+                mlist.change_value(memory, pointer, (memory>pointer)-1)
             done
         elif (nput>i) == "." do
-            output = output + chr(memory>pointer)
+            output = output + string.chr(memory>pointer)
         elif (nput>i) == "," do
-            change_value(memory, pointer, ord(input("> ")))
+            mlist.change_value(memory, pointer, string.ord(input("> ")))
         elif (nput>i) == "[" do
             if (memory>pointer) == 0 do
                 count = 1
@@ -75,8 +75,8 @@ defun main()
     println("Brainfuck Interpreter (type 'quit' to exit).")
     while true do
         code = input(">> ")
-        if strip(code, " ") == "quit" do
-            exit(0)
+        if string.strip(code, " ") == "quit" do
+            sys.exit(0)
         done
         output = brainfuck(code)
         if is_none(output) do
