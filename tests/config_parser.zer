@@ -1,65 +1,65 @@
 load "libs.ffio"
 load "libs.sys"
 load "libs.string"
-load "libs.list"
+load "libs.mlist"
 load "libs.termcolor"
 
 defun parse_config(config_file)
     parsed_config_data = []
     current_section_name = "__global__"
     current_section_items = []
-    lines = split(read(config_file), "\n")
+    lines = string.split(ffio.read(config_file), "\n")
     for i = 0 to len(lines) do
         line = lines>i
         if line != "" do
-            line = strip(line, " ")
-            if startswith(line, "#") or startswith(line, ";") do
+            line = string.strip(line, " ")
+            if string.startswith(line, "#") or string.startswith(line, ";") do
                 continue
             done
-        if startswith(line, "[") do
+        if string.startswith(line, "[") do
             if len(current_section_items) > 0 or current_section_name != "__global__" do
                 append(parsed_config_data, [current_section_name, current_section_items])
             done
             end_idx = index_of(split(line, ""), "]")
             if end_idx == none do
-                cprint("Error", "red", none, "bold")
+                termcolor.cprint("Error", "red", none, "bold")
                 println(": line " + to_str(i + 1) + " has malformed section (missing ']'). Skipping.")
                 continue
             done
             raw_section_name = slice(line, 1, end_idx, none)
             current_section_name = strip(raw_section_name, " \t")
             if current_section_name == "" do
-                cprint("Warning", "yellow", none, "bold")
+                termcolor.cprint("Warning", "yellow", none, "bold")
                 println(": line " + to_str(i + 1) + " has an empty section name. Using '__empty_section__'.")
                 current_section_name = "__empty_section__"
             done
             current_section_items = []
             continue
         done
-            vals = split(line, "=")
+            vals = string.split(line, "=")
             if len(vals) < 2 do
-                cprint("Warning", "yellow", none, "bold")
+                termcolor.cprint("Warning", "yellow", none, "bold")
                 println(": line " + to_str(i + 1) + " is not a valid config line or section header. Skipping.")
                 continue
             done
             if  len(vals) > 2 do
-                cprint("Error", "red", none, "bold")
+                termcolor.cprint("Error", "red", none, "bold")
                 println(": line " + to_str(i + 1) + " has too many '=' for a key-value pair.")
                 continue
             done
-            key = strip(to_str(vals>0), " ")
+            key = string.strip(to_str(vals>0), " ")
             val_str_raw = strip(to_str(join("", slice(vals, 1, len(vals), none))), " ")
             if key == "" or val_str_raw == "" do
-                cprint("Error", "red", none, "bold")
+                termcolor.cprint("Error", "red", none, "bold")
                 println(": line " + to_str(i + 1) + " has an empty key or value.")
                 continue
             done
             val = val_str_raw 
             val_str_processed = val_str_raw
-            if len(split(val_str_raw, "#")) > 1 or len(split(val_str_raw, ";")) > 1 do
+            if len(string.split(val_str_raw, "#")) > 1 or len(string.split(val_str_raw, ";")) > 1 do
                 in_single_quote = false
                 in_double_quote = false
-                val_chars = split(val_str_raw, "")
+                val_chars = string.split(val_str_raw, "")
                 for char_idx = 0 to len(val_chars) do
                     c = val_chars>char_idx
                     if c == "'"  and not in_double_quote do
@@ -67,13 +67,13 @@ defun parse_config(config_file)
                     elif c == '"' and not in_single_quote do
                         in_double_quote = not in_double_quote
                     elif (c == '#' or c == ';') and not in_single_quote and not in_double_quote do
-                        val_str_processed = strip(join("", slice(val_chars, 0, char_idx, none)), " ")
+                        val_str_processed = string.strip(string.join("", slice(val_chars, 0, char_idx, none)), " ")
                         break
                     done
                 done
             done
             if is_num(to_int(val_str_processed, true)) do
-                if endswith(to_str(to_float(val_str_processed, false)), ".0") do
+                if string.endswith(to_str(to_float(val_str_processed, false)), ".0") do
                     val = to_int(val_str_processed, false)
                 else
                     val = to_float(val_str_processed, false)
@@ -84,7 +84,7 @@ defun parse_config(config_file)
                 val = true
             elif val_str_processed == "false" do
                 val = false
-            elif (startswith(val_str_processed, '"') and endswith(val_str_processed, '"')) or (startswith(val_str_processed, "'") and endswith(val_str_processed, "'")) do
+            elif (string.startswith(val_str_processed, '"') and string.endswith(val_str_processed, '"')) or (string.startswith(val_str_processed, "'") and string.endswith(val_str_processed, "'")) do
                 val = to_str(slice(val_str_processed, 1, -1, none))
             else
                 val = to_str(val_str_processed)
