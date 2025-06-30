@@ -203,7 +203,6 @@
             <ul>
                 <li><b>For learning</b>: Python 3.11+ (best for beginners and educational purposes)</li>
                 <li><b>For automation</b>: PyPy 3.11 (recommended when running repetitive tasks or automation scripts)</li>
-                <li><b>IDE recommendation</b>: Use <a href="https://memecoder12345678.github.io/Zerionyx/docs.html#Zerionyx-Editor" style="color:#1affb3;">Zerionyx Editor</a> with syntax highlighting for the best learning experience</li>
                 <li><b>Note</b>: While the language is designed for simplicity, PyPy can significantly speed up automation tasks</li>
             </ul>
         </div>
@@ -356,8 +355,8 @@ Zerionyx may be magical, but its syntax must be real.
             <li><b>slice(l, from, to, step)</b> &rarr; list/string/hashmap &mdash; Slice list/string/hashmap <code>l</code> from <code>from</code> to <code>to</code> step <code>step</code> (exclusive)</li>
         </ul>
         <h2>Standard Libraries</h2>
-        <div class="lib-list">
-            <a href="javascript:void(0)" id="btn-list" onclick="showLib('list')">list</a>
+        <div class="lib-mlist">
+            <a href="javascript:void(0)" id="btn-mlist" onclick="showLib('list')">list</a>
             <a href="javascript:void(0)" id="btn-string" onclick="showLib('string')">string</a>
             <a href="javascript:void(0)" id="btn-math" onclick="showLib('math')">math</a>
             <a href="javascript:void(0)" id="btn-ffio" onclick="showLib('ffio')">ffio</a>
@@ -372,8 +371,8 @@ Zerionyx may be magical, but its syntax must be real.
             <a href="javascript:void(0)" id="btn-termcolor" onclick="showLib('termcolor')">termcolor</a>
             <!-- <a href="javascript:void(0)" id="btn-hashmap" onclick="showLib('hashmap')">hashmap</a> -->
         </div>
-        <div id="lib-list" class="lib-content" style="display:none;">
-            <h3>list.zer</h3>
+        <div id="lib-mlist" class="lib-content" style="display:none;">
+            <h3>mlist.zer</h3>
             <ul>
                 <li><b>map(f, l)</b> &rarr; list &mdash; Apply function <code>f</code> to each element of list <code>l</code></li>
                 <li><b>filter(f, l)</b> &rarr; list &mdash; Filter list <code>l</code> by function <code>f</code> (keep elements where <code>f(x)</code> is true)</li>
@@ -536,8 +535,8 @@ Zerionyx may be magical, but its syntax must be real.
             <h3>threading.zer</h3>
             <ul>
                 <li><b>start(func, args)</b> &rarr; thread &mdash; Start a new thread</li>
-                <li><b>thread_sleep(seconds)</b> &rarr; none &mdash; Sleep current thread</li>
-                <li><b>thread_join(thread, timeout)</b> &rarr; none &mdash; Wait for thread to finish</li>
+                <li><b>sleep(seconds)</b> &rarr; none &mdash; Sleep current thread</li>
+                <li><b>join(thread, timeout)</b> &rarr; none &mdash; Wait for thread to finish</li>
                 <li><b>is_alive(thread)</b> &rarr; bool &mdash; Is thread alive</li>
                 <li><b>cancel(thread)</b> &rarr; none &mdash; Cancel thread</li>
             </ul>
@@ -553,10 +552,10 @@ Zerionyx may be magical, but its syntax must be real.
         <div id="lib-keyboard" class="lib-content" style="display:none;">
             <h3>keyboard.zer</h3>
             <ul>
-                <li><b>keyboard_write(text)</b> &rarr; none &mdash; Type <code>text</code> as keyboard input</li>
+                <li><b>write(text)</b> &rarr; none &mdash; Type <code>text</code> as keyboard input</li>
                 <li><b>press(key)</b> &rarr; none &mdash; Press a key</li>
                 <li><b>release(key)</b> &rarr; none &mdash; Release a key</li>
-                <li><b>keyboard_wait(key)</b> &rarr; none &mdash; Wait for key press</li>
+                <li><b>wait(key)</b> &rarr; none &mdash; Wait for key press</li>
                 <li><b>is_pressed(key)</b> &rarr; bool &mdash; Is key pressed</li>
             </ul>
         </div>
@@ -573,9 +572,10 @@ Zerionyx may be magical, but its syntax must be real.
             <li>To use a library, add <code>load "libs.&lt;name&gt;"</code> at the top of your <b>.zer</b> file.</li>
             <li>Example: <code>load "libs.math"</code></li>
             <li>Then call functions as documented above.</li>
+            <li>Example: <code>math.is_prime(314)</code></li>
         </ul>
         <script>
-            window.addEventListener("load", () => {
+                window.addEventListener("load", () => {
                 setTimeout(() => {
                 const hash = window.location.hash;
                 if (hash) {
@@ -587,47 +587,6 @@ Zerionyx may be magical, but its syntax must be real.
                 }, 100);
             });
         </script>
-        <h2 id="Zerionyx-Editor">Zerionyx Editor</h2>
-        <div class="howto" style="margin-bottom:2.5rem;">
-            <h3>About Zerionyx Editor</h3>
-            <ul>
-                <li><b>Modern, lightweight code editor</b> designed for Zerionyx language</li>
-                <li>Syntax highlighting, auto-complete, file explorer, markdown preview</li>
-                <li>Open images, manage folders, and more</li>
-                <li>Cross-platform (Windows/Linux/Mac, requires Python 3.11+ and PyQt5)</li>
-            </ul>
-            <h3>Key Features</h3>
-            <ul>
-                <li>Tabbed editing, drag & drop file tree, and project explorer</li>
-                <li>Live Markdown preview for <code>.md</code> files</li>
-                <li>Quick commenting/uncommenting for Zerionyx code</li>
-                <li>Auto-completion for keywords, functions, and types</li>
-                <li>Image viewer for common formats (PNG, JPG, GIF, etc.)</li>
-            </ul>
-            <h3>Keyboard Shortcuts</h3>
-            <ul>
-                <li><b>Ctrl+N</b>: New file</li>
-                <li><b>Ctrl+O</b>: Open file</li>
-                <li><b>Ctrl+K</b>: Open folder</li>
-                <li><b>Ctrl+Shift+K</b>: Close folder</li>
-                <li><b>Ctrl+S</b>: Save file</li>
-                <li><b>Ctrl+Shift+S</b>: Save as</li>
-                <li><b>Ctrl+F</b>: Find</li>
-                <li><b>Ctrl+H</b>: Find and Replace</li>
-                <li><b>Ctrl+B</b>: Toggle file tree</li>
-                <li><b>Ctrl+Shift+E</b>: Show explorer</li>
-                <li><b>Ctrl+Q</b>: Exit</li>
-                <li><b>Ctrl+/</b>: Toggle comment (Zerionyx files)</li>
-                <li><b>Ctrl+Space</b>: Autocomplete suggestions</li>
-                <li><b>Ctrl+P</b>: Toggle Markdown preview</li>
-                <li><b>Ctrl+X</b>: Cut line (when nothing selected)</li>
-                <li><b>Ctrl+Z / Ctrl+Y</b>: Undo / Redo</li>
-                <li><b>Ctrl+A</b>: Select all</li>
-            </ul>
-            <div style="margin-top:1em;">
-                <b>To launch</b>: <code>python ./ide/ZerionyxEditor.py</code>
-            </div>
-        </div>
     </main>
     <footer>
         Zerionyx &copy; 2025 MemeCoder &mdash; <a href="https://github.com/memecoder12345678/Zerionyx" target="_blank">GitHub</a>
