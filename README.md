@@ -134,13 +134,13 @@ python -m pip install -r requirements.txt
 ### 3. Run a Zerionyx script
 
 ```bash
-python ./interpreter/Zerionyx.py tests/HaloWorld.zer
+python zerionyx.py tests/HaloWorld.zer
 ```
 
 ### 4. Launch interactive shell
 
 ```bash
-python ./interpreter/Zerionyx.py
+python zerionyx.py
 ```
 
 Use commands such as `grammar`, `license`, etc. for more details.
@@ -155,7 +155,6 @@ Use commands such as `grammar`, `license`, etc. for more details.
 
 * **Python 3.11+** for best compatibility
 * **PyPy 3.11** for faster performance (optional)
-* Use with [Zerionyx Editor](https://memecoder12345678.github.io/Zerionyx/docs.html#Zerionyx-Editor) for syntax highlighting (**recommended**)
 
 ---
 
@@ -164,8 +163,10 @@ Use commands such as `grammar`, `license`, etc. for more details.
 * [x] Add basic REPL and shell commands
 * [x] Add algorithms & data structure libraries
 * [X] Integrate debugger support
-* [ ] Integrating **dynamic library loading (.dll / .so)** into the language
-* [ ] Improving interpreter performance  
+* [X] Improving interpreter performance 
+* [ ] Integrating **dynamic library loading (.pyd / .so)** into the language
+* [ ] Creating developer tools (debuggers, profilers, code formatters)
+* [ ] Creating **VS Code plugin**
 ---
 
 ## Contributing
@@ -185,7 +186,7 @@ Zerionyx is growing fast &mdash; and we're looking for awesome people to help sh
 
 We're especially looking for contributors interested in: 
 
-- Integrating **dynamic library loading (.dll / .so)** into the language  
+- Integrating **dynamic library loading (.pyd / .so)** into the language  
 - Writing test suites and improving interpreter performance  
 - Creating developer tools (debuggers, profilers, code formatters)  
 
