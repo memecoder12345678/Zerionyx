@@ -98,19 +98,40 @@ println(add(5, 3))
 # Lists
 nums = [1, 2, 3, 4, 5]
 println(nums)
+println((nums>0))
+println((nums>4))
+
+# HashMaps
+users = {"name": "admin", "password": "admin"}
+println(users)
+println((users>"name"))
+println((users>"password"))
 
 # Conditional
 if x > y do
     println("X is greater")
-else
+elif x < y do
     println("Y is greater")
+else
+    println("X is equals to Y")
 done
 
-# Loop
-for i = 0 to len(nums) do
-    println("Index: " + to_str(i))
-    println("Value: " + to_str(nums>i) + "\n")
+# For-in loop
+for i in nums do
+    println(i)
 done
+
+# For loop
+for i = 1 to 11 do
+    println(i)
+done
+
+# While loop
+a = 100
+while a < 100 do
+    a -= 1
+done
+println(a)
 ```
 
 For more examples, check the [`tests`](tests) folder for a full overview.
