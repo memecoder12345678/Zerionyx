@@ -6,48 +6,46 @@ load "libs.time"
 load "libs.memory"
 load "libs.keyboard"
 
-A = set_reusable(0, true)
-B = set_reusable(0, true)
-loop_count = set_reusable(0, true)
+A = 0
+B = 0
+loop_count = 0
 max_loop = to_int(2 * PI / 0.04, false) # 157 frames
 shading = [".", ",", "-", "~", ":", ";", "=", "!", "*", "#", "$", "@"]
-print(chr(27) + "[2J" + chr(27) + "[H")
+print(string.chr(27) + "[2J" + string.chr(27) + "[H")
 while true do
     frame_id = "frame_" + to_str(loop_count)
-    cached = recall(frame_id)
+    cached = memory.recall(frame_id)
     if loop_count > max_loop do
-        loop_count = set_reusable(0, true)
-        A = set_reusable(0, true)
-        B = set_reusable(0, true)
+        loop_count = 0
+        A = 0
+        B = 0
         continue
     else
         if cached != none do
-            print(chr(27) + "[2J" + chr(27) + "[H")
+            print(string.chr(27) + "[2J" + string.chr(27) + "[H")
             println(cached)
             println("\n\nPress q to exit...")
-            sleep(0.03)
-            if keyboard_is_pressed("q") do
-                print(chr(27) + "[2J" + chr(27) + "[H")
-                exit(0)
+            time.sleep(0.03)
+            if keyboard.is_pressed("q") do
+                print(string.chr(27) + "[2J" + string.chr(27) + "[H")
+                sys.exit(0)
             done
         else
             print("Rendering donut... (" + to_str(loop_count) + "/" + to_str(max_loop) + " frames)\r")
             z = [0] * 1760
             b = [" "] * 1760
-            j_ = set_reusable(0, true)
-            i_ = set_reusable(0, true)
-            for j = j_ to 628 step 7 do
-                for i = i_ to 628 step 2 do
-                    c = sin(i / 100)
-                    d = cos(j / 100)
-                    e = sin(A)
-                    f = sin(j / 100)
-                    g = cos(A)
+            for j = 0 to 628 step 7 do
+                for i = 0 to 628 step 2 do
+                    c = math.sin(i / 100)
+                    d = math.cos(j / 100)
+                    e = math.sin(A)
+                    f = math.sin(j / 100)
+                    g = math.cos(A)
                     h = d + 2
                     D = 1 / (c * h * e + f * g + 5)
-                    l = cos(i / 100)
-                    m = cos(B)
-                    n = sin(B)
+                    l = math.cos(i / 100)
+                    m = math.cos(B)
+                    n = math.sin(B)
                     t = c * h * g - f * e
                     x = to_int(40 + 30 * D * (l * h * m - t * n), false)
                     y = to_int(12 + 15 * D * (l * h * n + t * m), false)
@@ -56,9 +54,9 @@ while true do
                     if o >= 0 and o < 1760 and y < 22 and y > 0 and x > 0 do
                         z_val = z>o
                         if D > z_val do
-                            change_value(z, o, D)
+                            mlist.change_value(z, o, D)
                             char = if N > 0 do shading>N else shading>0
-                            change_value(b, o, char)
+                            mlist.change_value(b, o, char)
                         done
                     done
                 done
@@ -70,7 +68,7 @@ while true do
                     frame_str = frame_str + "\n"
                 done
             done
-            remember(frame_id, frame_str)
+            memory.remember(frame_id, frame_str)
         done
         loop_count += 1
     done
