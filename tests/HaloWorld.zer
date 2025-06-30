@@ -2,10 +2,10 @@ load "libs.sys"
 load "libs.termcolor"
 
 defun main()
-    cprintln("Halo, World!", "blue", none, "bold")
+    termcolor.cprintln("Halo, World!", "blue", none, "bold")
 done
 
 if is_main do
     main()
-    exit(0)
+    sys.exit(0)
 done
