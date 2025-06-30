@@ -11,7 +11,7 @@ defun handle_input(m, m_)
         a += 1
         if a >= ma do
             println("You have used all your attempts!\nThe secret number was: " + to_str(sn))
-            exit(0)
+            sys.exit(0)
         done
         println("Invalid input!")
         i = to_int(input("Enter a number from " + to_str(m) + " to " + to_str(m_) + ": "), true)
@@ -21,7 +21,7 @@ done
 
 defun guess_number(m, m_)
     a = 0
-    sn = rand_int(m, m_)
+    sn = random.rand_int(m, m_)
     while a < ma do
         i = handle_input(m, m_)
         a += 1
@@ -45,5 +45,5 @@ done
 
 if is_main do
     main()
-    exit(0)
+    sys.exit(0)
 done
