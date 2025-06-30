@@ -4,31 +4,31 @@ load "libs.string"
 load "libs.termcolor"
 
 defun backup_folder(path, cbp, rbp)
-    lf = list_dir(path)
+    lf = ffio.list_dir(path)
     for i = 0 to len(lf) do
         f = lf>i
-        flp = path + os_sep + f
-        fbd = cbp + os_sep + f
+        flp = path + ffio.os_sep + f
+        fbd = cbp + ffio.os_sep + f
         if flp == rbp do
             cprintln("Skipping main backup directory itself: " + flp, "yellow", none, none)
             continue
         done
         if is_file(flp) do
-            e = catch(copy, [flp, fbd + ".bak"])
+            e = catch(ffio.copy, [flp, fbd + ".bak"])
             
             if is_none(e>1) do
                 cprintln("Backup created: " + fbd + ".bak", "green", none, none)
             else
                 ems = e>1 
-                if startswith(ems, "File ") do
+                if string.startswith(ems, "File ") do
                     msg = slice(ems, len("File "), len(ems), none)
-                    cprintln(msg, "red", none, none)
+                    termcolor.cprintln(msg, "red", none, none)
                 done
             done
         else
-            e = catch(make_dir, [fbd])
+            e = catch(ffio.make_dir, [fbd])
             if not is_none(e>1) do
-                cprintln("Error: Can not make subfolder in backup: " + fbd + " (Reason: " + (e>1) + ")", "red", none, none)
+                termcolor.cprintln("Error: Can not make subfolder in backup: " + fbd + " (Reason: " + (e>1) + ")", "red", none, none)
             else
                 backup_folder(flp, fbd, rbp)
             done
@@ -37,38 +37,38 @@ defun backup_folder(path, cbp, rbp)
 done
 
 defun main()
-    if len(argv) < 2 do
-        cprintln("Usage: bakme.zer <folder_to_backup>", "yellow", none, none)
-        exit(1)
+    if len(sys.argv) < 2 do
+        termcolor.cprintln("Usage: bakme.zer <folder_to_backup>", "yellow", none, none)
+        sys.exit(1)
     done
-    fp = argv>1
-    if not exists(fp) do 
-        cprintln("Error: Folder does not exist: " + fp, "red", none, none) 
-        exit(1) 
+    fp = sys.argv>1
+    if not ffio.exists(fp) do 
+        termcolor.cprintln("Error: Folder does not exist: " + fp, "red", none, none) 
+        sys.exit(1) 
     done
-    if is_file(fp) do 
-        cprintln("Error: Path provided is not a folder: " + fp, "red", none, none)
-        exit(1)
+    if ffio.is_file(fp) do 
+        termcolor.cprintln("Error: Path provided is not a folder: " + fp, "red", none, none)
+        sys.exit(1)
     done
-    abrp = fp + os_sep + "backup"
-    emmb = catch(make_dir, [abrp])
+    abrp = fp + ffio.os_sep + "backup"
+    emmb = catch(ffio.make_dir, [abrp])
     if not is_none(emmb>1) do
-        if exists(abrp) and not is_file(abrp) do
-            cprintln("Main backup folder already exists (and is a directory): " + abrp, "cyan", none, none)
+        if ffio.exists(abrp) and not ffio.is_file(abrp) do
+            termcolor.cprintln("Main backup folder already exists (and is a directory): " + abrp, "cyan", none, none)
         else
-            cprintln("Error: Can not make main backup folder: " + abrp + " (Reason: " + (emmb>1) + ")", "red", none, none)
-            exit(1)
+            termcolor.cprintln("Error: Can not make main backup folder: " + abrp + " (Reason: " + (emmb>1) + ")", "red", none, none)
+            sys.exit(1)
         done
     else
-        cprintln("Main backup folder created: " + abrp, "blue", none, none)
+        termcolor.cprintln("Main backup folder created: " + abrp, "blue", none, none)
     done
-    cprintln("Starting backup of: " + fp, "cyan", none, none)
-    cprintln("Target backup folder: " + abrp, "cyan", none, none)
+    termcolor.cprintln("Starting backup of: " + fp, "cyan", none, none)
+    termcolor.cprintln("Target backup folder: " + abrp, "cyan", none, none)
     backup_folder(fp, abrp, abrp)
-    cprintln("Backup process finished.", "green", none, none)
+    termcolor.cprintln("Backup process finished.", "green", none, none)
 done
 
 if is_main do
     main()
-    exit(0)
+    sys.exit(0)
 done
