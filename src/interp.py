@@ -1452,7 +1452,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'keyboard_write' must be a string",
+                    "First argument of 'write' must be a string",
                     exec_ctx,
                 )
             )
@@ -1483,7 +1483,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'keyboard_press' must be a string",
+                    "First argument of 'press' must be a string",
                     exec_ctx,
                 )
             )
@@ -1514,7 +1514,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'keyboard_release' must be a string",
+                    "First argument of 'release' must be a string",
                     exec_ctx,
                 )
             )
@@ -1545,7 +1545,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'keyboard_wait' must be a string",
+                    "First argument of 'wait' must be a string",
                     exec_ctx,
                 )
             )
@@ -1576,7 +1576,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'keyboard_is_pressed' must be a string",
+                    "First argument of 'is_pressed' must be a string",
                     exec_ctx,
                 )
             )
@@ -1607,7 +1607,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'thread_start' must be a function",
+                    "First argument of 'start' must be a function",
                     exec_ctx,
                 )
             )
@@ -1670,7 +1670,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'thread_sleep' must be a number",
+                    "First argument of 'sleep' must be a number",
                     exec_ctx,
                 )
             )
@@ -1701,7 +1701,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'thread_join' must be a thread",
+                    "First argument of 'join' must be a thread",
                     exec_ctx,
                 )
             )
@@ -1711,7 +1711,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "Second argument of 'thread_join' must be a number",
+                    "Second argument of 'join' must be a number",
                     exec_ctx,
                 )
             )
@@ -1739,7 +1739,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'thread_is_alive' must be a thread",
+                    "First argument of 'is_alive' must be a thread",
                     exec_ctx,
                 )
             )
@@ -1756,7 +1756,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'thread_cancel' must be a thread",
+                    "First argument of 'cancel' must be a thread",
                     exec_ctx,
                 )
             )
