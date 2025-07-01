@@ -785,19 +785,7 @@ class String(Object):
         return iter([String(ch) for ch in self.value]), None
 
     def __repr__(self):
-
-        return_value = f'"{self.value}"'
-
-        if return_value.endswith('""'):
-
-            return_value = return_value[:-1]
-
-        elif return_value.endswith("'\""):
-
-            return_value = return_value[:-2]
-
-        return return_value
-
+        return repr(self.value)
 
 class List(Object):
 
@@ -1056,57 +1044,41 @@ class File(Object):
 
 List.empty = List([])
 
-# class NameSpace(Object):
-#     def __init__(self, name):
-#         super().__init__()
-#         self.name = name
-#         self.variables = HashMap({})
-
-#     def get_comparison_gt(self, name, value):
-#         self.variables.set_index(String(name), value)
-
-#     def get(self, name):
-#         return self.variables.get_index(String(name))
-
-#     def copy(self):
-#         copied_ns = NameSpace(self.name)
-#         copied_ns.variables = self.variables.copy()
-#         return copied_ns
-
-#     def __repr__(self):
-#         return f"<NameSpace {self.name}>"
-
 class NameSpace(Object):
     def __init__(self, name):
         super().__init__()
         self.name = name
+
         self.variables = HashMap({})
 
-    # def get_comparison_gt(self, name, value=None):
-    #     # Nếu value là None: get, ngược lại: set
-    #     if value is None:
-    #         return self.variables.get_comparison_gt(String(name))
-    #     else:
-    #         self.variables = self.variables.set_index(String(name), value)
-    #         return self
+        self._internal = {
+            "context_": None,
+            "statements_": None,
+            "initialized_": False
+        }
 
     def get(self, name):
-        # print(self.variables)
-        # print(self.variables.get_index(String(name)))
+        # Ưu tiên biến hệ thống nếu khớp tên
+        if name in self._internal:
+            return self._internal[name]
+
         r, err = self.variables.get_comparison_gt(String(name))
         if err:
             return None
-        
-
         return r
 
     def set(self, name, value):
-        self.variables = self.variables.set_index(String(name), value)
+        # Nếu là biến hệ thống => set vào _internal
+        if name in self._internal:
+            self._internal[name] = value
+        else:
+            self.variables = self.variables.set_index(String(name), value)
         return self
 
     def copy(self):
         copied_ns = NameSpace(self.name)
         copied_ns.variables = self.variables.copy()
+        copied_ns._internal = self._internal.copy()
         copied_ns.set_pos(self.pos_start, self.pos_end)
         copied_ns.set_context(self.context)
         return copied_ns
@@ -1115,4 +1087,5 @@ class NameSpace(Object):
         return "<namespace>"
 
     def __repr__(self):
-        return f"<namespace {self.name}>"
+        user_keys = list(self.variables.values.keys())  # Lấy key của hashmap
+        return f"<namespace {self.name} | keys: {user_keys}>"
