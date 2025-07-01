@@ -3719,59 +3719,65 @@ class Interpreter:
 
 
 
-
     def visit_BinOpNode(self, node, context):
         res = RTResult()
         left = res.register(self.visit(node.left_node, context))
-        if res.should_return():
-            return res
-        right = res.register(self.visit(node.right_node, context))
-        if res.should_return():
-            return res
+        if res.should_return(): return res
 
-        if node.op_tok.type == TT_PLUS:
-            result, error = left.added_to(right)
-        elif node.op_tok.type == TT_MINUS:
-            result, error = left.subbed_by(right)
-        elif node.op_tok.type == TT_MUL:
-            result, error = left.multed_by(right)
-        elif node.op_tok.type == TT_DIV:
-            result, error = left.dived_by(right)
-        elif node.op_tok.type == TT_POW:
-            result, error = left.powed_by(right)
-        elif node.op_tok.type == TT_MOD:
-            result, error = left.moduled_by(right)
-        elif node.op_tok.type == TT_EE:
-            result, error = left.get_comparison_eq(right)
-        elif node.op_tok.type == TT_NE:
-            result, error = left.get_comparison_ne(right)
-        elif node.op_tok.type == TT_LT:
-            result, error = left.get_comparison_lt(right)
-        elif node.op_tok.type == TT_GT:
-            result, error = left.get_comparison_gt(right)
-        elif node.op_tok.type == TT_LTE:
-            result, error = left.get_comparison_lte(right)
-        elif node.op_tok.type == TT_GTE:
-            result, error = left.get_comparison_gte(right)
+        right = res.register(self.visit(node.right_node, context))
+        if res.should_return(): return res
+
+        op_type = node.op_tok.type
+        op_value = node.op_tok.value
+
+        ops = {
+            TT_PLUS:        lambda a, b: a.added_to(b),
+            TT_MINUS:       lambda a, b: a.subbed_by(b),
+            TT_MUL:         lambda a, b: a.multed_by(b),
+            TT_DIV:         lambda a, b: a.dived_by(b),
+            TT_POW:         lambda a, b: a.powed_by(b),
+            TT_MOD:         lambda a, b: a.moduled_by(b),
+            TT_EE:          lambda a, b: a.get_comparison_eq(b),
+            TT_NE:          lambda a, b: a.get_comparison_ne(b),
+            TT_LT:          lambda a, b: a.get_comparison_lt(b),
+            TT_GT:          lambda a, b: a.get_comparison_gt(b),
+            TT_LTE:         lambda a, b: a.get_comparison_lte(b),
+            TT_GTE:         lambda a, b: a.get_comparison_gte(b),
+            TT_FLOORDIV:    lambda a, b: a.floordived_by(b),
+        }
+
+        kw_ops = {
+            "and": lambda a, b: a.anded_by(b),
+            "or":  lambda a, b: a.ored_by(b),
+        }
+
+        if op_type in ops:
+            result, error = ops[op_type](left, right)
         elif node.op_tok.matches(TT_KEYWORD, "and"):
-            result, error = left.anded_by(right)
+            result, error = kw_ops["and"](left, right)
         elif node.op_tok.matches(TT_KEYWORD, "or"):
-            result, error = left.ored_by(right)
-        elif node.op_tok.type == TT_FLOORDIV:
-            result, error = left.floordived_by(right)
+            result, error = kw_ops["or"](left, right)
+        else:
+            return res.failure(RTError(
+                node.pos_start,
+                node.pos_end,
+                f"Unknown binary operator '{node.op_tok}'",
+                context
+            ))
 
         if error:
             return res.failure(error)
-        else:
-            return res.success(result.set_pos(node.pos_start, node.pos_end))
+        return res.success(result.set_pos(node.pos_start, node.pos_end))
+
+
 
     def visit_UnaryOpNode(self, node, context):
         res = RTResult()
-        number = res.register(self.visit(node.node, context))
+        value = res.register(self.visit(node.node, context))
         if res.should_return():
             return res
 
-        if isinstance(number, Number) and number.value is None:
+        if isinstance(value, Number) and value.value is None:
             return res.failure(
                 TError(
                     node.pos_start,
@@ -3781,17 +3787,33 @@ class Interpreter:
                 )
             )
 
-        error = None
+        op_type = node.op_tok.type
+        op_value = node.op_tok.value
 
-        if node.op_tok.type == TT_MINUS:
-            number, error = number.multed_by(Number(-1))
+        ops = {
+            TT_MINUS: lambda x: x.multed_by(Number(-1)),
+        }
+
+        kw_ops = {
+            "not": lambda x: x.notted(),
+        }
+
+        if op_type in ops:
+            result, error = ops[op_type](value)
         elif node.op_tok.matches(TT_KEYWORD, "not"):
-            number, error = number.notted()
+            result, error = kw_ops["not"](value)
+        else:
+            return res.failure(RTError(
+                node.pos_start,
+                node.pos_end,
+                f"Unknown unary operator '{node.op_tok}'",
+                context
+            ))
 
         if error:
             return res.failure(error)
-        else:
-            return res.success(number.set_pos(node.pos_start, node.pos_end))
+        return res.success(result.set_pos(node.pos_start, node.pos_end))
+ 
 
     def visit_IfNode(self, node, context):
         res = RTResult()
