@@ -3621,32 +3621,47 @@ class Interpreter:
 
         return res.success(value)
 
+    def initialize_namespace(self, namespace_obj):
+        if namespace_obj.get("initialized_"):
+            return  # Đã chạy rồi
+
+        stmts = namespace_obj.get("statements_")
+        ns_context = namespace_obj.get("context_")
+
+        for stmt in stmts:
+            _ = self.visit(stmt, ns_context)
+
+        for k, v in ns_context.symbol_table.symbols.items():
+            namespace_obj.set(k, v)
+        for k, v in ns_context.private_symbol_table.symbols.items():
+            namespace_obj.set(k, v)
+
+        namespace_obj.set("initialized_", True)
+
+    
     def visit_CallMemberAccessNode(self, node, context):
         res = RTResult()
         obj = res.register(self.visit(node.object_node, context))
-        if res.should_return():
-            return res
+        if res.should_return(): return res
+
+        if isinstance(obj, NameSpace) and not obj.get("__initialized__"):
+            self.initialize_namespace(obj)
+
         member = obj.get(node.member_name)
         if member is None:
             return res.failure(
-                RTError(
-                    node.pos_start,
-                    node.pos_end,
-                    f"'{obj}' has no member '{node.member_name}'",
-                    context,
-                )
+                RTError(node.pos_start, node.pos_end,
+                        f"'{obj}' has no member '{node.member_name}'", context)
             )
+
         if isinstance(member, Error):
             return res.failure(member)
         if not isinstance(member, Function):
             return res.failure(
-                RTError(
-                    node.pos_start,
-                    node.pos_end,
-                    f"'{node.member_name}' is not a function",
-                    context,
-                )
+                RTError(node.pos_start, node.pos_end,
+                        f"'{node.member_name}' is not a function", context)
             )
+
         args = []
         for arg_node in node.arg_nodes:
             args.append(res.register(self.visit(arg_node, context)))
@@ -3656,6 +3671,7 @@ class Interpreter:
         if res.should_return():
             return res
         return res.success(return_value)
+
     
     def visit_NameSpaceNode(self, node, context):
         res = RTResult()
@@ -3671,38 +3687,36 @@ class Interpreter:
         if hasattr(stmts, "element_nodes"):
             stmts = stmts.element_nodes
 
-        for stmt in stmts:
-            res.register(self.visit(stmt, ns_context))
-            if res.should_return():
-                return res
+        namespace.set("statements_", stmts)
+        namespace.set("context_", ns_context)
+        namespace.set("initialized_", False)
 
-        for var_name, value in ns_context.symbol_table.symbols.items():
-            namespace.set(var_name, value)
-        for var_name, value in ns_context.private_symbol_table.symbols.items():
-            namespace.set(var_name, value)
         context.symbol_table.set(node.namespace_name, namespace)
         context.private_symbol_table.set(node.namespace_name, namespace)
 
         return res.success(namespace)
+
     
     def visit_MemberAccessNode(self, node, context):
         res = RTResult()
         obj = res.register(self.visit(node.object_node, context))
-        if res.should_return():
-            return res
+        if res.should_return(): return res
+
+        if isinstance(obj, NameSpace) and not obj.get("initialized_"):
+            self.initialize_namespace(obj)
+
         member = obj.get(node.member_name)
         if member is None:
             return res.failure(
-                RTError(
-                    node.pos_start,
-                    node.pos_end,
-                    f"'{obj}' has no member '{node.member_name}'",
-                    context,
-                )
+                RTError(node.pos_start, node.pos_end,
+                    f"'{obj}' has no member '{node.member_name}'", context)
             )
+
         if isinstance(member, Error):
             return res.failure(member)
+
         return res.success(member)
+
 
 
 
