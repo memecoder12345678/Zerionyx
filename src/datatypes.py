@@ -1045,6 +1045,7 @@ class File(Object):
 List.empty = List([])
 
 class NameSpace(Object):
+    __slots__ = 
     def __init__(self, name):
         super().__init__()
         self.name = name
@@ -1058,7 +1059,6 @@ class NameSpace(Object):
         }
 
     def get(self, name):
-        # Ưu tiên biến hệ thống nếu khớp tên
         if name in self._internal:
             return self._internal[name]
 
@@ -1068,7 +1068,6 @@ class NameSpace(Object):
         return r
 
     def set(self, name, value):
-        # Nếu là biến hệ thống => set vào _internal
         if name in self._internal:
             self._internal[name] = value
         else:
@@ -1087,5 +1086,4 @@ class NameSpace(Object):
         return "<namespace>"
 
     def __repr__(self):
-        user_keys = list(self.variables.values.keys())  # Lấy key của hashmap
-        return f"<namespace {self.name} | keys: {user_keys}>"
+        return f"<namespace {self.name}>"
