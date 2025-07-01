@@ -132,6 +132,14 @@ while a < 100 do
     a -= 1
 done
 println(a)
+
+# NameSpace
+namespace m
+    pi = 3.14
+    defun area(r) -> pi * r * r
+done
+
+println(m.area(5))
 ```
 
 For more examples, check the [`tests`](tests) folder for a full overview.
