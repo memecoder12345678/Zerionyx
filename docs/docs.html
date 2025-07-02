@@ -33,27 +33,29 @@
         }
 
 header {
-    background-color: var(--dark-header-bg);
-    padding: 0.8rem 0;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    width: 100%; /* ✅ thêm dòng này */
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;                   /* kéo full-width */
+  background: var(--dark-header-bg);
+  z-index: 100;
 }
 
- 
- 
+.header-inner {
+  max-width: 1200px;          /* vẫn giữ giới hạn cho logo/nav */
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.8rem 20px;
+}
+
+/* Bỏ hoặc giảm max-width ở .header-container, cho nó thành full */
 .header-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  max-width: none;
+  margin: 0;
+  padding: 0;                 /* chuyển padding vào .header-inner nếu cần */
 }
-       
+
         .logo {
             display: flex;
             align-items: center;
@@ -211,18 +213,18 @@ pre {
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-container">
-            <div class="logo">
-                <img src="favicon.ico" alt="Zerionyx logo">
-                <a href="index.html">Zeriony<span>x</span></a>
-            </div>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="https://github.com/memecoder12345678/Zerionyx" target="_blank">GitHub</a>
-            </nav>
-        </div>
-    </header>
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <img src="favicon.ico" alt="Zerionyx logo">
+      <a href="index.html">Zeriony<span>x</span></a>
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="https://github.com/memecoder12345678/Zerionyx" target="_blank">GitHub</a>
+    </nav>
+  </div>
+</header>
 
     <div class="docs-wrapper">
         <aside class="sidebar">
