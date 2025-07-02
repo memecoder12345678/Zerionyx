@@ -32,24 +32,28 @@
             line-height: 1.6;
         }
 
-        header {
+header {
     background-color: var(--dark-header-bg);
     padding: 0.8rem 0;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     position: sticky;
     top: 0;
     z-index: 100;
+    width: 100%; /* ✅ thêm dòng này */
 }
+
  
  
-    .header-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        max-width: 1200px; /* <-- Dòng này giới hạn chiều rộng của NỘI DUNG */
-        margin: 0 auto;    /* <-- Dòng này căn giữa NỘI DUNG */
-        padding: 0 20px;
-    }       
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+       
         .logo {
             display: flex;
             align-items: center;
