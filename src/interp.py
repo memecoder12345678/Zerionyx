@@ -2383,6 +2383,31 @@ class BuiltInFunction(BaseFunction):
 
     execute_round_fp.arg_names = ["x"]
 
+    def convert_zer_to_py(self, obj):
+        if isinstance(obj, Number):
+            return obj.value
+
+        elif isinstance(obj, String):
+            return obj.value
+
+        elif isinstance(obj, NoneObject):
+            return None
+
+        elif isinstance(obj, List):
+            return [self.convert_zer_to_py(e) for e in obj.elements]
+
+        elif isinstance(obj, HashMap):
+            result = {}
+            for k, v in obj.map.items():
+                key = self.convert_zer_to_py(k)
+                val = self.convert_zer_to_py(v)
+                result[key] = val
+            return result
+
+        else:
+            return str(obj)
+
+    
     def validate_pyexec_result(self, obj):
         allowed = (bool, int, float, str)
         if obj is None:
@@ -2437,6 +2462,8 @@ class BuiltInFunction(BaseFunction):
 
     def execute_pyexec(self, exec_ctx):
         code = exec_ctx.symbol_table.get("code")
+        args = exec_ctx.symbol_table.get("args")
+
         if not isinstance(code, String):
             return RTResult().failure(
                 TError(
@@ -2446,11 +2473,25 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
+
+        if not isinstance(args, HashMap):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'pyexec' must be a hashmap",
+                    exec_ctx,
+                )
+            )
+
         try:
-            local_env = {}
+            local_env = self.convert_zer_to_py(args)  
+
             exec(code.value, {}, local_env)
+
             fr = self.validate_pyexec_result(local_env)
             return RTResult().success(fr)
+
         except Exception as e:
             return RTResult().failure(
                 RTError(
@@ -2461,7 +2502,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_pyexec.arg_names = ["code"]
+    execute_pyexec.arg_names = ["code", "args"]
 
     def execute_abs_path_fp(self, exec_ctx):
         path = exec_ctx.symbol_table.get("path")
