@@ -155,15 +155,17 @@
             color: var(--neon-blue);
         }
 
-        pre {
-            background-color: var(--dark-code-bg);
-            border: 1px solid var(--neon-blue);
-            box-shadow: 0 0 10px var(--neon-blue);
-            border-radius: 5px;
-            padding: 1rem;
-            overflow-x: auto;
-            line-height: 1.45;
-        }
+pre {
+    background-color: var(--dark-code-bg);
+    border: 1px solid var(--neon-blue);
+    box-shadow: 0 0 10px var(--neon-blue);
+    border-radius: 5px;
+    padding: 1rem;
+    overflow-x: auto;
+    max-width: 100%; /* ✅ thêm dòng này */
+    line-height: 1.45;
+}
+
         code {
             font-family: 'Fira Mono', 'Consolas', monospace;
             background-color: #1ad1ff1a;
