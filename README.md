@@ -59,7 +59,7 @@ It offers:
 ## Interactive Shell Demo
 
 <p align="center">
-  <img src="demo.svg" alt="Zerionyx Interactive Shell Demo" />
+  <img src="imgs/demo.svg" alt="Zerionyx Interactive Shell Demo" />
 </p>
 
 ---
@@ -244,7 +244,7 @@ If you find this project useful and want to support its development **anonymousl
 
 **Monero QR:**  
 <p align="center">
-  <img src="qr.png" alt="Monero Donation QR Code" width="200"/>
+  <img src="imgs/qr.png" alt="Monero Donation QR Code" width="200"/>
 </p>
 
 > Use wallets like [Feather Wallet](https://featherwallet.org/) or [Monero GUI](https://www.getmonero.org/downloads/) to send donations.
