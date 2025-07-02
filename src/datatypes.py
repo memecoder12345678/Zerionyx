@@ -1053,9 +1053,9 @@ class NameSpace(Object):
         self.variables = HashMap({})
 
         self._internal = {
-            "context_": None,
-            "statements_": None,
-            "initialized_": False
+            "context_": Number.none,
+            "statements_": Number.none,
+            "initialized_": Number.false
         }
 
     def get(self, name):
