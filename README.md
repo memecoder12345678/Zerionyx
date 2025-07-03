@@ -193,7 +193,6 @@ Use commands such as `grammar`, `license`, etc. for more details.
 * [x] Add algorithms & data structure libraries
 * [X] Integrate debugger support
 * [X] Improving interpreter performance 
-* [ ] Integrating **dynamic library loading (.pyd / .so)** into the language
 * [ ] Creating developer tools (debuggers, profilers, code formatters)
 * [ ] Creating **VS Code plugin**
 ---
@@ -214,8 +213,7 @@ Contributions are welcome! To get involved:
 Zerionyx is growing fast &mdash; and we're looking for awesome people to help shape its future.
 
 We're especially looking for contributors interested in: 
-
-- Integrating **dynamic library loading (.pyd / .so)** into the language  
+  
 - Writing test suites and improving interpreter performance  
 - Creating developer tools (debuggers, profilers, code formatters)  
 
