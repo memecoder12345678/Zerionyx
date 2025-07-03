@@ -253,7 +253,10 @@ pre {
                 <li><a href="#lib-time">time</a></li>
                 <li><a href="#lib-keyboard">keyboard</a></li>
                 <li><a href="#lib-termcolor">termcolor</a></li>
+                <li><a href="#lib-mouse">mouse</a></li>
+                <li><a href="#lib-screen">screen</a></li>
             </ul>
+            
         </aside>
 
         <main class="main-content">
@@ -608,6 +611,20 @@ Zerionyx may be magical, but its syntax must be real.
                     <li><b>cprintln(text, color, bg, style)</b> → none — Same as <code>cprint</code> but adds a newline</li>
                     <li><b>get_code(color, bg, style)</b> → str — Return ANSI escape code string for the given color, background, and style</li>
                 </ul></div>
+<div id="lib-mouse"><h3>mouse.zer</h3><ul>
+    <li><b>move(x, y)</b> → none — Di chuyển con trỏ chuột đến vị trí (<code>x</code>, <code>y</code>)</li>
+    <li><b>click()</b> → none — Nhấp chuột trái tại vị trí hiện tại</li>
+    <li><b>right_click()</b> → none — Nhấp chuột phải tại vị trí hiện tại</li>
+    <li><b>scroll(amount)</b> → none — Cuộn chuột theo chiều dọc với giá trị <code>amount</code></li>
+    <li><b>position()</b> → list — Lấy vị trí hiện tại của con trỏ chuột (trả về list gồm 2 số)</li>
+</ul></div>
+
+<div id="lib-screen"><h3>screen.zer</h3><ul>
+    <li><b>capture(path)</b> → none — Chụp ảnh toàn màn hình và lưu vào đường dẫn <code>path</code></li>
+    <li><b>capture_area(x, y, w, h)</b> → none — Chụp ảnh khu vực từ (<code>x</code>, <code>y</code>) với kích thước <code>w</code> × <code>h</code></li>
+    <li><b>get_color(x, y)</b> → string — Lấy mã màu tại điểm (<code>x</code>, <code>y</code>) dạng <code>#rrggbb</code></li>
+</ul></div>
+
             </section>
         </main>
     </div>
