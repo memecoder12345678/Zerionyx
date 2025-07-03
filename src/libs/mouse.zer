@@ -1,0 +1,25 @@
+namespace mouse
+    defun move(x, y)
+        mouse_move_fp(x, y)
+        return none
+    done
+
+    defun click()
+        mouse_click_fp()
+        return none
+    done
+
+    defun right_click()
+        right_click_fp()
+        return none
+    done
+
+    defun scroll(amount)
+        mouse_scroll_fp(amount)
+        return none
+    done
+
+    defun position()
+        return mouse_position_fp()
+    done
+done
