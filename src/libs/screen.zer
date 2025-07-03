@@ -1,0 +1,10 @@
+namespace screen
+    defun capture(p)
+        screen_capture_fp(p)
+        return none
+    done
+
+    defun	capture_area
+        screen_capture_area_fp
+    done
+done
