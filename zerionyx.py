@@ -106,7 +106,7 @@ def check_file_comments_or_empty(file_path):
                 all_empty_or_comments = False
                 break
         if all_empty_or_comments:
-            print("Error: The file is empty or only contains comments.")
+            print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}The file is empty or only contains comments{Fore.RESET}{Style.RESET_ALL}")
             sys.exit(0)
 
 
@@ -162,17 +162,17 @@ def main():
         except KeyboardInterrupt:
             print("\nexit...")
         except Exception as e:
-            print(f"Shell error: {e}")
+            print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Shell Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{e}{Fore.RESET}{Style.RESET_ALL}")
     elif len(sys.argv) == 2 and sys.argv[1] == "--version":
         print(f"Zerionyx {INFO}")
         return
     else:
         file_name = os.path.abspath(sys.argv[1])
         if not file_name.endswith(".zer"):
-            print("Error: The file must have a '.zer' extension.")
+            print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}The file must have a '.zer' extension{Fore.RESET}{Style.RESET_ALL}")
             return
         if not os.path.isfile(file_name):
-            print(f"Error: File '{os.path.abspath(file_name)}' does not exist.")
+            print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}File '{os.path.abspath(file_name)}' does not exist{Fore.RESET}{Style.RESET_ALL}")
             return
         try:
             check_file_comments_or_empty(file_name)
@@ -193,11 +193,8 @@ def main():
                     print(f"{repr(result.elements[0])}")
                 else:
                     print(f"{repr(result)}")
-        except IOError as e:
-            print(f"Error reading file '{file_name}': {e}.")
-            return
         except Exception as e:
-            print(f"Interpreter error: {e}.")
+            print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Interpreter Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{e}{Fore.RESET}{Style.RESET_ALL}")
             return
 
 
