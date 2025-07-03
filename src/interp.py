@@ -3569,13 +3569,13 @@ class BuiltInFunction(BaseFunction):
         x = exec_ctx.symbol_table.get("x")
         y = exec_ctx.symbol_table.get("y")
 
-        if not isinstance(x, Number) or not isinstance(y, Number):
+        if not isinstance(x, Number):
             return RTResult().failure(
-                TError(
-                    self.pos_start, self.pos_end,
-                    "Arguments of 'mouse.move' must be numbers",
-                    exec_ctx
-                )
+                TError(self.pos_start, self.pos_end, "First argument of 'move' must be a number", exec_ctx)
+            )
+        if not isinstance(y, Number):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "Second argument of 'move' must be a number", exec_ctx)
             )
 
         try:
@@ -3584,11 +3584,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
-                RTError(
-                    self.pos_start, self.pos_end,
-                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
-                    exec_ctx
-                )
+                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
             )
         except Exception as e:
             return RTResult().failure(
@@ -3604,11 +3600,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
-                RTError(
-                    self.pos_start, self.pos_end,
-                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
-                    exec_ctx
-                )
+                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
             )
         except Exception as e:
             return RTResult().failure(
@@ -3624,11 +3616,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
-                RTError(
-                    self.pos_start, self.pos_end,
-                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
-                    exec_ctx
-                )
+                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
             )
         except Exception as e:
             return RTResult().failure(
@@ -3642,11 +3630,7 @@ class BuiltInFunction(BaseFunction):
 
         if not isinstance(amount, Number):
             return RTResult().failure(
-                TError(
-                    self.pos_start, self.pos_end,
-                    "Argument of 'mouse.scroll' must be a number",
-                    exec_ctx
-                )
+                TError(self.pos_start, self.pos_end, "First argument of 'scroll' must be a number", exec_ctx)
             )
 
         try:
@@ -3655,11 +3639,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
-                RTError(
-                    self.pos_start, self.pos_end,
-                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
-                    exec_ctx
-                )
+                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
             )
         except Exception as e:
             return RTResult().failure(
@@ -3675,11 +3655,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(List([Number(x), Number(y)]))
         except ImportError:
             return RTResult().failure(
-                RTError(
-                    self.pos_start, self.pos_end,
-                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
-                    exec_ctx
-                )
+                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
             )
         except Exception as e:
             return RTResult().failure(
@@ -3693,11 +3669,7 @@ class BuiltInFunction(BaseFunction):
 
         if not isinstance(path, String):
             return RTResult().failure(
-                TError(
-                    self.pos_start, self.pos_end,
-                    "Argument of 'screen.capture' must be a string",
-                    exec_ctx
-                )
+                TError(self.pos_start, self.pos_end, "First argument of 'capture' must be a string", exec_ctx)
             )
 
         try:
@@ -3706,11 +3678,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
-                RTError(
-                    self.pos_start, self.pos_end,
-                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
-                    exec_ctx
-                )
+                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
             )
         except Exception as e:
             return RTResult().failure(
@@ -3725,27 +3693,32 @@ class BuiltInFunction(BaseFunction):
         w = exec_ctx.symbol_table.get("w")
         h = exec_ctx.symbol_table.get("h")
 
-        if not all(isinstance(i, Number) for i in [x, y, w, h]):
+        if not isinstance(x, Number):
             return RTResult().failure(
-                TError(
-                    self.pos_start, self.pos_end,
-                    "Arguments of 'screen.capture_area' must be numbers",
-                    exec_ctx
-                )
+                TError(self.pos_start, self.pos_end, "First argument of 'capture_area' must be a number", exec_ctx)
+            )
+        if not isinstance(y, Number):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "Second argument of 'capture_area' must be a number", exec_ctx)
+            )
+        if not isinstance(w, Number):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "Third argument of 'capture_area' must be a number", exec_ctx)
+            )
+        if not isinstance(h, Number):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "Fourth argument of 'capture_area' must be a number", exec_ctx)
             )
 
         try:
             from PIL import ImageGrab
             img = ImageGrab.grab(bbox=(x.value, y.value, x.value + w.value, y.value + h.value))
-            img.save("area_capture.png")
-            return RTResult().success(NoneObject.none)
+            iname = "area_capture_{time.time()}.png"
+            img.save(iname)
+            return RTResult().success(String(os.path.abs_path(iname)))
         except ImportError:
             return RTResult().failure(
-                RTError(
-                    self.pos_start, self.pos_end,
-                    "Pillow module not available\nTip: Install with: pip install pillow",
-                    exec_ctx
-                )
+                RTError(self.pos_start, self.pos_end, "Pillow module not available\nTip: Install with: pip install pillow", exec_ctx)
             )
         except Exception as e:
             return RTResult().failure(
