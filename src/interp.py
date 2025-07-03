@@ -3565,6 +3565,197 @@ class BuiltInFunction(BaseFunction):
 
 
     execute_del.arg_names = ["hm", "key"]
+    def execute_mouse_move_fp(self, exec_ctx):
+        x = exec_ctx.symbol_table.get("x")
+        y = exec_ctx.symbol_table.get("y")
+
+        if not isinstance(x, Number) or not isinstance(y, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start, self.pos_end,
+                    "Arguments of 'mouse.move' must be numbers",
+                    exec_ctx
+                )
+            )
+
+        try:
+            import pyautogui
+            pyautogui.moveTo(x.value, y.value)
+            return RTResult().success(NoneObject.none)
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start, self.pos_end,
+                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    exec_ctx
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    execute_mouse_move_fp.arg_names = ["x", "y"]
+
+    def execute_mouse_click_fp(self, exec_ctx):
+        try:
+            import pyautogui
+            pyautogui.click()
+            return RTResult().success(NoneObject.none)
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start, self.pos_end,
+                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    exec_ctx
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    execute_mouse_click_fp.arg_names = []
+
+    def execute_mouse_right_click_fp(self, exec_ctx):
+        try:
+            import pyautogui
+            pyautogui.rightClick()
+            return RTResult().success(NoneObject.none)
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start, self.pos_end,
+                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    exec_ctx
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    execute_mouse_right_click_fp.arg_names = []
+
+    def execute_mouse_scroll_fp(self, exec_ctx):
+        amount = exec_ctx.symbol_table.get("amount")
+
+        if not isinstance(amount, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start, self.pos_end,
+                    "Argument of 'mouse.scroll' must be a number",
+                    exec_ctx
+                )
+            )
+
+        try:
+            import pyautogui
+            pyautogui.scroll(int(amount.value))
+            return RTResult().success(NoneObject.none)
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start, self.pos_end,
+                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    exec_ctx
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    execute_mouse_scroll_fp.arg_names = ["amount"]
+
+    def execute_mouse_position_fp(self, exec_ctx):
+        try:
+            import pyautogui
+            x, y = pyautogui.position()
+            return RTResult().success(List([Number(x), Number(y)]))
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start, self.pos_end,
+                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    exec_ctx
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    execute_mouse_position_fp.arg_names = []
+
+    def execute_screen_capture_fp(self, exec_ctx):
+        path = exec_ctx.symbol_table.get("path")
+
+        if not isinstance(path, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start, self.pos_end,
+                    "Argument of 'screen.capture' must be a string",
+                    exec_ctx
+                )
+            )
+
+        try:
+            import pyautogui
+            pyautogui.screenshot(path.value)
+            return RTResult().success(NoneObject.none)
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start, self.pos_end,
+                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    exec_ctx
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    execute_screen_capture_fp.arg_names = ["path"]
+
+    def execute_screen_capture_area_fp(self, exec_ctx):
+        x = exec_ctx.symbol_table.get("x")
+        y = exec_ctx.symbol_table.get("y")
+        w = exec_ctx.symbol_table.get("w")
+        h = exec_ctx.symbol_table.get("h")
+
+        if not all(isinstance(i, Number) for i in [x, y, w, h]):
+            return RTResult().failure(
+                TError(
+                    self.pos_start, self.pos_end,
+                    "Arguments of 'screen.capture_area' must be numbers",
+                    exec_ctx
+                )
+            )
+
+        try:
+            from PIL import ImageGrab
+            img = ImageGrab.grab(bbox=(x.value, y.value, x.value + w.value, y.value + h.value))
+            img.save("area_capture.png")
+            return RTResult().success(NoneObject.none)
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start, self.pos_end,
+                    "Pillow module not available\nTip: Install with: pip install pillow",
+                    exec_ctx
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    execute_screen_capture_area_fp.arg_names = ["x", "y", "w", "h"]
+
+
+
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
