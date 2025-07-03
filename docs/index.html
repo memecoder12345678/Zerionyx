@@ -240,22 +240,76 @@
                 <h1>A Simple Language for Learning</h1>
                 <p>Zerionyx is a beginner-friendly, task-oriented language designed for education and basic automation.</p>
                 <div class="code-window">
-                    <div class="code-header">>>> zerionyx_shell</div>
-                    <div class="code-body">
-                        <pre><code class="highlight-Zerionyx"><span class="zer-comment"># Hello World</span>
+    <div class="code-header">>>> zerionyx_shell</div>
+    <div class="code-body">
+        <pre><code class="highlight-Zerionyx">
+<span class="zer-comment"># Hello World</span>
 <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-string">"Hello, World!"</span><span class="zer-types">)</span>
 
-<span class="zer-comment"># Variables and math</span>
+<span class="zer-comment"># Arithmetic</span>
 <span class="zer-var">x</span> <span class="zer-types">=</span> <span class="zer-number">10</span>
 <span class="zer-var">y</span> <span class="zer-types">=</span> <span class="zer-number">20</span>
 <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">x</span> <span class="zer-types">+</span> <span class="zer-var">y</span><span class="zer-types">)</span>
 
-<span class="zer-comment"># Functions</span>
-<span class="zer-keyword">defun</span> <span class="zer-func-def">add</span><span class="zer-types">(</span><span class="zer-var">a</span><span class="zer-var">,</span> <span class="zer-var">b</span><span class="zer-types">)</span>
+<span class="zer-comment"># Function definition</span>
+<span class="zer-keyword">defun</span> <span class="zer-func-def">add</span><span class="zer-types">(</span><span class="zer-var">a</span><span class="zer-types">,</span> <span class="zer-var">b</span><span class="zer-types">)</span>
     <span class="zer-keyword">return</span> <span class="zer-var">a</span> <span class="zer-types">+</span> <span class="zer-var">b</span>
-<span class="zer-keyword">done</span></code></pre>
-                    </div>
-                </div>
+<span class="zer-keyword">done</span>
+
+<span class="zer-comment"># One-line function</span>
+<span class="zer-keyword">defun</span> <span class="zer-func-def">add</span><span class="zer-types">(</span><span class="zer-var">a</span><span class="zer-types">,</span> <span class="zer-var">b</span><span class="zer-types">)</span> <span class="zer-types">-></span> <span class="zer-var">a</span> <span class="zer-types">+</span> <span class="zer-var">b</span>
+
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-func">add</span><span class="zer-types">(</span><span class="zer-number">5</span><span class="zer-types">,</span> <span class="zer-number">3</span><span class="zer-types">)</span><span class="zer-types">)</span>
+
+<span class="zer-comment"># Lists</span>
+<span class="zer-var">nums</span> <span class="zer-types">=</span> <span class="zer-types">[</span><span class="zer-number">1</span><span class="zer-types">,</span> <span class="zer-number">2</span><span class="zer-types">,</span> <span class="zer-number">3</span><span class="zer-types">,</span> <span class="zer-number">4</span><span class="zer-types">,</span> <span class="zer-number">5</span><span class="zer-types">]</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">nums</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">nums</span> <span class="zer-types">></span> <span class="zer-number">0</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">nums</span> <span class="zer-types">></span> <span class="zer-number">4</span><span class="zer-types">)</span>
+
+<span class="zer-comment"># HashMaps</span>
+<span class="zer-var">users</span> <span class="zer-types">=</span> <span class="zer-types">{</span><span class="zer-string">"name"</span><span class="zer-types">:</span> <span class="zer-string">"admin"</span><span class="zer-types">,</span> <span class="zer-string">"password"</span><span class="zer-types">:</span> <span class="zer-string">"admin"</span><span class="zer-types">}</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">users</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">users</span> <span class="zer-types">></span> <span class="zer-string">"name"</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">users</span> <span class="zer-types">></span> <span class="zer-string">"password"</span><span class="zer-types">)</span>
+
+<span class="zer-comment"># Conditional</span>
+<span class="zer-keyword">if</span> <span class="zer-var">x</span> <span class="zer-types">></span> <span class="zer-var">y</span> <span class="zer-keyword">do</span>
+    <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-string">"X is greater"</span><span class="zer-types">)</span>
+<span class="zer-keyword">elif</span> <span class="zer-var">x</span> <span class="zer-types"><</span> <span class="zer-var">y</span> <span class="zer-keyword">do</span>
+    <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-string">"Y is greater"</span><span class="zer-types">)</span>
+<span class="zer-keyword">else</span>
+    <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-string">"X is equals to Y"</span><span class="zer-types">)</span>
+<span class="zer-keyword">done</span>
+
+<span class="zer-comment"># For-in loop</span>
+<span class="zer-keyword">for</span> <span class="zer-var">i</span> <span class="zer-keyword">in</span> <span class="zer-var">nums</span> <span class="zer-keyword">do</span>
+    <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">i</span><span class="zer-types">)</span>
+<span class="zer-keyword">done</span>
+
+<span class="zer-comment"># For loop</span>
+<span class="zer-keyword">for</span> <span class="zer-var">i</span> <span class="zer-types">=</span> <span class="zer-number">1</span> <span class="zer-keyword">to</span> <span class="zer-number">11</span> <span class="zer-keyword">do</span>
+    <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">i</span><span class="zer-types">)</span>
+<span class="zer-keyword">done</span>
+
+<span class="zer-comment"># While loop</span>
+<span class="zer-var">a</span> <span class="zer-types">=</span> <span class="zer-number">100</span>
+<span class="zer-keyword">while</span> <span class="zer-var">a</span> <span class="zer-types"><</span> <span class="zer-number">100</span> <span class="zer-keyword">do</span>
+    <span class="zer-var">a</span> <span class="zer-types">-=</span> <span class="zer-number">1</span>
+<span class="zer-keyword">done</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">a</span><span class="zer-types">)</span>
+
+<span class="zer-comment"># NameSpace</span>
+<span class="zer-keyword">namespace</span> <span class="zer-var">m</span>
+    <span class="zer-var">pi</span> <span class="zer-types">=</span> <span class="zer-number">3.14</span>
+    <span class="zer-keyword">defun</span> <span class="zer-func-def">area</span><span class="zer-types">(</span><span class="zer-var">r</span><span class="zer-types">)</span> <span class="zer-types">-></span> <span class="zer-var">pi</span> <span class="zer-types">*</span> <span class="zer-var">r</span> <span class="zer-types">*</span> <span class="zer-var">r</span>
+<span class="zer-keyword">done</span>
+
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">m</span><span class="zer-types">.</span><span class="zer-func">area</span><span class="zer-types">(</span><span class="zer-number">5</span><span class="zer-types">)</span><span class="zer-types">)</span>
+</code></pre>
+    </div>
+</div>
+
                 <div class="cta-buttons">
                     <a href="https://github.com/memecoder12345678/Zerionyx" target="_blank" class="btn btn-primary">Get from GitHub</a>
                     <a href="docs.html" class="btn btn-secondary">Read the Docs</a>
