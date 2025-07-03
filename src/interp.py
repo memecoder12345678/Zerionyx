@@ -3580,7 +3580,7 @@ class BuiltInFunction(BaseFunction):
 
         try:
             import pyautogui
-            pyautogui.moveTo(x.value, y.value)
+            pyautogui.moveTo(int(x.value), int(y.value))
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
@@ -3712,7 +3712,7 @@ class BuiltInFunction(BaseFunction):
 
         try:
             from PIL import ImageGrab
-            img = ImageGrab.grab(bbox=(x.value, y.value, x.value + w.value, y.value + h.value))
+            img = ImageGrab.grab(bbox=(int(x.value), int(y.value), int(x.value) + int(w.value), int(y.value) + int(h.value)))
             iname = "area_capture_{time.time()}.png"
             img.save(iname)
             return RTResult().success(String(os.path.abs_path(iname)))
@@ -3728,7 +3728,34 @@ class BuiltInFunction(BaseFunction):
     execute_screen_capture_area_fp.arg_names = ["x", "y", "w", "h"]
 
 
+    def execute_screen_get_color_fp(self, exec_ctx):
+        x = exec_ctx.symbol_table.get("x")
+        y = exec_ctx.symbol_table.get("y")
 
+        if not isinstance(x, Number):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "First argument of 'get_color' must be a number", exec_ctx)
+            )
+        if not isinstance(y, Number):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "Second argument of 'get_color' must be a number", exec_ctx)
+            )
+
+        try:
+            import pyautogui
+            color = pyautogui.screenshot().getpixel((int(x.value), int(y.value)))
+            hex_color = '#%02x%02x%02x' % color
+            return RTResult().success(String(hex_color))
+        except ImportError:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    execute_screen_get_color_fp.arg_names = ["x", "y"]
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
