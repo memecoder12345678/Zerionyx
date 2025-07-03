@@ -4219,7 +4219,22 @@ def run(fn, text):
         context.private_symbol_table = private_symbol_table
         context.private_symbol_table.set("is_main", Number(1))
         result = interpreter.visit(ast.node, context)
-        result.value = "" if str(result.value) == "none" else result.value
+        val = str(result.value)
+
+        if val.strip().startswith("[") and val.strip().endswith("]"):
+            inner = val.strip()[1:-1]  # Bỏ dấu []
+            items = [i.strip() for i in inner.split(",") if i.strip().lower() != "none"]
+
+            if items:
+                result.value = f"[{', '.join(items)}]"
+            else:
+                result.value = ""
+
+        elif str(val).lower() == "none":
+            result.value = ""
+
+        else:
+            result.value = val
 
         return result.value, result.error
     except KeyboardInterrupt:
