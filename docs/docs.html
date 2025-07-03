@@ -426,16 +426,29 @@ Zerionyx may be magical, but its syntax must be real.
 
             <section id="standard-library">
                 <h2>Standard Library</h2>
-                <p>
+<p>
   To use a library, add <code>load "libs.&lt;name&gt;"</code> at the top of your <b>.zer</b> file.  
-  For example: <code>load "libs.math"</code>.  
-  This works like an <code>#include</code> in other languages: it inserts the contents of the library into your program.
-
-  <br><br>
-  However, <b>it does not automatically inject the namespace</b>.  
-  You'll still need to call functions using the library name, like  
-  <code>math.is_prime(314)</code>.
+  For example: <code>load "libs.math"</code>.
 </p>
+
+<p>
+  The <code>load</code> statement works similarly to <code>#include</code> in C — it inserts the contents of the file directly into your code, without automatically applying any namespace.
+</p>
+
+<p>
+  That means if you're loading your own library and want to keep things organized, you should manually wrap it in a namespace using the <code>namespace</code> keyword.
+</p>
+
+<p>
+  All official libraries under <code>libs.*</code> are already wrapped in their own namespaces.  
+  That's why you can use them right away, like <code>math.is_prime(314)</code>.
+</p>
+
+<p>
+  To load a library from your current directory instead of the built-in ones, use the <code>local.&lt;name&gt;</code> prefix.  
+  For example: <code>load "local.utils"</code> will include <code>utils.zer</code> from the current folder.
+</p>
+
 
                 
                 <div id="lib-mlist"><h3>mlist.zer</h3><ul>
