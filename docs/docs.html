@@ -240,7 +240,7 @@ pre {
             </ul>
             <h3>Standard Library</h3>
             <ul>
-                <li><a href="#lib-list">list</a></li>
+                <li><a href="#lib-mlist">list</a></li>
                 <li><a href="#lib-string">string</a></li>
                 <li><a href="#lib-math">math</a></li>
                 <li><a href="#lib-ffio">ffio</a></li>
@@ -419,16 +419,26 @@ Zerionyx may be magical, but its syntax must be real.
                     <li><b>to_int(x, silent)</b> → int/none — Convert <code>x</code> to int return <code>none</code> if fail and <code>silent</code> true else raise</li>
                     <li><b>to_str(x)</b> → string — Convert <code>x</code> to string</li>
                     <li><b>type(x)</b> → string/none — Return type of <code>x</code> as string or none</li>
-                    <li><b>pyexec(code)</b> → any — Executes embedded Python code and returns its result (use with caution)</li>
+                    <li><b>pyexec(code, args)</b> → hashmap — Executes embedded Python code and returns its result (use with caution)</li>
                     <li><b>slice(l, from, to, step)</b> → list/string/hashmap — Slice list/string/hashmap <code>l</code> from <code>from</code> to <code>to</code> step <code>step</code> (exclusive)</li>
                 </ul>
             </section>
 
             <section id="standard-library">
                 <h2>Standard Library</h2>
-                <p>To use a library, add <code>load "libs.<name>"</code> at the top of your <b>.zer</b> file. For example, <code>load "libs.math"</code>. Then call functions like <code>math.is_prime(314)</code>.</p>
+                <p>
+  To use a library, add <code>load "libs.&lt;name&gt;"</code> at the top of your <b>.zer</b> file.  
+  For example: <code>load "libs.math"</code>.  
+  This works like an <code>#include</code> in other languages: it inserts the contents of the library into your program.
+
+  <br><br>
+  However, <b>it does not automatically inject the namespace</b>.  
+  You'll still need to call functions using the library name, like  
+  <code>math.is_prime(314)</code>.
+</p>
+
                 
-                <div id="lib-list"><h3>list.zer</h3><ul>
+                <div id="lib-mlist"><h3>mlist.zer</h3><ul>
                     <li><b>map(f, l)</b> → list — Apply function <code>f</code> to each element of list <code>l</code></li>
                     <li><b>filter(f, l)</b> → list — Filter list <code>l</code> by function <code>f</code> (keep elements where <code>f(x)</code> is true)</li>
                     <li><b>reduce(f, l, i)</b> → any — Reduce list <code>l</code> with function <code>f</code> and initial value <code>i</code></li>
