@@ -4,7 +4,11 @@ namespace screen
         return none
     done
 
-    defun	capture_area
+    defun capture_area
         screen_capture_area_fp
+    done
+
+    defun get_color(x, y)
+        screen_get_color(x, y)
     done
 done
