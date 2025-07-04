@@ -2156,7 +2156,7 @@ class BuiltInFunction(BaseFunction):
             elif res.error:
                 return RTResult().failure(res.error)
             else:
-                return RTResult().success(List([res.value, NoneObject.none]))
+                return RTResult().success(List([res.value, NoneObject.none, NoneObject.none]))
         except (RTError, IOError, MError, TError) as err:
             err_str = str(err)
             err_line = err_str.strip().split("\n")[-1]
