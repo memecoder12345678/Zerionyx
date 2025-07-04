@@ -129,11 +129,6 @@ namespace ffio
         return none
     done
 
-    defun chdir(p)
-        chdir_fp(p)
-        return none
-    done
-
     defun access(p, m)
         return access_fp(p, m)
     done
