@@ -2141,7 +2141,18 @@ class BuiltInFunction(BaseFunction):
             if res.error and isinstance(res.error, (RTError, IOError, MError, TError)):
                 err_str = str(res.error)
                 err_line = err_str.strip().split("\n")[-1]
-                return RTResult().success(List([NoneObject.none, String(err_line)]))
+                err_name, err_msg = err_line.split(":", 1)
+                err_name = err_name.strip()
+                err_msg = err_msg.strip()
+                if err_name.startwiths("R"):
+                    err_name = "RT"
+                elif err_name.startwiths("M"):
+                    err_name = "M"
+                elif err_name.startwiths("IO"):
+                    err_name = "IO"
+                elif err_name.startwiths("T"):
+                    err_name = "T"
+                return RTResult().success(List([NoneObject.none, String(err_msg), String(err_name)]))
             elif res.error:
                 return RTResult().failure(res.error)
             else:
@@ -2149,7 +2160,18 @@ class BuiltInFunction(BaseFunction):
         except (RTError, IOError, MError, TError) as err:
             err_str = str(err)
             err_line = err_str.strip().split("\n")[-1]
-            return RTResult().success(List([NoneObject.none, String(err_line)]))
+            err_name, err_msg = err_line.split(":", 1)
+            err_name = err_name.strip()
+            err_msg = err_msg.strip()
+            if err_name.startwiths("R"):
+                err_name = "RT"
+            elif err_name.startwiths("M"):
+                err_name = "M"
+            elif err_name.startwiths("IO"):
+                err_name = "IO"
+            elif err_name.startwiths("T"):
+                err_name = "T"
+            return RTResult().success(List([NoneObject.none, String(err_msg), String(err_name)]))
         except Exception as err:
             return RTResult().failure(
                 RTError(
@@ -3097,49 +3119,7 @@ class BuiltInFunction(BaseFunction):
 
     execute_unlink_fp.arg_names = ["path"]
 
-    def execute_chdir_fp(self, exec_ctx):
-        path_arg = exec_ctx.symbol_table.get("path")
-        if not isinstance(path_arg, String):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'chdir' must be a string",
-                    exec_ctx,
-                )
-            )
-        if not os.path.isdir(path_arg.value):
-            return RTResult().failure(
-                IOError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Directory '{path_arg.value}' does not exist or is not a directory",
-                    exec_ctx,
-                )
-            )
-        try:
-            os.chdir(path_arg.value)
-            return RTResult().success(NoneObject.none)
-        except OSError as e:
-            return RTResult().failure(
-                IOError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Failed to set current directory to '{path_arg.value}': {str(e)}",
-                    exec_ctx,
-                )
-            )
-        except Exception as e:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Error changing directory: {str(e)}",
-                    exec_ctx,
-                )
-            )
-
-    execute_chdir_fp.arg_names = ["path"]
+    
 
     def execute_access_fp(self, exec_ctx):
         path_arg = exec_ctx.symbol_table.get("path")
