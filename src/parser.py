@@ -361,14 +361,14 @@ class Parser:
         while self.current_tok.type == TT_DOT:
             res.register_advancement()
             self.advance()
-            # if self.current_tok.type != TT_IDENTIFIER:
-            #     return res.failure(
-            #         InvalidSyntaxError(
-            #             self.current_tok.pos_start,
-            #             self.current_tok.pos_end,
-            #             "Expected identifier after '.'",
-            #         )
-            #     )
+            if self.current_tok.type != TT_IDENTIFIER:
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected identifier",
+                    )
+                )
             member_name = self.current_tok.value
             res.register_advancement()
             self.advance()

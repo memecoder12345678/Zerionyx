@@ -15,7 +15,7 @@ println("Sum: " + to_str(total))
 println("Zerionyx ran in: " + to_str(end - start) + " seconds")
 sys.exit(0)
 
-# Fastest: 1.16324806213379 seconds
-# Slowest: 1.29593896865845 seconds
-# Average: 1.22959351539612 seconds
-# NOTE: all tests were run using PyPy
+# Fastest: 0.942083835601807 seconds
+# Slowest: 1.026577949523926 seconds
+# Average: 0.984330892562866 seconds
+# NOTE: all tests were run using pypy3.11-v7.3.19-win64

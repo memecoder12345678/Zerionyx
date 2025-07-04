@@ -7,17 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         :root {
-            /* Neon Palette - Blue is primary */
             --neon-blue: #1ad1ff;
-            --neon-green-accent: #1affb3; /* Used only for small accents */
+            --neon-green-accent: #1affb3;
             
-            /* Structural Palette (Python.org inspired) */
             --light-bg: #ffffff;
             --dark-header-bg: #2b3b4a;
             --dark-code-bg: #101522;
             --sidebar-bg: #f9f9f9;
 
-            /* Text Colors */
             --dark-text: #333333;
             --light-text: #f0f0f0;
         }
@@ -32,29 +29,28 @@
             line-height: 1.6;
         }
 
-header {
-  position: sticky;
-  top: 0;
-  left: 0;
-  right: 0;                   /* kéo full-width */
-  background: var(--dark-header-bg);
-  z-index: 100;
-}
+        header {
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--dark-header-bg);
+            z-index: 100;
+        }
 
-.header-inner {
-  max-width: 1200px;          /* vẫn giữ giới hạn cho logo/nav */
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  padding: 0.8rem 20px;
-}
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 20px;
+        }
 
-/* Bỏ hoặc giảm max-width ở .header-container, cho nó thành full */
-.header-container {
-  max-width: none;
-  margin: 0;
-  padding: 0;                 /* chuyển padding vào .header-inner nếu cần */
-}
+        .header-container {
+            max-width: none;
+            margin: 0;
+            padding: 0;
+        }
 
         .logo {
             display: flex;
@@ -101,7 +97,7 @@ header {
             padding: 2rem 1rem;
             border-right: 1px solid #e0e0e0;
             position: sticky;
-            top: 68px; /* Adjusted for header height */
+            top: 68px;
             height: calc(100vh - 68px);
             overflow-y: auto;
             background: var(--sidebar-bg);
@@ -161,16 +157,16 @@ header {
             color: var(--neon-blue);
         }
 
-pre {
-    background-color: var(--dark-code-bg);
-    border: 1px solid var(--neon-blue);
-    box-shadow: 0 0 10px var(--neon-blue);
-    border-radius: 5px;
-    padding: 1rem;
-    overflow-x: auto;
-    max-width: 100%; /* ✅ thêm dòng này */
-    line-height: 1.45;
-}
+        pre {
+            background-color: var(--dark-code-bg);
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+            border-radius: 5px;
+            padding: 1rem;
+            overflow-x: auto;
+            max-width: 100%;
+            line-height: 1.45;
+        }
 
         code {
             font-family: 'Fira Mono', 'Consolas', monospace;
@@ -202,7 +198,6 @@ pre {
             text-shadow: 0 0 3px var(--neon-green-accent); 
         }
 
-        /* Syntax Highlighting */
         .highlight-Zerionyx .zer-keyword, 
         .highlight-Zerionyx .zer-types { color: var(--neon-blue); font-weight: bold; }
         .highlight-Zerionyx .zer-func-def,
@@ -320,6 +315,11 @@ ATOM               ::=
     | LIST_INDEX
     | IF_EXPR
     | FOR_EXPR
+    | FOR_IN_EXPR
+    | GET_INDEX
+    | GET_MEMBER
+    | HASHMAP_EXPR
+    | NAMESPACE_EXPR
     | WHILE_EXPR
     | DEF_FUNC
     | COMMENT
@@ -345,6 +345,11 @@ IF_EXPR           ::=
 FOR_EXPR          ::=
       "for" IDENTIFIER "=" EXPR "to" EXPR
       ("step" EXPR)?
+      "do" STATEMENT
+      NEWLINE "done"
+
+FOR_IN_EXPR          ::=
+      "for" IDENTIFIER "in" EXPR
       "do" STATEMENT
       NEWLINE "done"
 

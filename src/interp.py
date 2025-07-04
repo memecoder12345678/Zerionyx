@@ -13,7 +13,6 @@ from functools import lru_cache
 from .lexer import Lexer, RTResult
 
 from getpass import getpass
-import requests
 import urllib.request
 import urllib.error
 from urllib.parse import unquote
@@ -2420,7 +2419,7 @@ class BuiltInFunction(BaseFunction):
 
         elif isinstance(obj, HashMap):
             result = {}
-            for k, v in obj.map.items():
+            for k, v in obj.values.items():
                 key = self.convert_zer_to_py(k)
                 val = self.convert_zer_to_py(v)
                 result[key] = val
@@ -2507,7 +2506,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
-            local_env = self.convert_zer_to_py(args)  
+            local_env = self.convert_zer_to_py(args)
 
             exec(code.value, {}, local_env)
 
@@ -3366,6 +3365,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         try:
+            import requests
             response = requests.request(
                 method_arg.value,
                 url_arg.value,
@@ -3374,6 +3374,10 @@ class BuiltInFunction(BaseFunction):
                 timeout=timeout_arg.value,
             )
             return RTResult().success(self.validate_pyexec_result(response.json()))
+        except ImportError:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, "requests module not available\nTip: Install with: pip install requests", exec_ctx)
+            )
         except requests.exceptions.RequestException as e:
             return RTResult().failure(
                 RTError(
@@ -3849,8 +3853,9 @@ class Interpreter:
         if namespace_obj.get("initialized_").value:
             return
 
-        stmts = namespace_obj.get("statements_").value
-        ns_context = namespace_obj.get("context_").value
+        stmts = namespace_obj.get("statements_")
+        # print(stmts)
+        ns_context = namespace_obj.get("context_")
 
         for stmt in stmts:
             _ = self.visit(stmt, ns_context)
@@ -3913,7 +3918,7 @@ class Interpreter:
 
         namespace.set("statements_", stmts)
         namespace.set("context_", ns_context)
-        namespace.set("initialized_", False)
+        namespace.set("initialized_", Number.false)
 
         context.symbol_table.set(node.namespace_name, namespace)
         context.private_symbol_table.set(node.namespace_name, namespace)
@@ -3926,7 +3931,7 @@ class Interpreter:
         obj = res.register(self.visit(node.object_node, context))
         if res.should_return(): return res
 
-        if isinstance(obj, NameSpace) and not obj.get("initialized_").value
+        if isinstance(obj, NameSpace) and not obj.get("initialized_").value:
             self.initialize_namespace(obj)
 
         member = obj.get(node.member_name)

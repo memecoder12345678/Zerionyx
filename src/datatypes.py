@@ -1045,7 +1045,7 @@ class File(Object):
 List.empty = List([])
 
 class NameSpace(Object):
-    __slots__ = 
+    __slots__ = ("name", "variables", "_internal")
     def __init__(self, name):
         super().__init__()
         self.name = name
@@ -1055,8 +1055,9 @@ class NameSpace(Object):
         self._internal = {
             "context_": Number.none,
             "statements_": Number.none,
-            "initialized_": Number.false
+            "initialized_": Bool(False),
         }
+        # print(self._internal)
 
     def get(self, name):
         if name in self._internal:

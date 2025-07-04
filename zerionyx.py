@@ -51,6 +51,11 @@ ATOM               ::=
     | LIST_INDEX
     | IF_EXPR
     | FOR_EXPR
+    | FOR_IN_EXPR
+    | GET_INDEX
+    | GET_MEMBER
+    | HASHMAP_EXPR
+    | NAMESPACE_EXPR
     | WHILE_EXPR
     | DEF_FUNC
     | COMMENT
@@ -76,6 +81,11 @@ IF_EXPR           ::=
 FOR_EXPR          ::=
       "for" IDENTIFIER "=" EXPR "to" EXPR
       ("step" EXPR)?
+      "do" STATEMENT
+      NEWLINE "done"
+
+FOR_IN_EXPR          ::=
+      "for" IDENTIFIER "in" EXPR
       "do" STATEMENT
       NEWLINE "done"
 
