@@ -392,7 +392,7 @@ Zerionyx may be magical, but its syntax must be real.
                 <h2>Built-in Functions</h2>
                 <ul>
                     <li><b>append(obj, val)</b> → list — Add <code>val</code> to end of <code>obj</code> return <code>val</code></li>
-                    <li><b>catch(func, args)</b> → list — Run <code>func</code> with <code>args</code> return <code>[result, none]</code> if ok or <code>[none, err]</code> if error</li>
+                    <li><b>catch(func, args)</b> → list — Run <code>func</code> with <code>args</code> return <code>[result, none, none]</code> if ok or <code>[none, err_msg, err_name ('RT': 'Runtime Error', 'M': 'Math Error', 'IO': 'IO Error' or 'T': 'Type Error')]</code> if error</li>
                     <li><b>clear()</b> → none — Clear terminal</li>
                     <li><b>extend(a, b)</b> → none — Add all in <code>b</code> to <code>a</code> both must be list</li>
                     <li><b>finally(f, a, final_f, final_a)</b> → list — Run <code>f</code> with <code>a</code> then always run <code>final_f</code> with <code>final_a</code> return like <code>catch</code></li>
@@ -422,7 +422,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <li><b>to_int(x, silent)</b> → int/none — Convert <code>x</code> to int return <code>none</code> if fail and <code>silent</code> true else raise</li>
                     <li><b>to_str(x)</b> → string — Convert <code>x</code> to string</li>
                     <li><b>type(x)</b> → string/none — Return type of <code>x</code> as string or none</li>
-                    <li><b>pyexec(code, args)</b> → hashmap — Executes embedded Python code and returns its result (use with caution)</li>
+                    <li><b>pyexec(code, args)</b> → hashmap — Executes embedded Python code and returns its result (argsq hashmap) (use with caution)</li>
                     <li><b>slice(l, from, to, step)</b> → list/string/hashmap — Slice list/string/hashmap <code>l</code> from <code>from</code> to <code>to</code> step <code>step</code> (exclusive)</li>
                 </ul>
             </section>
