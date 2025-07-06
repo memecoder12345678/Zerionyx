@@ -229,8 +229,6 @@ class Lexer:
         else:
             return Token(TT_FLOAT, float(num_str), pos_start, self.pos)
 
-
-
     def make_string_single(self):
         string = ""
         pos_start = self.pos.copy()
@@ -511,15 +509,22 @@ class Lexer:
         if peek_idx < len(self.text):
             if (
                 peek_idx + 1 < len(self.text)
-                and self.text[peek_idx:peek_idx+2] == "as"
-                and (peek_idx + 2 >= len(self.text) or self.text[peek_idx+2] not in LETTERS_DIGITS + "_")
+                and self.text[peek_idx : peek_idx + 2] == "as"
+                and (
+                    peek_idx + 2 >= len(self.text)
+                    or self.text[peek_idx + 2] not in LETTERS_DIGITS + "_"
+                )
             ):
                 should_insert_let = True
 
             if not should_insert_let:
                 op_char1 = self.text[peek_idx]
-                op_char2 = self.text[peek_idx+1] if peek_idx+1 < len(self.text) else None
-                op_char3 = self.text[peek_idx+2] if peek_idx+2 < len(self.text) else None
+                op_char2 = (
+                    self.text[peek_idx + 1] if peek_idx + 1 < len(self.text) else None
+                )
+                op_char3 = (
+                    self.text[peek_idx + 2] if peek_idx + 2 < len(self.text) else None
+                )
 
                 if op_char1 == "=" and op_char2 != "=":
                     should_insert_let = True
@@ -532,9 +537,7 @@ class Lexer:
 
         if should_insert_let and id_str not in KEYWORDS:
             pt: Token | None = self.previous_token()
-            allowed_preceding_keywords_for_let = {
-                "do", "else", "as"
-            }
+            allowed_preceding_keywords_for_let = {"do", "else", "as"}
             insert_let = False
 
             if (

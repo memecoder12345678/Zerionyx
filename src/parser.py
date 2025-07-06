@@ -204,11 +204,11 @@ class Parser:
                 if res.error:
                     return res
                 return res.success(VarAssignNode(var_name, expr))
-            
+
             elif self.current_tok.matches(TT_KEYWORD, "as"):
                 res.register_advancement()
                 self.advance()
-                
+
                 if self.current_tok.type != TT_IDENTIFIER:
                     return res.failure(
                         InvalidSyntaxError(
@@ -217,12 +217,12 @@ class Parser:
                             "Expected identifier for alias",
                         )
                     )
-                
+
                 alias_name = self.current_tok
                 res.register_advancement()
                 self.advance()
                 return res.success(VarAssignAsNode(var_name, alias_name))
-            
+
             else:
                 return res.failure(
                     InvalidSyntaxError(
@@ -245,12 +245,12 @@ class Parser:
                 )
 
             module = self.current_tok
-            raw_path = module.value.replace('.', os.sep)
+            raw_path = module.value.replace(".", os.sep)
 
             if raw_path.endswith(("\\", "/")):
                 raw_path = raw_path[:-1]
 
-            raw_path += '.zer'
+            raw_path += ".zer"
 
             candidates = []
             if module.value.startswith("libs."):
@@ -261,7 +261,10 @@ class Parser:
                         os.path.dirname(os.path.abspath(__file__)), raw_path[6:]
                     )
                 else:
-                    local_path = os.path.join(os.path.dirname(os.path.abspath(self.current_tok.pos_start.fn)), raw_path[6:])
+                    local_path = os.path.join(
+                        os.path.dirname(os.path.abspath(self.current_tok.pos_start.fn)),
+                        raw_path[6:],
+                    )
                 candidates.append(local_path)
 
             chosen_path = None
@@ -275,8 +278,7 @@ class Parser:
             res.register_advancement()
             self.advance()
             return res.success(LoadNode(module))
-        
-      
+
         node = res.register(
             self.bin_op(self.comp_expr, ((TT_KEYWORD, "and"), (TT_KEYWORD, "or")))
         )
@@ -400,9 +402,17 @@ class Parser:
                         )
                     res.register_advancement()
                     self.advance()
-                atom = CallMemberAccessNode(atom, member_name, arg_nodes, atom.pos_start, self.current_tok.pos_end.copy())
+                atom = CallMemberAccessNode(
+                    atom,
+                    member_name,
+                    arg_nodes,
+                    atom.pos_start,
+                    self.current_tok.pos_end.copy(),
+                )
             else:
-                atom = MemberAccessNode(atom, member_name, atom.pos_start, self.current_tok.pos_end.copy())
+                atom = MemberAccessNode(
+                    atom, member_name, atom.pos_start, self.current_tok.pos_end.copy()
+                )
 
         if self.current_tok.type == TT_LPAREN:
             res.register_advancement()
@@ -522,7 +532,7 @@ class Parser:
                 "Expected int, float, identifier, '+', '-', '(', '[', '{', 'if', 'for', 'while' or 'defun'",
             )
         )
-    
+
     def namespace(self):
         self.skip_newlines()
         res = ParseResult()
@@ -582,7 +592,11 @@ class Parser:
         self.advance()
 
         # Trả về node với tên là string
-        return res.success(NameSpaceNode(namespace_name, statements, pos_start, self.current_tok.pos_end.copy()))
+        return res.success(
+            NameSpaceNode(
+                namespace_name, statements, pos_start, self.current_tok.pos_end.copy()
+            )
+        )
 
     def hashmap_expr(self) -> ParseResult:
         self.skip_newlines()
