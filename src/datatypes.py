@@ -1045,7 +1045,7 @@ class File(Object):
 List.empty = List([])
 
 class NameSpace(Object):
-    __slots__ = 
+    __slots__ = ("name", "variables", "_internal")
     def __init__(self, name):
         super().__init__()
         self.name = name
@@ -1081,6 +1081,12 @@ class NameSpace(Object):
         copied_ns.set_pos(self.pos_start, self.pos_end)
         copied_ns.set_context(self.context)
         return copied_ns
+    
+    def added_to(self, other):
+        
+        if not isinstance(other, NameSpace):
+            return None, self.illegal_operation(other)
+        return self.variables.added_to(other.variables)
 
     def type(self):
         return "<namespace>"

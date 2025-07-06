@@ -3749,15 +3749,13 @@ for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]
 @lru_cache(maxsize=None)
 class Interpreter:
     def __init__(self):
-        self.visit_table = {}
-
-
-        for attr_name in dir(self):
-            if attr_name.startswith("visit_") and attr_name != "visit":
-                method = getattr(self, attr_name)
-                if callable(method):
-                    node_type = attr_name[len("visit_"):]
-                    self.visit_table[node_type] = method
+        self.visit_table = {
+            attr_name[len("visit_"):]: getattr(self, attr_name)
+            for attr_name in dir(self)
+            if attr_name.startswith("visit_")
+            and attr_name != "visit"
+            and callable(getattr(self, attr_name))
+        }
 
     def visit(self, node, context):
         node_type = type(node).__name__
@@ -3849,8 +3847,8 @@ class Interpreter:
         if namespace_obj.get("initialized_").value:
             return
 
-        stmts = namespace_obj.get("statements_").value
-        ns_context = namespace_obj.get("context_").value
+        stmts = namespace_obj.get("statements_")
+        ns_context = namespace_obj.get("context_")
 
         for stmt in stmts:
             _ = self.visit(stmt, ns_context)
@@ -3868,7 +3866,7 @@ class Interpreter:
         obj = res.register(self.visit(node.object_node, context))
         if res.should_return(): return res
 
-        if isinstance(obj, NameSpace) and not obj.get("__initialized__"):
+        if isinstance(obj, NameSpace) and not obj.get("initialized_"):
             self.initialize_namespace(obj)
 
         member = obj.get(node.member_name)
@@ -3913,7 +3911,7 @@ class Interpreter:
 
         namespace.set("statements_", stmts)
         namespace.set("context_", ns_context)
-        namespace.set("initialized_", False)
+        namespace.set("initialized_", Number.false)
 
         context.symbol_table.set(node.namespace_name, namespace)
         context.private_symbol_table.set(node.namespace_name, namespace)
@@ -3926,7 +3924,7 @@ class Interpreter:
         obj = res.register(self.visit(node.object_node, context))
         if res.should_return(): return res
 
-        if isinstance(obj, NameSpace) and not obj.get("initialized_").value
+        if isinstance(obj, NameSpace) and not obj.get("initialized_").value:
             self.initialize_namespace(obj)
 
         member = obj.get(node.member_name)
@@ -3952,7 +3950,6 @@ class Interpreter:
         if res.should_return(): return res
 
         op_type = node.op_tok.type
-        op_value = node.op_tok.value
 
         ops = {
             TT_PLUS:        lambda a, b: a.added_to(b),
@@ -4012,7 +4009,6 @@ class Interpreter:
             )
 
         op_type = node.op_tok.type
-        op_value = node.op_tok.value
 
         ops = {
             TT_MINUS: lambda x: x.multed_by(Number(-1)),
