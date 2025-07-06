@@ -9,7 +9,6 @@ from .datatypes import *
 from .consts import *
 from .errors import TError, IOError, MError, Error, RTError
 from shutil import rmtree, copy
-from functools import lru_cache
 from .lexer import Lexer, RTResult
 
 from getpass import getpass
@@ -55,7 +54,7 @@ def load_module(fn, interpreter, context):
         context = Context("<module>")
         context.symbol_table = global_symbol_table
         context.private_symbol_table = SymbolTable()
-        context.private_symbol_table.set("is_main", Number(0))
+        context.private_symbol_table.set("is_main", Number.false)
         result = interpreter.visit(ast.node, context)
         result.value = "" if str(result.value) == "none" else result.value
         return result.value, result.error
@@ -2151,11 +2150,15 @@ class BuiltInFunction(BaseFunction):
                     err_name = "IO"
                 elif err_name.startwiths("T"):
                     err_name = "T"
-                return RTResult().success(List([NoneObject.none, String(err_msg), String(err_name)]))
+                return RTResult().success(
+                    List([NoneObject.none, String(err_msg), String(err_name)])
+                )
             elif res.error:
                 return RTResult().failure(res.error)
             else:
-                return RTResult().success(List([res.value, NoneObject.none, NoneObject.none]))
+                return RTResult().success(
+                    List([res.value, NoneObject.none, NoneObject.none])
+                )
         except (RTError, IOError, MError, TError) as err:
             err_str = str(err)
             err_line = err_str.strip().split("\n")[-1]
@@ -2170,7 +2173,9 @@ class BuiltInFunction(BaseFunction):
                 err_name = "IO"
             elif err_name.startwiths("T"):
                 err_name = "T"
-            return RTResult().success(List([NoneObject.none, String(err_msg), String(err_name)]))
+            return RTResult().success(
+                List([NoneObject.none, String(err_msg), String(err_name)])
+            )
         except Exception as err:
             return RTResult().failure(
                 RTError(
@@ -2428,7 +2433,6 @@ class BuiltInFunction(BaseFunction):
         else:
             return str(obj)
 
-    
     def validate_pyexec_result(self, obj):
         allowed = (bool, int, float, str)
         if obj is None:
@@ -3118,8 +3122,6 @@ class BuiltInFunction(BaseFunction):
 
     execute_unlink_fp.arg_names = ["path"]
 
-    
-
     def execute_access_fp(self, exec_ctx):
         path_arg = exec_ctx.symbol_table.get("path")
         mode_arg = exec_ctx.symbol_table.get("mode")
@@ -3459,6 +3461,7 @@ class BuiltInFunction(BaseFunction):
         return RTResult().success(Bool(hm.values.has(key.value)))
 
     execute_has.arg_names = ["hm", "key"]
+
     def execute_get(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         key = exec_ctx.symbol_table.get("key")
@@ -3489,9 +3492,8 @@ class BuiltInFunction(BaseFunction):
                 return RTResult().success(v)
 
         return RTResult().success(default)
+
     execute_get.arg_names = ["hm", "key", "default"]
-
-
 
     def execute_set(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
@@ -3547,28 +3549,44 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(hm)
         return RTResult().success(NoneObject.none)
 
-
     execute_del.arg_names = ["hm", "key"]
+
     def execute_mouse_move_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         y = exec_ctx.symbol_table.get("y")
 
         if not isinstance(x, Number):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "First argument of 'move' must be a number", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'move' must be a number",
+                    exec_ctx,
+                )
             )
         if not isinstance(y, Number):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Second argument of 'move' must be a number", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'move' must be a number",
+                    exec_ctx,
+                )
             )
 
         try:
             import pyautogui
+
             pyautogui.moveTo(int(x.value), int(y.value))
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    exec_ctx,
+                )
             )
         except Exception as e:
             return RTResult().failure(
@@ -3580,11 +3598,17 @@ class BuiltInFunction(BaseFunction):
     def execute_mouse_click_fp(self, exec_ctx):
         try:
             import pyautogui
+
             pyautogui.click()
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    exec_ctx,
+                )
             )
         except Exception as e:
             return RTResult().failure(
@@ -3596,11 +3620,17 @@ class BuiltInFunction(BaseFunction):
     def execute_mouse_right_click_fp(self, exec_ctx):
         try:
             import pyautogui
+
             pyautogui.rightClick()
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    exec_ctx,
+                )
             )
         except Exception as e:
             return RTResult().failure(
@@ -3614,16 +3644,27 @@ class BuiltInFunction(BaseFunction):
 
         if not isinstance(amount, Number):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "First argument of 'scroll' must be a number", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'scroll' must be a number",
+                    exec_ctx,
+                )
             )
 
         try:
             import pyautogui
+
             pyautogui.scroll(int(amount.value))
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    exec_ctx,
+                )
             )
         except Exception as e:
             return RTResult().failure(
@@ -3635,11 +3676,17 @@ class BuiltInFunction(BaseFunction):
     def execute_mouse_position_fp(self, exec_ctx):
         try:
             import pyautogui
+
             x, y = pyautogui.position()
             return RTResult().success(List([Number(x), Number(y)]))
         except ImportError:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    exec_ctx,
+                )
             )
         except Exception as e:
             return RTResult().failure(
@@ -3653,16 +3700,27 @@ class BuiltInFunction(BaseFunction):
 
         if not isinstance(path, String):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "First argument of 'capture' must be a string", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'capture' must be a string",
+                    exec_ctx,
+                )
             )
 
         try:
             import pyautogui
+
             pyautogui.screenshot(path.value)
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    exec_ctx,
+                )
             )
         except Exception as e:
             return RTResult().failure(
@@ -3679,30 +3737,63 @@ class BuiltInFunction(BaseFunction):
 
         if not isinstance(x, Number):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "First argument of 'capture_area' must be a number", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'capture_area' must be a number",
+                    exec_ctx,
+                )
             )
         if not isinstance(y, Number):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Second argument of 'capture_area' must be a number", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'capture_area' must be a number",
+                    exec_ctx,
+                )
             )
         if not isinstance(w, Number):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Third argument of 'capture_area' must be a number", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Third argument of 'capture_area' must be a number",
+                    exec_ctx,
+                )
             )
         if not isinstance(h, Number):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Fourth argument of 'capture_area' must be a number", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Fourth argument of 'capture_area' must be a number",
+                    exec_ctx,
+                )
             )
 
         try:
             from PIL import ImageGrab
-            img = ImageGrab.grab(bbox=(int(x.value), int(y.value), int(x.value) + int(w.value), int(y.value) + int(h.value)))
+
+            img = ImageGrab.grab(
+                bbox=(
+                    int(x.value),
+                    int(y.value),
+                    int(x.value) + int(w.value),
+                    int(y.value) + int(h.value),
+                )
+            )
             iname = "area_capture_{time.time()}.png"
             img.save(iname)
             return RTResult().success(String(os.path.abs_path(iname)))
         except ImportError:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, "Pillow module not available\nTip: Install with: pip install pillow", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Pillow module not available\nTip: Install with: pip install pillow",
+                    exec_ctx,
+                )
             )
         except Exception as e:
             return RTResult().failure(
@@ -3711,28 +3802,43 @@ class BuiltInFunction(BaseFunction):
 
     execute_screen_capture_area_fp.arg_names = ["x", "y", "w", "h"]
 
-
     def execute_screen_get_color_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         y = exec_ctx.symbol_table.get("y")
 
         if not isinstance(x, Number):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "First argument of 'get_color' must be a number", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'get_color' must be a number",
+                    exec_ctx,
+                )
             )
         if not isinstance(y, Number):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Second argument of 'get_color' must be a number", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'get_color' must be a number",
+                    exec_ctx,
+                )
             )
 
         try:
             import pyautogui
+
             color = pyautogui.screenshot().getpixel((int(x.value), int(y.value)))
-            hex_color = '#%02x%02x%02x' % color
+            hex_color = "#%02x%02x%02x" % color
             return RTResult().success(String(hex_color))
         except ImportError:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, "pyautogui module not available\nTip: Install with: pip install pyautogui", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    exec_ctx,
+                )
             )
         except Exception as e:
             return RTResult().failure(
@@ -3750,17 +3856,15 @@ for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]
         BUILTIN_FUNCTIONS.append(func_name)
 
 
-@lru_cache(maxsize=None)
 class Interpreter:
     def __init__(self):
         self.visit_table = {}
-
 
         for attr_name in dir(self):
             if attr_name.startswith("visit_") and attr_name != "visit":
                 method = getattr(self, attr_name)
                 if callable(method):
-                    node_type = attr_name[len("visit_"):]
+                    node_type = attr_name[len("visit_") :]
                     self.visit_table[node_type] = method
 
     def visit(self, node, context):
@@ -3771,7 +3875,6 @@ class Interpreter:
             raise Exception(f"No visit method defined for {node_type}")
 
         return method(node, context)
-
 
     def visit_NumberNode(self, node, context: Context):
         return RTResult().success(
@@ -3833,16 +3936,19 @@ class Interpreter:
 
     def visit_VarAssignAsNode(self, node, context: Context):
         res = RTResult()
-        orig_name  = node.var_name_tok.value
+        orig_name = node.var_name_tok.value
         alias_name = node.var_name_tok2.value
 
         value = context.symbol_table.get(orig_name)
         if value is None:
-            return res.failure(RTError(
-                node.pos_start, node.pos_end,
-                f"Variable '{orig_name}' is not defined",
-                context
-            ))
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"Variable '{orig_name}' is not defined",
+                    context,
+                )
+            )
 
         context.symbol_table.set(alias_name, value)
         context.private_symbol_table.set(alias_name, value)
@@ -3854,7 +3960,6 @@ class Interpreter:
             return
 
         stmts = namespace_obj.get("statements_")
-        # print(stmts)
         ns_context = namespace_obj.get("context_")
 
         for stmt in stmts:
@@ -3867,28 +3972,36 @@ class Interpreter:
 
         namespace_obj.set("initialized_", Number.true)
 
-    
     def visit_CallMemberAccessNode(self, node, context):
         res = RTResult()
         obj = res.register(self.visit(node.object_node, context))
-        if res.should_return(): return res
+        if res.should_return():
+            return res
 
-        if isinstance(obj, NameSpace) and not obj.get("__initialized__"):
+        if isinstance(obj, NameSpace) and not obj.get("initialized_").value:
             self.initialize_namespace(obj)
 
         member = obj.get(node.member_name)
         if member is None:
             return res.failure(
-                RTError(node.pos_start, node.pos_end,
-                        f"'{obj}' has no member '{node.member_name}'", context)
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"'{obj}' has no member '{node.member_name}'",
+                    context,
+                )
             )
 
         if isinstance(member, Error):
             return res.failure(member)
         if not isinstance(member, Function):
             return res.failure(
-                RTError(node.pos_start, node.pos_end,
-                        f"'{node.member_name}' is not a function", context)
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"'{node.member_name}' is not a function",
+                    context,
+                )
             )
 
         args = []
@@ -3901,7 +4014,6 @@ class Interpreter:
             return res
         return res.success(return_value)
 
-    
     def visit_NameSpaceNode(self, node, context):
         res = RTResult()
         namespace = NameSpace(node.namespace_name)
@@ -3918,27 +4030,30 @@ class Interpreter:
 
         namespace.set("statements_", stmts)
         namespace.set("context_", ns_context)
-        namespace.set("initialized_", Number.false)
 
         context.symbol_table.set(node.namespace_name, namespace)
         context.private_symbol_table.set(node.namespace_name, namespace)
 
         return res.success(namespace)
 
-    
     def visit_MemberAccessNode(self, node, context):
+
         res = RTResult()
         obj = res.register(self.visit(node.object_node, context))
-        if res.should_return(): return res
-
+        if res.should_return():
+            return res
         if isinstance(obj, NameSpace) and not obj.get("initialized_").value:
             self.initialize_namespace(obj)
 
         member = obj.get(node.member_name)
         if member is None:
             return res.failure(
-                RTError(node.pos_start, node.pos_end,
-                    f"'{obj}' has no member '{node.member_name}'", context)
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"'{obj}' has no member '{node.member_name}'",
+                    context,
+                )
             )
 
         if isinstance(member, Error):
@@ -3946,38 +4061,37 @@ class Interpreter:
 
         return res.success(member)
 
-
-
     def visit_BinOpNode(self, node, context):
         res = RTResult()
         left = res.register(self.visit(node.left_node, context))
-        if res.should_return(): return res
+        if res.should_return():
+            return res
 
         right = res.register(self.visit(node.right_node, context))
-        if res.should_return(): return res
+        if res.should_return():
+            return res
 
         op_type = node.op_tok.type
-        op_value = node.op_tok.value
 
         ops = {
-            TT_PLUS:        lambda a, b: a.added_to(b),
-            TT_MINUS:       lambda a, b: a.subbed_by(b),
-            TT_MUL:         lambda a, b: a.multed_by(b),
-            TT_DIV:         lambda a, b: a.dived_by(b),
-            TT_POW:         lambda a, b: a.powed_by(b),
-            TT_MOD:         lambda a, b: a.moduled_by(b),
-            TT_EE:          lambda a, b: a.get_comparison_eq(b),
-            TT_NE:          lambda a, b: a.get_comparison_ne(b),
-            TT_LT:          lambda a, b: a.get_comparison_lt(b),
-            TT_GT:          lambda a, b: a.get_comparison_gt(b),
-            TT_LTE:         lambda a, b: a.get_comparison_lte(b),
-            TT_GTE:         lambda a, b: a.get_comparison_gte(b),
-            TT_FLOORDIV:    lambda a, b: a.floordived_by(b),
+            TT_PLUS: lambda a, b: a.added_to(b),
+            TT_MINUS: lambda a, b: a.subbed_by(b),
+            TT_MUL: lambda a, b: a.multed_by(b),
+            TT_DIV: lambda a, b: a.dived_by(b),
+            TT_POW: lambda a, b: a.powed_by(b),
+            TT_MOD: lambda a, b: a.moduled_by(b),
+            TT_EE: lambda a, b: a.get_comparison_eq(b),
+            TT_NE: lambda a, b: a.get_comparison_ne(b),
+            TT_LT: lambda a, b: a.get_comparison_lt(b),
+            TT_GT: lambda a, b: a.get_comparison_gt(b),
+            TT_LTE: lambda a, b: a.get_comparison_lte(b),
+            TT_GTE: lambda a, b: a.get_comparison_gte(b),
+            TT_FLOORDIV: lambda a, b: a.floordived_by(b),
         }
 
         kw_ops = {
             "and": lambda a, b: a.anded_by(b),
-            "or":  lambda a, b: a.ored_by(b),
+            "or": lambda a, b: a.ored_by(b),
         }
 
         if op_type in ops:
@@ -3987,18 +4101,18 @@ class Interpreter:
         elif node.op_tok.matches(TT_KEYWORD, "or"):
             result, error = kw_ops["or"](left, right)
         else:
-            return res.failure(RTError(
-                node.pos_start,
-                node.pos_end,
-                f"Unknown binary operator '{node.op_tok}'",
-                context
-            ))
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"Unknown binary operator '{node.op_tok}'",
+                    context,
+                )
+            )
 
         if error:
             return res.failure(error)
         return res.success(result.set_pos(node.pos_start, node.pos_end))
-
-
 
     def visit_UnaryOpNode(self, node, context):
         res = RTResult()
@@ -4017,7 +4131,6 @@ class Interpreter:
             )
 
         op_type = node.op_tok.type
-        op_value = node.op_tok.value
 
         ops = {
             TT_MINUS: lambda x: x.multed_by(Number(-1)),
@@ -4032,17 +4145,18 @@ class Interpreter:
         elif node.op_tok.matches(TT_KEYWORD, "not"):
             result, error = kw_ops["not"](value)
         else:
-            return res.failure(RTError(
-                node.pos_start,
-                node.pos_end,
-                f"Unknown unary operator '{node.op_tok}'",
-                context
-            ))
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"Unknown unary operator '{node.op_tok}'",
+                    context,
+                )
+            )
 
         if error:
             return res.failure(error)
         return res.success(result.set_pos(node.pos_start, node.pos_end))
- 
 
     def visit_IfNode(self, node, context):
         res = RTResult()
@@ -4056,7 +4170,9 @@ class Interpreter:
                 expr_value = res.register(self.visit(expr, context))
                 if res.should_return():
                     return res
-                return res.success(NoneObject.none if should_return_none else expr_value)
+                return res.success(
+                    NoneObject.none if should_return_none else expr_value
+                )
 
         if node.else_case:
             expr, should_return_none = node.else_case
@@ -4183,7 +4299,6 @@ class Interpreter:
             context.symbol_table.set(func_name, func_value)
 
         return res.success(func_value)
-        
 
     def visit_CallNode(self, node, context):
         try:
@@ -4371,7 +4486,38 @@ for func in BUILTIN_FUNCTIONS:
     global_symbol_table.set(func, getattr(BuiltInFunction, func))
 
 private_symbol_table = SymbolTable()
-private_symbol_table.set("is_main", Number(0))
+private_symbol_table.set("is_main", Number.false)
+
+
+def clean_value(value):
+    from .datatypes import List, String, NoneObject
+
+    if isinstance(value, NoneObject):
+        return String("")
+
+    if isinstance(value, String) and value.value.strip().lower() == "none":
+        return String("")
+
+    if isinstance(value, List):
+        cleaned_elements = [
+            clean_value(elem)
+            for elem in value.elements
+            if not (
+                isinstance(elem, NoneObject)
+                or (isinstance(elem, String) and elem.value.strip().lower() == "none")
+            )
+        ]
+        if len(cleaned_elements) == 0:
+            return String("")
+        if len(cleaned_elements) == 1:
+            single_elem = cleaned_elements[0]
+            if isinstance(single_elem, List):
+                return single_elem
+            if isinstance(single_elem, String):
+                return String(single_elem.value)
+        return List(cleaned_elements)
+
+    return value
 
 
 def run(fn, text):
@@ -4379,8 +4525,6 @@ def run(fn, text):
     tokens, error = lexer.make_tokens()
     if error:
         return None, error
-    # for token in tokens:
-    #     print(token)
     result = None
     context = None
     try:
@@ -4388,31 +4532,17 @@ def run(fn, text):
         ast = parser.parse()
         if ast.error:
             return None, ast.error
-        # print(astpretty(ast.node))
         interpreter = Interpreter()
         context = Context("<program>")
         context.symbol_table = global_symbol_table
         context.private_symbol_table = private_symbol_table
-        context.private_symbol_table.set("is_main", Number(1))
+        context.private_symbol_table.set("is_main", Number.true)
         result = interpreter.visit(ast.node, context)
-        val = str(result.value)
-
-        if val.strip().startswith("[") and val.strip().endswith("]"):
-            inner = val.strip()[1:-1]  # Bỏ dấu []
-            items = [i.strip() for i in inner.split(",") if i.strip().lower() != "none"]
-
-            if items:
-                result.value = f"[{', '.join(items)}]"
-            else:
-                result.value = ""
-
-        elif str(val).lower() == "none":
-            result.value = ""
-
-        else:
-            result.value = val
+        value = result.value
+        result.value = clean_value(value)
 
         return result.value, result.error
+
     except KeyboardInterrupt:
         print("Interrupt Error: User Terminated")
         sys.exit(2)

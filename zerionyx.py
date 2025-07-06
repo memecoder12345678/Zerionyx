@@ -25,7 +25,7 @@ COMPOUND_STATEMENT ::=
 EXPR               ::= 
       "let" IDENTIFIER "=" EXPR
     | IDENTIFIER "=" EXPR
-      "let" IDENTIFIER "as" EXPR
+    | "let" IDENTIFIER "as" EXPR
     | IDENTIFIER "as" EXPR
     | IDENTIFIER ("+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^=") EXPR
     | COMP_EXPR (("and" | "or") COMP_EXPR)*
@@ -102,6 +102,7 @@ COMMENT           ::= "#" /[^\n]*/
 
 """
 
+
 def check_file_comments_or_empty(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
         lines = file.readlines()
@@ -116,7 +117,9 @@ def check_file_comments_or_empty(file_path):
                 all_empty_or_comments = False
                 break
         if all_empty_or_comments:
-            print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}The file is empty or only contains comments{Fore.RESET}{Style.RESET_ALL}")
+            print(
+                f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}The file is empty or only contains comments{Fore.RESET}{Style.RESET_ALL}"
+            )
             sys.exit(0)
 
 
@@ -171,18 +174,22 @@ def main():
                         print(f"{repr(result)}")
         except KeyboardInterrupt:
             print("\nexit...")
-        except Exception as e:
-            print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Shell Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{e}{Fore.RESET}{Style.RESET_ALL}")
+        # except Exception as e:
+        # print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Shell Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{e}{Fore.RESET}{Style.RESET_ALL}")
     elif len(sys.argv) == 2 and sys.argv[1] == "--version":
         print(f"Zerionyx {INFO}")
         return
     else:
         file_name = os.path.abspath(sys.argv[1])
         if not file_name.endswith(".zer"):
-            print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}The file must have a '.zer' extension{Fore.RESET}{Style.RESET_ALL}")
+            print(
+                f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}The file must have a '.zer' extension{Fore.RESET}{Style.RESET_ALL}"
+            )
             return
         if not os.path.isfile(file_name):
-            print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}File '{os.path.abspath(file_name)}' does not exist{Fore.RESET}{Style.RESET_ALL}")
+            print(
+                f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}File '{os.path.abspath(file_name)}' does not exist{Fore.RESET}{Style.RESET_ALL}"
+            )
             return
         try:
             check_file_comments_or_empty(file_name)
@@ -204,7 +211,9 @@ def main():
                 else:
                     print(f"{repr(result)}")
         except Exception as e:
-            print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Interpreter Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{e}{Fore.RESET}{Style.RESET_ALL}")
+            print(
+                f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Interpreter Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{e}{Fore.RESET}{Style.RESET_ALL}"
+            )
             return
 
 

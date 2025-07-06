@@ -7,8 +7,6 @@ from .errors import (
 )
 
 
-
-
 class Context:
 
     __slots__ = (
@@ -179,7 +177,6 @@ class Object:
 
         return None, self.illegal_operation(other)
 
-    
     def get(self, other):
         return None, self.illegal_operation(other)
 
@@ -273,7 +270,6 @@ class BaseFunction(Object):
                 )
             )
 
-
         if len(args) < len(arg_names):
             self.pos_end.col += 1
             if len(args) == 0:
@@ -351,7 +347,7 @@ class NoneObject(Object):
     def __repr__(self):
 
         return str(self.value)
-    
+
     def type(self):
 
         return "<none>"
@@ -421,11 +417,12 @@ class Bool(Object):
 
     def notted(self):
         return Bool(not self.value).set_context(self.context), None
-    
+
     def anded_by(self, other):
         if not isinstance(other, Bool):
             return None, None
         return Bool(self.value and other.value).set_context(self.context), None
+
     def ored_by(self, other):
         if not isinstance(other, Bool):
             return None, None
@@ -469,9 +466,7 @@ Bool.false = Bool(False)
 class Number(Object):
     __slots__ = ("value", "context", "pos_start", "pos_end", "fields")
 
-    def __init__(
-        self, value, context=None, pos_start=None, pos_end=None
-    ):
+    def __init__(self, value, context=None, pos_start=None, pos_end=None):
         self.value = value
         self.context = context
         self.pos_start = pos_start
@@ -545,7 +540,9 @@ class Number(Object):
             return Number(self.value // other.value).set_context(self.context), None
         else:
             return None, Object.illegal_operation(
-                self, other, f"Can't floor divide a number by a type of '{other.type()}'"
+                self,
+                other,
+                f"Can't floor divide a number by a type of '{other.type()}'",
             )
 
     def _get_comparison_result(self, other, op):
@@ -626,7 +623,7 @@ class Number(Object):
                 "Cannot perform logical operation with 'none'",
                 self.context,
             )
-        return Number(self.value*-1).set_context(self.context), None
+        return Number(self.value * -1).set_context(self.context), None
 
     def copy(self):
 
@@ -680,7 +677,6 @@ class Number(Object):
         if str(self.value).find("e") != -1 or str(self.value).find("E") != -1:
             return str(self.value).replace("e", "*10^(").replace("E", "*10^(") + ")"
         return str(self.value)
-
 
 
 Number.false = Bool.false
@@ -780,16 +776,16 @@ class String(Object):
             )
         return self.value[index]
 
-
     def iter(self):
         return iter([String(ch) for ch in self.value]), None
 
     def __repr__(self):
         return repr(self.value)
 
+
 class List(Object):
 
-    __slots__ = ("elements")
+    __slots__ = "elements"
 
     def __init__(self, elements):
         super().__init__()
@@ -851,7 +847,6 @@ class List(Object):
         else:
 
             return None, Object.illegal_operation(self, other, "Index must be a number")
-        
 
     def copy(self):
 
@@ -881,6 +876,7 @@ class List(Object):
     def __repr__(self):
 
         return f'[{", ".join([repr(x) for x in self.elements])}]'
+
 
 class HashMap(Object):
 
@@ -917,14 +913,12 @@ class HashMap(Object):
             return self.values[index.value], None
         except KeyError:
             return None, RTError(
-                    index.pos_start,
-                    index.pos_end,
-                    "Value at this key could not be retrieved from hashmap because key is not found",
-                    self.context,
-                )
-        
+                index.pos_start,
+                index.pos_end,
+                "Value at this key could not be retrieved from hashmap because key is not found",
+                self.context,
+            )
 
-        
     def get_index(self, index):
         if not isinstance(index, String):
             return None, self.illegal_operation(index)
@@ -978,7 +972,6 @@ class HashMap(Object):
         if eq_result == Number.true:
             return Number.false, None
         return Number.true, None
-
 
     def __len__(self) -> int:
         return len(self.values)
@@ -1044,6 +1037,7 @@ class File(Object):
 
 List.empty = List([])
 
+
 class NameSpace(Object):
     __slots__ = ("name", "variables", "_internal")
     def __init__(self, name):
@@ -1055,9 +1049,8 @@ class NameSpace(Object):
         self._internal = {
             "context_": Number.none,
             "statements_": Number.none,
-            "initialized_": Bool(False),
+            "initialized_": Number.false,
         }
-        # print(self._internal)
 
     def get(self, name):
         if name in self._internal:
@@ -1082,6 +1075,12 @@ class NameSpace(Object):
         copied_ns.set_pos(self.pos_start, self.pos_end)
         copied_ns.set_context(self.context)
         return copied_ns
+
+    def added_to(self, other):
+
+        if not isinstance(other, NameSpace):
+            return None, self.illegal_operation(other)
+        return self.variables.added_to(other.variables)
 
     def type(self):
         return "<namespace>"

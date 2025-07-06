@@ -39,7 +39,12 @@ class Token:
                     .replace("\r", "\\r")
                     .replace("\\", "\\\\")
                 )
-            elif self.value == "INT" or self.value == "FLOAT" or self.value == "IDENTIFIER" or self.value == "KEYWORD":
+            elif (
+                self.value == "INT"
+                or self.value == "FLOAT"
+                or self.value == "IDENTIFIER"
+                or self.value == "KEYWORD"
+            ):
                 return f"{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}{self.type}{Fore.RESET}{Style.RESET_ALL}: {Fore.CYAN}{self.value}{Fore.RESET}{Style.RESET_ALL}"
             return f"{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}{self.type}{Fore.RESET}{Style.RESET_ALL}: {Fore.CYAN}{self.value}"
         return f"{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}{self.type}"
