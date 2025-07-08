@@ -66,7 +66,7 @@ class SymbolTable:
 
     def exists(self, value):
 
-        return True if value in self.symbols.values() else False
+        return True if value in self.symbols.value() else False
 
     def copy(self):
 
@@ -163,7 +163,7 @@ class Object:
 
     def execute(self, _):
 
-        return RTResult().failure(self.illegal_operation())
+        return RTResult().failure(self.illegal_operation(error_str="Cannot call non-function"))
 
     def copy(self):
 
@@ -256,28 +256,29 @@ class BaseFunction(Object):
         return new_context
 
     def check_args(self, arg_names, args):
-
         res = RTResult()
 
         if len(args) > len(arg_names):
-            self.pos_end.col += 1
+            pos_end = self.pos_end.copy() if hasattr(self.pos_end, "copy") else self.pos_end
+            if hasattr(pos_end, "col"):
+                pos_end.col += 1
             return res.failure(
                 RTError(
                     self.pos_start,
-                    self.pos_end,
+                    pos_end,
                     f"{len(args) - len(arg_names)} too many args passed into {self}",
                     self.context,
                 )
             )
 
         if len(args) < len(arg_names):
-            self.pos_end.col += 1
-            if len(args) == 0:
-                self.pos_end.col += 1
+            pos_end = self.pos_end.copy() if hasattr(self.pos_end, "copy") else self.pos_end
+            if hasattr(pos_end, "col"):
+                pos_end.col += 1
             return res.failure(
                 RTError(
                     self.pos_start,
-                    self.pos_end,
+                    pos_end,
                     f"{len(arg_names) - len(args)} too few args passed into {self}",
                     self.context,
                 )
@@ -781,26 +782,80 @@ class String(Object):
 
     def __repr__(self):
         return repr(self.value)
+    
+class PyObject(Object):
+
+    __slots__ = ("value")
+    def __init__(self, obj):
+        super().__init__()
+        self.value = obj
+
+    def get_obj(self):
+        return self.value
+    
+    def __call__(self, *args, **kwargs):
+        return PyObject(self.value(*args, **kwargs))
+
+    def __getattr__(self, name):
+        return PyObject(getattr(self.value, name))
+    
+    def type(self):
+
+        return "<py-obj>"
+    
+    def copy(self):
+
+        copy = PyObject(self.value)
+
+        copy.set_pos(self.pos_start, self.pos_end)
+
+        copy.set_context(self.context)
+
+        return copy
+    
+    def __str__(self):
+        return str(self.value)
+
+    def __repr__(self):
+        return f"PyObject({repr(self.value)})"
+
+    def __int__(self):
+        return int(self.value)
+
+    def __float__(self):
+        return float(self.value)
+
+    def is_true(self):
+        try:
+            return bool(self.value)
+        except ValueError:
+            return False
+
+    def __getitem__(self, key):
+        return PyObject(self.value[key])
+
+    def __repr__(self):
+        return f"PyObject({self.value})"
 
 
 class List(Object):
 
-    __slots__ = "elements"
+    __slots__ = "value"
 
-    def __init__(self, elements):
+    def __init__(self, value):
         super().__init__()
-        self.elements = elements
+        self.value = value
 
     def added_to(self, other):
         new_list = self.copy()
-        new_list.elements.append(other)
+        new_list.value.append(other)
         return new_list, None
 
     def subbed_by(self, other):
         if isinstance(other, Number):
             new_list = self.copy()
             try:
-                new_list.elements.pop(other.value)
+                new_list.value.pop(other.value)
                 return new_list, None
             except:
                 return None, RTError(
@@ -817,11 +872,11 @@ class List(Object):
     def multed_by(self, other):
         if isinstance(other, List):
             new_list = self.copy()
-            new_list.elements.extend(other.elements)
+            new_list.value.extend(other.value)
             return new_list, None
         elif isinstance(other, Number):
             new_list = self.copy()
-            new_list.elements = self.elements * other.value
+            new_list.value = self.value * other.value
             return new_list, None
         else:
             return None, Object.illegal_operation(
@@ -834,7 +889,7 @@ class List(Object):
 
             try:
 
-                return self.elements[other.value], None
+                return self.value[other.value], None
 
             except IndexError:
                 return None, RTError(
@@ -850,7 +905,7 @@ class List(Object):
 
     def copy(self):
 
-        copy = List(self.elements)
+        copy = List(self.value)
 
         copy.set_pos(self.pos_start, self.pos_end)
 
@@ -860,47 +915,55 @@ class List(Object):
 
     def is_true(self):
 
-        return len(self.elements) > 0
+        return len(self.value) > 0
 
     def type(self):
 
         return "<list>"
 
     def iter(self):
-        return iter(self.elements), None
+        return iter(self.value), None
 
     def __str__(self):
 
-        return ", ".join([str(x) for x in self.elements])
+        return ", ".join([str(x) for x in self.value])
 
     def __repr__(self):
 
-        return f'[{", ".join([repr(x) for x in self.elements])}]'
+        return f'[{", ".join([repr(x) for x in self.value])}]'
 
 
 class HashMap(Object):
 
-    def __init__(self, values) -> None:
+    def __init__(self, value):
         super().__init__()
-        if isinstance(values, HashMap):
-            self.values: dict[str, Object] = values.values.copy()
-        elif isinstance(values, dict):
-            self.values: dict[str, Object] = values.copy()
+
+        self.value: dict[str, Object] = {}
+
+        if isinstance(value, HashMap):
+            raw = value.value
+        elif isinstance(value, dict):
+            raw = value
         else:
-            self.values: dict[str, Object] = {}
+            raw = {}
+
+        for k, v in raw.items():
+            key_str = str(k)
+            self.value[key_str] = v
+
 
     def is_true(self):
-        return len(self.values) > 0
+        return len(self.value) > 0
 
     def added_to(self, other):
         if not isinstance(other, HashMap):
             return None, self.illegal_operation(other)
 
-        new_map_values = self.values.copy()
-        for key, value in other.values.items():
-            new_map_values[key] = value
+        new_map_value = self.value.copy()
+        for key, value in other.value.items():
+            new_map_value[key] = value
 
-        return HashMap(new_map_values), None
+        return HashMap(new_map_value), None
 
     def type(self):
         return "<hashmap>"
@@ -908,9 +971,9 @@ class HashMap(Object):
     def get_comparison_gt(self, index):
         if not isinstance(index, String):
             return None, self.illegal_operation(index)
-
+        
         try:
-            return self.values[index.value], None
+            return self.value[index.value], None
         except KeyError:
             return None, RTError(
                 index.pos_start,
@@ -924,7 +987,7 @@ class HashMap(Object):
             return None, self.illegal_operation(index)
 
         try:
-            return self.values[index.value], None
+            return self.value[index.value], None
         except KeyError:
             return None, RTError(
                 index.pos_start,
@@ -937,47 +1000,45 @@ class HashMap(Object):
         if not isinstance(index, String):
             return None, self.illegal_operation(index)
 
-        new_values = self.values.copy()
-        new_values[index.value] = value
-        return HashMap(new_values)
+        new_value = self.value.copy()
+        new_value[index.value] = value
+        return HashMap(new_value)
 
     def iter(self):
-        pairs = [List([String(str(k)), v]) for k, v in self.values.items()]
+        pairs = [List([String(str(k)), v]) for k, v in self.value.items()]
         return iter(pairs), None
 
     def get_comparison_eq(self, other):
         if not isinstance(other, HashMap):
-            return None, self.illegal_operation(other)
+            return Bool(False).set_context(self.context), None
 
-        if len(self.values) != len(other.values):
-            return Number.false, None
+        if len(self.value) != len(other.value):
+            return Number.false.set_context(self.context), None
 
-        for key, value in self.values.items():
-            if key not in other.values:
-                return Number.false, None
+        for key, value in self.value.items():
+            if key not in other.value:
+                return Number.false.set_context(self.context), None
 
-            cmp, err = value.get_comparison_eq(other.values[key])
+            cmp, err = value.get_comparison_eq(other.value[key])
             if err:
                 return None, err
             assert cmp is not None
             if not cmp.is_true():
-                return Number.false, None
+                return Number.false.set_context(self.context), None
 
-        return Number.true, None
+        return Number.true.set_context(self.context), None
 
     def get_comparison_ne(self, other):
-        eq_result, err = self.get_comparison_eq(other)
-        if err:
-            return None, err
+        eq_result, _ = self.get_comparison_eq(other)
         if eq_result == Number.true:
-            return Number.false, None
-        return Number.true, None
+            return Number.false.set_context(self.context), None
+        return Number.true.set_context(self.context), None
 
     def __len__(self) -> int:
-        return len(self.values)
+        return len(self.value)
 
     def copy(self):
-        copied_map = HashMap(self.values.copy())
+        copied_map = HashMap(self.value.copy())
         copied_map.set_pos(self.pos_start, self.pos_end)
         copied_map.set_context(self.context)
         return copied_map
@@ -986,7 +1047,7 @@ class HashMap(Object):
         return self.__repr__()
 
     def __repr__(self) -> str:
-        __val = ", ".join([f"{repr(k)}: {repr(v)}" for k, v in self.values.items()])
+        __val = ", ".join([f"{repr(k)}: {repr(v)}" for k, v in self.value.items()])
         return f"{{{__val}}}"
 
 
@@ -1039,12 +1100,12 @@ List.empty = List([])
 
 
 class NameSpace(Object):
-    __slots__ = ("name", "variables", "_internal")
+    __slots__ = ("name", "value", "_internal")
     def __init__(self, name):
         super().__init__()
         self.name = name
 
-        self.variables = HashMap({})
+        self.value = HashMap({})
 
         self._internal = {
             "context_": Number.none,
@@ -1056,7 +1117,7 @@ class NameSpace(Object):
         if name in self._internal:
             return self._internal[name]
 
-        r, err = self.variables.get_comparison_gt(String(name))
+        r, err = self.value.get_comparison_gt(String(name))
         if err:
             return None
         return r
@@ -1065,12 +1126,12 @@ class NameSpace(Object):
         if name in self._internal:
             self._internal[name] = value
         else:
-            self.variables = self.variables.set_index(String(name), value)
+            self.value = self.value.set_index(String(name), value)
         return self
 
     def copy(self):
         copied_ns = NameSpace(self.name)
-        copied_ns.variables = self.variables.copy()
+        copied_ns.value = self.value.copy()
         copied_ns._internal = self._internal.copy()
         copied_ns.set_pos(self.pos_start, self.pos_end)
         copied_ns.set_context(self.context)
@@ -1080,10 +1141,69 @@ class NameSpace(Object):
 
         if not isinstance(other, NameSpace):
             return None, self.illegal_operation(other)
-        return self.variables.added_to(other.variables)
+        return self.value.added_to(other.value)
 
     def type(self):
         return "<namespace>"
 
     def __repr__(self):
         return f"<namespace {self.name}>"
+    
+class Bytes(Object):
+    __slots__ = ("value",)
+
+    def __init__(self, value):
+        super().__init__()
+        self.value = value
+
+    def added_to(self, other):
+        if isinstance(other, Bytes):
+            return Bytes(self.value + other.value).set_context(self.context), None
+        return None, self.illegal_operation(other)
+
+    def get_comparison_eq(self, other):
+        if isinstance(other, Bytes):
+            return Bool(self.value == other.value).set_context(self.context), None
+        return Bool(False).set_context(self.context), None
+
+    def get_comparison_ne(self, other):
+        if isinstance(other, Bytes):
+            return Bool(self.value != other.value).set_context(self.context), None
+        return Bool(True).set_context(self.context), None
+
+    def get_comparison_gt(self, index):
+        if not isinstance(index, Number):
+            return None, self.illegal_operation(index)
+        
+        try:
+            return Bytes(bytes(self.value[index.value])).set_context(self.context), None
+        except IndexError:
+            return None, RTError(
+                index.pos_start,
+                index.pos_end,
+                "Element at this index could not be retrieved from bytes because index is out of bounds",
+                self.context,
+            )
+
+    def copy(self):
+        copy = Bytes(self.value)
+        copy.set_pos(self.pos_start, self.pos_end)
+        copy.set_context(self.context)
+        return copy
+    
+    def iter(self):
+        pairs = [Bytes(bytes([i])) for i in self.value]
+        return iter(pairs), None
+
+
+    def is_true(self):
+        return len(self.value) > 0
+
+    def type(self):
+        return "<bytes>"
+
+    def __str__(self):
+        return self.value.hex()
+
+    def __repr__(self):
+        return self.value.hex()

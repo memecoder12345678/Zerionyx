@@ -168,14 +168,15 @@ def main():
                     else:
                         print(f"{error}")
                 elif result:
-                    if len(result.elements) == 1:
-                        print(f"{repr(result.elements[0])}")
+                    if len(result.value) == 1:
+                        print(f"{repr(result.value[0])}")
                     else:
                         print(f"{repr(result)}")
         except KeyboardInterrupt:
+
             print("\nexit...")
         # except Exception as e:
-        # print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Shell Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{e}{Fore.RESET}{Style.RESET_ALL}")
+        #     print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Shell Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{e}{Fore.RESET}{Style.RESET_ALL}")
     elif len(sys.argv) == 2 and sys.argv[1] == "--version":
         print(f"Zerionyx {INFO}")
         return
@@ -206,8 +207,8 @@ def main():
                     print(f"{error}")
                 sys.exit(1)
             elif result:
-                if len(result.elements) == 1:
-                    print(f"{repr(result.elements[0])}")
+                if len(result.value) == 1:
+                    print(f"{repr(result.value[0])}")
                 else:
                     print(f"{repr(result)}")
         except Exception as e:

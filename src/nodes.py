@@ -353,7 +353,6 @@ class NameSpaceNode:
     __slots__ = ["namespace_name", "statements", "pos_start", "pos_end"]
 
     def __init__(self, namespace_name, statements, pos_start, pos_end):
-        # Đảm bảo namespace_name là string, không phải token
         self.namespace_name = (
             namespace_name if isinstance(namespace_name, str) else namespace_name.value
         )
@@ -530,21 +529,25 @@ def astpretty(node, indent=0):
         res += pad + ")"
         return res
 
+    if isinstance(node, MemberAccessNode):
+        return (
+            pad + colorize_type("MemberAccessNode") + "("
+            + astpretty(node.object_node,0) + "."
+            + colorize_value(node.member_name)
+            + ")"
+        )
+    
+    if isinstance(node, NameSpaceNode):
+        node_type = colorize_type("NameSpaceNode")
+        res = pad + f"{node_type}({colorize_value(node.namespace_name)}) (\n"
+        for stmt in node.statements:
+            res += astpretty(stmt, indent + 1) + "\n"
+        res += pad + ")"
+        return res
+
     return pad + repr(node)
 
 
-class CallMemberAccessNode:
-    __slots__ = ["object_node", "member_name", "arg_nodes", "pos_start", "pos_end"]
-
-    def __init__(self, object_node, member_name, arg_nodes, pos_start, pos_end):
-        self.object_node = object_node
-        self.member_name = member_name
-        self.arg_nodes = arg_nodes
-        self.pos_start = pos_start
-        self.pos_end = pos_end
-
-    def __repr__(self):
-        return f"(CallMemberAccessNode {self.object_node}.{self.member_name}({self.arg_nodes}))"
 
 
 class MemberAccessNode:

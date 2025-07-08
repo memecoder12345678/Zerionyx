@@ -164,4 +164,12 @@ namespace string
         suffix = slice(s, len(s) - len(v), none, none) 
         return suffix == v
     done
+
+    defun encode(s, e, e_)
+        return encode_fp(s, e, e_)
+    done
+
+    defun decode(s, e, e_)
+        return decode_fp(s, e, e_)
+    done
 done

@@ -79,11 +79,18 @@ It offers:
 ```ruby
 # Hello World
 println("Hello, World!")
+print("Hello, World!\n")
 
 # Arithmetic
 x = 10
 y = 20
 println(x + y)
+println(x - y)
+println(x * y)
+println(x / y)
+println(x % y)
+println(x // y)
+println(x ^ y)
 
 # Function definition
 defun add(a, b)
@@ -91,7 +98,7 @@ defun add(a, b)
 done
 
 # One-line function
-defun add(a, b) -> a + b
+defun add(a, b) -> a += b
 
 println(add(5, 3))
 
@@ -106,6 +113,17 @@ users = {"name": "admin", "password": "admin"}
 println(users)
 println((users>"name"))
 println((users>"password"))
+
+# Bytes
+str_enc = to_bytes(to_hex("Hello, World!"))
+println(to_str(str_enc))
+println((str_enc>0))
+println((str_enc>4))
+
+# PyObject
+os = pyexec("import os", {})
+println(type(os))
+r = pyexec("os.system('echo Hello, World!')", {os})
 
 # Conditional
 if x > y do

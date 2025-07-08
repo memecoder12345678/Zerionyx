@@ -267,9 +267,9 @@ class BuiltInFunction(BaseFunction):
             )
 
         if int(reverse.value) == 1:
-            lst.elements.sort(key=lambda x: x.value, reverse=True)
+            lst.value.sort(key=lambda x: x.value, reverse=True)
         elif int(reverse.value) == 0:
-            lst.elements.sort(key=lambda x: x.value)
+            lst.value.sort(key=lambda x: x.value)
         else:
             return RTResult().failure(
                 TError(
@@ -288,7 +288,7 @@ class BuiltInFunction(BaseFunction):
         value = exec_ctx.symbol_table.get("value")
 
         if isinstance(obj_, List):
-            obj_.elements.append(value)
+            obj_.value.append(value)
             return RTResult().success(value)
         else:
             return RTResult().failure(
@@ -326,7 +326,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
-            element = list_.elements.pop(int(index.value))
+            element = list_.value.pop(int(index.value))
         except:
             return RTResult().failure(
                 RTError(
@@ -364,7 +364,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        listA.elements.extend(listB.elements)
+        listA.value.extend(listB.value)
         return RTResult().success(NoneObject.none)
 
     execute_extend.arg_names = ["listA", "listB"]
@@ -392,7 +392,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        list_.elements.insert(int(index.value), element)
+        list_.value.insert(int(index.value), element)
         return RTResult().success(NoneObject.none)
 
     execute_insert.arg_names = ["list_", "index", "element"]
@@ -437,16 +437,14 @@ class BuiltInFunction(BaseFunction):
     def execute_len(self, exec_ctx):
         value_ = exec_ctx.symbol_table.get("value")
 
-        if isinstance(value_, List):
-            return RTResult().success(Number(len(value_.elements)))
-        elif isinstance(value_, String):
+        if isinstance(value_, List | String | Bytes | HashMap):
             return RTResult().success(Number(len(value_.value)))
         else:
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'len' must be a list or string",
+                    "First argument of 'len' must be a list, string, hashmap or bytes",
                     exec_ctx,
                 )
             )
@@ -487,7 +485,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'slice' must be a string or list",
+                    "First argument of 'slice' must be a string, list, hashmap or bytes",
                     exec_ctx,
                 )
             )
@@ -528,9 +526,12 @@ class BuiltInFunction(BaseFunction):
             sliced_l = l.value[a:b:s]
             return RTResult().success(String(sliced_l))
         elif isinstance(l, HashMap):
-            sliced_l = dict(l.values.items()[a:b:s])
+            sliced_l = dict(l.value.items()[a:b:s])
             return RTResult().success(HashMap(sliced_l))
-        sliced_l = l.elements[a:b:s]
+        elif isinstance(l, Bytes):
+            sliced_l = l.value[a:b:s]
+            return RTResult().success(Bytes(sliced_l))
+        sliced_l = l.value[a:b:s]
         return RTResult().success(List(sliced_l))
 
     execute_slice.arg_names = ["l", "start", "end", "step"]
@@ -555,21 +556,37 @@ class BuiltInFunction(BaseFunction):
 
     def execute_read_fp(self, exec_ctx):
         file = exec_ctx.symbol_table.get("file")
+        mode = exec_ctx.symbol_table.get("mode")
 
-        try:
-            with open(file.path.__str__(), "r", encoding="utf-8") as f:
-                return RTResult().success(String(f.read()))
-        except Exception as e:
-            return RTResult().failure(
-                IOError(
-                    self.pos_start,
-                    self.pos_end,
-                    f'Failed to read file "{file.path}"\n' + str(e),
-                    exec_ctx,
+        if mode.value == "r":
+            try:
+                with open(file.path.__str__(), "r") as f:
+                    return RTResult().success(String(f.read()))
+            except Exception as e:
+                return RTResult().failure(
+                    IOError(
+                        self.pos_start,
+                        self.pos_end,
+                        f'Failed to read file "{file.path}"\n' + str(e),
+                        exec_ctx,
+                    )
                 )
-            )
+        elif mode.value == "rb":
+            try:
+                with open(file.path.__str__(), "rb") as f:
+                    return RTResult().success(Bytes(f.read()))
+            except Exception as e:
+                return RTResult().failure(
+                    IOError(
+                        self.pos_start,
+                        self.pos_end,
+                        f'Failed to read file "{file.path}": ' + str(e),
+                        exec_ctx,
+                    )
+                )
 
-    execute_read_fp.arg_names = ["file"]
+
+    execute_read_fp.arg_names = ["file", "mode"]
 
     def execute_write_fp(self, exec_ctx):
         file = exec_ctx.symbol_table.get("file")
@@ -577,7 +594,7 @@ class BuiltInFunction(BaseFunction):
         text = exec_ctx.symbol_table.get("text")
 
         try:
-            with open(file.path.__str__(), mode.__str__(), encoding="utf-8") as f:
+            with open(file.path.__str__(), mode.__str__()) as f:
                 f.write(text.value)
             return RTResult().success(Number.none)
         except Exception as e:
@@ -829,7 +846,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        if len(arr.elements) == 0:
+        if len(arr.value) == 0:
             return RTResult().failure(
                 RTError(
                     self.pos_start,
@@ -840,7 +857,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         return RTResult().success(
-            arr.elements[random.randrange(0, len(arr.elements) - 1)]
+            arr.value[random.randrange(0, len(arr.value) - 1)]
         )
 
     execute_rand_choice_fp.arg_names = ["arr"]
@@ -971,7 +988,7 @@ class BuiltInFunction(BaseFunction):
 
     def execute_join_fp(self, exec_ctx):
         sep = exec_ctx.symbol_table.get("sep")
-        iterables = exec_ctx.symbol_table.get("elements")
+        iterables = exec_ctx.symbol_table.get("value")
         if not isinstance(sep, String):
             return RTResult().failure(
                 TError(
@@ -983,11 +1000,11 @@ class BuiltInFunction(BaseFunction):
             )
 
         if isinstance(iterables, List):
-            if len(iterables.elements) == 0:
+            if len(iterables.value) == 0:
                 return RTResult().success(String(""))
 
             return RTResult().success(
-                String(sep.value.join([str(element) for element in iterables.elements]))
+                String(sep.value.join([str(element) for element in iterables.value]))
             )
         elif isinstance(iterables, String):
             if len(iterables) == 0:
@@ -1005,7 +1022,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_join_fp.arg_names = ["sep", "elements"]
+    execute_join_fp.arg_names = ["sep", "value"]
 
     def execute_system_fp(self, exec_ctx):
         command = exec_ctx.symbol_table.get("command")
@@ -1631,7 +1648,7 @@ class BuiltInFunction(BaseFunction):
             def thread_wrapper():
                 context = func.generate_new_context()
                 context.private_symbol_table.set("is_main", Number.false)
-                func.check_and_populate_args(func.arg_names, args.elements, context)
+                func.check_and_populate_args(func.arg_names, args.value, context)
                 interpreter = Interpreter()
                 return interpreter.visit(func.body_node, context)
 
@@ -1999,85 +2016,85 @@ class BuiltInFunction(BaseFunction):
 
     def execute_md5_fp(self, exec_ctx):
         text = exec_ctx.symbol_table.get("text")
-        if not isinstance(text, String):
+        if not isinstance(text, Bytes):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'md5' must be a string",
+                    "First argument of 'md5' must be a bytes",
                     exec_ctx,
                 )
             )
         return RTResult().success(
-            String(str(hashlib.md5(text.value.encode()).hexdigest()))
+            Bytes(hashlib.md5(text.value).hexdigest())
         )
 
     execute_md5_fp.arg_names = ["text"]
 
     def execute_sha1_fp(self, exec_ctx):
         text = exec_ctx.symbol_table.get("text")
-        if not isinstance(text, String):
+        if not isinstance(text, Bytes):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'sha1' must be a string",
+                    "First argument of 'sha1' must be a bytes",
                     exec_ctx,
                 )
             )
         return RTResult().success(
-            String(str(hashlib.sha1(text.value.encode()).hexdigest()))
+            Bytes(hashlib.sha1(text.value).hexdigest())
         )
 
     execute_sha1_fp.arg_names = ["text"]
 
     def execute_sha256_fp(self, exec_ctx):
         text = exec_ctx.symbol_table.get("text")
-        if not isinstance(text, String):
+        if not isinstance(text, Bytes):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'sha256' must be a string",
+                    "First argument of 'sha256' must be a bytes",
                     exec_ctx,
                 )
             )
         return RTResult().success(
-            String(str(hashlib.sha256(text.value.encode()).hexdigest()))
+            Bytes(hashlib.sha256(text.value).hexdigest())
         )
 
     execute_sha256_fp.arg_names = ["text"]
 
     def execute_sha512_fp(self, exec_ctx):
         text = exec_ctx.symbol_table.get("text")
-        if not isinstance(text, String):
+        if not isinstance(text, Bytes):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'sha512' must be a string",
+                    "First argument of 'sha512' must be a bytes",
                     exec_ctx,
                 )
             )
         return RTResult().success(
-            String(str(hashlib.sha512(text.value.encode()).hexdigest()))
+            Bytes(hashlib.sha512(text.value).hexdigest())
         )
 
     execute_sha512_fp.arg_names = ["text"]
 
     def execute_crc32_fp(self, exec_ctx):
         text = exec_ctx.symbol_table.get("text")
-        if not isinstance(text, String):
+        if not isinstance(text, Bytes):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'crc32' must be a string",
+                    "First argument of 'crc32' must be a bytes",
                     exec_ctx,
                 )
             )
         return RTResult().success(
-            String(str(format(zlib.crc32(text.value.encode()) & 0xFFFFFFFF, "08x")))
+            Bytes(format(zlib.crc32(text.value) & 0xFFFFFFFF, "08x"))
         )
 
     execute_crc32_fp.arg_names = ["text"]
@@ -2113,7 +2130,7 @@ class BuiltInFunction(BaseFunction):
 
     execute_find_fp.arg_names = ["text", "substring"]
 
-    def execute_catch(self, exec_ctx):
+    def execute_is_err(self, exec_ctx):
         func = exec_ctx.symbol_table.get("func")
         args = exec_ctx.symbol_table.get("args")
         if not isinstance(func, BaseFunction):
@@ -2121,7 +2138,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'catch' must be a function",
+                    "First argument of 'is_err' must be a function",
                     exec_ctx,
                 )
             )
@@ -2130,12 +2147,12 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "Second argument of 'catch' must be a list",
+                    "Second argument of 'is_err' must be a list",
                     exec_ctx,
                 )
             )
         try:
-            res = func.execute(args.elements)
+            res = func.execute(args.value)
             if res.error and isinstance(res.error, (RTError, IOError, MError, TError)):
                 err_str = str(res.error)
                 err_line = err_str.strip().split("\n")[-1]
@@ -2181,91 +2198,12 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    f"Unexpected error in 'catch': {err}",
+                    f"Unexpected error in 'is_err': {err}",
                     exec_ctx,
                 )
             )
 
-    execute_catch.arg_names = ["func", "args"]
-
-    def execute_finally(self, exec_ctx):
-        func = exec_ctx.symbol_table.get("func")
-        args = exec_ctx.symbol_table.get("args")
-        final_func = exec_ctx.symbol_table.get("final_func")
-        final_args = exec_ctx.symbol_table.get("final_args")
-        if not isinstance(func, BaseFunction):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'finally' must be a function",
-                    exec_ctx,
-                )
-            )
-        if not isinstance(args, List):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'finally' must be a list",
-                    exec_ctx,
-                )
-            )
-        if not isinstance(final_func, BaseFunction):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Third argument of 'finally' must be a function",
-                    exec_ctx,
-                )
-            )
-        if not isinstance(final_args, List):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Fourth argument of 'finally' must be a list",
-                    exec_ctx,
-                )
-            )
-        try:
-            res = func.execute(args.elements)
-            try:
-                final_func.execute(final_args.elements)
-            except Exception:
-                pass
-            if res.error and isinstance(res.error, (RTError, IOError, MError, TError)):
-                err_str = str(res.error)
-                err_line = err_str.strip().split("\n")[-1]
-                return RTResult().success(List([NoneObject.none, String(err_line)]))
-            elif res.error:
-                return RTResult().failure(res.error)
-            else:
-                return RTResult().success(List([res.value, NoneObject.none]))
-        except (RTError, IOError, MError, TError) as err:
-            try:
-                final_func.execute(final_args.elements)
-            except Exception:
-                pass
-            err_str = str(err)
-            err_line = err_str.strip().split("\n")[-1]
-            return RTResult().success(List([NoneObject.none, String(err_line)]))
-        except Exception as err:
-            try:
-                final_func.execute(final_args.elements)
-            except Exception:
-                pass
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Unexpected error in 'finally': {err}",
-                    exec_ctx,
-                )
-            )
-
-    execute_finally.arg_names = ["func", "args", "final_func", "final_args"]
+    execute_is_err.arg_names = ["func", "args"]
 
     def execute_is_file_fp(self, exec_ctx):
         path = exec_ctx.symbol_table.get("path")
@@ -2420,16 +2358,17 @@ class BuiltInFunction(BaseFunction):
             return None
 
         elif isinstance(obj, List):
-            return [self.convert_zer_to_py(e) for e in obj.elements]
+            return [self.convert_zer_to_py(e) for e in obj.value]
 
         elif isinstance(obj, HashMap):
             result = {}
-            for k, v in obj.values.items():
+            for k, v in obj.value.items():
                 key = self.convert_zer_to_py(k)
                 val = self.convert_zer_to_py(v)
                 result[key] = val
             return result
-
+        elif isinstance(obj, PyObject):
+            return obj
         else:
             return str(obj)
 
@@ -2483,7 +2422,7 @@ class BuiltInFunction(BaseFunction):
                     items.append(self.validate_pyexec_result(item))
             return List(items)
         else:
-            return String(str(obj))
+            return PyObject(obj)
 
     def execute_pyexec(self, exec_ctx):
         code = exec_ctx.symbol_table.get("code")
@@ -2959,13 +2898,13 @@ class BuiltInFunction(BaseFunction):
         actual_times_tuple = None
         if isinstance(times_arg, List):
             if (
-                len(times_arg.elements) == 2
-                and isinstance(times_arg.elements[0], Number)
-                and isinstance(times_arg.elements[1], Number)
+                len(times_arg.value) == 2
+                and isinstance(times_arg.value[0], Number)
+                and isinstance(times_arg.value[1], Number)
             ):
                 actual_times_tuple = (
-                    times_arg.elements[0].value,
-                    times_arg.elements[1].value,
+                    times_arg.value[0].value,
+                    times_arg.value[1].value,
                 )
             else:
                 return RTResult().failure(
@@ -3173,7 +3112,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         path_components_str = []
-        for i, item in enumerate(args_list_obj.elements):
+        for i, item in enumerate(args_list_obj.value):
             if not isinstance(item, String):
                 return RTResult().failure(
                     TError(
@@ -3371,7 +3310,7 @@ class BuiltInFunction(BaseFunction):
             response = requests.request(
                 method_arg.value,
                 url_arg.value,
-                headers=headers_arg.elements,
+                headers=headers_arg.value,
                 data=data_arg.value,
                 timeout=timeout_arg.value,
             )
@@ -3403,7 +3342,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(List(hm.values.keys()))
+        return RTResult().success(List(hm.value.keys()))
 
     execute_keys.arg_names = ["hm"]
 
@@ -3418,7 +3357,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(List(hm.values.values()))
+        return RTResult().success(List(hm.value.values()))
 
     execute_values.arg_names = ["hm"]
 
@@ -3433,7 +3372,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(List(hm.values.items()))
+        return RTResult().success(List(hm.value.items()))
 
     execute_items.arg_names = ["hm"]
 
@@ -3458,7 +3397,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(Bool(hm.values.has(key.value)))
+        return RTResult().success(Bool(hm.value.has(key.value)))
 
     execute_has.arg_names = ["hm", "key"]
 
@@ -3487,7 +3426,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        for k, v in hm.values.items():
+        for k, v in hm.value.items():
             if k.value == key.value:
                 return RTResult().success(v)
 
@@ -3500,26 +3439,40 @@ class BuiltInFunction(BaseFunction):
         key = exec_ctx.symbol_table.get("key")
         value = exec_ctx.symbol_table.get("value")
 
-        if not isinstance(hm, HashMap):
+        if not isinstance(hm, HashMap | List):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'set' must be a hashmap",
+                    "First argument of 'set' must be a hashmap oỏ list",
                     exec_ctx,
                 )
             )
-        if not isinstance(key, String):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'set' must be a string",
-                    exec_ctx,
+        if isinstance(hm, HashMap):
+            if not isinstance(key, String):
+                return RTResult().failure(
+                    TError(
+                        self.pos_start,
+                        self.pos_end,
+                        "Second argument of 'set' must be a string key when first argument is a hashmap",
+                        exec_ctx,
+                    )
                 )
-            )
-        return RTResult().success(HashMap(hm.set_index(key, value)))
-
+            return RTResult().success(HashMap(hm.set_index(key, value)))
+        else:
+            if not isinstance(key, Number):
+                return RTResult().failure(
+                    TError(
+                        self.pos_start,
+                        self.pos_end,
+                        "Second argument of 'set' must be a number index when first argument is a list",
+                        exec_ctx,
+                    )
+                )
+            hm.value.pop(key)
+            hm.value.insert(key, value)
+            return RTResult().success(List(hm))
+        
     execute_set.arg_names = ["hm", "key", "value"]
 
     def execute_del(self, exec_ctx):
@@ -3544,8 +3497,8 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        if key.value in hm.values:
-            del hm.values[key.value]
+        if key.value in hm.value:
+            del hm.value[key.value]
             return RTResult().success(hm)
         return RTResult().success(NoneObject.none)
 
@@ -3734,6 +3687,7 @@ class BuiltInFunction(BaseFunction):
         y = exec_ctx.symbol_table.get("y")
         w = exec_ctx.symbol_table.get("w")
         h = exec_ctx.symbol_table.get("h")
+        p = exec_ctx.symbol_table.get("p")
 
         if not isinstance(x, Number):
             return RTResult().failure(
@@ -3783,9 +3737,8 @@ class BuiltInFunction(BaseFunction):
                     int(y.value) + int(h.value),
                 )
             )
-            iname = "area_capture_{time.time()}.png"
-            img.save(iname)
-            return RTResult().success(String(os.path.abs_path(iname)))
+            img.save(p)
+            return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
                 RTError(
@@ -3800,7 +3753,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
 
-    execute_screen_capture_area_fp.arg_names = ["x", "y", "w", "h"]
+    execute_screen_capture_area_fp.arg_names = ["x", "y", "w", "h", "p"]
 
     def execute_screen_get_color_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
@@ -3847,6 +3800,224 @@ class BuiltInFunction(BaseFunction):
 
     execute_screen_get_color_fp.arg_names = ["x", "y"]
 
+    def execute_to_bytes(self, exec_ctx):
+        value = exec_ctx.symbol_table.get("value")
+        supress_error = exec_ctx.symbol_table.get("supress_error")
+
+        if not isinstance(supress_error, Bool):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'to_bytes' must be a boolean",
+                    exec_ctx,
+                )
+            )
+
+        if int(supress_error.value) == 1:
+            supress_error_ = True
+        elif int(supress_error.value) == 0:
+            supress_error_ = False
+        else:
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'to_bytes' must be a boolean",
+                    exec_ctx,
+                )
+            )
+
+        if isinstance(value, Number):
+            return RTResult().success(Bytes(bytes.from_hex(value.value)))
+        elif isinstance(value, String):
+            try:
+                return RTResult().success(Number(float(value.value)))
+            except ValueError:
+                if supress_error_:
+                    return RTResult().success(Number.none)
+                else:
+                    return RTResult().failure(
+                        RTError(
+                            self.pos_start,
+                            self.pos_end,
+                            f"Failed to convert '{value.value}' of type '{value.type()}' to bytes",
+                            exec_ctx,
+                        )
+                    )
+        else:
+            if supress_error_:
+                return RTResult().success(Number.none)
+            else:
+                return RTResult().failure(
+                    RTError(
+                        self.pos_start,
+                        self.pos_end,
+                        f"Failed to convert value of type '{value.type()}' to bytes",
+                        exec_ctx,
+                    )
+                )
+
+    execute_to_bytes.arg_names = ["value", "supress_error"]
+
+
+    def execute_is_bytes(self, exec_ctx):
+        is_bytes = isinstance(exec_ctx.symbol_table.get("value"), Bytes)
+        return RTResult().success(Number.true if is_bytes else Number.false)
+
+    execute_is_bytes.arg_names = ["value"]
+
+    def execute_decode_fp(self, exec_ctx):
+        s = exec_ctx.symbol_table.get("s")
+        encoding = exec_ctx.symbol_table.get("encoding")
+        errors = exec_ctx.symbol_table.get("errors")
+
+        if not isinstance(s, Bytes):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'decode' must be bytes",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(encoding, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'decode' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(errors, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Third argument of 'decode' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            decoded = s.value.decode(encoding.value, errors.value)
+            return RTResult().success(String(decoded))
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to decode bytes: {e}",
+                    exec_ctx,
+                )
+            )
+
+    execute_decode_fp.arg_names = ["s", "encoding", "errors"]
+
+    def execute_encode_fp(self, exec_ctx):
+        s = exec_ctx.symbol_table.get("s")
+        encoding = exec_ctx.symbol_table.get("encoding")
+        errors = exec_ctx.symbol_table.get("errors")
+
+        if not isinstance(s, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'encode' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(encoding, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'encode' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(errors, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Third argument of 'encode' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            encoded = s.value.encode(encoding.value, errors.value)
+            return RTResult().success(Bytes(encoded))
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to encode string: {e}",
+                    exec_ctx,
+                )
+            )
+
+    execute_encode_fp.arg_names = ["s", "encoding", "errors"]
+
+    def execute_is_py_obj(self, exec_ctx):
+        is_py_obj = isinstance(exec_ctx.symbol_table.get("value"), PyObject)
+        return RTResult().success(Number.true if is_py_obj else Number.false)
+
+    execute_is_py_obj.arg_names = ["value"]
+
+    def execute_to_hex(self, exec_ctx):
+        value = exec_ctx.symbol_table.get("value")
+        suppress_error = exec_ctx.symbol_table.get("supress_error")
+
+        if not isinstance(suppress_error, Bool):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'to_hex' must be a boolean",
+                    exec_ctx,
+                )
+            )
+        suppress_error_ = bool(suppress_error.value)
+
+        try:
+            if isinstance(value, Number):
+                hex_str = hex(int(value.value))[2:]
+                return RTResult().success(String(hex_str))
+            
+            elif isinstance(value, String):
+                b = value.value.encode()
+                hex_str = b.hex()
+                return RTResult().success(String(hex_str))
+            
+            elif isinstance(value, Bytes):
+                hex_str = value.value.hex()
+                return RTResult().success(String(hex_str))
+            else:
+                return RTResult().failure(TError(
+                        self.pos_start,
+                        self.pos_end,
+                        f"Failed to convert value of type '{value.type()}' to hex: {e}",
+                        exec_ctx,
+                    ))
+        except Exception as e:
+            if suppress_error_:
+                return RTResult().success(String("none"))
+            else:
+                return RTResult().failure(
+                    RTError(
+                        self.pos_start,
+                        self.pos_end,
+                        f"Failed to convert value of type '{value.type()}' to hex: {e}",
+                        exec_ctx,
+                    )
+                )
+
+    execute_to_hex.arg_names = ["value", "supress_error"]
+
+
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
     func_name = method_name[8:]
@@ -3892,15 +4063,15 @@ class Interpreter:
 
     def visit_ListNode(self, node, context: Context):
         res = RTResult()
-        elements = []
+        value = []
 
         for element_node in node.element_nodes:
-            elements.append(res.register(self.visit(element_node, context)))
+            value.append(res.register(self.visit(element_node, context)))
             if res.should_return():
                 return res
 
         return res.success(
-            List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
+            List(value).set_context(context).set_pos(node.pos_start, node.pos_end)
         )
 
     def visit_VarAccessNode(self, node, context: Context):
@@ -3971,48 +4142,6 @@ class Interpreter:
             namespace_obj.set(k, v)
 
         namespace_obj.set("initialized_", Number.true)
-
-    def visit_CallMemberAccessNode(self, node, context):
-        res = RTResult()
-        obj = res.register(self.visit(node.object_node, context))
-        if res.should_return():
-            return res
-
-        if isinstance(obj, NameSpace) and not obj.get("initialized_").value:
-            self.initialize_namespace(obj)
-
-        member = obj.get(node.member_name)
-        if member is None:
-            return res.failure(
-                RTError(
-                    node.pos_start,
-                    node.pos_end,
-                    f"'{obj}' has no member '{node.member_name}'",
-                    context,
-                )
-            )
-
-        if isinstance(member, Error):
-            return res.failure(member)
-        if not isinstance(member, Function):
-            return res.failure(
-                RTError(
-                    node.pos_start,
-                    node.pos_end,
-                    f"'{node.member_name}' is not a function",
-                    context,
-                )
-            )
-
-        args = []
-        for arg_node in node.arg_nodes:
-            args.append(res.register(self.visit(arg_node, context)))
-            if res.should_return():
-                return res
-        return_value = res.register(member.execute(args))
-        if res.should_return():
-            return res
-        return res.success(return_value)
 
     def visit_NameSpaceNode(self, node, context):
         res = RTResult()
@@ -4206,7 +4335,7 @@ class Interpreter:
         should_return_none = node.should_return_none
 
         if not should_return_none:
-            elements = []
+            value = []
 
         if step >= 0:
             cond = lambda: i < end
@@ -4232,13 +4361,13 @@ class Interpreter:
                 break
 
             if not should_return_none:
-                elements.append(value)
+                value.append(value)
 
         if should_return_none:
             return res.success(NoneObject.none)
         else:
             return res.success(
-                List(elements)
+                List(value)
                 .set_context(context)
                 .set_pos(node.pos_start, node.pos_end)
             )
@@ -4247,7 +4376,7 @@ class Interpreter:
         res = RTResult()
         should_return_none = node.should_return_none
         if not should_return_none:
-            elements = []
+            value = []
 
         while True:
             condition = res.register(self.visit(node.condition_node, context))
@@ -4272,13 +4401,13 @@ class Interpreter:
                 break
 
             if not should_return_none:
-                elements.append(value)
+                value.append(value)
 
         if should_return_none:
             return res.success(NoneObject.none)
         else:
             return res.success(
-                List(elements)
+                List(value)
                 .set_context(context)
                 .set_pos(node.pos_start, node.pos_end)
             )
@@ -4388,7 +4517,7 @@ class Interpreter:
 
     def visit_HashMapNode(self, node, context):
         res = RTResult()
-        values = {}
+        result = {}
 
         for key_node, value_node in node.pairs:
             key = res.register(self.visit(key_node, context))
@@ -4405,14 +4534,14 @@ class Interpreter:
                     )
                 )
 
-            value = res.register(self.visit(value_node, context))
+            val = res.register(self.visit(value_node, context))
             if res.should_return():
                 return res
-            assert value is not None
+            assert val is not None
 
-            values[key.value] = value
+            result[key.value] = val
 
-        return res.success(HashMap(values))
+        return res.success(HashMap(result))
 
     def visit_ForInNode(self, node: ForInNode, context: Context) -> RTResult:
         res = RTResult()
@@ -4428,7 +4557,7 @@ class Interpreter:
         if error:
             return res.failure(error)
 
-        elements = []
+        e = []
 
         try:
             while True:
@@ -4450,7 +4579,7 @@ class Interpreter:
                     continue
 
                 if not should_return_none:
-                    elements.append(value)
+                    e.append(value)
         except StopIteration:
             pass
 
@@ -4458,7 +4587,7 @@ class Interpreter:
             return res.success(NoneObject.none)
         else:
             return res.success(
-                List(elements)
+                List(value)
                 .set_context(context)
                 .set_pos(node.pos_start, node.pos_end)
             )
@@ -4477,6 +4606,8 @@ global_symbol_table.set("func", String("<func>"))
 global_symbol_table.set("bool", String("<bool>"))
 global_symbol_table.set("hashmap", String("<hashmap>"))
 global_symbol_table.set("thread", String("<thread>"))
+global_symbol_table.set("bytes", String("<bytes>"))
+global_symbol_table.set("py_obj", String("<py-obj>"))
 global_symbol_table.set("os_name_fp", String(os.name))
 global_symbol_table.set("PI_fp", Number(math.pi))
 global_symbol_table.set("E_fp", Number(math.e))
@@ -4499,23 +4630,25 @@ def clean_value(value):
         return String("")
 
     if isinstance(value, List):
-        cleaned_elements = [
+        if not hasattr(value, "value") or not isinstance(value.value, list):
+            return String("")
+        cleaned_value = [
             clean_value(elem)
-            for elem in value.elements
+            for elem in value.value
             if not (
                 isinstance(elem, NoneObject)
                 or (isinstance(elem, String) and elem.value.strip().lower() == "none")
             )
         ]
-        if len(cleaned_elements) == 0:
+        if len(cleaned_value) == 0:
             return String("")
-        if len(cleaned_elements) == 1:
-            single_elem = cleaned_elements[0]
+        if len(cleaned_value) == 1:
+            single_elem = cleaned_value[0]
             if isinstance(single_elem, List):
                 return single_elem
             if isinstance(single_elem, String):
                 return String(single_elem.value)
-        return List(cleaned_elements)
+        return List(cleaned_value)
 
     return value
 

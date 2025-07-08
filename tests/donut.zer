@@ -54,9 +54,9 @@ while true do
                     if o >= 0 and o < 1760 and y < 22 and y > 0 and x > 0 do
                         z_val = z>o
                         if D > z_val do
-                            mlist.change_value(z, o, D)
+                            set(z, o, D)
                             char = if N > 0 do shading>N else shading>0
-                            mlist.change_value(b, o, char)
+                            set(b, o, char)
                         done
                     done
                 done

@@ -375,44 +375,9 @@ class Parser:
             res.register_advancement()
             self.advance()
 
-            if self.current_tok.type == TT_LPAREN:
-                res.register_advancement()
-                self.advance()
-                arg_nodes = []
-                if self.current_tok.type == TT_RPAREN:
-                    res.register_advancement()
-                    self.advance()
-                else:
-                    arg_nodes.append(res.register(self.expr()))
-                    if res.error:
-                        return res
-                    while self.current_tok.type == TT_COMMA:
-                        res.register_advancement()
-                        self.advance()
-                        arg_nodes.append(res.register(self.expr()))
-                        if res.error:
-                            return res
-                    if self.current_tok.type != TT_RPAREN:
-                        return res.failure(
-                            InvalidSyntaxError(
-                                self.current_tok.pos_start,
-                                self.current_tok.pos_end,
-                                "Expected ',' or ')'",
-                            )
-                        )
-                    res.register_advancement()
-                    self.advance()
-                atom = CallMemberAccessNode(
-                    atom,
-                    member_name,
-                    arg_nodes,
-                    atom.pos_start,
-                    self.current_tok.pos_end.copy(),
-                )
-            else:
-                atom = MemberAccessNode(
-                    atom, member_name, atom.pos_start, self.current_tok.pos_end.copy()
-                )
+            atom = MemberAccessNode(
+                atom, member_name, atom.pos_start, self.current_tok.pos_end.copy()
+            )
 
         if self.current_tok.type == TT_LPAREN:
             res.register_advancement()
@@ -559,7 +524,7 @@ class Parser:
                 )
             )
 
-        namespace_name = self.current_tok.value  # <-- Lấy value là string
+        namespace_name = self.current_tok.value
         res.register_advancement()
         self.advance()
 
@@ -591,7 +556,6 @@ class Parser:
         res.register_advancement()
         self.advance()
 
-        # Trả về node với tên là string
         return res.success(
             NameSpaceNode(
                 namespace_name, statements, pos_start, self.current_tok.pos_end.copy()

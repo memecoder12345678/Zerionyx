@@ -10,7 +10,7 @@ namespace memory
         for i = 0 to len(mem_) do 
             pair = mem_>i
             if pair>0 == k do 
-                mlist.change_value(pair, 1, v)
+                set(pair, 1, v)
                 return none
             done
         done
@@ -42,7 +42,9 @@ namespace memory
     done
 
     defun clear_memory()
-        mlist.clear_list(mem_)
+        for i = 0 to len(l) do
+            pop(l, i)
+        done
         return none
     done
 

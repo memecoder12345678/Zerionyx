@@ -238,13 +238,20 @@
                 <div class="code-window">
                     <div class="code-header">>>> zerionyx_shell</div>
                         <div class="code-body">
-                            <pre><code class="highlight-Zerionyx"><span class="zer-comment"># Hello World</span>
+<pre><code class="highlight-Zerionyx"><span class="zer-comment"># Hello World</span>
 <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-string">"Hello, World!"</span><span class="zer-types">)</span>
+<span class="zer-func">print</span><span class="zer-types">(</span><span class="zer-string">"Hello, World!\n"</span><span class="zer-types">)</span>
 
 <span class="zer-comment"># Arithmetic</span>
 <span class="zer-var">x</span> <span class="zer-types">=</span> <span class="zer-number">10</span>
 <span class="zer-var">y</span> <span class="zer-types">=</span> <span class="zer-number">20</span>
 <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">x</span> <span class="zer-types">+</span> <span class="zer-var">y</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">x</span> <span class="zer-types">-</span> <span class="zer-var">y</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">x</span> <span class="zer-types">*</span> <span class="zer-var">y</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">x</span> <span class="zer-types">/</span> <span class="zer-var">y</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">x</span> <span class="zer-types">%</span> <span class="zer-var">y</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">x</span> <span class="zer-types">//</span> <span class="zer-var">y</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">x</span> <span class="zer-types">^</span> <span class="zer-var">y</span><span class="zer-types">)</span>
 
 <span class="zer-comment"># Function definition</span>
 <span class="zer-keyword">defun</span> <span class="zer-func-def">add</span><span class="zer-types">(</span><span class="zer-var">a</span><span class="zer-types">,</span> <span class="zer-var">b</span><span class="zer-types">)</span>
@@ -252,7 +259,8 @@
 <span class="zer-keyword">done</span>
 
 <span class="zer-comment"># One-line function</span>
-<span class="zer-keyword">defun</span> <span class="zer-func-def">add</span><span class="zer-types">(</span><span class="zer-var">a</span><span class="zer-types">,</span> <span class="zer-var">b</span><span class="zer-types">)</span> <span class="zer-types">-></span> <span class="zer-var">a</span> <span class="zer-types">+</span> <span class="zer-var">b</span>
+<span class="zer-keyword">defun</span> <span class="zer-func-def">add</span><span class="zer-types">(</span><span class="zer-var">a</span><span class="zer-types">,</span> <span class="zer-var">b</span><span class="zer-types">)</span> <span class="zer-types">-></span> <span class="zer-var">a</span> <span class="zer-types">+=</span> <span class="zer-var">b</span>
+
 <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-func">add</span><span class="zer-types">(</span><span class="zer-number">5</span><span class="zer-types">,</span> <span class="zer-number">3</span><span class="zer-types">)</span><span class="zer-types">)</span>
 
 <span class="zer-comment"># Lists</span>
@@ -266,6 +274,17 @@
 <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">users</span><span class="zer-types">)</span>
 <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-types">(</span><span class="zer-var">users</span><span class="zer-types">></span><span class="zer-string">"name"</span><span class="zer-types">)</span><span class="zer-types">)</span>
 <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-types">(</span><span class="zer-var">users</span><span class="zer-types">></span><span class="zer-string">"password"</span><span class="zer-types">)</span><span class="zer-types">)</span>
+
+<span class="zer-comment"># Bytes</span>
+<span class="zer-var">str_enc</span> <span class="zer-types">=</span> <span class="zer-func">to_bytes</span><span class="zer-types">(</span><span class="zer-func">to_hex</span><span class="zer-types">(</span><span class="zer-string">"Hello, World!"</span><span class="zer-types">)</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-func">to_str</span><span class="zer-types">(</span><span class="zer-var">str_enc</span><span class="zer-types">)</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-types">(</span><span class="zer-var">str_enc</span><span class="zer-types">></span><span class="zer-number">0</span><span class="zer-types">)</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-types">(</span><span class="zer-var">str_enc</span><span class="zer-types">></span><span class="zer-number">4</span><span class="zer-types">)</span><span class="zer-types">)</span>
+
+<span class="zer-comment"># PyObject</span>
+<span class="zer-var">os</span> <span class="zer-types">=</span> <span class="zer-func">pyexec</span><span class="zer-types">(</span><span class="zer-string">"import os"</span><span class="zer-types">,</span> <span class="zer-types">{}</span><span class="zer-types">)</span>
+<span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-func">type</span><span class="zer-types">(</span><span class="zer-var">os</span><span class="zer-types">)</span><span class="zer-types">)</span>
+<span class="zer-var">r</span> <span class="zer-types">=</span> <span class="zer-func">pyexec</span><span class="zer-types">(</span><span class="zer-string">"os.system('echo Hello, World!')"</span><span class="zer-types">,</span> <span class="zer-types">{</span><span class="zer-var">os</span><span class="zer-types">}</span><span class="zer-types">)</span>
 
 <span class="zer-comment"># Conditional</span>
 <span class="zer-keyword">if</span> <span class="zer-var">x</span> <span class="zer-types">></span> <span class="zer-var">y</span> <span class="zer-keyword">do</span>
@@ -299,9 +318,10 @@
     <span class="zer-keyword">defun</span> <span class="zer-func-def">area</span><span class="zer-types">(</span><span class="zer-var">r</span><span class="zer-types">)</span> <span class="zer-types">-></span> <span class="zer-var">pi</span> <span class="zer-types">*</span> <span class="zer-var">r</span> <span class="zer-types">*</span> <span class="zer-var">r</span>
 <span class="zer-keyword">done</span>
 <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-var">m</span><span class="zer-types">.</span><span class="zer-func">area</span><span class="zer-types">(</span><span class="zer-number">5</span><span class="zer-types">)</span><span class="zer-types">)</span>
-                        </code></pre>
+
+
+                        </div>
                     </div>
-                </div>
 
 
                 <div class="cta-buttons">

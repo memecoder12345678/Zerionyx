@@ -3,18 +3,21 @@
 namespace ffio
     os_sep = os_sep_fp
 
-    defun write(f, m, t)
-        if m != "w" and m != "a" do
+    defun write(f, m)
+        if m != "w" and m != "a" and mode != "wb" do
             panic("Invalid mode for write operation", "IO")
         done
         if type(f) != str do
             panic("First argument of 'write' must be a string", "T")
         done
         f_ = open_fp(f)
-        write_fp(f_, m, t)
+        write_fp(f_, m)
     done
 
-    defun read(f)
+    defun read(f, m)
+        if m != "r" and m != "rb" do
+            panic("Invalid mode for write operation", "IO")
+        done
         if not exists_fp(f) do
             panic("File does not exist", "IO")
         done
@@ -22,7 +25,7 @@ namespace ffio
             panic("First argument of 'read' must be a string", "T")
         done
         f_ = open_fp(f)
-        return read_fp(f_)
+        return read_fp(f_, m)
     done
 
     defun exists(f)

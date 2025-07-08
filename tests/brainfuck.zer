@@ -30,15 +30,15 @@ defun brainfuck(nput)
                 pointer -= 1
             done
         elif (nput>i) == "+" do
-            mlist.change_value(memory, pointer, ((memory>pointer)+1) % 256)
+            set(memory, pointer, ((memory>pointer)+1) % 256)
         elif (nput>i) == "-" do
             if memory>pointer > 0 do
-                mlist.change_value(memory, pointer, (memory>pointer)-1)
+                set(memory, pointer, (memory>pointer)-1)
             done
         elif (nput>i) == "." do
             output = output + string.chr(memory>pointer)
         elif (nput>i) == "," do
-            mlist.change_value(memory, pointer, string.ord(input("> ")))
+            set(memory, pointer, string.ord(input("> ")))
         elif (nput>i) == "[" do
             if (memory>pointer) == 0 do
                 count = 1

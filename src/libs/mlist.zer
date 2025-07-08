@@ -33,12 +33,6 @@ namespace mlist
         return l_
     done
 
-    defun clear_list(l)
-        for i = 0 to len(l) do
-            pop(l, i)
-        done
-    done
-
     defun filter(f, l)
         if type(l) != list do
             panic("Second argument of 'filter' must be a list", "T")
@@ -158,11 +152,7 @@ namespace mlist
         return r
     done
 
-    defun change_value(l, i, v)
-        pop(l, i)
-        insert(l, i, v)
-        return l
-    done
+
 
     defun sort(l, r)
         if type(l) != list do
