@@ -4666,6 +4666,7 @@ def run(fn, text):
         if ast.error:
             return None, ast.error
         interpreter = Interpreter()
+        
         context = Context("<program>")
         context.symbol_table = global_symbol_table
         context.private_symbol_table = private_symbol_table

@@ -784,58 +784,108 @@ class String(Object):
         return repr(self.value)
     
 class PyObject(Object):
+    __slots__ = ('value',)
 
-    __slots__ = ("value")
     def __init__(self, obj):
         super().__init__()
         self.value = obj
 
     def get_obj(self):
         return self.value
-    
-    def __call__(self, *args, **kwargs):
-        return PyObject(self.value(*args, **kwargs))
 
-    def __getattr__(self, name):
-        return PyObject(getattr(self.value, name))
-    
-    def type(self):
-
-        return "<py-obj>"
-    
     def copy(self):
+        c = PyObject(self.value)
+        c.set_pos(self.pos_start, self.pos_end)
+        c.set_context(self.context)
+        return c
 
-        copy = PyObject(self.value)
+    def type(self):
+        return f"<py-obj>"
 
-        copy.set_pos(self.pos_start, self.pos_end)
+    def __repr__(self):  return f"PyObject({self.value!r})"
+    def __str__(self):   return str(self.value)
+    def __bytes__(self): return bytes(self.value)
 
-        copy.set_context(self.context)
+    def __bool__(self):  return bool(self.value)
+    def is_true(self):   return self.__bool__()
 
-        return copy
-    
-    def __str__(self):
-        return str(self.value)
+    def __int__(self):     return int(self.value)
+    def __float__(self):   return float(self.value)
+    def __complex__(self): return complex(self.value)
+    def __index__(self):   return self.__int__()
 
-    def __repr__(self):
-        return f"PyObject({repr(self.value)})"
+    def __add__(self, o): return PyObject(self.value + o.value)
+    def __sub__(self, o): return PyObject(self.value - o.value)
+    def __mul__(self, o): return PyObject(self.value * o.value)
+    def __truediv__(self, o): return PyObject(self.value / o.value)
+    def __floordiv__(self, o): return PyObject(self.value // o.value)
+    def __mod__(self, o): return PyObject(self.value % o.value)
+    def __pow__(self, o): return PyObject(self.value ** o.value)
 
-    def __int__(self):
-        return int(self.value)
+    def __radd__(self, o): return PyObject(o.value + self.value)
+    def __rsub__(self, o): return PyObject(o.value - self.value)
+    def __rmul__(self, o): return PyObject(o.value * self.value)
+    def __rtruediv__(self, o): return PyObject(o.value / self.value)
+    def __rfloordiv__(self, o): return PyObject(o.value // self.value)
+    def __rmod__(self, o): return PyObject(o.value % self.value)
+    def __rpow__(self, o): return PyObject(o.value ** self.value)
 
-    def __float__(self):
-        return float(self.value)
+    def __neg__(self): return PyObject(-self.value)
+    def __pos__(self): return PyObject(+self.value)
+    def __abs__(self): return PyObject(abs(self.value))
+    def __invert__(self): return PyObject(~self.value)
 
-    def is_true(self):
-        try:
-            return bool(self.value)
-        except ValueError:
-            return False
+    def __and__(self, o): return PyObject(self.value & o.value)
+    def __or__(self, o):  return PyObject(self.value | o.value)
+    def __xor__(self, o): return PyObject(self.value ^ o.value)
+    def __lshift__(self, o): return PyObject(self.value << o.value)
+    def __rshift__(self, o): return PyObject(self.value >> o.value)
+    def __rand__(self, o): return PyObject(o.value & self.value)
+    def __ror__(self, o):  return PyObject(o.value | self.value)
+    def __rxor__(self, o): return PyObject(o.value ^ self.value)
+    def __rlshift__(self, o): return PyObject(o.value << self.value)
+    def __rrshift__(self, o): return PyObject(o.value >> self.value)
 
-    def __getitem__(self, key):
-        return PyObject(self.value[key])
+    def __eq__(self, o): return self.value == o.value
+    def __ne__(self, o): return self.value != o.value
+    def __lt__(self, o): return self.value < o.value
+    def __le__(self, o): return self.value <= o.value
+    def __gt__(self, o): return self.value > o.value
+    def __ge__(self, o): return self.value >= o.value
 
-    def __repr__(self):
-        return f"PyObject({self.value})"
+    def __len__(self): return len(self.value)
+    def __getitem__(self, k): return PyObject(self.value[k])
+    def __setitem__(self, k, v): self.value[k] = v.value
+    def __delitem__(self, k): del self.value[k]
+    def __contains__(self, item): return item.value in self.value
+
+    def __iter__(self): return iter(self.value)
+    def __next__(self): return next(self.value)
+    def __reversed__(self): return reversed(self.value)
+
+    def __enter__(self): return self.value.__enter__()
+    def __exit__(self, exc_type, exc, tb): return self.value.__exit__(exc_type, exc, tb)
+
+    def __call__(self, *args, **kwargs):
+        return PyObject(self.value(
+            *[a.value for a in args],
+            **{k: v.value for k, v in kwargs.items()}
+        ))
+
+    def __getattr__(self, name): return PyObject(getattr(self.value, name))
+    def __setattr__(self, name, val):
+        if name in ('value', 'pos_start', 'pos_end', 'context'):
+            super().__setattr__(name, val)
+        else:
+            setattr(self.value, name, val.value if isinstance(val, PyObject) else val)
+    def __delattr__(self, name): delattr(self.value, name)
+
+    def __format__(self, spec): return format(self.value, spec)
+    def __hash__(self): return hash(self.value)
+    def __round__(self, n=None): return PyObject(round(self.value, n)) 
+
+    def __call__(self, *args, **kwargs): 
+        return PyObject(self.value(*[arg.value for arg in args], **{k:v.value for k,v in kwargs.items()}))
 
 
 class List(Object):
