@@ -3406,30 +3406,44 @@ class BuiltInFunction(BaseFunction):
         key = exec_ctx.symbol_table.get("key")
         default = exec_ctx.symbol_table.get("default")
 
-        if not isinstance(hm, HashMap):
+        if not isinstance(hm, HashMap | List):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'get' must be a hashmap",
+                    "First argument of 'get' must be a hashmap or list",
                     exec_ctx,
                 )
             )
-
-        if not isinstance(key, String):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'get' must be a string",
-                    exec_ctx,
+        if isinstance(hm, HashMap):
+            if not isinstance(key, String):
+                return RTResult().failure(
+                    TError(
+                        self.pos_start,
+                        self.pos_end,
+                        "Second argument of 'get' must be a string key when first argument is a hashmap",
+                        exec_ctx,
+                    )
                 )
-            )
 
-        for k, v in hm.value.items():
-            if k.value == key.value:
-                return RTResult().success(v)
-
+            for k, v in hm.value.items():
+                if k.value == key.value:
+                    return RTResult().success(v)
+        else:
+            if not isinstance(key, Number):
+                return RTResult().failure(
+                    TError(
+                        self.pos_start,
+                        self.pos_end,
+                        "Second argument of 'get' must be a number when first argument is a list",
+                        exec_ctx,
+                        )
+                    )
+            
+            if not (key.value < 0 or key.value >= len(hm.value)):
+                return RTResult().success(
+                    hm.value[key.value]
+                )
         return RTResult().success(default)
 
     execute_get.arg_names = ["hm", "key", "default"]
