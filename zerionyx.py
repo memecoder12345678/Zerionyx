@@ -66,7 +66,7 @@ GET_MEMBER        ::= IDENTIFIER  "." CALL
 
 LIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"
 
-HASHMAP_EXPR      ::= "{" (EXPR ("," STRING ":" EXPR)*)? "}"
+HASHMAP_EXPR      ::= "{" (STRING ":" EXPR ("," STRING ":" EXPR)*)? "}"
 
 NAMESPACE_EXPR    ::=
       "namespace" IDENTIFIER
