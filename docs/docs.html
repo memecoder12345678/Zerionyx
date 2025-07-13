@@ -330,7 +330,7 @@ GET_MEMBER        ::= IDENTIFIER  "." CALL
 
 LIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"
 
-HASHMAP_EXPR      ::= "{" (EXPR ("," STRING ":" EXPR)*)? "}"
+HASHMAP_EXPR      ::= "{" (STRING ":" EXPR ("," STRING ":" EXPR)*)? "}"
 
 NAMESPACE_EXPR    ::=
       "namespace" IDENTIFIER
@@ -415,7 +415,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <li><b>values(hm)</b> → list — Return list of all values in <code>hm</code></li>
                     <li><b>items(hm)</b> → list — Return list of <code>[key, value]</code> pairs in <code>hm</code></li>
                     <li><b>has(hm, key)</b> → bool — Return <code>true</code> if <code>key</code> exists in <code>hm</code></li>
-                    <li><b>get(hm, key, default)</b> → any — Return value for <code>key</code> or <code>default</code> if not found</li>
+                    <li><b>get(hmol, koi, default)</b> → any — Return value for <code>koi</code> or <code>default</code> if not found</li>
                     <li><b>set(hmol, koi, value)</b> → hashmap/list — Add or update <code>koi</code> in <code>hmol</code> with <code>value</code></li>
                     <li><b>del(hm, key)</b> → none — Delete <code>key</code> and its value from <code>hm</code></li>
                     <li><b>len(x)</b> → number — Get length of <code>x</code></li>
