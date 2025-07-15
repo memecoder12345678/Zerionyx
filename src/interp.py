@@ -2368,7 +2368,7 @@ class BuiltInFunction(BaseFunction):
                 result[key] = val
             return result
         elif isinstance(obj, PyObject):
-            return obj
+            return obj.get_obj()
         else:
             return str(obj)
 
