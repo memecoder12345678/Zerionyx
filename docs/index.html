@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
@@ -57,16 +58,18 @@
             margin: 0;
             padding: 0;
         }
-        
+
         .logo {
             display: flex;
             align-items: center;
             gap: 12px;
         }
+
         .logo img {
             width: 32px;
             height: 32px;
         }
+
         .logo a {
             font-size: 1.8rem;
             font-weight: bold;
@@ -74,6 +77,7 @@
             text-decoration: none;
             text-shadow: 0 0 5px var(--neon-blue);
         }
+
         .logo span {
             color: var(--neon-green-accent);
             text-shadow: 0 0 8px var(--neon-green-accent);
@@ -118,7 +122,7 @@
             max-width: 700px;
             margin: 0 auto;
         }
-        
+
         .code-header {
             background-color: #181c2f;
             padding: 8px 15px;
@@ -139,7 +143,7 @@
             padding: 0;
             font-family: 'Fira Mono', 'Consolas', monospace;
         }
-        
+
         .cta-buttons {
             margin-top: 3rem;
             display: flex;
@@ -163,6 +167,7 @@
             background: var(--neon-blue);
             box-shadow: 0 0 10px var(--neon-blue);
         }
+
         .btn-primary:hover {
             box-shadow: 0 0 20px var(--neon-blue);
             transform: translateY(-2px);
@@ -172,6 +177,7 @@
             background: var(--neon-green-accent);
             box-shadow: 0 0 10px var(--neon-green-accent);
         }
+
         .btn-secondary:hover {
             box-shadow: 0 0 20px var(--neon-green-accent);
             transform: translateY(-2px);
@@ -182,26 +188,30 @@
             background-color: var(--light-panel-bg);
             border-top: 1px solid #eee;
         }
+
         .features h2 {
             text-align: center;
             font-size: 2rem;
             font-weight: 300;
             margin-bottom: 2.5rem;
         }
+
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
         }
+
         .feature-item {
             padding: 1.5rem;
         }
+
         .feature-item h3 {
             color: var(--neon-blue);
             text-shadow: 0 0 3px var(--neon-blue);
             margin-top: 0;
         }
-        
+
         footer {
             background-color: var(--dark-header-bg);
             color: #ccc;
@@ -209,30 +219,52 @@
             padding: 2rem 0;
             font-size: 0.9rem;
         }
+
         footer a {
             color: var(--neon-green-accent);
             text-shadow: 0 0 3px var(--neon-green-accent);
         }
 
-        .highlight-Zerionyx .zer-keyword, 
-        .highlight-Zerionyx .zer-types { color: var(--neon-blue); font-weight: bold; }
+        .highlight-Zerionyx .zer-keyword,
+        .highlight-Zerionyx .zer-types {
+            color: var(--neon-blue);
+            font-weight: bold;
+        }
+
         .highlight-Zerionyx .zer-func-def,
-        .highlight-Zerionyx .zer-func { color: var(--neon-green-accent); font-weight: bold; }
-        .highlight-Zerionyx .zer-string { color: #e2fb8c; }
-        .highlight-Zerionyx .zer-number { color: #ffb366; }
-        .highlight-Zerionyx .zer-comment { color: #667788; font-style: italic; }
-        .highlight-Zerionyx .zer-var { color: #e6faff; }
+        .highlight-Zerionyx .zer-func {
+            color: var(--neon-green-accent);
+            font-weight: bold;
+        }
+
+        .highlight-Zerionyx .zer-string {
+            color: #e2fb8c;
+        }
+
+        .highlight-Zerionyx .zer-number {
+            color: #ffb366;
+        }
+
+        .highlight-Zerionyx .zer-comment {
+            color: #667788;
+            font-style: italic;
+        }
+
+        .highlight-Zerionyx .zer-var {
+            color: #e6faff;
+        }
     </style>
 </head>
+
 <body>
     <header>
-        <div class="header-container">
+        <div class="header-inner">
             <div class="logo">
                 <img src="favicon.ico" alt="Zerionyx logo">
                 <a href="index.html">Zeriony<span>x</span></a>
             </div>
             <nav>
-                <a href="docs.html">Documentation</a>
+                <a href="index.html">Home</a>
                 <a href="https://github.com/memecoder12345678/Zerionyx" target="_blank">GitHub</a>
             </nav>
         </div>
@@ -242,11 +274,12 @@
         <section class="hero">
             <div class="container">
                 <h1>A Simple Language for Learning</h1>
-                <p>Zerionyx is a beginner-friendly, task-oriented language designed for education and basic automation.</p>
+                <p>Zerionyx is a beginner-friendly, task-oriented language designed for education and basic automation.
+                </p>
                 <div class="code-window">
                     <div class="code-header">>>> zerionyx_shell</div>
-                        <div class="code-body">
-<pre><code class="highlight-Zerionyx"><span class="zer-comment"># Hello World</span>
+                    <div class="code-body">
+                        <pre><code class="highlight-Zerionyx"><span class="zer-comment"># Hello World</span>
 <span class="zer-func">println</span><span class="zer-types">(</span><span class="zer-string">"Hello, World!"</span><span class="zer-types">)</span>
 <span class="zer-func">print</span><span class="zer-types">(</span><span class="zer-string">"Hello, World!\n"</span><span class="zer-types">)</span>
 
