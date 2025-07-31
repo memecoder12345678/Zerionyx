@@ -1,0 +1,26 @@
+{
+  "name": "zerionyx-syntax",
+  "displayName": "Zerionyx",
+  "description": "Syntax highlighting for the Zerionyx language",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.102.0"
+  },
+  "icon": "imgs/icon.png",
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "zerionyx",
+      "aliases": ["zerionyx", "zerionyx"],
+      "extensions": [".zer"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "zerionyx",
+      "scopeName": "source.zerionyx",
+      "path": "./syntaxes/zerionyx.tmLanguage.json"
+    }]
+  }
+}
