@@ -212,7 +212,7 @@ Use commands such as `grammar`, `license`, etc., for more details.
 * [X] Integrate debugger support
 * [X] Improving interpreter performance 
 * [ ] Creating developer tools (debuggers, profilers, code formatters)
-* [ ] Creating **VS Code plugin**
+* [X] Creating **VS Code plugin**
 ---
 
 ## Contributing
