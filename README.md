@@ -145,9 +145,9 @@ for i = 1 to 11 do
 done
 
 # While loop
-a = 100
+a = 1
 while a < 100 do
-    a -= 1
+    a += 1
 done
 println(a)
 
@@ -190,7 +190,7 @@ python zerionyx.py tests/HaloWorld.zer
 python zerionyx.py
 ```
 
-Use commands such as `grammar`, `license`, etc. for more details.
+Use commands such as `grammar`, `license`, etc., for more details.
 
 ### 5. Full Documentation
 
@@ -228,7 +228,7 @@ Contributions are welcome! To get involved:
 
 ## Looking for Contributors
 
-Zerionyx is growing fast &mdash; and we're looking for awesome people to help shape its future.
+Zerionyx is growing fast &mdash; we're looking for awesome people to help shape its future.
 
 We're especially looking for contributors interested in: 
   
