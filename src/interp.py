@@ -4040,6 +4040,15 @@ class BuiltInFunction(BaseFunction):
 
     execute_to_hex.arg_names = ["value", "supress_error"]
 
+    def execute_is_nan(self, exec_ctx):
+        value = exec_ctx.symbol_table.get("value")
+        if math.isnan(value.value):
+            return RTResult().success(Number.true)
+        else:
+            return RTResult().success(Number.false)
+
+    execute_is_nan.arg_names = ["value"]
+
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
     func_name = method_name[8:]
@@ -4672,6 +4681,9 @@ global_symbol_table.set("os_name_fp", String(os.name))
 global_symbol_table.set("PI_fp", Number(math.pi))
 global_symbol_table.set("E_fp", Number(math.e))
 global_symbol_table.set("none_type", String("<none>"))
+global_symbol_table.set("nan", Number(float("nan")))
+global_symbol_table.set("inf", Number(float("inf")))
+global_symbol_table.set("neg_inf", Number(float("-inf")))
 
 for func in BUILTIN_FUNCTIONS:
     global_symbol_table.set(func, getattr(BuiltInFunction, func))
