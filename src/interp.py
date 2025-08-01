@@ -2133,6 +2133,7 @@ class BuiltInFunction(BaseFunction):
     def execute_is_err(self, exec_ctx):
         func = exec_ctx.symbol_table.get("func")
         args = exec_ctx.symbol_table.get("args")
+
         if not isinstance(func, BaseFunction):
             return RTResult().failure(
                 TError(
@@ -2142,6 +2143,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
+
         if not isinstance(args, List):
             return RTResult().failure(
                 TError(
@@ -2151,49 +2153,60 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
+
         try:
             res = func.execute(args.value)
-            if res.error and isinstance(res.error, (RTError, IOError, MError, TError)):
-                err_str = str(res.error)
-                err_line = err_str.strip().split("\n")[-1]
-                err_name, err_msg = err_line.split(":", 1)
-                err_name = err_name.strip()
-                err_msg = err_msg.strip()
-                if err_name.startwiths("R"):
-                    err_name = "RT"
-                elif err_name.startwiths("M"):
-                    err_name = "M"
-                elif err_name.startwiths("IO"):
-                    err_name = "IO"
-                elif err_name.startwiths("T"):
-                    err_name = "T"
-                return RTResult().success(
-                    List([NoneObject.none, String(err_msg), String(err_name)])
-                )
-            elif res.error:
-                return RTResult().failure(res.error)
+
+            if res.error:
+                err = res.error
+                if isinstance(err, Error):
+                    err_str = str(err)
+                    err_line = err_str.strip().split("\n")[-1]
+                    err_name, err_msg = err_line.split(":", 1)
+                    err_name = err_name.strip()
+                    err_msg = err_msg.strip()
+
+                    if err_name.startswith("R"):
+                        err_name = "RT"
+                    elif err_name.startswith("M"):
+                        err_name = "M"
+                    elif err_name.startswith("I"):
+                        err_name = "IO"
+                    elif err_name.startswith("T"):
+                        err_name = "T"
+
+                    return RTResult().success(
+                        List([NoneObject.none, String(err_msg), String(err_name)])
+                    )
+                else:
+                    return RTResult().failure(err)
+
             else:
                 return RTResult().success(
                     List([res.value, NoneObject.none, NoneObject.none])
                 )
-        except (RTError, IOError, MError, TError) as err:
-            err_str = str(err)
-            err_line = err_str.strip().split("\n")[-1]
-            err_name, err_msg = err_line.split(":", 1)
-            err_name = err_name.strip()
-            err_msg = err_msg.strip()
-            if err_name.startwiths("R"):
-                err_name = "RT"
-            elif err_name.startwiths("M"):
-                err_name = "M"
-            elif err_name.startwiths("IO"):
-                err_name = "IO"
-            elif err_name.startwiths("T"):
-                err_name = "T"
-            return RTResult().success(
-                List([NoneObject.none, String(err_msg), String(err_name)])
-            )
+
         except Exception as err:
+            if isinstance(err, Error) or (isinstance(err, type) and issubclass(err.__class__, Error)):
+                err_str = str(err)
+                err_line = err_str.strip().split("\n")[-1]
+                err_name, err_msg = err_line.split(":", 1)
+                err_name = err_name.strip()
+                err_msg = err_msg.strip()
+
+                if err_name.startswith("R"):
+                    err_name = "RT"
+                elif err_name.startswith("M"):
+                    err_name = "M"
+                elif err_name.startswith("I"):
+                    err_name = "IO"
+                elif err_name.startswith("T"):
+                    err_name = "T"
+
+                return RTResult().success(
+                    List([NoneObject.none, String(err_msg), String(err_name)])
+                )
+
             return RTResult().failure(
                 RTError(
                     self.pos_start,
@@ -2204,6 +2217,7 @@ class BuiltInFunction(BaseFunction):
             )
 
     execute_is_err.arg_names = ["func", "args"]
+
 
     def execute_is_file_fp(self, exec_ctx):
         path = exec_ctx.symbol_table.get("path")
@@ -3483,8 +3497,8 @@ class BuiltInFunction(BaseFunction):
                         exec_ctx,
                     )
                 )
-            hm.value.pop(key)
-            hm.value.insert(key, value)
+            hm.value.pop(key.value)
+            hm.value.insert(key.value, value)
             return RTResult().success(List(hm))
         
     execute_set.arg_names = ["hm", "key", "value"]

@@ -1,7 +1,6 @@
 load "libs.sys"
 load "libs.math"
 load "libs.string"
-load "libs.list"
 load "libs.time"
 load "libs.memory"
 load "libs.keyboard"
@@ -9,7 +8,7 @@ load "libs.keyboard"
 A = 0
 B = 0
 loop_count = 0
-max_loop = to_int(2 * PI / 0.04, false) # 157 frames
+max_loop = to_int(2 * math.PI / 0.04, false) # 157 frames
 shading = [".", ",", "-", "~", ":", ";", "=", "!", "*", "#", "$", "@"]
 print(string.chr(27) + "[2J" + string.chr(27) + "[H")
 while true do

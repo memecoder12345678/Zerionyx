@@ -1,8 +1,8 @@
 # libs.mlist
 
-load "libs.random"
-
 namespace mlist
+    load "libs.random"
+
     defun map(f, l)
         if type(l) != list do
             panic("Second argument of 'map' must be a list", "T")

@@ -10,14 +10,14 @@ defun backup_folder(path, cbp, rbp)
         flp = path + ffio.os_sep + f
         fbd = cbp + ffio.os_sep + f
         if flp == rbp do
-            cprintln("Skipping main backup directory itself: " + flp, "yellow", none, none)
+            termcolor.cprintln("Skipping main backup directory itself: " + flp, "yellow", none, none)
             continue
         done
-        if is_file(flp) do
+        if ffio.is_file(flp) do
             e = is_err(ffio.copy, [flp, fbd + ".bak"])
             
             if is_none(e>1) do
-                cprintln("Backup created: " + fbd + ".bak", "green", none, none)
+                termcolor.cprintln("Backup created: " + fbd + ".bak", "green", none, none)
             else
                 ems = e>1 
                 if string.startswith(ems, "File ") do

@@ -120,3 +120,80 @@ done
 #     return default_value
 # done
 # --- Note --- #
+
+defun main()
+    if len(sys.argv) < 2 do
+        termcolor.cprintln("Usage: script_name <config_file_path>", "yellow", none, "bold")
+        sys.exit(1)
+    done
+    config_path = sys.argv>1
+    if not ffio.exists(config_path) do
+        termcolor.cprintln("Error: File does not exist: " + config_path, 'red', none, 'bold')
+        sys.exit(1)
+    done
+    if not ffio.is_file(config_path) do
+        termcolor.cprintln("Error: Path is not a file: " + config_path, 'red', none, 'bold')
+        sys.exit(1)
+    done
+    termcolor.cprintln("Parsing configuration file: " + config_path, "cyan", none, none)
+    config_data = parse_config(config_path)
+    if len(config_data) == 0 do
+        termcolor.cprintln("No configuration entries found or file is effectively empty.", "yellow")
+    else
+        println("\n--- Parsed Configuration ---")
+        for i = 0 to len(config_data) do
+            section_block = config_data>i
+            section_name = section_block>0
+            section_items = section_block>1
+            termcolor.cprint("[", "yellow", none, "bold")
+            termcolor.cprint(to_str(section_name), "yellow", none, "bold")
+            termcolor.cprintln("]", "yellow", none, "bold")
+            if len(section_items) == 0 do
+                termcolor.cprintln("  (empty section)", "grey", none, none)
+            else
+                for j = 0 to len(section_items) do
+                    kv_pair = section_items>j
+                    key = kv_pair>0
+                    value = kv_pair>1
+                    print("  ")
+                    termcolor.cprint(to_str(key), 'magenta', none, 'bold')
+                    print(" = ")
+                    termcolor.cprint(to_str(value), 'green', none, none)
+                    print(" (type: ")
+                    termcolor.cprint(type(value), "blue", none, none)
+                    println(")")
+                done
+            done
+            if i < len(config_data) - 1 do
+                println("")
+            done
+        done
+        # ---  Example --- #
+        # println("\n--- Example Get Config Value ---")
+        # assuming you have a config file like:
+        # name = GlobalVal
+        # [Settings]
+        # user = Alice
+        # theme = dark
+        # [Database]
+        # host = localhost
+        # user_name = get_config_value(config_data, "Settings", "user", "default_user")
+        # termcolor.cprint("User from [Settings]: ", "white", none, none)
+        # termcolor.cprintln(user_name, "cyan", none, none)
+        # db_host = get_config_value(config_data, "Database", "host", "127.0.0.1")
+        # termcolor.cprint("Host from [Database]: ", "white", none, none)
+        # termcolor.cprintln(db_host, "cyan", none, none)
+        # global_val = get_config_value(config_data, "__global__", "name", "not_found")
+        # termcolor.cprint("Name from __global__: ", "white", none, none)
+        # termcolor.cprintln(global_val, "cyan", none, none)
+        # missing_val = get_config_value(config_data, "Settings", "nonexistent", "MISSING")
+        # termcolor.cprint("Missing from [Settings]: ", "white", none, none)
+        # termcolor.cprintln(missing_val, "red", none, none)
+        # --- Example --- #
+    done
+done
+
+if is_main do
+    main()
+    sys.exit(0)
+done

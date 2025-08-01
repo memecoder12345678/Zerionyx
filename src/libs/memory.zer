@@ -1,8 +1,5 @@
 # libs.memory
 
-load "libs.list"
-load "libs.string"
-
 namespace memory
     mem_ = []
 

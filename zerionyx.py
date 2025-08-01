@@ -175,8 +175,8 @@ def main():
         except KeyboardInterrupt:
 
             print("\nexit...")
-        # except Exception as e:
-        #     print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Shell Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{e}{Fore.RESET}{Style.RESET_ALL}")
+        except Exception as e:
+            print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Shell Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{e}{Fore.RESET}{Style.RESET_ALL}")
     elif len(sys.argv) == 2 and sys.argv[1] == "--version":
         print(f"Zerionyx {INFO}")
         return

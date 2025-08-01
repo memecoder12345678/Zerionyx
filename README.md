@@ -211,8 +211,8 @@ Use commands such as `grammar`, `license`, etc., for more details.
 * [x] Add algorithms & data structure libraries
 * [X] Integrate debugger support
 * [X] Improving interpreter performance 
-* [ ] Creating developer tools (debuggers, profilers, code formatters)
-* [X] Creating **VS Code plugin**
+* [X] Creating **VS Code plugin** (syntax highlighting only)
+* [ ] Creating developer tools (profilers, code formatters)
 ---
 
 ## Contributing
