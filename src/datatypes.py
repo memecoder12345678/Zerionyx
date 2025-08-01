@@ -163,7 +163,9 @@ class Object:
 
     def execute(self, _):
 
-        return RTResult().failure(self.illegal_operation(error_str="Cannot call non-function"))
+        return RTResult().failure(
+            self.illegal_operation(error_str="Cannot call non-function")
+        )
 
     def copy(self):
 
@@ -259,7 +261,9 @@ class BaseFunction(Object):
         res = RTResult()
 
         if len(args) > len(arg_names):
-            pos_end = self.pos_end.copy() if hasattr(self.pos_end, "copy") else self.pos_end
+            pos_end = (
+                self.pos_end.copy() if hasattr(self.pos_end, "copy") else self.pos_end
+            )
             if hasattr(pos_end, "col"):
                 pos_end.col += 1
             return res.failure(
@@ -272,7 +276,9 @@ class BaseFunction(Object):
             )
 
         if len(args) < len(arg_names):
-            pos_end = self.pos_end.copy() if hasattr(self.pos_end, "copy") else self.pos_end
+            pos_end = (
+                self.pos_end.copy() if hasattr(self.pos_end, "copy") else self.pos_end
+            )
             if hasattr(pos_end, "col"):
                 pos_end.col += 1
             return res.failure(
@@ -782,9 +788,10 @@ class String(Object):
 
     def __repr__(self):
         return repr(self.value)
-    
+
+
 class PyObject(Object):
-    __slots__ = ('value',)
+    __slots__ = ("value",)
 
     def __init__(self, obj):
         super().__init__()
@@ -913,7 +920,6 @@ class HashMap(Object):
             key_str = str(k)
             self.value[key_str] = v
 
-
     def is_true(self):
         return len(self.value) > 0
 
@@ -933,7 +939,7 @@ class HashMap(Object):
     def get_comparison_gt(self, index):
         if not isinstance(index, String):
             return None, self.illegal_operation(index)
-        
+
         try:
             return self.value[index.value], None
         except KeyError:
@@ -1063,6 +1069,7 @@ List.empty = List([])
 
 class NameSpace(Object):
     __slots__ = ("name", "value", "_internal")
+
     def __init__(self, name):
         super().__init__()
         self.name = name
@@ -1110,7 +1117,8 @@ class NameSpace(Object):
 
     def __repr__(self):
         return f"<namespace {self.name}>"
-    
+
+
 class Bytes(Object):
     __slots__ = ("value",)
 
@@ -1136,7 +1144,7 @@ class Bytes(Object):
     def get_comparison_gt(self, index):
         if not isinstance(index, Number):
             return None, self.illegal_operation(index)
-        
+
         try:
             return Bytes(bytes(self.value[index.value])).set_context(self.context), None
         except IndexError:
@@ -1152,11 +1160,10 @@ class Bytes(Object):
         copy.set_pos(self.pos_start, self.pos_end)
         copy.set_context(self.context)
         return copy
-    
+
     def iter(self):
         pairs = [Bytes(bytes([i])) for i in self.value]
         return iter(pairs), None
-
 
     def is_true(self):
         return len(self.value) > 0

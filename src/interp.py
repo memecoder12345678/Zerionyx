@@ -585,7 +585,6 @@ class BuiltInFunction(BaseFunction):
                     )
                 )
 
-
     execute_read_fp.arg_names = ["file", "mode"]
 
     def execute_write_fp(self, exec_ctx):
@@ -856,9 +855,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        return RTResult().success(
-            arr.value[random.randrange(0, len(arr.value) - 1)]
-        )
+        return RTResult().success(arr.value[random.randrange(0, len(arr.value) - 1)])
 
     execute_rand_choice_fp.arg_names = ["arr"]
 
@@ -2025,9 +2022,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(
-            Bytes(hashlib.md5(text.value).hexdigest())
-        )
+        return RTResult().success(Bytes(hashlib.md5(text.value).hexdigest()))
 
     execute_md5_fp.arg_names = ["text"]
 
@@ -2042,9 +2037,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(
-            Bytes(hashlib.sha1(text.value).hexdigest())
-        )
+        return RTResult().success(Bytes(hashlib.sha1(text.value).hexdigest()))
 
     execute_sha1_fp.arg_names = ["text"]
 
@@ -2059,9 +2052,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(
-            Bytes(hashlib.sha256(text.value).hexdigest())
-        )
+        return RTResult().success(Bytes(hashlib.sha256(text.value).hexdigest()))
 
     execute_sha256_fp.arg_names = ["text"]
 
@@ -2076,9 +2067,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(
-            Bytes(hashlib.sha512(text.value).hexdigest())
-        )
+        return RTResult().success(Bytes(hashlib.sha512(text.value).hexdigest()))
 
     execute_sha512_fp.arg_names = ["text"]
 
@@ -2187,7 +2176,9 @@ class BuiltInFunction(BaseFunction):
                 )
 
         except Exception as err:
-            if isinstance(err, Error) or (isinstance(err, type) and issubclass(err.__class__, Error)):
+            if isinstance(err, Error) or (
+                isinstance(err, type) and issubclass(err.__class__, Error)
+            ):
                 err_str = str(err)
                 err_line = err_str.strip().split("\n")[-1]
                 err_name, err_msg = err_line.split(":", 1)
@@ -2217,7 +2208,6 @@ class BuiltInFunction(BaseFunction):
             )
 
     execute_is_err.arg_names = ["func", "args"]
-
 
     def execute_is_file_fp(self, exec_ctx):
         path = exec_ctx.symbol_table.get("path")
@@ -3321,6 +3311,7 @@ class BuiltInFunction(BaseFunction):
             )
         try:
             import requests
+
             response = requests.request(
                 method_arg.value,
                 url_arg.value,
@@ -3331,7 +3322,12 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(self.validate_pyexec_result(response.json()))
         except ImportError:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, "requests module not available\nTip: Install with: pip install requests", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "requests module not available\nTip: Install with: pip install requests",
+                    exec_ctx,
+                )
             )
         except requests.exceptions.RequestException as e:
             return RTResult().failure(
@@ -3451,13 +3447,11 @@ class BuiltInFunction(BaseFunction):
                         self.pos_end,
                         "Second argument of 'get' must be a number when first argument is a list",
                         exec_ctx,
-                        )
                     )
-            
-            if not (key.value < 0 or key.value >= len(hm.value)):
-                return RTResult().success(
-                    hm.value[key.value]
                 )
+
+            if not (key.value < 0 or key.value >= len(hm.value)):
+                return RTResult().success(hm.value[key.value])
         return RTResult().success(default)
 
     execute_get.arg_names = ["hm", "key", "default"]
@@ -3500,7 +3494,7 @@ class BuiltInFunction(BaseFunction):
             hm.value.pop(key.value)
             hm.value.insert(key.value, value)
             return RTResult().success(List(hm))
-        
+
     execute_set.arg_names = ["hm", "key", "value"]
 
     def execute_del(self, exec_ctx):
@@ -3888,7 +3882,6 @@ class BuiltInFunction(BaseFunction):
 
     execute_to_bytes.arg_names = ["value", "supress_error"]
 
-
     def execute_is_bytes(self, exec_ctx):
         is_bytes = isinstance(exec_ctx.symbol_table.get("value"), Bytes)
         return RTResult().success(Number.true if is_bytes else Number.false)
@@ -4014,22 +4007,24 @@ class BuiltInFunction(BaseFunction):
             if isinstance(value, Number):
                 hex_str = hex(int(value.value))[2:]
                 return RTResult().success(String(hex_str))
-            
+
             elif isinstance(value, String):
                 b = value.value.encode()
                 hex_str = b.hex()
                 return RTResult().success(String(hex_str))
-            
+
             elif isinstance(value, Bytes):
                 hex_str = value.value.hex()
                 return RTResult().success(String(hex_str))
             else:
-                return RTResult().failure(TError(
+                return RTResult().failure(
+                    TError(
                         self.pos_start,
                         self.pos_end,
                         f"Failed to convert value of type '{value.type()}' to hex: {e}",
                         exec_ctx,
-                    ))
+                    )
+                )
         except Exception as e:
             if suppress_error_:
                 return RTResult().success(String("none"))
@@ -4044,7 +4039,6 @@ class BuiltInFunction(BaseFunction):
                 )
 
     execute_to_hex.arg_names = ["value", "supress_error"]
-
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -4230,33 +4224,79 @@ class Interpreter:
 
         op_type = node.op_tok.type
 
-        ops = {
-            TT_PLUS: lambda a, b: a.added_to(b),
-            TT_MINUS: lambda a, b: a.subbed_by(b),
-            TT_MUL: lambda a, b: a.multed_by(b),
-            TT_DIV: lambda a, b: a.dived_by(b),
-            TT_POW: lambda a, b: a.powed_by(b),
-            TT_MOD: lambda a, b: a.moduled_by(b),
-            TT_EE: lambda a, b: a.get_comparison_eq(b),
-            TT_NE: lambda a, b: a.get_comparison_ne(b),
-            TT_LT: lambda a, b: a.get_comparison_lt(b),
-            TT_GT: lambda a, b: a.get_comparison_gt(b),
-            TT_LTE: lambda a, b: a.get_comparison_lte(b),
-            TT_GTE: lambda a, b: a.get_comparison_gte(b),
-            TT_FLOORDIV: lambda a, b: a.floordived_by(b),
-        }
+        if isinstance(left, Number) and isinstance(right, Number):
+            if op_type == TT_PLUS:
+                result = Number(left.value + right.value)
+            elif op_type == TT_MINUS:
+                result = Number(left.value - right.value)
+            elif op_type == TT_MUL:
+                result = Number(left.value * right.value)
+            elif op_type == TT_DIV:
+                if right.value == 0:
+                    return res.failure(
+                        MError(
+                            right.pos_start, right.pos_end, "Division by zero", context
+                        )
+                    )
+                result = Number(left.value / right.value)
+            elif op_type == TT_MOD:
+                if right.value == 0:
+                    return res.failure(
+                        MError(
+                            right.pos_start, right.pos_end, "Division by zero", context
+                        )
+                    )
+                result = Number(left.value % right.value)
+            elif op_type == TT_FLOORDIV:
+                if right.value == 0:
+                    return res.failure(
+                        MError(
+                            right.pos_start, right.pos_end, "Division by zero", context
+                        )
+                    )
+                result = Number(left.value // right.value)
+            elif op_type == TT_POW:
+                result = Number(left.value**right.value)
+            else:
+                result, error = getattr(
+                    left,
+                    {
+                        TT_EE: "get_comparison_eq",
+                        TT_NE: "get_comparison_ne",
+                        TT_LT: "get_comparison_lt",
+                        TT_GT: "get_comparison_gt",
+                        TT_LTE: "get_comparison_lte",
+                        TT_GTE: "get_comparison_gte",
+                    }.get(op_type),
+                )(right)
+                if error:
+                    return res.failure(error)
 
-        kw_ops = {
-            "and": lambda a, b: a.anded_by(b),
-            "or": lambda a, b: a.ored_by(b),
+            return res.success(result.set_pos(node.pos_start, node.pos_end))
+
+        ops = {
+            TT_PLUS: "added_to",
+            TT_MINUS: "subbed_by",
+            TT_MUL: "multed_by",
+            TT_DIV: "dived_by",
+            TT_POW: "powed_by",
+            TT_MOD: "moduled_by",
+            TT_EE: "get_comparison_eq",
+            TT_NE: "get_comparison_ne",
+            TT_LT: "get_comparison_lt",
+            TT_GT: "get_comparison_gt",
+            TT_LTE: "get_comparison_lte",
+            TT_GTE: "get_comparison_gte",
+            TT_FLOORDIV: "floordived_by",
         }
 
         if op_type in ops:
-            result, error = ops[op_type](left, right)
+            method = getattr(left, ops[op_type])
+            result, error = method(right)
         elif node.op_tok.matches(TT_KEYWORD, "and"):
-            result, error = kw_ops["and"](left, right)
+            result, error = left.anded_by(right)
         elif node.op_tok.matches(TT_KEYWORD, "or"):
-            result, error = kw_ops["or"](left, right)
+            result, error = left.ored_by(right)
         else:
             return res.failure(
                 RTError(
@@ -4342,6 +4382,7 @@ class Interpreter:
 
     def visit_ForNode(self, node, context):
         res = RTResult()
+
         start_value = res.register(self.visit(node.start_value_node, context))
         if res.should_return():
             return res
@@ -4357,24 +4398,22 @@ class Interpreter:
         else:
             step_value = Number(1)
 
-        i = start_value.value
-        end = end_value.value
-        step = step_value.value
-        should_return_none = node.should_return_none
+        start_int = start_value.value
+        end_int = end_value.value
+        step_int = step_value.value
 
-        if not should_return_none:
-            value = []
+        var_name = node.var_name_tok.value
+        body_node = node.body_node
 
-        if step >= 0:
-            cond = lambda: i < end
-        else:
-            cond = lambda: i > end
+        elements = [] if not node.should_return_none else None
 
-        while cond():
-            context.symbol_table.set(node.var_name_tok.value, Number(i))
-            i += step
+        loop_var = Number(0)
+        context.symbol_table.set(var_name, loop_var)
 
-            value = res.register(self.visit(node.body_node, context))
+        for i in range(start_int, end_int, step_int):
+            loop_var.value = i
+
+            value = res.register(self.visit(body_node, context))
             if (
                 res.should_return()
                 and not res.loop_should_continue
@@ -4388,17 +4427,14 @@ class Interpreter:
             if res.loop_should_break:
                 break
 
-            if not should_return_none:
-                value.append(value)
+            if elements is not None:
+                elements.append(value)
 
-        if should_return_none:
-            return res.success(NoneObject.none)
-        else:
-            return res.success(
-                List(value)
-                .set_context(context)
-                .set_pos(node.pos_start, node.pos_end)
-            )
+        return res.success(
+            List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
+            if elements is not None
+            else NoneObject.none
+        )
 
     def visit_WhileNode(self, node, context):
         res = RTResult()
@@ -4435,9 +4471,7 @@ class Interpreter:
             return res.success(NoneObject.none)
         else:
             return res.success(
-                List(value)
-                .set_context(context)
-                .set_pos(node.pos_start, node.pos_end)
+                List(value).set_context(context).set_pos(node.pos_start, node.pos_end)
             )
 
     def visit_FuncDefNode(self, node, context):
@@ -4615,9 +4649,7 @@ class Interpreter:
             return res.success(NoneObject.none)
         else:
             return res.success(
-                List(value)
-                .set_context(context)
-                .set_pos(node.pos_start, node.pos_end)
+                List(value).set_context(context).set_pos(node.pos_start, node.pos_end)
             )
 
 
@@ -4694,7 +4726,7 @@ def run(fn, text):
         if ast.error:
             return None, ast.error
         interpreter = Interpreter()
-        
+
         context = Context("<program>")
         context.symbol_table = global_symbol_table
         context.private_symbol_table = private_symbol_table
@@ -4706,5 +4738,7 @@ def run(fn, text):
         return result.value, result.error
 
     except KeyboardInterrupt:
-        print("Interrupt Error: User Terminated")
+        print(
+            f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Interrupt Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}User Terminated{Fore.RESET}{Style.RESET_ALL}"
+        )
         sys.exit(2)

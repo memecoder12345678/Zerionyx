@@ -212,7 +212,6 @@ Use commands such as `grammar`, `license`, etc., for more details.
 * [X] Integrate debugger support
 * [X] Improving interpreter performance 
 * [X] Creating **VS Code plugin** (syntax highlighting only)
-* [ ] Creating developer tools (profilers, code formatters)
 ---
 
 ## Contributing

@@ -2,20 +2,52 @@ load "libs.time"
 load "libs.sys"
 
 N = 1000000
-total = 0
-let start = time.time()
+Repeats = 10
+times = []
 
-for i = 1 to N + 1 do
-    total += i
+for r = 1 to Repeats + 1 do
+    total = 0
+    start = time.time()
+    for i = 1 to N + 1 do
+        total += i
+    done
+    end = time.time()
+    append(times, end - start)
 done
 
-end = time.time()
+let sum = 0
+let fastest = (times>0)
+let slowest = (times>0)
 
-println("Sum: " + to_str(total))
-println("Zerionyx ran in: " + to_str(end - start) + " seconds")
+for t in times do
+    sum += t
+    if t < fastest do
+        fastest = t
+    done
+    if t > slowest do
+        slowest = t
+    done
+done
+
+avg = sum / to_float(len(times), false)
+
+println("Average: " + to_str(avg) + " s")
+println("Fastest: " + to_str(fastest) + " s")
+println("Slowest: " + to_str(slowest) + " s")
 sys.exit(0)
 
-# Fastest: 0.872158288955689 seconds
-# Slowest: 0.915579557418823 seconds
-# Average: 0,893868923187256 seconds
-# NOTE: All tests were run using PyPy 3.11 (v7.3.19, 64-bit) on Intel Core i5-8250U.
+
+# Zerionyx running on PyPy 3.11 (v7.3.19, 64-bit, jit off) on Intel Core i5-8250U:
+    # Average: 38.33161084651947 s
+    # Fastest: 37.53442406654358 s
+    # Slowest: 39.03928422927856 s
+
+# Zerionyx running on Python 3.12.8 (64-bit) on Intel Core i5-8250U:
+    # Average: 6.603876042366028 s
+    # Fastest: 6.456980466842651 s
+    # Slowest: 6.765600681304932 s
+
+# Zerionyx running on PyPy 3.11 (v7.3.19, 64-bit, jit on) on Intel Core i5-8250U:
+    # Average: 0.537789940834045 s
+    # Fastest: 0.516501903533936 s
+    # Slowest: 0.577680587768555 s

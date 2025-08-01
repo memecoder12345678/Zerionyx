@@ -531,12 +531,15 @@ def astpretty(node, indent=0):
 
     if isinstance(node, MemberAccessNode):
         return (
-            pad + colorize_type("MemberAccessNode") + "("
-            + astpretty(node.object_node,0) + "."
+            pad
+            + colorize_type("MemberAccessNode")
+            + "("
+            + astpretty(node.object_node, 0)
+            + "."
             + colorize_value(node.member_name)
             + ")"
         )
-    
+
     if isinstance(node, NameSpaceNode):
         node_type = colorize_type("NameSpaceNode")
         res = pad + f"{node_type}({colorize_value(node.namespace_name)}) (\n"
@@ -546,8 +549,6 @@ def astpretty(node, indent=0):
         return res
 
     return pad + repr(node)
-
-
 
 
 class MemberAccessNode:
