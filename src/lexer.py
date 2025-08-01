@@ -57,7 +57,7 @@ class Lexer:
                     return [], error
                 self.tokens.append(token)
             elif self.current_char == "'":
-                token, error = self.make_string_single()
+                token, error = self.make_string()
                 if error:
                     return [], error
                 self.tokens.append(token)
@@ -229,121 +229,56 @@ class Lexer:
         else:
             return Token(TT_FLOAT, float(num_str), pos_start, self.pos)
 
-    def make_string_single(self):
-        string = ""
-        pos_start = self.pos.copy()
-        escape_character = False
-        self.advance()
-        escape_characters = {"n": "\n", "t": "\t", "r": "\r", "'": "\'", '"': '\"'}
-        if self.current_char == "'" and self.peek_foward_steps(1) == "'":
-            self.advance()
-            self.advance()
-            while self.current_char is not None:
-                if (
-                    self.current_char == "'"
-                    and self.peek_foward_steps(1) == "'"
-                    and self.peek_foward_steps(2) == "'"
-                ):
-                    self.advance()
-                    self.advance()
-                    self.advance()
-                    break
-                if escape_character:
-                    string += escape_characters.get(
-                        self.current_char,
-                        "\\" if self.current_char == "\\" else self.current_char,
-                    )
-                    escape_character = False
-                else:
-                    if self.current_char == "\\":
-                        escape_character = True
-                    else:
-                        string += self.current_char
-                self.advance()
-            else:
-                return [], ExpectedCharError(
-                    pos_start, self.pos, "''' (closing quotes for multiline string)"
-                )
-            return Token(TT_STRING, string, pos_start, self.pos), None
-        while self.current_char is not None and (
-            self.current_char != "'" or escape_character
-        ):
-            if escape_character:
-                string += escape_characters.get(
-                    self.current_char,
-                    "\\" if self.current_char == "\\" else self.current_char,
-                )
-                escape_character = False
-            else:
-                if self.current_char == "\\":
-                    escape_character = True
-                else:
-                    string += self.current_char
-            self.advance()
-        if self.current_char != "'":
-            return [], ExpectedCharError(
-                pos_start, self.pos, '"\'" (closing quote for string)'
-            )
-        self.advance()
-        return Token(TT_STRING, string, pos_start, self.pos), None
-
     def make_string(self):
-        string = ""
+        quote_char = self.current_char
+        return self._process_string_literal(quote_char)
+
+    def _process_string_literal(self, quote_char):
+        string_content = []
         pos_start = self.pos.copy()
-        escape_character = False
         self.advance()
-        escape_characters = {"n": "\n", "t": "\t", "r": "\r", "'": "\'", '"': '\"'}
-        if self.current_char == '"' and self.peek_foward_steps(1) == '"':
+
+        is_multiline = False
+        closing_sequence = quote_char
+        if self.current_char == quote_char and self.peek_foward_steps(1) == quote_char:
+            is_multiline = True
+            closing_sequence = quote_char * 3
             self.advance()
             self.advance()
-            while self.current_char is not None:
+
+        while self.current_char is not None:
+            if is_multiline:
                 if (
-                    self.current_char == '"'
-                    and self.peek_foward_steps(1) == '"'
-                    and self.peek_foward_steps(2) == '"'
+                    self.current_char == quote_char
+                    and self.peek_foward_steps(1) == quote_char
+                    and self.peek_foward_steps(2) == quote_char
                 ):
                     self.advance()
                     self.advance()
                     self.advance()
                     break
-                if escape_character:
-                    string += escape_characters.get(
-                        self.current_char,
-                        "\\" if self.current_char == "\\" else self.current_char,
-                    )
-                    escape_character = False
-                else:
-                    if self.current_char == "\\":
-                        escape_character = True
-                    else:
-                        string += self.current_char
-                self.advance()
             else:
-                return [], ExpectedCharError(
-                    pos_start, self.pos, '""" (closing quotes for multiline string)'
-                )
-            return Token(TT_STRING, string, pos_start, self.pos), None
-        while self.current_char is not None and (
-            self.current_char != '"' or escape_character
-        ):
-            if escape_character:
-                string += escape_characters.get(
-                    self.current_char,
-                    "\\" if self.current_char == "\\" else self.current_char,
-                )
-                escape_character = False
-            else:
-                if self.current_char == "\\":
-                    escape_character = True
-                else:
-                    string += self.current_char
+                if self.current_char == quote_char:
+                    self.advance()
+                    break
+
+            string_content.append(self.current_char)
             self.advance()
-        if self.current_char != '"':
-            return [], ExpectedCharError(
-                pos_start, self.pos, "'\"' (closing quote for string)"
+        else:
+            return None, ExpectedCharError(pos_start, self.pos, f"'{closing_sequence}'")
+
+        raw_string = "".join(string_content)
+
+        try:
+            processed_string = raw_string.encode("raw_unicode_escape").decode(
+                "unicode_escape"
             )
-        self.advance()
-        return Token(TT_STRING, string, pos_start, self.pos), None
+        except UnicodeDecodeError as e:
+            return None, IllegalCharError(
+                pos_start, self.pos, f"Invalid escape sequence in string"
+            )
+
+        return Token(TT_STRING, processed_string, pos_start, self.pos), None
 
     def peek_foward_steps(self, steps) -> str | None:
         peek_pos_idx = self.pos.idx + steps
