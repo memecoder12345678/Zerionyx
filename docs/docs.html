@@ -307,7 +307,8 @@
 
             <section id="grammar">
                 <h2>Language Grammar</h2>
-                <pre><code class="highlight-Zerionyx">PROGRAM            ::= (STATEMENT NEWLINE*)*
+                <pre><code class="highlight-Zerionyx">
+PROGRAM            ::= (STATEMENT NEWLINE*)*
 
 STATEMENT          ::= SIMPLE_STATEMENT | COMPOUND_STATEMENT
 
@@ -395,8 +396,16 @@ WHILE_EXPR        ::=
       "while" EXPR "do" STATEMENT
       NEWLINE "done"
 
+PARAM_LIST        ::=
+      PARAM ("," PARAM)* ("," DYNAMIC_PARAM)?
+      | DYNAMIC_PARAM
+
+PARAM             ::= IDENTIFIER ("=" EXPR)?
+
+DYNAMIC_PARAM     ::= IDENTIFIER "in" IDENTIFIER
+
 DEF_FUNC          ::= 
-      "defun" IDENTIFIER "(" (IDENTIFIER ("," IDENTIFIER)*)? ")"
+      "defun" IDENTIFIER "(" PARAM_LIST? ")"
       ("->" EXPR)?
       NEWLINE STATEMENT NEWLINE "done"
 
@@ -791,3 +800,4 @@ Zerionyx may be magical, but its syntax must be real.
 </body>
 
 </html>
+
