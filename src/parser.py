@@ -355,10 +355,27 @@ class Parser:
 
     def call(self):
         res = ParseResult()
-        func = res.register(self.atom())
+        atom = res.register(self.atom())
         if res.error:
             return res
+        while self.current_tok.type == TT_DOT:
+            res.register_advancement()
+            self.advance()
+            if self.current_tok.type != TT_IDENTIFIER:
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected identifier",
+                    )
+                )
+            member_name = self.current_tok.value
+            res.register_advancement()
+            self.advance()
 
+            atom = MemberAccessNode(
+                atom, member_name, atom.pos_start, self.current_tok.pos_end.copy()
+            )
         if self.current_tok.type == TT_LPAREN:
             res.register_advancement()
             self.advance()
@@ -397,8 +414,8 @@ class Parser:
 
                 res.register_advancement()
                 self.advance()
-            return res.success(CallNode(func, arg_nodes))
-        return res.success(func)
+            return res.success(CallNode(atom, arg_nodes))
+        return res.success(atom)
 
     def atom(self):
         self.skip_newlines()
