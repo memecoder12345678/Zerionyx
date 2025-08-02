@@ -45,7 +45,7 @@ namespace termcolor
         return ''
     done
 
-    defun get_code(c, b, s)
+    defun get_code(c=none, b=none, s=none)
         color_code = ''
         bg_code = ''
         style_code = ''

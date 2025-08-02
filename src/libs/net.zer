@@ -13,8 +13,8 @@ namespace net
         return ping_fp(h)
     done
 
-    defun downl(u)
-        return downl_fp(u)
+    defun downl(u, t=15)
+        return downl_fp(u, t)
     done
 
     defun get_local_ip()
