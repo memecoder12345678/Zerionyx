@@ -25,7 +25,10 @@ import hashlib
 import zlib
 
 from colorama import init, Fore, Style
+import io
 
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 init()
 ssl._create_default_https_context = ssl._create_unverified_context
 BUILTIN_FUNCTIONS = []

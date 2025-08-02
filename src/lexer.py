@@ -99,7 +99,7 @@ class Lexer:
 
                 if not self.open_bracket_stack:
                     return [], ExpectedCharError(
-                        pos_start_closer, self.pos, "')' without matching opener"
+                        pos_start_closer, self.pos, "')'"
                     )
 
                 expected_closer, _ = self.open_bracket_stack[-1]
@@ -129,7 +129,7 @@ class Lexer:
 
                 if not self.open_bracket_stack:
                     return [], ExpectedCharError(
-                        pos_start_closer, self.pos, "']' without matching opener"
+                        pos_start_closer, self.pos, "']'"
                     )
 
                 expected_closer, _ = self.open_bracket_stack[-1]
@@ -169,7 +169,7 @@ class Lexer:
 
                 if not self.open_bracket_stack:
                     return [], ExpectedCharError(
-                        pos_start_closer, self.pos, "'}' without matching opener"
+                        pos_start_closer, self.pos, "'}'"
                     )
 
                 expected_closer, _ = self.open_bracket_stack[-1]
@@ -234,51 +234,58 @@ class Lexer:
         return self._process_string_literal(quote_char)
 
     def _process_string_literal(self, quote_char):
-        string_content = []
-        pos_start = self.pos.copy()
-        self.advance()
-
-        is_multiline = False
-        closing_sequence = quote_char
-        if self.current_char == quote_char and self.peek_foward_steps(1) == quote_char:
-            is_multiline = True
-            closing_sequence = quote_char * 3
-            self.advance()
+            string_content = []
+            pos_start = self.pos.copy()
             self.advance()
 
-        while self.current_char is not None:
-            if is_multiline:
-                if (
-                    self.current_char == quote_char
-                    and self.peek_foward_steps(1) == quote_char
-                    and self.peek_foward_steps(2) == quote_char
-                ):
-                    self.advance()
-                    self.advance()
-                    self.advance()
-                    break
+            is_multiline = False
+            closing_sequence = quote_char
+            if self.current_char == quote_char and self.peek_foward_steps(1) == quote_char:
+                is_multiline = True
+                closing_sequence = quote_char * 3
+                self.advance(2)
+
+            escape_character = False
+
+            while self.current_char is not None:
+                if is_multiline:
+                    if (
+                        self.current_char == quote_char
+                        and self.peek_foward_steps(1) == quote_char
+                        and self.peek_foward_steps(2) == quote_char
+                    ):
+                        self.advance(3)
+                        break
+                else:
+                    if not escape_character and self.current_char == quote_char:
+                        self.advance()
+                        break
+
+                if escape_character:
+                    string_content.append(self.current_char)
+                    escape_character = False
+                elif self.current_char == '\\':
+                    string_content.append('\\')
+                    escape_character = True
+                else:
+                    string_content.append(self.current_char)
+
+                self.advance()
             else:
-                if self.current_char == quote_char:
-                    self.advance()
-                    break
+                return None, ExpectedCharError(
+                    pos_start, self.pos, f"Unterminated string, expected '{closing_sequence}'"
+                )
 
-            string_content.append(self.current_char)
-            self.advance()
-        else:
-            return None, ExpectedCharError(pos_start, self.pos, f"'{closing_sequence}'")
+            raw_string = "".join(string_content)
+            
+            try:
+                processed_string = raw_string.encode('raw_unicode_escape').decode('unicode_escape')
+            except UnicodeDecodeError as e:
+                return None, IllegalCharError(
+                    pos_start, self.pos, f"Invalid escape sequence in string: {e}"
+                )
 
-        raw_string = "".join(string_content)
-
-        try:
-            processed_string = raw_string.encode("raw_unicode_escape").decode(
-                "unicode_escape"
-            )
-        except UnicodeDecodeError as e:
-            return None, IllegalCharError(
-                pos_start, self.pos, f"Invalid escape sequence in string"
-            )
-
-        return Token(TT_STRING, processed_string, pos_start, self.pos), None
+            return Token(TT_STRING, processed_string, pos_start, self.pos), None
 
     def peek_foward_steps(self, steps) -> str | None:
         peek_pos_idx = self.pos.idx + steps
