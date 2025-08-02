@@ -781,7 +781,7 @@ class String(Object):
                 "Element at this index could not be removed from String because index is out of bounds",
                 self.context,
             )
-        return String(self.value[index]), None
+        return String(self.value[index.value]), None
 
     def iter(self):
         return iter([String(ch) for ch in self.value]), None
