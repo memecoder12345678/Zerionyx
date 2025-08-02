@@ -1,8 +1,12 @@
 MIT License
 
 Copyright (c) 2019 David Callanan
-Modified by angelcaru (2024)
-Modified by MemeCoder (2025)
+
+Portions of this software are derived from the works of Fus3n and David Callanan.  
+Fus3n's original project did not include a license, but was publicly stated to be free for use and modification.
+
+Modified by angelcaru (2024) — based on David Callanan's original version.  
+Further modified by MemeCoder (2025) — incorporating elements from both Fus3n’s and angelcaru’s versions.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
