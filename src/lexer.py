@@ -273,16 +273,16 @@ class Lexer:
                 self.advance()
             else:
                 return None, ExpectedCharError(
-                    pos_start, self.pos, f"Unterminated string, expected '{closing_sequence}'"
+                    pos_start, self.pos, f"'{closing_sequence}'"
                 )
 
             raw_string = "".join(string_content)
             
             try:
                 processed_string = raw_string.encode('raw_unicode_escape').decode('unicode_escape')
-            except UnicodeDecodeError as e:
+            except UnicodeDecodeError:
                 return None, IllegalCharError(
-                    pos_start, self.pos, f"Invalid escape sequence in string: {e}"
+                    pos_start, self.pos, f"Invalid escape sequence in string"
                 )
 
             return Token(TT_STRING, processed_string, pos_start, self.pos), None
