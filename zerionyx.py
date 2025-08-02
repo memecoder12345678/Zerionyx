@@ -94,12 +94,7 @@ WHILE_EXPR        ::=
       NEWLINE "done"
 
 PARAM_LIST        ::=
-      PARAM ("," PARAM)* ("," DYNAMIC_PARAM)?
-      | DYNAMIC_PARAM
-
-PARAM             ::= IDENTIFIER ("=" EXPR)?
-
-DYNAMIC_PARAM     ::= IDENTIFIER "in" IDENTIFIER
+      IDENTIFIER ("=" EXPR)? ("," IDENTIFIER ("=" EXPR)?)*
 
 DEF_FUNC          ::= 
       "defun" IDENTIFIER "(" PARAM_LIST? ")"
