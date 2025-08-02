@@ -4747,9 +4747,11 @@ def run(fn, text):
         context.private_symbol_table = private_symbol_table
         context.private_symbol_table.set("is_main", Number.true)
         result = interpreter.visit(ast.node, context)
-        value = result.value
-        result.value = clean_value(value)
-
+        if fn == "<stdin>":
+            value = result.value
+            result.value = clean_value(value)
+        else:
+            result.value = ""
         return result.value, result.error
 
     except KeyboardInterrupt:
