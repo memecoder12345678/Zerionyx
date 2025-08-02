@@ -108,33 +108,21 @@ class BaseFunction(Object):
 
         return res.success(None)
 
-    def populate_args(self, arg_names, args, defaults, dynamics, exec_ctx):
+    def populate_args(self, arg_names, args, defaults, exec_ctx):
         res = RTResult()
         for i in range(len(arg_names)):
             arg_name = arg_names[i]
-            dynamic = dynamics[i]
             arg_value = defaults[i] if i >= len(args) else args[i]
-            if dynamic is not None:
-                dynamic_context = Context(
-                    f"{self.name} (dynamic argument '{arg_name}')",
-                    exec_ctx,
-                    dynamic.pos_start.copy(),
-                )
-                dynamic_context.symbol_table = SymbolTable(exec_ctx.symbol_table)
-                dynamic_context.symbol_table.set("$", arg_value)
-                arg_value = res.register(Interpreter().visit(dynamic, dynamic_context))
-                if res.should_return():
-                    return res
             arg_value.set_context(exec_ctx)
             exec_ctx.symbol_table.set(arg_name, arg_value)
         return res.success(None)
 
-    def check_and_populate_args(self, arg_names, args, defaults, dynamics, exec_ctx):
+    def check_and_populate_args(self, arg_names, args, defaults, exec_ctx):
         res = RTResult()
         res.register(self.check_args(arg_names, args, defaults))
         if res.should_return():
             return res
-        res.register(self.populate_args(arg_names, args, defaults, dynamics, exec_ctx))
+        res.register(self.populate_args(arg_names, args, defaults, exec_ctx))
         if res.should_return():
             return res
         return res.success(None)
@@ -142,13 +130,12 @@ class BaseFunction(Object):
 
 class Function(BaseFunction):
     def __init__(
-        self, name, body_node, arg_names, defaults, dynamics, should_auto_return
+        self, name, body_node, arg_names, defaults, should_auto_return
     ):
         super().__init__(name)
         self.body_node = body_node
         self.arg_names = arg_names
         self.defaults = defaults
-        self.dynamics = dynamics
         self.should_auto_return = should_auto_return
 
     def execute(self, args):
@@ -158,7 +145,7 @@ class Function(BaseFunction):
 
         res.register(
             self.check_and_populate_args(
-                self.arg_names, args, self.defaults, self.dynamics, exec_ctx
+                self.arg_names, args, self.defaults, exec_ctx
             )
         )
         if res.should_return():
@@ -181,7 +168,6 @@ class Function(BaseFunction):
             self.body_node,
             self.arg_names,
             self.defaults,
-            self.dynamics,
             self.should_auto_return,
         )
         copy.set_context(self.context)
@@ -208,7 +194,7 @@ class BuiltInFunction(BaseFunction):
 
         res.register(
             self.check_and_populate_args(
-                method.arg_names, args, method.defaults, method.dynamics, exec_ctx
+                method.arg_names, args, method.defaults, exec_ctx
             )
         )
         if res.should_return():
@@ -232,16 +218,13 @@ class BuiltInFunction(BaseFunction):
         return f"<built-in function {self.name}>"
 
     @staticmethod
-    def set_args(arg_names, defaults=None, dynamics=None):
+    def set_args(arg_names, defaults=None):
         if defaults is None:
             defaults = [None] * len(arg_names)
-        if dynamics is None:
-            dynamics = [None] * len(arg_names)
 
         def _args(f):
             f.arg_names = arg_names
             f.defaults = defaults
-            f.dynamics = dynamics
             return f
 
         return _args
@@ -4432,7 +4415,6 @@ class Interpreter:
                 body_node,
                 arg_names,
                 defaults,
-                node.dynamics,
                 node.should_auto_return,
             )
             .set_context(context)

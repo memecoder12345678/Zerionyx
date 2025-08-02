@@ -1121,7 +1121,6 @@ class Parser:
         self.advance()
         arg_name_toks = []
         defaults = []
-        dynamics = []
         hasOptionals = False
 
         if self.current_tok.type == TT_IDENTIFIER:
@@ -1142,20 +1141,12 @@ class Parser:
             elif hasOptionals:
                 return res.failure(
                     InvalidSyntaxError(
-                        pos_start, pos_end, "Expected optional parameter."
+                        pos_start, pos_end, "Expected optional parameter"
                     )
                 )
             else:
                 defaults.append(None)
 
-            if self.current_tok.matches(TT_KEYWORD, "in"):
-                res.register_advancement()
-                self.advance()
-                dynamics.append(res.register(self.expr()))
-                if res.error:
-                    return res
-            else:
-                dynamics.append(None)
 
             while self.current_tok.type == TT_COMMA:
                 res.register_advancement()
@@ -1193,14 +1184,6 @@ class Parser:
                 else:
                     defaults.append(None)
 
-                if self.current_tok.matches(TT_KEYWORD, "in"):
-                    res.register_advancement()
-                    self.advance()
-                    dynamics.append(res.register(self.expr()))
-                    if res.error:
-                        return res
-                else:
-                    dynamics.append(None)
 
             if self.current_tok.type != TT_RPAREN:
                 return res.failure(
@@ -1232,7 +1215,7 @@ class Parser:
                 return res
 
             return res.success(
-                FuncDefNode(var_name_tok, arg_name_toks, defaults, dynamics, body, True)
+                FuncDefNode(var_name_tok, arg_name_toks, defaults, body, True)
             )
 
         if self.current_tok.type != TT_NEWLINE:
@@ -1264,7 +1247,7 @@ class Parser:
         self.advance()
 
         return res.success(
-            FuncDefNode(var_name_tok, arg_name_toks, defaults, dynamics, body, False)
+            FuncDefNode(var_name_tok, arg_name_toks, defaults, body, False)
         )
 
     def bin_op(self, func_a, ops, func_b=None):
