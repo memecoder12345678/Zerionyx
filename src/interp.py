@@ -27,8 +27,8 @@ import zlib
 from colorama import init, Fore, Style
 import io
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 init()
 ssl._create_default_https_context = ssl._create_unverified_context
 BUILTIN_FUNCTIONS = []
@@ -66,13 +66,89 @@ def load_module(fn, interpreter, context):
         sys.exit(2)
 
 
-class Function(BaseFunction):
-    __slots__ = ("body_node", "arg_names", "should_auto_return")
+class BaseFunction(Object):
+    def __init__(self, name):
+        super().__init__()
+        self.name = name or "<anonymous>"
 
-    def __init__(self, name, body_node, arg_names, should_auto_return):
+    def set_context(self, context=None):
+        if hasattr(self, "context") and self.context:
+            return self
+        return super().set_context(context)
+
+    def generate_new_context(self):
+        new_context = Context(self.name, self.context, self.pos_start)
+        new_context.symbol_table = SymbolTable(new_context.parent.symbol_table)
+        return new_context
+
+    def check_args(self, arg_names, args, defaults):
+        res = RTResult()
+
+        if len(args) > len(arg_names):
+            return res.failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"{len(args) - len(arg_names)} too many args passed into {self}",
+                    self.context,
+                )
+            )
+
+        if len(args) < len(arg_names) - len(
+            list(filter(lambda default: default is not None, defaults))
+        ):
+            return res.failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"{(len(arg_names) - len(list(filter(lambda default: default is not None, defaults)))) - len(args)} too few args passed into {self}",
+                    self.context,
+                )
+            )
+
+        return res.success(None)
+
+    def populate_args(self, arg_names, args, defaults, dynamics, exec_ctx):
+        res = RTResult()
+        for i in range(len(arg_names)):
+            arg_name = arg_names[i]
+            dynamic = dynamics[i]
+            arg_value = defaults[i] if i >= len(args) else args[i]
+            if dynamic is not None:
+                dynamic_context = Context(
+                    f"{self.name} (dynamic argument '{arg_name}')",
+                    exec_ctx,
+                    dynamic.pos_start.copy(),
+                )
+                dynamic_context.symbol_table = SymbolTable(exec_ctx.symbol_table)
+                dynamic_context.symbol_table.set("$", arg_value)
+                arg_value = res.register(Interpreter().visit(dynamic, dynamic_context))
+                if res.should_return():
+                    return res
+            arg_value.set_context(exec_ctx)
+            exec_ctx.symbol_table.set(arg_name, arg_value)
+        return res.success(None)
+
+    def check_and_populate_args(self, arg_names, args, defaults, dynamics, exec_ctx):
+        res = RTResult()
+        res.register(self.check_args(arg_names, args, defaults))
+        if res.should_return():
+            return res
+        res.register(self.populate_args(arg_names, args, defaults, dynamics, exec_ctx))
+        if res.should_return():
+            return res
+        return res.success(None)
+
+
+class Function(BaseFunction):
+    def __init__(
+        self, name, body_node, arg_names, defaults, dynamics, should_auto_return
+    ):
         super().__init__(name)
         self.body_node = body_node
         self.arg_names = arg_names
+        self.defaults = defaults
+        self.dynamics = dynamics
         self.should_auto_return = should_auto_return
 
     def execute(self, args):
@@ -80,7 +156,11 @@ class Function(BaseFunction):
         interpreter = Interpreter()
         exec_ctx = self.generate_new_context()
 
-        res.register(self.check_and_populate_args(self.arg_names, args, exec_ctx))
+        res.register(
+            self.check_and_populate_args(
+                self.arg_names, args, self.defaults, self.dynamics, exec_ctx
+            )
+        )
         if res.should_return():
             return res
 
@@ -91,27 +171,31 @@ class Function(BaseFunction):
         ret_value = (
             (value if self.should_auto_return else None)
             or res.func_return_value
-            or NoneObject.none
+            or Number.null
         )
         return res.success(ret_value)
 
     def copy(self):
         copy = Function(
-            self.name, self.body_node, self.arg_names, self.should_auto_return
+            self.name,
+            self.body_node,
+            self.arg_names,
+            self.defaults,
+            self.dynamics,
+            self.should_auto_return,
         )
         copy.set_context(self.context)
         copy.set_pos(self.pos_start, self.pos_end)
         return copy
 
+    def __repr__(self):
+        return f"<function {self.name}>"
+
     def type(self):
         return "<func>"
 
-    def __repr__(self):
-        return f"<func {self.name}>"
-
 
 class BuiltInFunction(BaseFunction):
-
     def __init__(self, name):
         super().__init__(name)
 
@@ -120,9 +204,13 @@ class BuiltInFunction(BaseFunction):
         exec_ctx = self.generate_new_context()
 
         method_name = f"execute_{self.name}"
-        method = getattr(self, method_name, self.no_visit_method)
+        method = getattr(self, method_name, self.no_execute_method)
 
-        res.register(self.check_and_populate_args(method.arg_names, args, exec_ctx))
+        res.register(
+            self.check_and_populate_args(
+                method.arg_names, args, method.defaults, method.dynamics, exec_ctx
+            )
+        )
         if res.should_return():
             return res
 
@@ -131,7 +219,7 @@ class BuiltInFunction(BaseFunction):
             return res
         return res.success(return_value)
 
-    def no_visit_method(self, _, __):
+    def no_execute_method(self, _, __):
         raise Exception(f"No execute_{self.name} method defined")
 
     def copy(self):
@@ -141,8 +229,24 @@ class BuiltInFunction(BaseFunction):
         return copy
 
     def __repr__(self):
-        return f"<built-in func {self.name}>"
+        return f"<built-in function {self.name}>"
 
+    @staticmethod
+    def set_args(arg_names, defaults=None, dynamics=None):
+        if defaults is None:
+            defaults = [None] * len(arg_names)
+        if dynamics is None:
+            dynamics = [None] * len(arg_names)
+
+        def _args(f):
+            f.arg_names = arg_names
+            f.defaults = defaults
+            f.dynamics = dynamics
+            return f
+
+        return _args
+
+    @set_args(["value"], [String("")])
     def execute_println(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
         if isinstance(value, String):
@@ -152,8 +256,7 @@ class BuiltInFunction(BaseFunction):
         print(repr(exec_ctx.symbol_table.get("value")))
         return RTResult().success(NoneObject.none)
 
-    execute_println.arg_names = ["value"]
-
+    @set_args(["value"], [String("")])
     def execute_print(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
         if isinstance(value, String):
@@ -163,8 +266,7 @@ class BuiltInFunction(BaseFunction):
         print(repr(exec_ctx.symbol_table.get("value")), end="")
         return RTResult().success(NoneObject.none)
 
-    execute_print.arg_names = ["value"]
-
+    @set_args(["prompt"], [String("")])
     def execute_input(self, exec_ctx):
         prompt = exec_ctx.symbol_table.get("prompt")
         if not isinstance(prompt, String):
@@ -179,8 +281,7 @@ class BuiltInFunction(BaseFunction):
         text = input(prompt.value)
         return RTResult().success(String(text))
 
-    execute_input.arg_names = ["prompt"]
-
+    @set_args(["prompt"], [String("")])
     def execute_get_password(self, exec_ctx):
         prompt = exec_ctx.symbol_table.get("prompt")
         if not isinstance(prompt, String):
@@ -195,58 +296,49 @@ class BuiltInFunction(BaseFunction):
         pass_ = getpass(prompt.value)
         return RTResult().success(String(pass_))
 
-    execute_get_password.arg_names = ["prompt"]
-
+    @set_args([])
     def execute_clear(self, _):
         os.system("cls" if os.name == "nt" else "clear")
         return RTResult().success(NoneObject.none)
 
-    execute_clear.arg_names = []
-
+    @set_args(["value"])
     def execute_type(self, exec_ctx):
         data = exec_ctx.symbol_table.get("value")
         return RTResult().success(String(data.type()))
 
-    execute_type.arg_names = ["value"]
-
+    @set_args(["value"])
     def execute_is_none(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
         return RTResult().success(
             Number.true if isinstance(value, NoneObject) else Number.false
         )
 
-    execute_is_none.arg_names = ["value"]
-
+    @set_args(["value"])
     def execute_is_num(self, exec_ctx):
         is_number = isinstance(exec_ctx.symbol_table.get("value"), Number)
         return RTResult().success(Number.true if is_number else Number.false)
 
-    execute_is_num.arg_names = ["value"]
-
+    @set_args(["value"])
     def execute_is_bool(self, exec_ctx):
         is_bool = isinstance(exec_ctx.symbol_table.get("value"), Bool)
         return RTResult().success(Number.true if is_bool else Number.false)
 
-    execute_is_bool.arg_names = ["value"]
-
+    @set_args(["value"])
     def execute_is_str(self, exec_ctx):
         is_str = isinstance(exec_ctx.symbol_table.get("value"), String)
         return RTResult().success(Number.true if is_str else Number.false)
 
-    execute_is_str.arg_names = ["value"]
-
+    @set_args(["value"])
     def execute_is_list(self, exec_ctx):
         is_number = isinstance(exec_ctx.symbol_table.get("value"), List)
         return RTResult().success(Number.true if is_number else Number.false)
 
-    execute_is_list.arg_names = ["value"]
-
+    @set_args(["value"])
     def execute_is_func(self, exec_ctx):
         is_number = isinstance(exec_ctx.symbol_table.get("value"), BaseFunction)
         return RTResult().success(Number.true if is_number else Number.false)
 
-    execute_is_func.arg_names = ["value"]
-
+    @set_args(["value", "reverse"], [None, Number.false])
     def execute_sort_fp(self, exec_ctx):
         lst = exec_ctx.symbol_table.get("value")
         reverse = exec_ctx.symbol_table.get("reverse")
@@ -284,8 +376,7 @@ class BuiltInFunction(BaseFunction):
             )
         return RTResult().success(lst)
 
-    execute_sort_fp.arg_names = ["value", "reverse"]
-
+    @set_args(["object", "value"])
     def execute_append(self, exec_ctx):
         obj_ = exec_ctx.symbol_table.get("object")
         value = exec_ctx.symbol_table.get("value")
@@ -303,8 +394,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_append.arg_names = ["object", "value"]
-
+    @set_args(["list", "index"])
     def execute_pop(self, exec_ctx):
         list_ = exec_ctx.symbol_table.get("list")
         index = exec_ctx.symbol_table.get("index")
@@ -341,8 +431,7 @@ class BuiltInFunction(BaseFunction):
             )
         return RTResult().success(element)
 
-    execute_pop.arg_names = ["list", "index"]
-
+    @set_args(["listA", "listB"])
     def execute_extend(self, exec_ctx: Context):
         listA = exec_ctx.symbol_table.get("listA")
         listB = exec_ctx.symbol_table.get("listB")
@@ -370,8 +459,7 @@ class BuiltInFunction(BaseFunction):
         listA.value.extend(listB.value)
         return RTResult().success(NoneObject.none)
 
-    execute_extend.arg_names = ["listA", "listB"]
-
+    @set_args(["list", "index", "element"])
     def execute_insert(self, exec_ctx):
         list_ = exec_ctx.symbol_table.get("list_")
         element = exec_ctx.symbol_table.get("element")
@@ -398,12 +486,12 @@ class BuiltInFunction(BaseFunction):
         list_.value.insert(int(index.value), element)
         return RTResult().success(NoneObject.none)
 
-    execute_insert.arg_names = ["list_", "index", "element"]
-
+    @set_args(["string", "value", "with", "c"], [None, None, None, Number(-1)])
     def execute_replace_fp(self, exec_ctx):
         string = exec_ctx.symbol_table.get("string")
         value = exec_ctx.symbol_table.get("value")
         with_val = exec_ctx.symbol_table.get("with")
+        c = exec_ctx.symbol_table.get("c")
 
         if not isinstance(string, String):
             return RTResult().failure(
@@ -432,11 +520,19 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        val = string.value.replace(value.value, with_val.value)
+        if not isinstance(with_val, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Fourth argument of 'replace' must be a string",
+                    exec_ctx,
+                )
+            )
+        val = string.value.replace(value.value, with_val.value, c)
         return RTResult().success(String(val))
 
-    execute_replace_fp.arg_names = ["string", "value", "with"]
-
+    @set_args(["value"])
     def execute_len(self, exec_ctx):
         value_ = exec_ctx.symbol_table.get("value")
 
@@ -452,8 +548,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_len.arg_names = ["value"]
-
+    @set_args(["seconds"])
     def execute_sleep_fp(self, exec_ctx):
         seconds = exec_ctx.symbol_table.get("seconds")
 
@@ -470,14 +565,14 @@ class BuiltInFunction(BaseFunction):
         time.sleep(seconds.value)
         return RTResult().success(NoneObject.none)
 
-    execute_sleep_fp.arg_names = ["seconds"]
-
+    @set_args(["value"], [0])
     def execute_exit_fp(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
         sys.exit(int(value.value))
 
-    execute_exit_fp.arg_names = ["value"]
-
+    @set_args(
+        ["l", "start", "end", "step"], [None, Number.none, Number.none, Number.none]
+    )
     def execute_slice(self, exec_ctx):
         l = exec_ctx.symbol_table.get("l")
         start = exec_ctx.symbol_table.get("start")
@@ -537,8 +632,7 @@ class BuiltInFunction(BaseFunction):
         sliced_l = l.value[a:b:s]
         return RTResult().success(List(sliced_l))
 
-    execute_slice.arg_names = ["l", "start", "end", "step"]
-
+    @set_args(["file_path"])
     def execute_open_fp(self, exec_ctx):
         file_path = exec_ctx.symbol_table.get("file_path")
 
@@ -555,8 +649,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_open_fp.arg_names = ["file_path"]
-
+    @set_args(["file", "mode"])
     def execute_read_fp(self, exec_ctx):
         file = exec_ctx.symbol_table.get("file")
         mode = exec_ctx.symbol_table.get("mode")
@@ -588,8 +681,7 @@ class BuiltInFunction(BaseFunction):
                     )
                 )
 
-    execute_read_fp.arg_names = ["file", "mode"]
-
+    @set_args(["file", "mode", "text"])
     def execute_write_fp(self, exec_ctx):
         file = exec_ctx.symbol_table.get("file")
         mode = exec_ctx.symbol_table.get("mode")
@@ -609,8 +701,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_write_fp.arg_names = ["file", "mode", "text"]
-
+    @set_args(["file_path"])
     def execute_exists_fp(self, exec_ctx):
         file_path = exec_ctx.symbol_table.get("file_path")
 
@@ -644,13 +735,11 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_exists_fp.arg_names = ["file_path"]
-
+    @set_args([])
     def execute_time_fp(self, _):
         return RTResult().success(Number(time.time()))
 
-    execute_time_fp.arg_names = []
-
+    @set_args(["name"])
     def execute_get_env_fp(self, exec_ctx):
         name = exec_ctx.symbol_table.get("name")
 
@@ -678,8 +767,7 @@ class BuiltInFunction(BaseFunction):
 
         return RTResult().success(String(value))
 
-    execute_get_env_fp.arg_names = ["name"]
-
+    @set_args(["name", "value"])
     def execute_set_env_fp(self, exec_ctx):
         name = exec_ctx.symbol_table.get("name")
         value = exec_ctx.symbol_table.get("value")
@@ -717,8 +805,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_set_env_fp.arg_names = ["name", "value"]
-
+    @set_args([])
     def execute_get_cdir_fp(self, exec_ctx):
         try:
             return RTResult().success(String(os.getcwd()))
@@ -732,8 +819,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_get_cdir_fp.arg_names = []
-
+    @set_args(["name"])
     def execute_set_cdir_fp(self, exec_ctx):
         name = exec_ctx.symbol_table.get("name")
 
@@ -770,13 +856,11 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_set_cdir_fp.arg_names = ["name"]
-
+    @set_args([])
     def execute_rand_fp(self, _):
         return RTResult().success(Number(random.random()))
 
-    execute_rand_fp.arg_names = []
-
+    @set_args(["min", "max"])
     def execute_rand_int_fp(self, exec_ctx):
         min = exec_ctx.symbol_table.get("min")
         max = exec_ctx.symbol_table.get("max")
@@ -805,8 +889,7 @@ class BuiltInFunction(BaseFunction):
             Number(random.randint(int(min.value), int(max.value)))
         )
 
-    execute_rand_int_fp.arg_names = ["min", "max"]
-
+    @set_args(["min", "max"])
     def execute_rand_float_fp(self, exec_ctx):
         min = exec_ctx.symbol_table.get("min")
         max = exec_ctx.symbol_table.get("max")
@@ -833,8 +916,7 @@ class BuiltInFunction(BaseFunction):
 
         return RTResult().success(Number(random.randint(min.value, max.value)))
 
-    execute_rand_float_fp.arg_names = ["min", "max"]
-
+    @set_args(["arr"])
     def execute_rand_choice_fp(self, exec_ctx):
         arr = exec_ctx.symbol_table.get("arr")
 
@@ -860,13 +942,11 @@ class BuiltInFunction(BaseFunction):
 
         return RTResult().success(arr.value[random.randrange(0, len(arr.value) - 1)])
 
-    execute_rand_choice_fp.arg_names = ["arr"]
-
+    @set_args(["value"])
     def execute_to_str(self, exec_ctx):
         return RTResult().success(String(str(exec_ctx.symbol_table.get("value"))))
 
-    execute_to_str.arg_names = ["value"]
-
+    @set_args(["value", "supress_error"], [None, Number.false])
     def execute_to_int(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
         supress_error = exec_ctx.symbol_table.get("supress_error")
@@ -924,8 +1004,7 @@ class BuiltInFunction(BaseFunction):
                     )
                 )
 
-    execute_to_int.arg_names = ["value", "supress_error"]
-
+    @set_args(["value", "supress_error"], [None, Number.false])
     def execute_to_float(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
         supress_error = exec_ctx.symbol_table.get("supress_error")
@@ -984,8 +1063,7 @@ class BuiltInFunction(BaseFunction):
                     )
                 )
 
-    execute_to_float.arg_names = ["value", "supress_error"]
-
+    @set_args(["sep", "value"])
     def execute_join_fp(self, exec_ctx):
         sep = exec_ctx.symbol_table.get("sep")
         iterables = exec_ctx.symbol_table.get("value")
@@ -1022,8 +1100,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_join_fp.arg_names = ["sep", "value"]
-
+    @set_args(["command"])
     def execute_system_fp(self, exec_ctx):
         command = exec_ctx.symbol_table.get("command")
 
@@ -1051,8 +1128,7 @@ class BuiltInFunction(BaseFunction):
 
         return RTResult().success(NoneObject.none)
 
-    execute_system_fp.arg_names = ["command"]
-
+    @set_args(["command"])
     def execute_osystem_fp(self, exec_ctx):
         cmd = exec_ctx.symbol_table.get("cmd")
         result = subprocess.run(
@@ -1072,8 +1148,7 @@ class BuiltInFunction(BaseFunction):
             )
         )
 
-    execute_osystem_fp.arg_names = ["command"]
-
+    @set_args(["message", "err_type"], [None, String("RT")])
     def execute_panic(self, exec_ctx):
         msg = exec_ctx.symbol_table.get("message")
         err_type = exec_ctx.symbol_table.get("err_type")
@@ -1126,8 +1201,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_panic.arg_names = ["message", "err_type"]
-
+    @set_args(["string", "sep"], [None, String("")])
     def execute_split_fp(self, exec_ctx):
         value = exec_ctx.symbol_table.get("string")
         sep = exec_ctx.symbol_table.get("sep")
@@ -1161,8 +1235,7 @@ class BuiltInFunction(BaseFunction):
             List([String(string) for string in value.value.split(sep.value)])
         )
 
-    execute_split_fp.arg_names = ["string", "sep"]
-
+    @set_args(["string", "sep"], [None, String(" ")])
     def execute_strip_fp(self, exec_ctx):
         value = exec_ctx.symbol_table.get("string")
         sep = exec_ctx.symbol_table.get("sep")
@@ -1188,8 +1261,7 @@ class BuiltInFunction(BaseFunction):
             )
         return RTResult().success(String(value.value.strip(sep.value)))
 
-    execute_strip_fp.arg_names = ["string", "sep"]
-
+    @set_args(["string"])
     def execute_to_upper_fp(self, exec_ctx):
         value = exec_ctx.symbol_table.get("string")
 
@@ -1204,8 +1276,7 @@ class BuiltInFunction(BaseFunction):
             )
         return RTResult().success(String(value.value.upper()))
 
-    execute_to_upper_fp.arg_names = ["string"]
-
+    @set_args(["string"])
     def execute_to_lower_fp(self, exec_ctx):
         value = exec_ctx.symbol_table.get("string")
 
@@ -1220,8 +1291,7 @@ class BuiltInFunction(BaseFunction):
             )
         return RTResult().success(String(value.value.lower()))
 
-    execute_to_lower_fp.arg_names = ["string"]
-
+    @set_args(["time"])
     def execute_ctime_fp(self, exec_ctx):
         value = exec_ctx.symbol_table.get("time")
         if not isinstance(value, Number):
@@ -1235,8 +1305,7 @@ class BuiltInFunction(BaseFunction):
             )
         return RTResult().success(String(time.ctime(int(value.value))))
 
-    execute_ctime_fp.arg_names = ["time"]
-
+    @set_args(["dir_path"], [String(".")])
     def execute_list_dir_fp(self, exec_ctx):
         value = exec_ctx.symbol_table.get("dir_path")
         if not isinstance(value, String):
@@ -1271,8 +1340,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_list_dir_fp.arg_names = ["dir_path"]
-
+    @set_args(["dir_path"])
     def execute_mkdir_fp(self, exec_ctx):
         value = exec_ctx.symbol_table.get("dir_path")
         if not isinstance(value, String):
@@ -1296,8 +1364,7 @@ class BuiltInFunction(BaseFunction):
         os.mkdir(value.value)
         return RTResult().success(NoneObject.none)
 
-    execute_mkdir_fp.arg_names = ["dir_path"]
-
+    @set_args(["file_path"])
     def execute_remove_fp(self, exec_ctx):
         value = exec_ctx.symbol_table.get("file_path")
         if not isinstance(value, String):
@@ -1331,8 +1398,7 @@ class BuiltInFunction(BaseFunction):
             )
         return RTResult().success(NoneObject.none)
 
-    execute_remove_fp.arg_names = ["file_path"]
-
+    @set_args(["old_file_path", "new_file_path"])
     def execute_rename_fp(self, exec_ctx):
         value1 = exec_ctx.symbol_table.get("old_file_path")
         value2 = exec_ctx.symbol_table.get("new_file_path")
@@ -1377,8 +1443,7 @@ class BuiltInFunction(BaseFunction):
             )
         return RTResult().success(NoneObject.none)
 
-    execute_rename_fp.arg_names = ["old_file_path", "new_file_path"]
-
+    @set_args(["dir_path"])
     def execute_rmtree_fp(self, exec_ctx):
         value1 = exec_ctx.symbol_table.get("dir_path")
         if not isinstance(value1, String):
@@ -1412,8 +1477,7 @@ class BuiltInFunction(BaseFunction):
             )
         return RTResult().success(NoneObject.none)
 
-    execute_rmtree_fp.arg_names = ["dir_path"]
-
+    @set_args(["src_path", "dst_path"])
     def execute_copy_fp(self, exec_ctx):
         value1 = exec_ctx.symbol_table.get("src_path")
         value2 = exec_ctx.symbol_table.get("dst_path")
@@ -1457,8 +1521,7 @@ class BuiltInFunction(BaseFunction):
             )
         return RTResult().success(NoneObject.none)
 
-    execute_copy_fp.arg_names = ["src_path", "dst_path"]
-
+    @set_args(["text"])
     def execute_keyboard_write_fp(self, exec_ctx):
         text = exec_ctx.symbol_table.get("text")
 
@@ -1473,7 +1536,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
-            import keyboard
+            import keyboard # type: ignore
 
             keyboard.write(text.value)
         except ImportError:
@@ -1488,8 +1551,7 @@ class BuiltInFunction(BaseFunction):
 
         return RTResult().success(NoneObject.none)
 
-    execute_keyboard_write_fp.arg_names = ["text"]
-
+    @set_args(["key"])
     def execute_keyboard_press_fp(self, exec_ctx):
         key = exec_ctx.symbol_table.get("key")
 
@@ -1504,7 +1566,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
-            import keyboard
+            import keyboard # type: ignore
 
             keyboard.press(key.value)
         except ImportError:
@@ -1519,8 +1581,7 @@ class BuiltInFunction(BaseFunction):
 
         return RTResult().success(NoneObject.none)
 
-    execute_keyboard_press_fp.arg_names = ["key"]
-
+    @set_args(["key"])
     def execute_keyboard_release_fp(self, exec_ctx):
         key = exec_ctx.symbol_table.get("key")
 
@@ -1535,7 +1596,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
-            import keyboard
+            import keyboard # type: ignore
 
             keyboard.release(key.value)
         except ImportError:
@@ -1550,8 +1611,7 @@ class BuiltInFunction(BaseFunction):
 
         return RTResult().success(NoneObject.none)
 
-    execute_keyboard_release_fp.arg_names = ["key"]
-
+    @set_args(["key"])
     def execute_keyboard_wait_fp(self, exec_ctx):
         key = exec_ctx.symbol_table.get("key")
 
@@ -1566,7 +1626,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
-            import keyboard
+            import keyboard # type: ignore
 
             keyboard.wait(key.value)
         except ImportError:
@@ -1581,8 +1641,7 @@ class BuiltInFunction(BaseFunction):
 
         return RTResult().success(NoneObject.none)
 
-    execute_keyboard_wait_fp.arg_names = ["key"]
-
+    @set_args(["key"])
     def execute_keyboard_is_pressed_fp(self, exec_ctx):
         key = exec_ctx.symbol_table.get("key")
 
@@ -1597,7 +1656,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
-            import keyboard
+            import keyboard # type: ignore
 
             is_pressed = keyboard.is_pressed(key.value)
             return RTResult().success(Number.true if is_pressed else Number.false)
@@ -1611,8 +1670,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_keyboard_is_pressed_fp.arg_names = ["key"]
-
+    @set_args(["func", "args"], [None, List([])])
     def execute_thread_start_fp(self, exec_ctx):
         func = exec_ctx.symbol_table.get("func")
         args = exec_ctx.symbol_table.get("args")
@@ -1675,8 +1733,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_thread_start_fp.arg_names = ["func", "args"]
-
+    @set_args(["seconds"])
     def execute_thread_sleep_fp(self, exec_ctx):
         seconds = exec_ctx.symbol_table.get("seconds")
 
@@ -1705,8 +1762,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_thread_sleep_fp.arg_names = ["seconds"]
-
+    @set_args(["thread", "timeout"], [None, Number(15)])
     def execute_thread_join_fp(self, exec_ctx):
         thread = exec_ctx.symbol_table.get("thread")
         timeout = exec_ctx.symbol_table.get("timeout")
@@ -1744,8 +1800,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_thread_join_fp.arg_names = ["thread", "timeout"]
-
+    @set_args(["thread"])
     def execute_thread_is_alive_fp(self, exec_ctx):
         thread = exec_ctx.symbol_table.get("thread")
 
@@ -1761,8 +1816,7 @@ class BuiltInFunction(BaseFunction):
 
         return RTResult().success(Number.true if thread.is_alive() else Number.false)
 
-    execute_thread_is_alive_fp.arg_names = ["thread"]
-
+    @set_args(["thread"])
     def execute_thread_cancel_fp(self, exec_ctx):
         thread = exec_ctx.symbol_table.get("thread")
 
@@ -1789,16 +1843,14 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_thread_cancel_fp.arg_names = ["thread"]
-
+    @set_args(["thread"])
     def execute_is_thread(self, exec_ctx):
         thread = exec_ctx.symbol_table.get("thread")
         return RTResult().success(
             Number.true if isinstance(thread, ThreadWrapper) else Number.false
         )
 
-    execute_is_thread.arg_names = ["thread"]
-
+    @set_args(["value"])
     def execute_ord_fp(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
 
@@ -1824,8 +1876,7 @@ class BuiltInFunction(BaseFunction):
 
         return RTResult().success(Number(ord(value.value)))
 
-    execute_ord_fp.arg_names = ["value"]
-
+    @set_args(["value"])
     def execute_chr_fp(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
 
@@ -1851,8 +1902,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_chr_fp.arg_names = ["value"]
-
+    @set_args([])
     def execute_get_ip_fp(self, exec_ctx):
         try:
             with urllib.request.urlopen("https://api.ipify.org") as res_:
@@ -1867,8 +1917,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_get_ip_fp.arg_names = []
-
+    @set_args([])
     def execute_get_mac_fp(self, exec_ctx):
         try:
             mac = uuid.getnode()
@@ -1886,8 +1935,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_get_mac_fp.arg_names = []
-
+    @set_args(["host"])
     def execute_ping_fp(self, exec_ctx):
         host = exec_ctx.symbol_table.get("host")
         if not isinstance(host, String):
@@ -1902,22 +1950,21 @@ class BuiltInFunction(BaseFunction):
         try:
             t0 = time.time()
             subprocess.check_output(
-                ["ping", "-n", "1", host], stderr=subprocess.DEVnone
+                ["ping", "-n", "1", host.value], stderr=subprocess.DEVNULL
             )
             t1 = time.time()
-            return [str(round((t1 - t0) * 1000)) + " ms"]
+            return RTResult().success(String(str(round((t1 - t0) * 1000)) + " ms"))
         except:
             return RTResult().failure(
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    f"Failed to ping {host}",
+                    f"Failed to ping {host.value}",
                     exec_ctx,
                 )
             )
 
-    execute_ping_fp.arg_names = ["host"]
-
+    @set_args(["url", "timeout"], [None, Number(15)])
     def execute_downl_fp(self, exec_ctx):
         def sanitize_filename(filename):
             filename = unquote(filename)
@@ -1964,7 +2011,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    f"HTTP Error {e.code}: Failed to download {url}",
+                    f"HTTP Error {e.code}: Failed to download {url.value}",
                     exec_ctx,
                 )
             )
@@ -1973,13 +2020,12 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    f"Failed to download {url}: {str(e)}",
+                    f"Failed to download {url.value}: {str(e)}",
                     exec_ctx,
                 )
             )
 
-    execute_downl_fp.arg_names = ["url", "timeout"]
-
+    @set_args([])
     def execute_get_local_ip_fp(self, exec_ctx):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -1997,8 +2043,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_get_local_ip_fp.arg_names = []
-
+    @set_args([])
     def execute_get_hostname_fp(self, exec_ctx):
         try:
             return RTResult().success(String(socket.gethostname()))
@@ -2012,8 +2057,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_get_hostname_fp.arg_names = []
-
+    @set_args(["text"])
     def execute_md5_fp(self, exec_ctx):
         text = exec_ctx.symbol_table.get("text")
         if not isinstance(text, Bytes):
@@ -2025,10 +2069,9 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(Bytes(hashlib.md5(text.value).hexdigest()))
+        return RTResult().success(Bytes(hashlib.md5(text.value).hexdigest().encode()))
 
-    execute_md5_fp.arg_names = ["text"]
-
+    @set_args(["text"])
     def execute_sha1_fp(self, exec_ctx):
         text = exec_ctx.symbol_table.get("text")
         if not isinstance(text, Bytes):
@@ -2040,10 +2083,9 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(Bytes(hashlib.sha1(text.value).hexdigest()))
+        return RTResult().success(Bytes(hashlib.sha1(text.value).hexdigest().encode()))
 
-    execute_sha1_fp.arg_names = ["text"]
-
+    @set_args(["text"])
     def execute_sha256_fp(self, exec_ctx):
         text = exec_ctx.symbol_table.get("text")
         if not isinstance(text, Bytes):
@@ -2055,10 +2097,11 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(Bytes(hashlib.sha256(text.value).hexdigest()))
+        return RTResult().success(
+            Bytes(hashlib.sha256(text.value).hexdigest().encode())
+        )
 
-    execute_sha256_fp.arg_names = ["text"]
-
+    @set_args(["text"])
     def execute_sha512_fp(self, exec_ctx):
         text = exec_ctx.symbol_table.get("text")
         if not isinstance(text, Bytes):
@@ -2070,10 +2113,11 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(Bytes(hashlib.sha512(text.value).hexdigest()))
+        return RTResult().success(
+            Bytes(hashlib.sha512(text.value).hexdigest().encode())
+        )
 
-    execute_sha512_fp.arg_names = ["text"]
-
+    @set_args(["text"])
     def execute_crc32_fp(self, exec_ctx):
         text = exec_ctx.symbol_table.get("text")
         if not isinstance(text, Bytes):
@@ -2086,11 +2130,10 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         return RTResult().success(
-            Bytes(format(zlib.crc32(text.value) & 0xFFFFFFFF, "08x"))
+            Bytes(format(zlib.crc32(text.value) & 0xFFFFFFFF, "08x").encode())
         )
 
-    execute_crc32_fp.arg_names = ["text"]
-
+    @set_args(["text", "substring"])
     def execute_find_fp(self, exec_ctx):
         text = exec_ctx.symbol_table.get("text")
         substring = exec_ctx.symbol_table.get("substring")
@@ -2120,8 +2163,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(NoneObject.none)
         return RTResult().success(Number(index))
 
-    execute_find_fp.arg_names = ["text", "substring"]
-
+    @set_args(["func", "args"], [None, List([])])
     def execute_is_err(self, exec_ctx):
         func = exec_ctx.symbol_table.get("func")
         args = exec_ctx.symbol_table.get("args")
@@ -2210,8 +2252,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_is_err.arg_names = ["func", "args"]
-
+    @set_args(["path"])
     def execute_is_file_fp(self, exec_ctx):
         path = exec_ctx.symbol_table.get("path")
         if not isinstance(path, String):
@@ -2227,72 +2268,61 @@ class BuiltInFunction(BaseFunction):
             Number.true if os.path.isfile(path.value) else Number.false
         )
 
-    execute_is_file_fp.arg_names = ["path"]
-
+    @set_args(["a"])
     def execute_sqrt_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
         return RTResult().success(Number(math.sqrt(a.value)))
 
-    execute_sqrt_fp.arg_names = ["a"]
-
+    @set_args(["a"])
     def execute_abs_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
         return RTResult().success(Number(abs(a.value)))
 
-    execute_abs_fp.arg_names = ["a"]
-
+    @set_args(["x"])
     def execute_sin_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.sin(x.value)))
 
-    execute_sin_fp.arg_names = ["x"]
-
+    @set_args(["x"])
     def execute_cos_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.cos(x.value)))
 
-    execute_cos_fp.arg_names = ["x"]
-
+    @set_args(["x"])
     def execute_tan_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.tan(x.value)))
 
-    execute_tan_fp.arg_names = ["x"]
-
+    @set_args(["n"])
     def execute_fact_fp(self, exec_ctx):
         n = exec_ctx.symbol_table.get("n")
         return RTResult().success(Number(math.factorial(n.value)))
 
-    execute_fact_fp.arg_names = ["n"]
-
+    @set_args(["a", "b"])
     def execute_gcd_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
         b = exec_ctx.symbol_table.get("b")
         return RTResult().success(Number(math.gcd(a.value, b.value)))
 
-    execute_gcd_fp.arg_names = ["a", "b"]
-
+    @set_args(["a", "b"])
     def execute_lcm_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
         b = exec_ctx.symbol_table.get("b")
         return RTResult().success(Number(math.lcm(a.value, b.value)))
 
-    execute_fact_fp.arg_names = ["a", "b"]
-
+    @set_args(["n"])
     def execute_fib_fp(self, exec_ctx):
         n = exec_ctx.symbol_table.get("n")
         if n.value == 0:
             return RTResult().success(Number(0))
         a, b = 0, 1
-        for _ in range(n.value + 1):
-            a, b = b, a + b  # this is the most Pythonic bullshit I've ever seen 🐍
-        return RTResult().success(Number(b))
+        for _ in range(n.value):
+            a, b = b, a + b
+        return RTResult().success(Number(a))
 
-    execute_fib_fp.arg_names = ["n"]
-
+    @set_args(["n"])
     def execute_is_prime_fp(self, exec_ctx):
-        n = exec_ctx.symbol_table.get("n")
-        n = n.value
+        n = exec_ctx.symbol_table.get("n").value
         if n < 2:
             return RTResult().success(Number.false)
         if n == 2 or n == 3:
@@ -2306,53 +2336,45 @@ class BuiltInFunction(BaseFunction):
             i += 6
         return RTResult().success(Number.true)
 
+    @set_args(["d"])
     def execute_deg2rad_fp(self, exec_ctx):
         d = exec_ctx.symbol_table.get("d")
         return RTResult().success(Number(math.radians(d.value)))
 
-    execute_deg2rad_fp.arg_names = ["d"]
-
+    @set_args(["r"])
     def execute_rad2deg_fp(self, exec_ctx):
         r = exec_ctx.symbol_table.get("r")
         return RTResult().success(Number(math.degrees(r.value)))
 
-    execute_rad2deg_fp.arg_names = ["r"]
-
+    @set_args(["x"])
     def execute_exp_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.exp(x.value)))
 
-    execute_exp_fp.arg_names = ["x"]
-
+    @set_args(["x"])
     def execute_log_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.log(x.value)))
 
-    execute_log_fp.arg_names = ["x"]
-
+    @set_args(["x"])
     def execute_sinh_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.sinh(x.value)))
 
-    execute_sinh_fp.arg_names = ["x"]
-
+    @set_args(["x"])
     def execute_cosh_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.cosh(x.value)))
 
-    execute_cosh_fp.arg_names = ["x"]
-
+    @set_args(["x"])
     def execute_tanh_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(math.tanh(x.value)))
 
-    execute_tanh_fp.arg_names = ["x"]
-
+    @set_args(["x"])
     def execute_round_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         return RTResult().success(Number(round(x.value)))
-
-    execute_round_fp.arg_names = ["x"]
 
     def convert_zer_to_py(self, obj):
         if isinstance(obj, Number):
@@ -2431,6 +2453,7 @@ class BuiltInFunction(BaseFunction):
         else:
             return PyObject(obj)
 
+    @set_args(["code", "args"], [None, HashMap({})])
     def execute_pyexec(self, exec_ctx):
         code = exec_ctx.symbol_table.get("code")
         args = exec_ctx.symbol_table.get("args")
@@ -2473,8 +2496,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_pyexec.arg_names = ["code", "args"]
-
+    @set_args(["path"])
     def execute_abs_path_fp(self, exec_ctx):
         path = exec_ctx.symbol_table.get("path")
         if not isinstance(path, String):
@@ -2498,8 +2520,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_abs_path_fp.arg_names = ["path"]
-
+    @set_args(["path"])
     def execute_dir_name_fp(self, exec_ctx):
         path = exec_ctx.symbol_table.get("path")
         if not isinstance(path, String):
@@ -2523,8 +2544,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_dir_name_fp.arg_names = ["path"]
-
+    @set_args(["path"])
     def execute_base_name_fp(self, exec_ctx):
         path = exec_ctx.symbol_table.get("path")
         if not isinstance(path, String):
@@ -2548,8 +2568,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_base_name_fp.arg_names = ["path"]
-
+    @set_args(["src", "dst"])
     def execute_symlink_fp(self, exec_ctx):
         src = exec_ctx.symbol_table.get("src")
         dst = exec_ctx.symbol_table.get("dst")
@@ -2604,8 +2623,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_symlink_fp.arg_names = ["src", "dst"]
-
+    @set_args(["path"])
     def execute_readlink_fp(self, exec_ctx):
         path_arg = exec_ctx.symbol_table.get("path")
         if not isinstance(path_arg, String):
@@ -2649,8 +2667,6 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_readlink_fp.arg_names = ["path"]
-
     def _format_stat_result_to_list(self, stat_res, context):
         return List(
             [
@@ -2667,6 +2683,7 @@ class BuiltInFunction(BaseFunction):
             ]
         )
 
+    @set_args(["path"])
     def execute_stat_fp(self, exec_ctx):
         path_arg = exec_ctx.symbol_table.get("path")
         if not isinstance(path_arg, String):
@@ -2702,8 +2719,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_stat_fp.arg_names = ["path"]
-
+    @set_args(["path"])
     def execute_lstat_fp(self, exec_ctx):
         path_arg = exec_ctx.symbol_table.get("path")
         if not isinstance(path_arg, String):
@@ -2743,8 +2759,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_lstat_fp.arg_names = ["path"]
-
+    @set_args(["top"])
     def execute_walk_fp(self, exec_ctx):
         top_path = exec_ctx.symbol_table.get("top")
         if not isinstance(top_path, String):
@@ -2774,8 +2789,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_walk_fp.arg_names = ["top"]
-
+    @set_args(["path", "mode"])
     def execute_chmod_fp(self, exec_ctx):
         path_arg = exec_ctx.symbol_table.get("path")
         mode_arg = exec_ctx.symbol_table.get("mode")
@@ -2820,8 +2834,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_chmod_fp.arg_names = ["path", "mode"]
-
+    @set_args(["path", "uid", "gid"])
     def execute_chown_fp(self, exec_ctx):
         path_arg = exec_ctx.symbol_table.get("path")
         uid_arg = exec_ctx.symbol_table.get("uid")
@@ -2886,8 +2899,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_chown_fp.arg_names = ["path", "uid", "gid"]
-
+    @set_args(["path", "times"])
     def execute_utime_fp(self, exec_ctx):
         path_arg = exec_ctx.symbol_table.get("path")
         times_arg = exec_ctx.symbol_table.get("times")
@@ -2956,8 +2968,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_utime_fp.arg_names = ["path", "times"]
-
+    @set_args(["src", "dst"])
     def execute_link_fp(self, exec_ctx):
         src = exec_ctx.symbol_table.get("src")
         dst = exec_ctx.symbol_table.get("dst")
@@ -3012,8 +3023,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_link_fp.arg_names = ["src", "dst"]
-
+    @set_args(["path"])
     def execute_unlink_fp(self, exec_ctx):
         path_arg = exec_ctx.symbol_table.get("path")
         if not isinstance(path_arg, String):
@@ -3066,8 +3076,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_unlink_fp.arg_names = ["path"]
-
+    @set_args(["path", "mode"])
     def execute_access_fp(self, exec_ctx):
         path_arg = exec_ctx.symbol_table.get("path")
         mode_arg = exec_ctx.symbol_table.get("mode")
@@ -3103,8 +3112,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_access_fp.arg_names = ["path", "mode"]
-
+    @set_args(["args"])
     def execute_path_join_fp(self, exec_ctx):
         args_list_obj = exec_ctx.symbol_table.get("args")
 
@@ -3155,34 +3163,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_path_join_fp.arg_names = ["args"]
-
-    def execute_is_file_fp(self, exec_ctx):
-        path_arg = exec_ctx.symbol_table.get("path")
-        if not isinstance(path_arg, String):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'is_file' must be a string",
-                    exec_ctx,
-                )
-            )
-        try:
-            is_file = os.path.isfile(path_arg.value)
-            return RTResult().success(Number.true if is_file else Number.false)
-        except Exception as e:
-            return RTResult().failure(
-                IOError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Failed to check if path is file '{path_arg.value}': {str(e)}",
-                    exec_ctx,
-                )
-            )
-
-    execute_is_file_fp.arg_names = ["path"]
-
+    @set_args(["path"])
     def execute_is_dir_fp(self, exec_ctx):
         path_arg = exec_ctx.symbol_table.get("path")
         if not isinstance(path_arg, String):
@@ -3207,8 +3188,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_is_dir_fp.arg_names = ["path"]
-
+    @set_args(["path"])
     def execute_is_link_fp(self, exec_ctx):
         path_arg = exec_ctx.symbol_table.get("path")
         if not isinstance(path_arg, String):
@@ -3233,8 +3213,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_is_link_fp.arg_names = ["path"]
-
+    @set_args(["path"])
     def execute_is_mount_fp(self, exec_ctx):
         path_arg = exec_ctx.symbol_table.get("path")
         if not isinstance(path_arg, String):
@@ -3259,8 +3238,10 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_is_mount_fp.arg_names = ["path"]
-
+    @set_args(
+        ["url", "method", "headers", "data", "timeout"],
+        [None, None, None, None, Number(15)],
+    )
     def execute_request_fp(self, exec_ctx):
         url_arg = exec_ctx.symbol_table.get("url")
         method_arg = exec_ctx.symbol_table.get("method")
@@ -3318,8 +3299,8 @@ class BuiltInFunction(BaseFunction):
             response = requests.request(
                 method_arg.value,
                 url_arg.value,
-                headers=headers_arg.value,
-                data=data_arg.value,
+                headers=self.convert_zer_to_py(headers_arg),
+                data=self.convert_zer_to_py(data_arg),
                 timeout=timeout_arg.value,
             )
             return RTResult().success(self.validate_pyexec_result(response.json()))
@@ -3342,8 +3323,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_request_fp.arg_names = ["url", "method", "headers", "data", "timeout"]
-
+    @set_args(["hm"])
     def execute_keys(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         if not isinstance(hm, HashMap):
@@ -3355,10 +3335,9 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(List(hm.value.keys()))
+        return RTResult().success(List(list(hm.value.keys())))
 
-    execute_keys.arg_names = ["hm"]
-
+    @set_args(["hm"])
     def execute_values(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         if not isinstance(hm, HashMap):
@@ -3370,10 +3349,9 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(List(hm.value.values()))
+        return RTResult().success(List(list(hm.value.values())))
 
-    execute_values.arg_names = ["hm"]
-
+    @set_args(["hm"])
     def execute_items(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         if not isinstance(hm, HashMap):
@@ -3385,10 +3363,9 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(List(hm.value.items()))
+        return RTResult().success(List([List(list(i)) for i in hm.value.items()]))
 
-    execute_items.arg_names = ["hm"]
-
+    @set_args(["hm", "key"])
     def execute_has(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         key = exec_ctx.symbol_table.get("key")
@@ -3401,25 +3378,20 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        if not isinstance(key, String):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'has' must be a string",
-                    exec_ctx,
-                )
-            )
-        return RTResult().success(Bool(hm.value.has(key.value)))
 
-    execute_has.arg_names = ["hm", "key"]
+        found = any(
+            k.value == key.value for k in hm.value.keys() if hasattr(k, "value")
+        )
 
+        return RTResult().success(Number.true if found else Number.false)
+
+    @set_args(["hm", "key", "default"], [None, None, Number.none])
     def execute_get(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         key = exec_ctx.symbol_table.get("key")
         default = exec_ctx.symbol_table.get("default")
 
-        if not isinstance(hm, HashMap | List):
+        if not isinstance(hm, (HashMap, List)):
             return RTResult().failure(
                 TError(
                     self.pos_start,
@@ -3429,20 +3401,10 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         if isinstance(hm, HashMap):
-            if not isinstance(key, String):
-                return RTResult().failure(
-                    TError(
-                        self.pos_start,
-                        self.pos_end,
-                        "Second argument of 'get' must be a string key when first argument is a hashmap",
-                        exec_ctx,
-                    )
-                )
-
             for k, v in hm.value.items():
-                if k.value == key.value:
+                if hasattr(k, "value") and k.value == key.value:
                     return RTResult().success(v)
-        else:
+        else:  # Is a List
             if not isinstance(key, Number):
                 return RTResult().failure(
                     TError(
@@ -3453,38 +3415,29 @@ class BuiltInFunction(BaseFunction):
                     )
                 )
 
-            if not (key.value < 0 or key.value >= len(hm.value)):
-                return RTResult().success(hm.value[key.value])
+            if 0 <= key.value < len(hm.value):
+                return RTResult().success(hm.value[int(key.value)])
         return RTResult().success(default)
 
-    execute_get.arg_names = ["hm", "key", "default"]
-
+    @set_args(["hm", "key", "value"], [None, None, Number.none])
     def execute_set(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         key = exec_ctx.symbol_table.get("key")
         value = exec_ctx.symbol_table.get("value")
 
-        if not isinstance(hm, HashMap | List):
+        if not isinstance(hm, (HashMap, List)):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'set' must be a hashmap oỏ list",
+                    "First argument of 'set' must be a hashmap or list",
                     exec_ctx,
                 )
             )
         if isinstance(hm, HashMap):
-            if not isinstance(key, String):
-                return RTResult().failure(
-                    TError(
-                        self.pos_start,
-                        self.pos_end,
-                        "Second argument of 'set' must be a string key when first argument is a hashmap",
-                        exec_ctx,
-                    )
-                )
-            return RTResult().success(HashMap(hm.set_index(key, value)))
-        else:
+            hm.value[key] = value
+            return RTResult().success(hm)
+        else:  # is a List
             if not isinstance(key, Number):
                 return RTResult().failure(
                     TError(
@@ -3494,12 +3447,21 @@ class BuiltInFunction(BaseFunction):
                         exec_ctx,
                     )
                 )
-            hm.value.pop(key.value)
-            hm.value.insert(key.value, value)
-            return RTResult().success(List(hm))
+            idx = int(key.value)
+            if 0 <= idx < len(hm.value):
+                hm.value[idx] = value
+                return RTResult().success(hm)
+            else:
+                return RTResult().failure(
+                    RTError(
+                        self.pos_start,
+                        self.pos_end,
+                        f"Index {idx} is out of bounds for list of size {len(hm.value)}",
+                        exec_ctx,
+                    )
+                )
 
-    execute_set.arg_names = ["hm", "key", "value"]
-
+    @set_args(["hm", "key"])
     def execute_del(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         key = exec_ctx.symbol_table.get("key")
@@ -3513,22 +3475,19 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        if not isinstance(key, String):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'del' must be a string",
-                    exec_ctx,
-                )
-            )
-        if key.value in hm.value:
-            del hm.value[key.value]
+
+        key_to_del = None
+        for k in hm.value.keys():
+            if hasattr(k, "value") and k.value == key.value:
+                key_to_del = k
+                break
+
+        if key_to_del is not None:
+            del hm.value[key_to_del]
             return RTResult().success(hm)
         return RTResult().success(NoneObject.none)
 
-    execute_del.arg_names = ["hm", "key"]
-
+    @set_args(["x", "y"])
     def execute_mouse_move_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         y = exec_ctx.symbol_table.get("y")
@@ -3553,7 +3512,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
-            import pyautogui
+            import pyautogui # type: ignore
 
             pyautogui.moveTo(int(x.value), int(y.value))
             return RTResult().success(NoneObject.none)
@@ -3571,11 +3530,10 @@ class BuiltInFunction(BaseFunction):
                 RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
 
-    execute_mouse_move_fp.arg_names = ["x", "y"]
-
+    @set_args([])
     def execute_mouse_click_fp(self, exec_ctx):
         try:
-            import pyautogui
+            import pyautogui # type: ignore
 
             pyautogui.click()
             return RTResult().success(NoneObject.none)
@@ -3593,11 +3551,10 @@ class BuiltInFunction(BaseFunction):
                 RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
 
-    execute_mouse_click_fp.arg_names = []
-
+    @set_args([])
     def execute_mouse_right_click_fp(self, exec_ctx):
         try:
-            import pyautogui
+            import pyautogui # type: ignore
 
             pyautogui.rightClick()
             return RTResult().success(NoneObject.none)
@@ -3615,8 +3572,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
 
-    execute_mouse_right_click_fp.arg_names = []
-
+    @set_args(["amount"])
     def execute_mouse_scroll_fp(self, exec_ctx):
         amount = exec_ctx.symbol_table.get("amount")
 
@@ -3631,7 +3587,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
-            import pyautogui
+            import pyautogui # type: ignore
 
             pyautogui.scroll(int(amount.value))
             return RTResult().success(NoneObject.none)
@@ -3649,11 +3605,10 @@ class BuiltInFunction(BaseFunction):
                 RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
 
-    execute_mouse_scroll_fp.arg_names = ["amount"]
-
+    @set_args([])
     def execute_mouse_position_fp(self, exec_ctx):
         try:
-            import pyautogui
+            import pyautogui # type: ignore
 
             x, y = pyautogui.position()
             return RTResult().success(List([Number(x), Number(y)]))
@@ -3671,8 +3626,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
 
-    execute_mouse_position_fp.arg_names = []
-
+    @set_args(["path"])
     def execute_screen_capture_fp(self, exec_ctx):
         path = exec_ctx.symbol_table.get("path")
 
@@ -3687,7 +3641,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
-            import pyautogui
+            import pyautogui # type: ignore
 
             pyautogui.screenshot(path.value)
             return RTResult().success(NoneObject.none)
@@ -3705,8 +3659,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
 
-    execute_screen_capture_fp.arg_names = ["path"]
-
+    @set_args(["x", "y", "w", "h", "p"])
     def execute_screen_capture_area_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         y = exec_ctx.symbol_table.get("y")
@@ -3752,7 +3705,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
-            from PIL import ImageGrab
+            from PIL import ImageGrab # type: ignore
 
             img = ImageGrab.grab(
                 bbox=(
@@ -3762,7 +3715,7 @@ class BuiltInFunction(BaseFunction):
                     int(y.value) + int(h.value),
                 )
             )
-            img.save(p)
+            img.save(p.value)
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
@@ -3778,8 +3731,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
 
-    execute_screen_capture_area_fp.arg_names = ["x", "y", "w", "h", "p"]
-
+    @set_args(["x", "y"])
     def execute_screen_get_color_fp(self, exec_ctx):
         x = exec_ctx.symbol_table.get("x")
         y = exec_ctx.symbol_table.get("y")
@@ -3804,7 +3756,7 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
-            import pyautogui
+            import pyautogui # type: ignore
 
             color = pyautogui.screenshot().getpixel((int(x.value), int(y.value)))
             hex_color = "#%02x%02x%02x" % color
@@ -3823,8 +3775,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
 
-    execute_screen_get_color_fp.arg_names = ["x", "y"]
-
+    @set_args(["value", "supress_error"], [None, Number.false])
     def execute_to_bytes(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
         supress_error = exec_ctx.symbol_table.get("supress_error")
@@ -3839,28 +3790,14 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-        if int(supress_error.value) == 1:
-            supress_error_ = True
-        elif int(supress_error.value) == 0:
-            supress_error_ = False
-        else:
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'to_bytes' must be a boolean",
-                    exec_ctx,
-                )
-            )
+        supress_error_ = bool(supress_error.value)
 
-        if isinstance(value, Number):
-            return RTResult().success(Bytes(bytes.from_hex(value.value)))
-        elif isinstance(value, String):
+        if isinstance(value, String):
             try:
-                return RTResult().success(Number(float(value.value)))
+                return RTResult().success(Bytes(bytes.fromhex(value.value)))
             except ValueError:
                 if supress_error_:
-                    return RTResult().success(Number.none)
+                    return RTResult().success(NoneObject.none)
                 else:
                     return RTResult().failure(
                         RTError(
@@ -3872,7 +3809,7 @@ class BuiltInFunction(BaseFunction):
                     )
         else:
             if supress_error_:
-                return RTResult().success(Number.none)
+                return RTResult().success(NoneObject.none)
             else:
                 return RTResult().failure(
                     RTError(
@@ -3883,14 +3820,12 @@ class BuiltInFunction(BaseFunction):
                     )
                 )
 
-    execute_to_bytes.arg_names = ["value", "supress_error"]
-
+    @set_args(["value"])
     def execute_is_bytes(self, exec_ctx):
         is_bytes = isinstance(exec_ctx.symbol_table.get("value"), Bytes)
         return RTResult().success(Number.true if is_bytes else Number.false)
 
-    execute_is_bytes.arg_names = ["value"]
-
+    @set_args(["s", "encoding", "errors"], [None, String("utf-8"), String("strict")])
     def execute_decode_fp(self, exec_ctx):
         s = exec_ctx.symbol_table.get("s")
         encoding = exec_ctx.symbol_table.get("encoding")
@@ -3936,8 +3871,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_decode_fp.arg_names = ["s", "encoding", "errors"]
-
+    @set_args(["s", "encoding", "errors"], [None, String("utf-8"), String("strict")])
     def execute_encode_fp(self, exec_ctx):
         s = exec_ctx.symbol_table.get("s")
         encoding = exec_ctx.symbol_table.get("encoding")
@@ -3983,14 +3917,12 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    execute_encode_fp.arg_names = ["s", "encoding", "errors"]
-
+    @set_args(["value"])
     def execute_is_py_obj(self, exec_ctx):
         is_py_obj = isinstance(exec_ctx.symbol_table.get("value"), PyObject)
         return RTResult().success(Number.true if is_py_obj else Number.false)
 
-    execute_is_py_obj.arg_names = ["value"]
-
+    @set_args(["value", "supress_error"], [None, Number.false])
     def execute_to_hex(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
         suppress_error = exec_ctx.symbol_table.get("supress_error")
@@ -4020,14 +3952,7 @@ class BuiltInFunction(BaseFunction):
                 hex_str = value.value.hex()
                 return RTResult().success(String(hex_str))
             else:
-                return RTResult().failure(
-                    TError(
-                        self.pos_start,
-                        self.pos_end,
-                        f"Failed to convert value of type '{value.type()}' to hex: {e}",
-                        exec_ctx,
-                    )
-                )
+                raise TypeError(f"Cannot convert type '{value.type()}' to hex")
         except Exception as e:
             if suppress_error_:
                 return RTResult().success(String("none"))
@@ -4041,16 +3966,15 @@ class BuiltInFunction(BaseFunction):
                     )
                 )
 
-    execute_to_hex.arg_names = ["value", "supress_error"]
-
+    @set_args(["value"])
     def execute_is_nan(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
+        if not isinstance(value, Number):
+            return RTResult().success(Number.false)
         if math.isnan(value.value):
             return RTResult().success(Number.true)
         else:
             return RTResult().success(Number.false)
-
-    execute_is_nan.arg_names = ["value"]
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -4492,8 +4416,25 @@ class Interpreter:
         func_name = node.var_name_tok.value if node.var_name_tok else None
         body_node = node.body_node
         arg_names = [arg_name.value for arg_name in node.arg_name_toks]
+        defaults = []
+        for default in node.defaults:
+            if default is None:
+                defaults.append(None)
+                continue
+            default_value = res.register(self.visit(default, context))
+            if res.should_return():
+                return res
+            defaults.append(default_value)
+
         func_value = (
-            Function(func_name, body_node, arg_names, node.should_auto_return)
+            Function(
+                func_name,
+                body_node,
+                arg_names,
+                defaults,
+                node.dynamics,
+                node.should_auto_return,
+            )
             .set_context(context)
             .set_pos(node.pos_start, node.pos_end)
         )
@@ -4504,39 +4445,28 @@ class Interpreter:
         return res.success(func_value)
 
     def visit_CallNode(self, node, context):
-        try:
-            res = RTResult()
-            args = []
+        res = RTResult()
+        args = []
 
-            value_to_call = res.register(self.visit(node.node_to_call, context))
+        value_to_call = res.register(self.visit(node.node_to_call, context))
+        if res.should_return():
+            return res
+        value_to_call = value_to_call.copy().set_pos(node.pos_start, node.pos_end)
+
+        for arg_node in node.arg_nodes:
+            args.append(res.register(self.visit(arg_node, context)))
             if res.should_return():
                 return res
-            value_to_call = value_to_call.copy().set_pos(node.pos_start, node.pos_end)
 
-            for arg_node in node.arg_nodes:
-                args.append(res.register(self.visit(arg_node, context)))
-                if res.should_return():
-                    return res
-
-            return_value = res.register(value_to_call.execute(args))
-            if res.should_return():
-                return res
-            return_value = (
-                return_value.copy()
-                .set_pos(node.pos_start, node.pos_end)
-                .set_context(context)
-            )
-
-            return res.success(return_value)
-        except RecursionError:
-            return res.failure(
-                RTError(
-                    node.pos_start,
-                    node.pos_end,
-                    f"Maximum recursion depth exceeded ({sys.getrecursionlimit()})",
-                    context,
-                )
-            )
+        return_value = res.register(value_to_call.execute(args))
+        if res.should_return():
+            return res
+        return_value = (
+            return_value.copy()
+            .set_pos(node.pos_start, node.pos_end)
+            .set_context(context)
+        )
+        return res.success(return_value)
 
     def visit_ReturnNode(self, node, context):
         res = RTResult()

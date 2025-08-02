@@ -154,7 +154,7 @@ namespace mlist
 
 
 
-    defun sort(l, r)
+    defun sort(l, r=false)
         if type(l) != list do
             panic("First argument of 'sort' must be a list", "T")
         done

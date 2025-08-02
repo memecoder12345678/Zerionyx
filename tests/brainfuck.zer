@@ -1,6 +1,5 @@
 load "libs.sys"
 load "libs.string"
-load "libs.mlist"
 
 memory = [0]
 pointer = 0

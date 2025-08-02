@@ -10,11 +10,11 @@ namespace string
     list_ascii_uppercase = split_fp(ascii_uppercase, "")
     list_ascii_letters = split_fp(ascii_letters, "")
 
-    defun split(s, s_)
+    defun split(s, s_="")
         return split_fp(s, s_)
     done
 
-    defun strip(s, s_)
+    defun strip(s, s_=" ")
         return strip_fp(s, s_)
     done 
 
@@ -22,8 +22,8 @@ namespace string
         return join_fp(s, l)
     done
 
-    defun replace(s, v, w)
-        return replace_fp(s, v, w)
+    defun replace(s, v, w, c=-1)
+        return replace_fp(s, v, w, c)
     done
 
     defun to_upper(s)

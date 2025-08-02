@@ -98,9 +98,7 @@ class Lexer:
                 self.tokens[-1].pos_end = self.pos.copy()
 
                 if not self.open_bracket_stack:
-                    return [], ExpectedCharError(
-                        pos_start_closer, self.pos, "')'"
-                    )
+                    return [], ExpectedCharError(pos_start_closer, self.pos, "')'")
 
                 expected_closer, _ = self.open_bracket_stack[-1]
                 if expected_closer == ")":
@@ -128,9 +126,7 @@ class Lexer:
                 self.tokens[-1].pos_end = self.pos.copy()
 
                 if not self.open_bracket_stack:
-                    return [], ExpectedCharError(
-                        pos_start_closer, self.pos, "']'"
-                    )
+                    return [], ExpectedCharError(pos_start_closer, self.pos, "']'")
 
                 expected_closer, _ = self.open_bracket_stack[-1]
                 if expected_closer == "]":
@@ -168,9 +164,7 @@ class Lexer:
                 self.tokens[-1].pos_end = self.pos.copy()
 
                 if not self.open_bracket_stack:
-                    return [], ExpectedCharError(
-                        pos_start_closer, self.pos, "'}'"
-                    )
+                    return [], ExpectedCharError(pos_start_closer, self.pos, "'}'")
 
                 expected_closer, _ = self.open_bracket_stack[-1]
                 if expected_closer == "}":
@@ -234,58 +228,58 @@ class Lexer:
         return self._process_string_literal(quote_char)
 
     def _process_string_literal(self, quote_char):
-            string_content = []
-            pos_start = self.pos.copy()
-            self.advance()
+        string_content = []
+        pos_start = self.pos.copy()
+        self.advance()
 
-            is_multiline = False
-            closing_sequence = quote_char
-            if self.current_char == quote_char and self.peek_foward_steps(1) == quote_char:
-                is_multiline = True
-                closing_sequence = quote_char * 3
-                self.advance(2)
+        is_multiline = False
+        closing_sequence = quote_char
+        if self.current_char == quote_char and self.peek_foward_steps(1) == quote_char:
+            is_multiline = True
+            closing_sequence = quote_char * 3
+            self.advance(2)
 
-            escape_character = False
+        escape_character = False
 
-            while self.current_char is not None:
-                if is_multiline:
-                    if (
-                        self.current_char == quote_char
-                        and self.peek_foward_steps(1) == quote_char
-                        and self.peek_foward_steps(2) == quote_char
-                    ):
-                        self.advance(3)
-                        break
-                else:
-                    if not escape_character and self.current_char == quote_char:
-                        self.advance()
-                        break
-
-                if escape_character:
-                    string_content.append(self.current_char)
-                    escape_character = False
-                elif self.current_char == '\\':
-                    string_content.append('\\')
-                    escape_character = True
-                else:
-                    string_content.append(self.current_char)
-
-                self.advance()
+        while self.current_char is not None:
+            if is_multiline:
+                if (
+                    self.current_char == quote_char
+                    and self.peek_foward_steps(1) == quote_char
+                    and self.peek_foward_steps(2) == quote_char
+                ):
+                    self.advance(3)
+                    break
             else:
-                return None, ExpectedCharError(
-                    pos_start, self.pos, f"'{closing_sequence}'"
-                )
+                if not escape_character and self.current_char == quote_char:
+                    self.advance()
+                    break
 
-            raw_string = "".join(string_content)
-            
-            try:
-                processed_string = raw_string.encode('raw_unicode_escape').decode('unicode_escape')
-            except UnicodeDecodeError:
-                return None, IllegalCharError(
-                    pos_start, self.pos, f"Invalid escape sequence in string"
-                )
+            if escape_character:
+                string_content.append(self.current_char)
+                escape_character = False
+            elif self.current_char == "\\":
+                string_content.append("\\")
+                escape_character = True
+            else:
+                string_content.append(self.current_char)
 
-            return Token(TT_STRING, processed_string, pos_start, self.pos), None
+            self.advance()
+        else:
+            return None, ExpectedCharError(pos_start, self.pos, f"'{closing_sequence}'")
+
+        raw_string = "".join(string_content)
+
+        try:
+            processed_string = raw_string.encode("raw_unicode_escape").decode(
+                "unicode_escape"
+            )
+        except UnicodeDecodeError:
+            return None, IllegalCharError(
+                pos_start, self.pos, f"Invalid escape sequence in string"
+            )
+
+        return Token(TT_STRING, processed_string, pos_start, self.pos), None
 
     def peek_foward_steps(self, steps) -> str | None:
         peek_pos_idx = self.pos.idx + steps
@@ -497,6 +491,21 @@ class Lexer:
                 or pt.type == TT_LBRACE
             ):
                 insert_let = True
+
+            # Ngăn chặn việc chèn 'let' cho các tham số mặc định của hàm.
+            # Đây là trường hợp đặc biệt khi `identifier = value` không phải là khai báo biến.
+            if insert_let and pt and pt.type == TT_LPAREN:
+                # Chuỗi token sẽ là [..., KEYWORD:'defun', IDENTIFIER, LPAREN]
+                # khi chúng ta kiểm tra tham số mặc định.
+                if len(self.tokens) >= 3:
+                    token_before_lparen = self.tokens[-2]
+                    token_two_before_lparen = self.tokens[-3]
+                    if (
+                        token_two_before_lparen.type == TT_KEYWORD
+                        and token_two_before_lparen.value == "defun"
+                        and token_before_lparen.type == TT_IDENTIFIER
+                    ):
+                        insert_let = False
 
             if insert_let:
                 self.tokens.append(

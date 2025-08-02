@@ -186,18 +186,19 @@ class WhileNode:
 
 
 class FuncDefNode:
-    __slots__ = [
-        "var_name_tok",
-        "arg_name_toks",
-        "body_node",
-        "should_auto_return",
-        "pos_start",
-        "pos_end",
-    ]
-
-    def __init__(self, var_name_tok, arg_name_toks, body_node, should_auto_return):
+    def __init__(
+        self,
+        var_name_tok,
+        arg_name_toks,
+        defaults,
+        dynamics,
+        body_node,
+        should_auto_return,
+    ):
         self.var_name_tok = var_name_tok
         self.arg_name_toks = arg_name_toks
+        self.defaults = defaults
+        self.dynamics = dynamics
         self.body_node = body_node
         self.should_auto_return = should_auto_return
 
@@ -210,13 +211,8 @@ class FuncDefNode:
 
         self.pos_end = self.body_node.pos_end
 
-    def __str__(self):
-        return f"FuncDefNode({self.var_name_tok.value if self.var_name_tok else 'anonymous'}({', '.join(t.value for t in self.arg_name_toks)}) {self.body_node})"
-
 
 class CallNode:
-    __slots__ = ["node_to_call", "arg_nodes", "pos_start", "pos_end"]
-
     def __init__(self, node_to_call, arg_nodes):
         self.node_to_call = node_to_call
         self.arg_nodes = arg_nodes
@@ -227,9 +223,6 @@ class CallNode:
             self.pos_end = self.arg_nodes[len(self.arg_nodes) - 1].pos_end
         else:
             self.pos_end = self.node_to_call.pos_end
-
-    def __str__(self):
-        return f"CallNode({self.node_to_call}({', '.join(str(arg) for arg in self.arg_nodes)}))"
 
 
 class ReturnNode:

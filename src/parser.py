@@ -354,60 +354,51 @@ class Parser:
         return self.bin_op(self.call, (TT_POW,))
 
     def call(self):
-        self.skip_newlines()
         res = ParseResult()
-        atom = res.register(self.atom())
+        func = res.register(self.atom())
         if res.error:
             return res
-
-        while self.current_tok.type == TT_DOT:
-            res.register_advancement()
-            self.advance()
-            if self.current_tok.type != TT_IDENTIFIER:
-                return res.failure(
-                    InvalidSyntaxError(
-                        self.current_tok.pos_start,
-                        self.current_tok.pos_end,
-                        "Expected identifier",
-                    )
-                )
-            member_name = self.current_tok.value
-            res.register_advancement()
-            self.advance()
-
-            atom = MemberAccessNode(
-                atom, member_name, atom.pos_start, self.current_tok.pos_end.copy()
-            )
 
         if self.current_tok.type == TT_LPAREN:
             res.register_advancement()
             self.advance()
             arg_nodes = []
+
             if self.current_tok.type == TT_RPAREN:
                 res.register_advancement()
                 self.advance()
             else:
                 arg_nodes.append(res.register(self.expr()))
                 if res.error:
-                    return res
+                    return res.failure(
+                        InvalidSyntaxError(
+                            self.current_tok.pos_start,
+                            self.current_tok.pos_end,
+                            "Expected ')', 'if', 'for', 'while', 'defun', 'namespace', int, float, identifier, '+', '-', '(', '[', '{' or 'not'",
+                        )
+                    )
+
                 while self.current_tok.type == TT_COMMA:
                     res.register_advancement()
                     self.advance()
+
                     arg_nodes.append(res.register(self.expr()))
                     if res.error:
                         return res
+
                 if self.current_tok.type != TT_RPAREN:
                     return res.failure(
                         InvalidSyntaxError(
                             self.current_tok.pos_start,
                             self.current_tok.pos_end,
-                            "Expected ',' or ')'",
+                            f"Expected ',' or ')'",
                         )
                     )
+
                 res.register_advancement()
                 self.advance()
-            return res.success(CallNode(atom, arg_nodes))
-        return res.success(atom)
+            return res.success(CallNode(func, arg_nodes))
+        return res.success(func)
 
     def atom(self):
         self.skip_newlines()
@@ -1089,7 +1080,6 @@ class Parser:
         return res.success(WhileNode(condition, body, False))
 
     def func_def(self):
-        self.skip_newlines()
         res = ParseResult()
 
         if not self.current_tok.matches(TT_KEYWORD, "defun"):
@@ -1130,11 +1120,42 @@ class Parser:
         res.register_advancement()
         self.advance()
         arg_name_toks = []
+        defaults = []
+        dynamics = []
+        hasOptionals = False
 
         if self.current_tok.type == TT_IDENTIFIER:
+            pos_start = self.current_tok.pos_start.copy()
+            pos_end = self.current_tok.pos_end.copy()
             arg_name_toks.append(self.current_tok)
             res.register_advancement()
             self.advance()
+
+            if self.current_tok.type == TT_EQ:
+                res.register_advancement()
+                self.advance()
+                default = res.register(self.expr())
+                if res.error:
+                    return res
+                defaults.append(default)
+                hasOptionals = True
+            elif hasOptionals:
+                return res.failure(
+                    InvalidSyntaxError(
+                        pos_start, pos_end, "Expected optional parameter."
+                    )
+                )
+            else:
+                defaults.append(None)
+
+            if self.current_tok.matches(TT_KEYWORD, "in"):
+                res.register_advancement()
+                self.advance()
+                dynamics.append(res.register(self.expr()))
+                if res.error:
+                    return res
+            else:
+                dynamics.append(None)
 
             while self.current_tok.type == TT_COMMA:
                 res.register_advancement()
@@ -1149,16 +1170,44 @@ class Parser:
                         )
                     )
 
+                pos_start = self.current_tok.pos_start.copy()
+                pos_end = self.current_tok.pos_end.copy()
                 arg_name_toks.append(self.current_tok)
                 res.register_advancement()
                 self.advance()
+
+                if self.current_tok.type == TT_EQ:
+                    res.register_advancement()
+                    self.advance()
+                    default = res.register(self.expr())
+                    if res.error:
+                        return res
+                    defaults.append(default)
+                    hasOptionals = True
+                elif hasOptionals:
+                    return res.failure(
+                        InvalidSyntaxError(
+                            pos_start, pos_end, "Expected optional parameter."
+                        )
+                    )
+                else:
+                    defaults.append(None)
+
+                if self.current_tok.matches(TT_KEYWORD, "in"):
+                    res.register_advancement()
+                    self.advance()
+                    dynamics.append(res.register(self.expr()))
+                    if res.error:
+                        return res
+                else:
+                    dynamics.append(None)
 
             if self.current_tok.type != TT_RPAREN:
                 return res.failure(
                     InvalidSyntaxError(
                         self.current_tok.pos_start,
                         self.current_tok.pos_end,
-                        f"Expected ',' or ')'",
+                        f"Expected ',', ')' or '='",
                     )
                 )
         else:
@@ -1182,7 +1231,9 @@ class Parser:
             if res.error:
                 return res
 
-            return res.success(FuncDefNode(var_name_tok, arg_name_toks, body, True))
+            return res.success(
+                FuncDefNode(var_name_tok, arg_name_toks, defaults, dynamics, body, True)
+            )
 
         if self.current_tok.type != TT_NEWLINE:
             return res.failure(
@@ -1212,7 +1263,9 @@ class Parser:
         res.register_advancement()
         self.advance()
 
-        return res.success(FuncDefNode(var_name_tok, arg_name_toks, body, False))
+        return res.success(
+            FuncDefNode(var_name_tok, arg_name_toks, defaults, dynamics, body, False)
+        )
 
     def bin_op(self, func_a, ops, func_b=None):
         self.skip_newlines()

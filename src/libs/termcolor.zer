@@ -71,7 +71,7 @@ namespace termcolor
         return string.join(';', all_codes)
     done
 
-    defun cprint(t, c, b, s)
+    defun cprint(t, c=none, b=none, s=none)
         code_str = get_code(c, b, s)
         if not is_none(code_str) do
             print(string.chr(27) + '[' + code_str + 'm' + to_str(t) + string.chr(27) + '[0m')
@@ -81,7 +81,7 @@ namespace termcolor
         return none
     done
 
-    defun cprintln(t, c, b, s)
+    defun cprintln(t, c=none, b=none, s=none)
         code_str = get_code(c, b, s)
         if not is_none(code_str) do
             println(string.chr(27) + '[' + code_str + 'm' + to_str(t) + string.chr(27) + '[0m')

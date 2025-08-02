@@ -173,9 +173,11 @@ def main():
                     else:
                         print(f"{repr(result)}")
         except KeyboardInterrupt:
-
             print("\nexit...")
         except Exception as e:
+            import traceback
+
+            traceback.print_exc()
             print(
                 f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Shell Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{e}{Fore.RESET}{Style.RESET_ALL}"
             )
@@ -214,6 +216,9 @@ def main():
                 else:
                     print(f"{repr(result)}")
         except Exception as e:
+            import traceback
+
+            traceback.print_exc()
             print(
                 f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Interpreter Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{e}{Fore.RESET}{Style.RESET_ALL}"
             )

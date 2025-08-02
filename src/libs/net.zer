@@ -25,7 +25,7 @@ namespace net
         return get_hostname_fp()
     done
 
-    defun request(url, method, headers, data, timeout)
+    defun request(url, method, headers, data, timeout=15)
         return request_fp(url, method, headers, data, timeout)
     done
 done
