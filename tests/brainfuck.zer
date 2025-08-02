@@ -39,7 +39,7 @@ defun brainfuck(nput)
         elif (nput>i) == "." do
             output = output + string.chr(memory>pointer)
         elif (nput>i) == "," do
-            set(memory, pointer, string.ord(input("> ")))
+            set(memory, pointer, string.ord(to_int((input("> ")>0), false)))
         elif (nput>i) == "[" do
             if (memory>pointer) == 0 do
                 count = 1
