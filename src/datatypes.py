@@ -18,15 +18,10 @@ class Context:
     )
 
     def __init__(self, display_name, parent=None, parent_entry_pos=None):
-
         self.display_name = display_name
-
         self.parent = parent
-
         self.parent_entry_pos = parent_entry_pos
-
         self.symbol_table = None
-
         self.private_symbol_table = None
 
 
@@ -35,148 +30,108 @@ class SymbolTable:
     __slots__ = ("symbols", "parent")
 
     def __init__(self, parent=None):
-
         self.symbols = {}
-
         self.parent = parent
 
     def get(self, name):
-
         value = self.symbols.get(name, None)
-
         if value == None and self.parent:
-
             return self.parent.get(name)
-
         return value
 
     def set(self, name, value):
-
         self.symbols[name] = value
 
     def change(self, other):
-
         self.symbols = other.symbols
-
         self.parent = other.parent
 
     def remove(self, name):
-
         del self.symbols[name]
 
     def exists(self, value):
-
         return True if value in self.symbols.value() else False
 
     def copy(self):
-
         return SymbolTable().change(self)
 
 
 class Object:
 
     def __init__(self):
-
         self.set_pos()
-
         self.set_context()
-
         self.fields = []
 
     def set_pos(self, pos_start=None, pos_end=None):
-
         self.pos_start = pos_start
-
         self.pos_end = pos_end
-
         return self
 
     def set_context(self, context=None):
-
         self.context = context
-
         return self
 
     def type(self):
-
         return "Object"
 
     def added_to(self, other):
-
         return None, self.illegal_operation(other)
 
     def subbed_by(self, other):
-
         return None, self.illegal_operation(other)
 
     def multed_by(self, other):
-
         return None, self.illegal_operation(other)
 
     def dived_by(self, other):
-
         return None, self.illegal_operation(other)
 
     def moduled_by(self, other):
-
         return None, self.illegal_operation(other)
 
     def powed_by(self, other):
-
         return None, self.illegal_operation(other)
 
     def get_comparison_eq(self, other):
-
         return None, self.illegal_operation(other)
-
+        
     def get_comparison_ne(self, other):
-
         return None, self.illegal_operation(other)
 
     def get_comparison_lt(self, other):
-
         return None, self.illegal_operation(other)
 
     def get_comparison_gt(self, other):
-
         return None, self.illegal_operation(other)
 
     def get_comparison_lte(self, other):
-
         return None, self.illegal_operation(other)
 
     def get_comparison_gte(self, other):
-
         return None, self.illegal_operation(other)
 
     def anded_by(self, other):
-
         return None, self.illegal_operation(other)
 
     def ored_by(self, other):
-
         return None, self.illegal_operation(other)
 
     def notted(self, other):
-
         return None, self.illegal_operation(other)
 
     def execute(self, _):
-
         return RTResult().failure(
             self.illegal_operation(error_str="Cannot call non-function")
         )
 
     def copy(self):
-
         raise Exception("No copy method defined")
 
     def is_true(self):
-
         return False
 
     def prequaled_by(self, other: "Object"):
-
         return None, self.illegal_operation(other)
 
     def get(self, other):
@@ -188,11 +143,8 @@ class Object:
         )
 
     def illegal_operation(self, other=None, error_str=None):
-
         if not other:
-
             other = self
-
         return TError(
             self.pos_start,
             other.pos_end,
@@ -242,79 +194,54 @@ class NoneObject(Object):
     __slots__ = "value"
 
     def __init__(self, value):
-
         super().__init__()
-
         self.value = value
 
     def added_to(self, other):
-
         return other, None
 
     def copy(self):
-
         copy = NoneObject(self.value)
-
         copy.set_pos(self.pos_start, self.pos_end)
-
         copy.set_context(self.context)
-
         return copy
 
     def is_true(self):
-
         return False
 
     def __str__(self):
-
         return "none"
 
     def __repr__(self):
-
         return str(self.value)
 
     def type(self):
-
         return "<none>"
 
     def get_comparison_eq(self, other):
-
         if isinstance(other, NoneObject):
-
             return Bool(True).set_context(self.context), None
-
         return Bool(False).set_context(self.context), None
 
     def get_comparison_ne(self, other):
-
         if isinstance(other, NoneObject):
-
             return Bool(False).set_context(self.context), None
-
         return Bool(True).set_context(self.context), None
 
     def get_comparison_lt(self, _):
-
         return Bool(False).set_context(self.context), None
 
     def get_comparison_gt(self, _):
-
         return Bool(False).set_context(self.context), None
 
     def get_comparison_lte(self, other):
-
         if isinstance(other, NoneObject):
-
             return Bool(False).set_context(self.context), None
-
         return Bool(True).set_context(self.context), None
 
     def get_comparison_gte(self, other):
-
         if isinstance(other, NoneObject):
-
             return Bool(True).set_context(self.context), None
-
         return Bool(False).set_context(self.context), None
 
 
@@ -551,54 +478,34 @@ class Number(Object):
         return Number(self.value * -1).set_context(self.context), None
 
     def copy(self):
-
         copy = Number(self.value)
-
         copy.set_pos(self.pos_start, self.pos_end)
-
         copy.set_context(self.context)
-
         return copy
 
     def is_true(self):
-
         return bool(self.value) if self.value is not None else False
 
     def type(self):
-
         if self.value % 1 == 0:
-
             return "<int>"
-
         else:
-
             return "<float>"
 
     def __str__(self):
-
         if self.value is None:
-
             return "none"
-
         if isinstance(self, Bool):
-
             return "false" if not self.value else "true"
-
         if str(self.value).find("e") != -1 or str(self.value).find("E") != -1:
             return str(self.value).replace("e", "*10^(").replace("E", "*10^(") + ")"
-
         return str(self.value)
 
     def __repr__(self):
-
         if self.value is None:
-
             return "none"
-
         if isinstance(self.value, Bool):
-
             return "false" if not self.value else "true"
-
         if str(self.value).find("e") != -1 or str(self.value).find("E") != -1:
             return str(self.value).replace("e", "*10^(").replace("E", "*10^(") + ")"
         return str(self.value)
@@ -610,45 +517,31 @@ Number.none = NoneObject.none
 
 
 class String(Object):
-
     __slots__ = "value"
 
     def __init__(self, value):
-
         super().__init__()
-
         self.value = value
-
         self.fields = ["size"]
 
     def __len__(self):
-
         return len(self.value)
 
     def __iter__(self):
-
         return iter(self.value)
 
     def added_to(self, other):
-
         if isinstance(other, String):
-
             return String(self.value + other.value).set_context(self.context), None
-
         else:
-
             return None, Object.illegal_operation(
                 self, other, f"Can't add a string to a type of '{other.type()}'"
             )
 
     def multed_by(self, other):
-
         if isinstance(other, Number):
-
             return String(self.value * other.value).set_context(self.context), None
-
         else:
-
             return None, Object.illegal_operation(
                 self, other, f"Can't multiply a string by a type of '{other.type()}'"
             )
@@ -657,7 +550,6 @@ class String(Object):
         if isinstance(other, type_to_check):
             result = bool(op(self.value, other.value))
             return Bool(result).set_context(self.context), None
-
         default_result = True if op is operator.ne else False
         return Bool(default_result).set_context(self.context), None
 
@@ -668,25 +560,18 @@ class String(Object):
         return self._make_comparison(other, operator.ne, String)
 
     def is_true(self):
-
         return len(self.value) > 0
 
     def copy(self):
-
         copy = String(self.value)
-
         copy.set_pos(self.pos_start, self.pos_end)
-
         copy.set_context(self.context)
-
         return copy
 
     def type(self):
-
         return "<str>"
 
     def __str__(self):
-
         return self.value.replace("\n", "\\n")
 
     def get_comparison_gt(self, index):
@@ -771,13 +656,9 @@ class List(Object):
             )
 
     def get_comparison_gt(self, other):
-
         if isinstance(other, Number):
-
             try:
-
                 return self.value[other.value], None
-
             except IndexError:
                 return None, RTError(
                     other.pos_start,
@@ -785,38 +666,28 @@ class List(Object):
                     "Element at this index could not be retrieved from list because index is out of bounds",
                     self.context,
                 )
-
         else:
-
             return None, Object.illegal_operation(self, other, "Index must be a number")
 
     def copy(self):
-
         copy = List(self.value)
-
         copy.set_pos(self.pos_start, self.pos_end)
-
         copy.set_context(self.context)
-
         return copy
 
     def is_true(self):
-
         return len(self.value) > 0
 
     def type(self):
-
         return "<list>"
 
     def iter(self):
         return iter(self.value), None
 
     def __str__(self):
-
         return ", ".join([str(x) for x in self.value])
 
     def __repr__(self):
-
         return f'[{", ".join([repr(x) for x in self.value])}]'
 
 
@@ -824,9 +695,7 @@ class HashMap(Object):
 
     def __init__(self, value):
         super().__init__()
-
         self.value: dict[str, Object] = {}
-
         if isinstance(value, HashMap):
             raw = value.value
         elif isinstance(value, dict):
@@ -871,7 +740,6 @@ class HashMap(Object):
     def get_index(self, index):
         if not isinstance(index, String):
             return None, self.illegal_operation(index)
-
         try:
             return self.value[index.value], None
         except KeyError:
@@ -885,7 +753,6 @@ class HashMap(Object):
     def set_index(self, index, value):
         if not isinstance(index, String):
             return None, self.illegal_operation(index)
-
         new_value = self.value.copy()
         new_value[index.value] = value
         return HashMap(new_value)
@@ -897,21 +764,17 @@ class HashMap(Object):
     def get_comparison_eq(self, other):
         if not isinstance(other, HashMap):
             return Bool(False).set_context(self.context), None
-
         if len(self.value) != len(other.value):
             return Number.false.set_context(self.context), None
 
         for key, value in self.value.items():
             if key not in other.value:
                 return Number.false.set_context(self.context), None
-
             cmp, err = value.get_comparison_eq(other.value[key])
             if err:
                 return None, err
-            assert cmp is not None
             if not cmp.is_true():
                 return Number.false.set_context(self.context), None
-
         return Number.true.set_context(self.context), None
 
     def get_comparison_ne(self, other):
@@ -942,18 +805,14 @@ class File(Object):
     __slots__ = ("name", "path")
 
     def __init__(self, name, path):
-
         super().__init__()
-
         self.name = name
-
         self.path = path
 
     def _make_comparison(self, other, op, type_to_check):
         if isinstance(other, type_to_check):
             result = bool(op(self.path, other.path))
             return Bool(result).set_context(self.context), None
-
         default_result = True if op is operator.ne else False
         return Bool(default_result).set_context(self.context), None
 
@@ -964,21 +823,15 @@ class File(Object):
         return self._make_comparison(other, operator.ne, File)
 
     def copy(self):
-
         copy = File(self.name, self.path)
-
         copy.set_pos(self.pos_start, self.pos_end)
-
         copy.set_context(self.context)
-
         return copy
 
     def type(self):
-
         return "<File>"
 
     def __repr__(self):
-
         return f"<File {self.name}>"
 
 
@@ -1061,8 +914,7 @@ class Bytes(Object):
 
     def get_comparison_gt(self, index):
         if not isinstance(index, Number):
-            return None, self.illegal_operation(index)
-
+            return None, self.illegal_operation(index)p
         try:
             return Bytes(bytes(self.value[index.value])).set_context(self.context), None
         except IndexError:
