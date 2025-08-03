@@ -67,6 +67,7 @@ def load_module(fn, interpreter, context):
 
 
 class BaseFunction(Object):
+    __slots__ = "name"
     def __init__(self, name):
         super().__init__()
         self.name = name or "<anonymous>"
@@ -129,6 +130,7 @@ class BaseFunction(Object):
 
 
 class Function(BaseFunction):
+    __slots__ = ("name", "body_node", "arg_names", "defaults", "should_auto_return")
     def __init__(
         self, name, body_node, arg_names, defaults, should_auto_return
     ):
@@ -182,6 +184,7 @@ class Function(BaseFunction):
 
 
 class BuiltInFunction(BaseFunction):
+    __slots__ = ("name", "body_node", "arg_names", "defaults", "should_auto_return")
     def __init__(self, name):
         super().__init__(name)
 
