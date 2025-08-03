@@ -1,0 +1,131 @@
+# libs.math
+
+namespace math
+    PI = PI_fp
+    E = E_fp
+
+    defun pass()
+        none
+    done
+
+    defun check_number(a, b, f)
+        if type(a) != int and type(a) != float do
+            panic("First argument of '" + f + "' must be a number", "T")
+        done
+        if b == none do
+            pass()
+        else
+            if type(b) != int and type(b) != float do
+                panic("Second argument of '" + f + "' must be a number", "T")
+            done
+        done
+    done
+
+    defun sqrt(a)
+        check_number(a, none, "sqrt")
+        if a < 0 do
+            panic("Square root of negative number error", "M")
+        done
+        return sqrt_fp(a)
+    done
+
+    defun abs(a)
+        check_number(a, none, "abs")
+        return abs_fp(a)
+    done
+
+    defun fact(n)
+        check_number(n, none, "fact")
+        if n < 0 do
+            panic("'fact' is undefined for negative number", "M")
+        done
+        return fact_fp(n)
+    done
+
+    defun sin(x)
+        check_number(x, none, "sin")
+        return sin_fp(x)
+    done
+
+    defun cos(x)
+        check_number(x, none, "cos")
+        return cos_fp(x)
+    done
+
+    defun tan(x)
+        check_number(x, none, "tan")
+        k = to_int(x / (PI / 2), false)
+        if (k % 2 != 0) and (abs(x - (k * PI / 2)) < (1 * 10^ (-15))) do
+            panic("'tan' is undefined at this value", "M")
+        done
+        return tan_fp(x)
+    done
+
+    defun gcd(a, b)
+        check_number(a, b, "gcd")
+        return gcd_fp(a, b)
+    done
+
+    defun lcm(a, b)
+        check_number(a, b, "lcm")
+        return lcm_fp(a, b)
+    done
+
+    defun fib(n)
+        check_number(n, none, "fib")
+        if n < 0 do
+            panic("'fib' is undefined for negative number", "M")
+        done
+        return fib_fp(n)
+    done
+
+    defun is_prime(n)
+        check_number(n, none, "is_prime")
+        return is_prime_fp(n)
+    done
+
+    defun deg2rad(d)
+        check_number(d, none, "deg2rad")
+        return deg2rad_fp(d)
+    done
+
+    defun rad2deg(r)
+        check_number(r, none, "rad2deg")
+        return rad2deg_fp(r)
+    done
+
+    defun exp(x)
+        check_number(x, none, "exp")
+        return exp_fp(x)
+    done
+
+    defun log(x)
+        check_number(x, none, "log")
+        if x <= 0 do
+            panic("'log' is undefined at this value", "M")
+        done
+        return log_fp(x)
+    done
+
+    ln2 = log(2)
+
+    defun sinh(x)
+        check_number(x, none, "sinh")
+        return sinh_fp(x)
+    done
+
+    defun cosh(x)
+        check_number(x, none, "cosh")
+        return cosh_fp(x)
+    done
+
+    defun tanh(x)
+        check_number(x, none, "tanh")
+        return tanh_fp(x)
+    done
+
+    defun round(x)
+        check_number(x, none, "round")
+        return round_fp(x)
+    done
+done

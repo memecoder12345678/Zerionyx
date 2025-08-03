@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <title>Zerionyx Documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            --neon-blue: #1ad1ff;
+            --neon-green-accent: #1affb3;
+
+            --light-bg: #ffffff;
+            --dark-header-bg: #2b3b4a;
+            --dark-code-bg: #101522;
+            --sidebar-bg: #f9f9f9;
+
+            --dark-text: #333333;
+            --light-text: #f0f0f0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Source Sans Pro', 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--dark-header-bg);
+            z-index: 100;
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 20px;
+        }
+
+        .header-container {
+            max-width: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .logo a {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--light-text);
+            text-decoration: none;
+            text-shadow: 0 0 5px var(--neon-blue);
+        }
+
+        .logo span {
+            color: var(--neon-green-accent);
+            text-shadow: 0 0 8px var(--neon-green-accent);
+        }
+
+        nav a {
+            color: var(--light-text);
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 1.1rem;
+            transition: color 0.2s, text-shadow 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--neon-blue);
+            text-shadow: 0 0 5px var(--neon-blue);
+        }
+
+        .docs-wrapper {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            padding: 2rem 1rem;
+            border-right: 1px solid #e0e0e0;
+            position: sticky;
+            top: 68px;
+            height: calc(100vh - 68px);
+            overflow-y: auto;
+            background: var(--sidebar-bg);
+        }
+
+        .sidebar h3 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            color: #777;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .sidebar h3:first-child {
+            margin-top: 0;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li a {
+            display: block;
+            padding: 0.4rem 0.5rem;
+            color: var(--neon-blue);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .sidebar li a:hover {
+            background-color: #e0e0e0;
+            text-shadow: 0 0 4px var(--neon-blue);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem 3rem;
+        }
+
+        .main-content h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+
+        .main-content h2 {
+            font-size: 1.8rem;
+            font-weight: 400;
+            margin-top: 3rem;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+            color: var(--neon-blue);
+            text-shadow: 0 0 3px var(--neon-blue);
+        }
+
+        .main-content h3 {
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-top: 2.5rem;
+            color: var(--neon-blue);
+        }
+
+        pre {
+            background-color: var(--dark-code-bg);
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+            border-radius: 5px;
+            padding: 1rem;
+            overflow-x: auto;
+            max-width: 100%;
+            line-height: 1.45;
+        }
+
+        code {
+            font-family: 'Fira Mono', 'Consolas', monospace;
+            background-color: #1ad1ff1a;
+            color: #0d4b5f;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        pre>code {
+            color: #e6faff;
+            background: none;
+            padding: 0;
+            border-radius: 0;
+            font-size: 1em;
+            text-shadow: none;
+        }
+
+        footer {
+            background-color: var(--dark-header-bg);
+            color: #ccc;
+            text-align: center;
+            padding: 2rem 0;
+            font-size: 0.9rem;
+            margin-top: 4rem;
+        }
+
+        footer a {
+            color: var(--neon-green-accent);
+            text-shadow: 0 0 3px var(--neon-green-accent);
+        }
+
+        .highlight-Zerionyx .zyx-keyword,
+        .highlight-Zerionyx .zyx-types {
+            color: var(--neon-blue);
+            font-weight: bold;
+        }
+
+        .highlight-Zerionyx .zyx-func-def,
+        .highlight-Zerionyx .zyx-func {
+            color: var(--neon-green-accent);
+            font-weight: bold;
+        }
+
+        .highlight-Zerionyx .zyx-string {
+            color: #e2fb8c;
+        }
+
+        .highlight-Zerionyx .zyx-number {
+            color: #ffb366;
+        }
+
+        .highlight-Zerionyx .zyx-comment {
+            color: #667788;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-inner">
+            <div class="logo">
+                <img src="favicon.ico" alt="Zerionyx logo">
+                <a href="index.html">Zeriony<span>x</span></a>
+            </div>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="https://github.com/memecoder12345678/Zerionyx" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="docs-wrapper">
+        <aside class="sidebar">
+            <h3>Language</h3>
+            <ul>
+                <li><a href="#getting-started">Getting Started</a></li>
+                <li><a href="#grammar">Grammar</a></li>
+                <li><a href="#zen-of-zerionyx">Zen of Zerionyx</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="#built-in-functions">Built-in Functions</a></li>
+            </ul>
+            <h3>Standard Library</h3>
+            <ul>
+                <li><a href="#lib-mlist">list</a></li>
+                <li><a href="#lib-string">string</a></li>
+                <li><a href="#lib-math">math</a></li>
+                <li><a href="#lib-ffio">ffio</a></li>
+                <li><a href="#lib-hash">hash</a></li>
+                <li><a href="#lib-memory">memory</a></li>
+                <li><a href="#lib-net">net</a></li>
+                <li><a href="#lib-random">random</a></li>
+                <li><a href="#lib-sys">sys</a></li>
+                <li><a href="#lib-threading">threading</a></li>
+                <li><a href="#lib-time">time</a></li>
+                <li><a href="#lib-keyboard">keyboard</a></li>
+                <li><a href="#lib-termcolor">termcolor</a></li>
+                <li><a href="#lib-mouse">mouse</a></li>
+                <li><a href="#lib-screen">screen</a></li>
+            </ul>
+
+        </aside>
+
+        <main class="main-content">
+            <h1>Zerionyx Documentation</h1>
+
+            <section id="getting-started">
+                <h2>Getting Started</h2>
+                <ul>
+                    <li><b>Install Zerionyx</b>: <code>git clone https://github.com/memecoder12345678/Zerionyx</code>
+                    </li>
+                    <li><b>Run a file</b>: <code>python zerionyx.py yourfile.zyx</code></li>
+                    <li><b>Open interactive shell</b>: <code>python zerionyx.py</code></li>
+                    <li>See the <a href="index.html" style="color:var(--neon-blue);">homepage</a> for more info.</li>
+                </ul>
+            </section>
+
+            <section id="grammar">
+                <h2>Language Grammar</h2>
+                <pre><code class="highlight-Zerionyx">PROGRAM            ::= (STATEMENT NEWLINE*)*
+
+STATEMENT          ::= SIMPLE_STATEMENT | COMPOUND_STATEMENT
+
+SIMPLE_STATEMENT   ::=
+      "load" STRING
+    | "return" EXPR
+    | "continue"
+    | "break"
+    | EXPR
+
+COMPOUND_STATEMENT ::=
+      IF_EXPR
+    | FOR_EXPR
+    | WHILE_EXPR
+    | DEF_FUNC
+
+EXPR               ::= 
+      "let" IDENTIFIER "=" EXPR
+    | IDENTIFIER "=" EXPR
+    | "let" IDENTIFIER "as" EXPR
+    | IDENTIFIER "as" EXPR
+    | IDENTIFIER ("+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^=") EXPR
+    | COMP_EXPR (("and" | "or") COMP_EXPR)*
+
+COMP_EXPR          ::= 
+      ARITH_EXPR (("==" | "<" | ">" | "<=" | ">=" | "!=") ARITH_EXPR)*
+    | "not" COMP_EXPR
+
+ARITH_EXPR         ::= TERM (("+" | "-") TERM)*
+
+TERM               ::= FACTOR (("*" | "/" | "//" | "%") FACTOR)*
+
+FACTOR             ::= ("+" | "-") FACTOR | POWER
+
+POWER              ::= CALL ("^" FACTOR)*
+
+CALL               ::= ATOM ("(" (EXPR ("," EXPR)*)? ")")?
+
+ATOM               ::= 
+      INT | FLOAT | STRING | IDENTIFIER
+    | "(" EXPR ")"
+    | LIST_EXPR
+    | LIST_INDEX
+    | IF_EXPR
+    | FOR_EXPR
+    | FOR_IN_EXPR
+    | GET_INDEX
+    | GET_MEMBER
+    | HASHMAP_EXPR
+    | NAMESPACE_EXPR
+    | WHILE_EXPR
+    | DEF_FUNC
+    | COMMENT
+
+GET_INDEX         ::= "(" IDENTIFIER ">" EXPR ")
+
+GET_MEMBER        ::= IDENTIFIER  "." CALL
+
+LIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"
+
+HASHMAP_EXPR      ::= "{" (STRING ":" EXPR ("," STRING ":" EXPR)*)? "}"
+
+NAMESPACE_EXPR    ::=
+      "namespace" IDENTIFIER
+      NEWLINE STATEMENT NEWLINE "done"
+
+IF_EXPR           ::= 
+      "if" EXPR "do" STATEMENT
+      (NEWLINE "elif" EXPR "do" STATEMENT)*
+      (NEWLINE "else" STATEMENT)?
+      NEWLINE "done"
+
+FOR_EXPR          ::=
+      "for" IDENTIFIER "=" EXPR "to" EXPR
+      ("step" EXPR)?
+      "do" STATEMENT
+      NEWLINE "done"
+
+FOR_IN_EXPR          ::=
+      "for" IDENTIFIER "in" EXPR
+      "do" STATEMENT
+      NEWLINE "done"
+
+WHILE_EXPR        ::= 
+      "while" EXPR "do" STATEMENT
+      NEWLINE "done"
+
+PARAM_LIST        ::=
+      IDENTIFIER ("=" EXPR)? ("," IDENTIFIER ("=" EXPR)?)*
+
+DEF_FUNC          ::= 
+      "defun" IDENTIFIER "(" PARAM_LIST? ")"
+      ("->" EXPR)?
+      NEWLINE STATEMENT NEWLINE "done"
+
+COMMENT           ::= "#" /[^\n]*/
+</code></pre>
+            </section>
+
+            <section id="zen-of-zerionyx">
+                <h2>The Zen of Zerionyx</h2>
+                <pre><code class="highlight-Zerionyx">The Zen of Zerionyx, by MemeCoder.
+
+Clarity is better than cleverness.
+Consistency is better than chaos.
+Freedom in syntax, but not in structure.
+Parentheses are for math, backslashes are for flow.
+The caret (<code>^</code>) means power — and nothing else.
+Blocks should be explicit: <code>do...done</code> says it all.
+if is a command, not a value.
+<code>let</code> or <code>=</code>, pick one — but be clear.
+Whitespace is free; newlines are not.
+Write like a poet, execute like a machine.
+Code is for humans first, machines second.
+<code>elif</code> is enough — no need for <code>else if</code>.
+<code>load</code> means include — not magic.
+Indentation is rhythm, not restriction.
+When in doubt, don't guess — define it.
+Simplicity comes first.
+If it's hard to explain, it's probably wrong.
+If it's easy to explain, it might be right.
+Weirdness is not a feature.
+Zerionyx may be magical, but its syntax must be real.
+</code></pre>
+            </section>
+
+            <section id="built-in-functions">
+                <h2>Built-in Functions</h2>
+                <ul>
+                    <li><b>append(obj, val)</b> → list — Add <code>val</code> to end of <code>obj</code> return
+                        <code>val</code>
+                    </li>
+                    <li><b>is_err(func, args=[])</b> → list — Run <code>func</code> with <code>args</code> return
+                        <code>[result, none, none]</code> if ok or
+                        <code>[none, err_msg, err_name ('RT': 'Runtime Error', 'M': 'Math Error', 'IO': 'IO Error' or 'T': 'Type Error')]</code>
+                        if error
+                    </li>
+                    <li><b>clear()</b> → none — Clear terminal</li>
+                    <li><b>extend(a, b)</b> → none — Add all in <code>b</code> to <code>a</code> both must be list</li>
+                    <li><b>input(prompt="")</b> → str — Show <code>prompt</code> get user input</li>
+                    <li><b>get_password(prompt="")</b> → str — Show <code>prompt</code> get user password</li>
+                    <li><b>insert(lst, i, val)</b> → none — insert <code>val</code> to <code>lst</code> at index
+                        <code>i</code>
+                    </li>
+                    <li><b>is_func(x)</b> → bool — Check if <code>x</code> is func</li>
+                    <li><b>is_list(x)</b> → bool — Check if <code>x</code> is list</li>
+                    <li><b>is_py_obj(x)</b> → bool — Check if <code>x</code> is PyObject</li>
+                    <li><b>is_none(x)</b> → bool — Check if <code>x</code> is none</li>
+                    <li><b>is_num(x)</b> → bool — Check if <code>x</code> is number</li>
+                    <li><b>is_str(x)</b> → bool — Check if <code>x</code> is string</li>
+                    <li><b>is_bool(x)</b> → bool — Check if <code>x</code> is boolean</li>
+                    <li><b>is_thread(x)</b> → bool — Check if <code>x</code> is thread</li>
+                    <li><b>keys(hm)</b> → list — Return list of all keys in <code>hm</code> (a hashmap)</li>
+                    <li><b>values(hm)</b> → list — Return list of all values in <code>hm</code></li>
+                    <li><b>items(hm)</b> → list — Return list of <code>[key, value]</code> pairs in <code>hm</code></li>
+                    <li><b>has(hm, key)</b> → bool — Return <code>true</code> if <code>key</code> exists in
+                        <code>hm</code>
+                    </li>
+                    <li><b>get(hmol, koi, default=none)</b> → any — Return value for <code>koi</code> or <code>default</code>
+                        if not found</li>
+                    <li><b>set(hmol, koi, value=none)</b> → hashmap/list — Add or update <code>koi</code> in
+                        <code>hmol</code> with <code>value</code>
+                    </li>
+                    <li><b>del(hm, key)</b> → none — Delete <code>key</code> and its value from <code>hm</code></li>
+                    <li><b>len(x)</b> → number — Get length of <code>x</code></li>
+                    <li><b>panic(msg, type="RT")</b> — Stop with err <code>msg</code> and
+                        <code>type ('RT': 'Runtime Error', 'M': 'Math Error', 'IO': 'IO Error' or 'T': 'Type Error')</code>
+                    </li>
+                    <li><b>pop(lst, i)</b> → any — Remove and return item at <code>i</code> in <code>lst</code></li>
+                    <li><b>print(value="")</b> → none — Prints <code>text</code> to the standard output with no newline</li>
+                    <li><b>println(value="")</b> → none — Same as <code>print</code> but adds a newline</li>
+                    <li><b>to_float(x, supress_error=false)</b> → number (float)/none — Convert <code>x</code> to float return
+                        <code>none</code> if fail and <code>silent</code> true else raise
+                    </li>
+                    <li><b>to_int(x, supress_error=false)</b> → number (int)/none — Convert <code>x</code> to int return
+                        <code>none</code> if fail and <code>silent</code> true else raise
+                    </li>
+                    <li><b>to_str(x)</b> → str — Convert <code>x</code> to string</li>
+                    <li><b>to_bytes(x, supress_error=false)</b> → bytes — Convert <code>x</code> (hex string) to bytes</li>
+                    <li><b>to_hex(x, supress_error=false)</b> → str — Convert <code>x</code> to hex string</li>
+                    <li><b>type(x)</b> → str/none — Return type of <code>x</code> as string or none</li>
+                    <li><b>pyexec(code, args={})</b> → hashmap — Executes embedded Python code and returns its result (args
+                        hashmap) (use with caution)</li>
+                    <li><b>slice(l, from=none, to=none, step=none)</b> → list/string/hashmap/bytes — Slice list/string/hashmap/bytes
+                        <code>l</code> from <code>from</code> to <code>to</code> step <code>step</code> (exclusive)
+                    </li>
+                </ul>
+            </section>
+
+            <section id="standard-library">
+                <h2>Standard Library</h2>
+                <p>
+                    To use a library, add <code>load "libs.&lt;name&gt;"</code> at the top of your <b>.zyx</b> file.
+                    For example: <code>load "libs.math"</code>.
+                </p>
+
+                <p>
+                    The <code>load</code> statement works similarly to <code>#include</code> in C — it inserts the
+                    contents of the file directly into your code, without automatically applying any namespace.
+                </p>
+
+                <p>
+                    That means if you're loading your own library and want to keep things organized, you should manually
+                    wrap it in a namespace using the <code>namespace</code> keyword.
+                </p>
+
+                <p>
+                    All official libraries under <code>libs.*</code> are already wrapped in their own namespaces.
+                    That's why you can use them right away, like <code>math.is_prime(314)</code>.
+                </p>
+
+                <p>
+                    To load a library from your current directory instead of the built-in ones, use the
+                    <code>local.&lt;name&gt;</code> prefix.
+                    For example: <code>load "local.utils"</code> will include <code>utils.zyx</code> from the current
+                    folder.
+                </p>
+
+
+
+                <div id="lib-mlist">
+                    <h3>mlist.zyx</h3>
+                    <ul>
+                        <li><b>map(f, l)</b> → list — Apply function <code>f</code> to each element of list
+                            <code>l</code>
+                        </li>
+                        <li><b>filter(f, l)</b> → list — Filter list <code>l</code> by function <code>f</code> (keep
+                            elements where <code>f(x)</code> is true)</li>
+                        <li><b>reduce(f, l, i)</b> → any — Reduce list <code>l</code> with function <code>f</code> and
+                            initial value <code>i</code></li>
+                        <li><b>min(l)</b> → number — Minimum value in list <code>l</code></li>
+                        <li><b>max(l)</b> → number — Maximum value in list <code>l</code></li>
+                        <li><b>reverse(l)</b> → list — Reverse the list <code>l</code></li>
+                        <li><b>zip(l1, l2)</b> → list — Pair elements from <code>l1</code> and <code>l2</code> (shortest
+                            length)</li>
+                        <li><b>zip_longest(l1, l2)</b> → list — Pair elements from <code>l1</code> and <code>l2</code>
+                            (fill with <code>none</code> if lengths differ)</li>
+                        <li><b>sort(l, r=false)</b> → list — Sort list <code>l</code></li>
+                        <li><b>count(l, v)</b> → number — Count occurrences of <code>v</code> in <code>l</code></li>
+                        <li><b>index_of(l, v)</b> → number/none — Index of <code>v</code> in <code>l</code> or
+                            <code>none</code> if not found
+                        </li>
+                        <li><b>rand_int_list(len, min, max)</b> → list — List of random integers</li>
+                        <li><b>rand_float_list(len, min, max)</b> → list — List of random floats</li>
+                    </ul>
+                </div>
+                <div id="lib-string">
+                    <h3>string.zyx</h3>
+                    <ul>
+                        <li><b>split(s, s_="")</b> → list — Split string <code>s</code> by separator <code>sep</code></li>
+                        <li><b>strip(s, s_=" ")</b> → list — Trims <code>sep</code> from both ends of <code>s</code></li>
+                        <li><b>join(sep, l)</b> → str — Join list <code>l</code> with separator <code>sep</code></li>
+                        <li><b>replace(s, old, new, c=-1)</b> → str — Replace <code>old</code> with <code>new</code> in
+                            <code>s</code>
+                        </li>
+                        <li><b>to_upper(s)</b> → str — Uppercase <code>s</code></li>
+                        <li><b>to_lower(s)</b> → str — Lowercase <code>s</code></li>
+                        <li><b>ord(s)</b> → number — Unicode code point of character <code>s</code></li>
+                        <li><b>chr(n)</b> → str — Character from code <code>n</code></li>
+                        <li><b>is_digit(s)</b> → bool — Is <code>s</code> a digit</li>
+                        <li><b>is_ascii_lowercase(s)</b> → bool — Is <code>s</code> a lowercase letter</li>
+                        <li><b>is_ascii_uppercase(s)</b> → bool — Is <code>s</code> an uppercase letter</li>
+                        <li><b>is_ascii_letter(s)</b> → bool — Is <code>s</code> a letter</li>
+                        <li><b>is_space(s)</b> → bool — Is <code>s</code> a whitespace character</li>
+                        <li><b>find(s, v)</b> → number/none — Index of substring <code>v</code> in <code>s</code></li>
+                        <li><b>find_all(s, v)</b> → list — All indices of substring <code>v</code> in <code>s</code>
+                        </li>
+                        <li><b>startswith(s, v)</b> → bool — <code>s</code> starts with <code>v</code></li>
+                        <li><b>endswith(s, v)</b> → bool — <code>s</code> ends with <code>v</code></li>
+                        <li><b>encode(s, encoding="utf-8", errors="strict")</b> → <code>bytes</code> — Encode <code>s</code> using
+                            <code>encoding</code>
+                        </li>
+                        <li><b>decode(b, encoding="utf-8", errors="strict")</b> → <code>string</code> — Decode <code>b</code> using
+                            <code>encoding</code>
+                        </li>
+                    </ul>
+                </div>
+                <div id="lib-math">
+                    <h3>math.zyx</h3>
+                    <ul>
+                        <li><b>sqrt(a)</b> → number — Square root of <code>a</code></li>
+                        <li><b>abs(a)</b> → number — Absolute value of <code>a</code></li>
+                        <li><b>fact(n)</b> → number — Factorial of <code>n</code></li>
+                        <li><b>sin(x)</b> → number — Sine of <code>x</code></li>
+                        <li><b>cos(x)</b> → number — Cosine of <code>x</code></li>
+                        <li><b>tan(x)</b> → number — Tangent of <code>x</code></li>
+                        <li><b>gcd(a, b)</b> → number — GCD of <code>a</code> and <code>b</code></li>
+                        <li><b>lcm(a, b)</b> → number — LCM of <code>a</code> and <code>b</code></li>
+                        <li><b>fib(n)</b> → number — <code>n</code>-th Fibonacci number</li>
+                        <li><b>is_prime(n)</b> → bool — Is <code>n</code> prime</li>
+                        <li><b>deg2rad(d)</b> → number — Degrees to radians</li>
+                        <li><b>rad2deg(r)</b> → number — Radians to degrees</li>
+                        <li><b>exp(x)</b> → number — Exponential of <code>x</code></li>
+                        <li><b>log(x)</b> → number — Natural logarithm of <code>x</code></li>
+                        <li><b>sinh(x)</b> → number — Hyperbolic sine</li>
+                        <li><b>cosh(x)</b> → number — Hyperbolic cosine</li>
+                        <li><b>tanh(x)</b> → number — Hyperbolic tangent</li>
+                        <li><b>round(x)</b> → number — Round <code>x</code> to nearest integer</li>
+                        <li>Constants: <b>PI</b>, <b>E</b>, <b>ln2</b></li>
+                    </ul>
+                </div>
+                <div id="lib-ffio">
+                    <h3>ffio.zyx</h3>
+                    <ul>
+                        <li><b>write(file, mode, text)</b> → none — Write <code>text</code> to <code>file</code> with
+                            mode <code>mode</code> ("w", "a" or "wb")</li>
+                        <li><b>read(file, mode)</b> → str/bytes — Read contents of <code>file</code> with mode
+                            <code>mode</code> ("r" or "rb")
+                        </li>
+                        <li><b>exists(file)</b> → bool — Check if <code>file</code> exists</li>
+                        <li><b>get_cdir()</b> → str — Get current directory</li>
+                        <li><b>set_cdir(dir)</b> → none — Change current directory</li>
+                        <li><b>list_dir(d=".")</b> → list — List files in directory</li>
+                        <li><b>make_dir(dir)</b> → none — Create directory</li>
+                        <li><b>remove_file(file)</b> → none — Remove file</li>
+                        <li><b>rename(old, new)</b> → none — Rename file or directory</li>
+                        <li><b>remove_dir(dir)</b> → none — Remove directory</li>
+                        <li><b>copy(src, dst)</b> → none — Copy file</li>
+                        <li><b>is_file(file)</b> → bool — Is path a file</li>
+                        <li><b>abs_path(path)</b> → str — Get absolute path</li>
+                        <li><b>base_name(file)</b> → str — Get file name</li>
+                        <li><b>dir_name(file)</b> → str — Get parent folder</li>
+                        <li><b>symlink(src, dst)</b> → none — Create symbolic link from src to <code>dst</code></li>
+                        <li><b>readlink(path)</b> → str — Read destination of a symbolic link</li>
+                        <li><b>stat(path)</b> → list — Get file or directory metadata (follow symlinks)</li>
+                        <li><b>lstat(path)</b> → list — Get file or directory metadata (don't follow symlinks)</li>
+                        <li><b>walk(top)</b> → list — Recursively walk through directory tree starting at
+                            <code>top</code>
+                        </li>
+                        <li><b>chmod(path, mode)</b> → none — Change permission bits of a file or directory</li>
+                        <li><b>chown(path, uid, gid)</b> → none — Change owner and group of a file or directory</li>
+                        <li><b>utime(path, times)</b> → none — Set access and modification times</li>
+                        <li><b>link(src, dst)</b> → none — Create a hard link from <code>src</code> to <code>dst</code>
+                        </li>
+                        <li><b>unlink(path)</b> → none — Remove a file or symbolic link</li>
+                        <li><b>access(path, mode)</b> → bool — Check user's access permissions for a path</li>
+                        <li><b>path_join(parts)</b> → str — Join multiple path components into one</li>
+                        <li><b>is_dir(path)</b> → bool — Check if the path is a directory</li>
+                        <li><b>is_link(path)</b> → bool — Check if the path is a symbolic link</li>
+                        <li><b>is_mount(path)</b> → bool — Check if the path is a mount point</li>
+                        <li>Constants: <b>os_sep</b></li>
+                    </ul>
+                </div>
+                <div id="lib-hash">
+                    <h3>hash.zyx</h3>
+                    <ul>
+                        <li><b>md5(s)</b> → bytes — MD5 hash of <code>s</code></li>
+                        <li><b>sha1(s)</b> → bytes — SHA1 hash of <code>s</code></li>
+                        <li><b>sha256(s)</b> → bytes — SHA256 hash of <code>s</code></li>
+                        <li><b>sha512(s)</b> → bytes — SHA512 hash of <code>s</code></li>
+                        <li><b>crc32(s)</b> → bytes — CRC32 hash of <code>s</code></li>
+                    </ul>
+                </div>
+                <div id="lib-memory">
+                    <h3>memory.zyx</h3>
+                    <ul>
+                        <li><b>remember(key, value)</b> → none — Store <code>value</code> with <code>key</code></li>
+                        <li><b>recall(key)</b> → any/none — Retrieve value by <code>key</code></li>
+                        <li><b>forget(key)</b> → none — Remove <code>key</code> from memory</li>
+                        <li><b>clear_memory()</b> → none — Clear all memory</li>
+                        <li><b>keys()</b> → list — List all keys</li>
+                        <li><b>is_empty()</b> → bool — Is memory empty</li>
+                        <li><b>size()</b> → number — Number of keys</li>
+                    </ul>
+                </div>
+                <div id="lib-net">
+                    <h3>net.zyx</h3>
+                    <ul>
+                        <li><b>get_ip()</b> → str — Get public IP address</li>
+                        <li><b>get_mac()</b> → str — Get MAC address</li>
+                        <li><b>ping(host)</b> → str — Ping host</li>
+                        <li><b>downl(url, t=15)</b> → str — Download file from URL</li>
+                        <li><b>get_local_ip()</b> → str — Get local IP address</li>
+                        <li><b>get_hostname()</b> → str — Get hostname</li>
+                        <li><b>request(url, method, headers, data, t=15)</b> → list/hashmap — Send HTTP request and
+                            return response JSON</li>
+                    </ul>
+                </div>
+                <div id="lib-random">
+                    <h3>random.zyx</h3>
+                    <ul>
+                        <li><b>rand()</b> → number (float) — Random float in [0, 1]</li>
+                        <li><b>rand_int(min, max)</b> → number (int) — Random integer in [min, max]</li>
+                        <li><b>rand_float(min, max)</b> → number (float) — Random float in [min, max]</li>
+                        <li><b>rand_choice(list)</b> → any — Random element from list</li>
+                        <li><b>int_seed(i)</b> → number (int) — Integer seed</li>
+                        <li><b>float_seed(f)</b> → number (float) — Float seed</li>
+                    </ul>
+                </div>
+                <div id="lib-sys">
+                    <h3>sys.zyx</h3>
+                    <ul>
+                        <li><b>system(cmd)</b> → none — Execute system command</li>
+                        <li><b>osystem(cmd)</b> → list — Same as <code>system</code> but returns its result</li>
+                        <li><b>get_env(name)</b> → str — Get environment variable</li>
+                        <li><b>set_env(name, value)</b> → none — Set environment variable</li>
+                        <li><b>exit(e=0)</b> → none — Exit program</li>
+                        <li><b>argv</b> — List of command-line arguments</li>
+                        <li><b>os_name</b> — OS name</li>
+                    </ul>
+                </div>
+                <div id="lib-threading">
+                    <h3>threading.zyx</h3>
+                    <ul>
+                        <li><b>start(func, a=[])</b> → thread — Start a new thread</li>
+                        <li><b>sleep(seconds)</b> → none — Sleep current thread</li>
+                        <li><b>join(thread, t=15)</b> → none — Wait for thread to finish</li>
+                        <li><b>is_alive(thread)</b> → bool — Is thread alive</li>
+                        <li><b>cancel(thread)</b> → none — Cancel thread</li>
+                    </ul>
+                </div>
+                <div id="lib-time">
+                    <h3>time.zyx</h3>
+                    <ul>
+                        <li><b>sleep(seconds)</b> → none — Sleep for <code>seconds</code></li>
+                        <li><b>time()</b> → number (float) — Current time (seconds since epoch)</li>
+                        <li><b>ctime(time)</b> → str — Human-readable time</li>
+                    </ul>
+                </div>
+                <div id="lib-keyboard">
+                    <h3>keyboard.zyx</h3>
+                    <ul>
+                        <li><b>write(text)</b> → none — Type <code>text</code> as keyboard input</li>
+                        <li><b>press(key)</b> → none — Press a key</li>
+                        <li><b>release(key)</b> → none — Release a key</li>
+                        <li><b>wait(key)</b> → none — Wait for key press</li>
+                        <li><b>is_pressed(key)</b> → bool — Is key pressed</li>
+                    </ul>
+                </div>
+                <div id="lib-termcolor">
+                    <h3>termcolor.zyx</h3>
+                    <ul>
+                        <li><b>cprint(text, c=none, b=none, s=none)</b> → none — Prints <code>text</code> with color,
+                            background, and style with no newline</li>
+                        <li><b>cprintln(text, c=none, b=none, s=none)</b> → none — Same as <code>cprint</code> but adds a
+                            newline</li>
+                        <li><b>get_code(c=none, b=none, s=none)</b> → str — Return ANSI escape code string for the given
+                            color, background, and style</li>
+                    </ul>
+                </div>
+                <div id="lib-mouse">
+                    <h3>mouse.zyx</h3>
+                    <ul>
+                        <li><b>move(x, y)</b> → none — Moves the mouse cursor to position (<code>x</code>,
+                            <code>y</code>)
+                        </li>
+                        <li><b>click()</b> → none — Performs a left-click at the current mouse position</li>
+                        <li><b>right_click()</b> → none — Performs a right-click at the current mouse position</li>
+                        <li><b>scroll(amount)</b> → none — Scrolls vertically by <code>amount</code> units</li>
+                        <li><b>position()</b> → list — Returns the current mouse position as a list of two numbers</li>
+                    </ul>
+                </div>
+
+                <div id="lib-screen">
+                    <h3>screen.zyx</h3>
+                    <ul>
+                        <li><b>capture(path)</b> → none — Takes a screenshot of the entire screen and saves it to
+                            <code>path</code>
+                        </li>
+                        <li><b>capture_area(x, y, w, h, path)</b> → str — Captures a specific screen region starting at
+                            (<code>x</code>, <code>y</code>) with size <code>w</code> × <code>h</code> and saves it to
+                            <code>path</code>
+                        </li>
+                        <li><b>get_color(x, y)</b> → str — Returns the color at (<code>x</code>, <code>y</code>) as a
+                            hex string like <code>#rrggbb</code></li>
+                    </ul>
+                </div>
+
+
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <div class="container">
+            Zerionyx © 2025 MemeCoder — <a href="https://github.com/memecoder12345678/Zerionyx" target="_blank">View on
+                GitHub</a>
+        </div>
+    </footer>
+</body>
+
+</html>
+
+
+

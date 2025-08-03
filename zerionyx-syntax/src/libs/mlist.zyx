@@ -1,0 +1,204 @@
+# libs.mlist
+
+namespace mlist
+    load "libs.random"
+
+    defun map(f, l)
+        if type(l) != list do
+            panic("Second argument of 'map' must be a list", "T")
+        done
+        if type(f) != func do
+            panic("First argument of 'map' must be a function", "T")
+        done
+        r = []
+        for i = 0 to len(l) do
+            append(r, f(l>i))
+        done
+        return r
+    done
+
+    defun rand_int_list(l, m, m_)
+        l_ = []
+        for _ = 0 to l do
+            append(l_, random.rand_int(m, m_))
+        done
+        return l_
+    done
+
+    defun rand_float_list(l, m, m_)
+        l_ = []
+        for _ = 0 to l do
+            append(l_, random.rand_float(m, m_))
+        done
+        return l_
+    done
+
+    defun filter(f, l)
+        if type(l) != list do
+            panic("Second argument of 'filter' must be a list", "T")
+        done
+        if type(f) != func do
+            panic("First argument of 'filter' must be a function", "T")
+        done
+        r = []
+        for i = 0 to len(l) do
+            if f(l>i) do
+                append(r, l>i)
+            done
+        done
+        return r
+    done
+
+    defun reduce(f, l, i)
+        if type(l) != list do
+            panic("Second argument of 'reduce' must be a list", "T")
+        done
+        if type(f) != func do
+            panic("First argument of 'reduce' must be a function", "T")
+        done
+        if type(i) != int and type(i) != float do
+            panic("Third argument of 'reduce' must be a number", "T")
+        done
+        acc = i
+        for i = 0 to len(l) do
+            acc = f(acc, l>i)
+        done
+        return acc
+    done
+
+    defun min(l)
+        if type(l) != list do
+            panic("First argument of 'min' must be a list", "T")
+        done
+        if len(l) == 0 do
+            panic("First argument of 'min' must be a list of numbers", "T")
+        done
+        m = l>0
+        for i = 0 to len(l) do
+            if type(l>i) != int and type(l>i) != float do
+                panic("First argument of 'min' must be a list of numbers", "T")
+            done
+            if (l>i) < m do
+                m = l>i
+            done
+        done
+        return m
+    done
+
+    defun max(l)
+        if type(l) != list do
+            panic("First argument of 'max' must be a list", "T")
+        done
+        if len(l) == 0 do
+            panic("First argument of 'max' must be a list of numbers", "T")
+        done
+        m = l>0
+        for i = 0 to len(l) do
+            if type(l>i) != int and type(l>i) != float do
+                panic("First argument of 'max' must be a list of numbers", "T")
+            done
+            if (l>i) > m do
+                m = l>i
+            done
+        done
+        return m
+    done
+
+    defun reverse(l)
+        r = []
+        if type(l) != list do
+            panic("First argument of 'reverse' must be a list", "T")
+        done
+        for i = len(l) - 1 to -1 step -1 do
+            append(r, l>i)
+        done
+        return r
+    done
+
+    defun zip(l, l_)
+        r = []
+        if type(l) != list do
+            panic("First argument of 'zip' must be a list", "T")
+        elif type(l_) != list do
+            panic("Second argument of 'zip' must be a list", "T")
+        done
+        _l = min([len(l), len(l_)])
+        for i = 0 to _l do
+            append(r, [l>i, l_>i])
+        done
+        return r
+    done
+
+    defun zip_longest(l, l_)
+        r = []
+        if type(l) != list do
+            panic("First argument of 'zip_longest' must be a list", "T")
+        done
+        if type(l_) != list do
+            panic("Second argument of 'zip_longest' must be a list", "T")
+        done
+        m = max([len(l), len(l_)])
+        for i = 0 to m do
+            v1 = none
+            v2 = none
+            if i < len(l) do
+                v1 = l>i
+            done
+            if i < len(l_) do
+                v2 = l_>i
+            done
+            append(r, [v1, v2])
+        done
+        return r
+    done
+
+
+
+    defun sort(l, r=false)
+        if type(l) != list do
+            panic("First argument of 'sort' must be a list", "T")
+        done
+        if not (len(filter(defun a(x) -> if type(x) == str do return true else return false, l)) == len(l) or len(filter(defun a(x) -> if type(x) == int or type(x) == float do return true else return false, l)) == len(l)) do
+            panic("All elements of the list must be a either numbers or strings", "T")
+        done
+        s = sort_fp(l, r)
+        return s
+    done
+
+    defun count(l, v)
+        if type(l) != list do
+            panic("First argument of 'count' must be a list", "T")
+        done
+        c = 0
+        for i = 0 to len(l) do
+            if type(l>i) != str and type(v) == str do
+                if to_str(l>i) == v do
+                    c = c + 1
+                done
+            else
+                if l>i == v do
+                    c = c + 1
+                done
+            done
+        done
+        return c
+    done
+
+    defun index_of(l, v)
+        if type(l) != list do
+            panic("First argument of 'index_of' must be a list", "T")
+        done
+        for i = 0 to len(l) do
+            if type(l>i) != str and type(v) == str do
+                if to_str(l>i) == v do
+                    return i
+                done
+            else
+                if l>i == v do
+                    return i
+                done
+            done
+        done
+        return none
+    done
+done

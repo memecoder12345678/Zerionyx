@@ -1,0 +1,199 @@
+load "libs.ffio"
+load "libs.sys"
+load "libs.string"
+load "libs.mlist"
+load "libs.termcolor"
+
+defun parse_config(config_file)
+    parsed_config_data = []
+    current_section_name = "__global__"
+    current_section_items = []
+    lines = string.split(ffio.read(config_file), "\n")
+    for i = 0 to len(lines) do
+        line = lines>i
+        if line != "" do
+            line = string.strip(line, " ")
+            if string.startswith(line, "#") or string.startswith(line, ";") do
+                continue
+            done
+        if string.startswith(line, "[") do
+            if len(current_section_items) > 0 or current_section_name != "__global__" do
+                append(parsed_config_data, [current_section_name, current_section_items])
+            done
+            end_idx = index_of(split(line, ""), "]")
+            if end_idx == none do
+                termcolor.cprint("Error", "red", none, "bold")
+                println(": line " + to_str(i + 1) + " has malformed section (missing ']'). Skipping.")
+                continue
+            done
+            raw_section_name = slice(line, 1, end_idx, none)
+            current_section_name = strip(raw_section_name, " \t")
+            if current_section_name == "" do
+                termcolor.cprint("Warning", "yellow", none, "bold")
+                println(": line " + to_str(i + 1) + " has an empty section name. Using '__empty_section__'.")
+                current_section_name = "__empty_section__"
+            done
+            current_section_items = []
+            continue
+        done
+            vals = string.split(line, "=")
+            if len(vals) < 2 do
+                termcolor.cprint("Warning", "yellow", none, "bold")
+                println(": line " + to_str(i + 1) + " is not a valid config line or section header. Skipping.")
+                continue
+            done
+            if  len(vals) > 2 do
+                termcolor.cprint("Error", "red", none, "bold")
+                println(": line " + to_str(i + 1) + " has too many '=' for a key-value pair.")
+                continue
+            done
+            key = string.strip(to_str(vals>0), " ")
+            val_str_raw = strip(to_str(join("", slice(vals, 1, len(vals), none))), " ")
+            if key == "" or val_str_raw == "" do
+                termcolor.cprint("Error", "red", none, "bold")
+                println(": line " + to_str(i + 1) + " has an empty key or value.")
+                continue
+            done
+            val = val_str_raw 
+            val_str_processed = val_str_raw
+            if len(string.split(val_str_raw, "#")) > 1 or len(string.split(val_str_raw, ";")) > 1 do
+                in_single_quote = false
+                in_double_quote = false
+                val_chars = string.split(val_str_raw, "")
+                for char_idx = 0 to len(val_chars) do
+                    c = val_chars>char_idx
+                    if c == "'"  and not in_double_quote do
+                        in_single_quote = not in_single_quote
+                    elif c == '"' and not in_single_quote do
+                        in_double_quote = not in_double_quote
+                    elif (c == '#' or c == ';') and not in_single_quote and not in_double_quote do
+                        val_str_processed = string.strip(string.join("", slice(val_chars, 0, char_idx, none)), " ")
+                        break
+                    done
+                done
+            done
+            if is_num(to_int(val_str_processed, true)) do
+                if string.endswith(to_str(to_float(val_str_processed, false)), ".0") do
+                    val = to_int(val_str_processed, false)
+                else
+                    val = to_float(val_str_processed, false)
+                done
+            elif val_str_processed == "none" do
+                val = none
+            elif val_str_processed == "true" do
+                val = true
+            elif val_str_processed == "false" do
+                val = false
+            elif (string.startswith(val_str_processed, '"') and string.endswith(val_str_processed, '"')) or (string.startswith(val_str_processed, "'") and string.endswith(val_str_processed, "'")) do
+                val = to_str(slice(val_str_processed, 1, -1, none))
+            else
+                val = to_str(val_str_processed)
+            done
+            append(current_section_items, [key, val])
+        done
+    done
+    if len(current_section_items) > 0 or current_section_name != "__global__" or len(parsed_config_data) == 0 do
+        is_initial_global_and_empty = (current_section_name == "__global__" and len(current_section_items) == 0)
+        if not (is_initial_global_and_empty and len(parsed_config_data) > 0) do 
+            append(parsed_config_data, [current_section_name, current_section_items])
+        done
+    done
+    return parsed_config_data
+done
+
+# --- Note --- #
+# use this function to get value from config
+# defun get_config_value(config_data, section_name, key_name, default_value)
+#     for i = 0 to len(config_data) do
+#         current_section = config_data>i
+#         if current_section>0 == section_name do
+#             items_in_section = current_section>1
+#             for j = 0 to len(items_in_section) do
+#                 kv_pair = items_in_section>j
+#                 if kv_pair>0 == key_name do
+#                     return kv_pair>1
+#                 done
+#             done
+#             return default_value
+#         done
+#     done
+#     return default_value
+# done
+# --- Note --- #
+
+defun main()
+    if len(sys.argv) < 2 do
+        termcolor.cprintln("Usage: script_name <config_file_path>", "yellow", none, "bold")
+        sys.exit(1)
+    done
+    config_path = sys.argv>1
+    if not ffio.exists(config_path) do
+        termcolor.cprintln("Error: File does not exist: " + config_path, 'red', none, 'bold')
+        sys.exit(1)
+    done
+    if not ffio.is_file(config_path) do
+        termcolor.cprintln("Error: Path is not a file: " + config_path, 'red', none, 'bold')
+        sys.exit(1)
+    done
+    termcolor.cprintln("Parsing configuration file: " + config_path, "cyan", none, none)
+    config_data = parse_config(config_path)
+    if len(config_data) == 0 do
+        termcolor.cprintln("No configuration entries found or file is effectively empty.", "yellow")
+    else
+        println("\n--- Parsed Configuration ---")
+        for i = 0 to len(config_data) do
+            section_block = config_data>i
+            section_name = section_block>0
+            section_items = section_block>1
+            termcolor.cprint("[", "yellow", none, "bold")
+            termcolor.cprint(to_str(section_name), "yellow", none, "bold")
+            termcolor.cprintln("]", "yellow", none, "bold")
+            if len(section_items) == 0 do
+                termcolor.cprintln("  (empty section)", "grey", none, none)
+            else
+                for j = 0 to len(section_items) do
+                    kv_pair = section_items>j
+                    key = kv_pair>0
+                    value = kv_pair>1
+                    print("  ")
+                    termcolor.cprint(to_str(key), 'magenta', none, 'bold')
+                    print(" = ")
+                    termcolor.cprint(to_str(value), 'green', none, none)
+                    print(" (type: ")
+                    termcolor.cprint(type(value), "blue", none, none)
+                    println(")")
+                done
+            done
+            if i < len(config_data) - 1 do
+                println("")
+            done
+        done
+        # ---  Example --- #
+        # println("\n--- Example Get Config Value ---")
+        # assuming you have a config file like:
+        # name = GlobalVal
+        # [Settings]
+        # user = Alice
+        # theme = dark
+        # [Database]
+        # host = localhost
+        # user_name = get_config_value(config_data, "Settings", "user", "default_user")
+        # termcolor.cprint("User from [Settings]: ", "white", none, none)
+        # termcolor.cprintln(user_name, "cyan", none, none)
+        # db_host = get_config_value(config_data, "Database", "host", "127.0.0.1")
+        # termcolor.cprint("Host from [Database]: ", "white", none, none)
+        # termcolor.cprintln(db_host, "cyan", none, none)
+        # global_val = get_config_value(config_data, "__global__", "name", "not_found")
+        # termcolor.cprint("Name from __global__: ", "white", none, none)
+        # termcolor.cprintln(global_val, "cyan", none, none)
+        # missing_val = get_config_value(config_data, "Settings", "nonexistent", "MISSING")
+        # termcolor.cprint("Missing from [Settings]: ", "white", none, none)
+        # termcolor.cprintln(missing_val, "red", none, none)
+        # --- Example --- #
+    done
+done
+
+if is_main do
+    main()
+    sys.exit(0)
+done

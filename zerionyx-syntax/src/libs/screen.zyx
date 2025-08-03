@@ -1,0 +1,15 @@
+namespace screen
+    defun capture(p)
+        screen_capture_fp(p)
+        return none
+    done
+
+    defun capture_area(x, y, w, h, p)
+        screen_capture_area_fp(x, y, w, h, p)
+        return none
+    done
+
+    defun get_color(x, y)
+        return screen_get_color(x, y)
+    done
+done
