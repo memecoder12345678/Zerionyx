@@ -95,7 +95,7 @@ class Object:
 
     def get_comparison_eq(self, other):
         return None, self.illegal_operation(other)
-        
+
     def get_comparison_ne(self, other):
         return None, self.illegal_operation(other)
 
@@ -914,7 +914,7 @@ class Bytes(Object):
 
     def get_comparison_gt(self, index):
         if not isinstance(index, Number):
-            return None, self.illegal_operation(index)p
+            return None, self.illegal_operation(index)
         try:
             return Bytes(bytes(self.value[index.value])).set_context(self.context), None
         except IndexError:
