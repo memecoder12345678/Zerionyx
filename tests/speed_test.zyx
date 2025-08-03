@@ -37,17 +37,18 @@ println("Slowest: " + to_str(slowest) + " s")
 sys.exit(0)
 
 
-# Zerionyx running on PyPy 3.11 (v7.3.19, 64-bit, jit off) on Intel Core i5-8250U:
+# Zerionyx executed on PyPy 3.11 (v7.3.19, 64-bit, JIT disabled) on Intel Core i5-8250U laptop (plugged-in mode)
 #     Average: 38.33161084651947 s
 #     Fastest: 37.53442406654358 s
 #     Slowest: 39.03928422927856 s
 
-# Zerionyx running on Python 3.12.8 (64-bit) on Intel Core i5-8250U:
+# Zerionyx executed on Python 3.12.8 (64-bit) on Intel Core i5-8250U laptop (plugged-in mode)
 #     Average: 6.603876042366028 s
 #     Fastest: 6.456980466842651 s
 #     Slowest: 6.765600681304932 s
 
-# Zerionyx running on PyPy 3.11 (v7.3.19, 64-bit, jit on) on Intel Core i5-8250U:
+# Zerionyx executed on PyPy 3.11 (v7.3.19, 64-bit, JIT enabled) on Intel Core i5-8250U laptop (plugged-in mode):
 #     Average: 0.3975654602050781 s
 #     Fastest: 0.3619201183319092 s
 #     Slowest: 0.4779665470123291 s
+
