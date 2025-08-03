@@ -250,7 +250,7 @@ class Parser:
             if raw_path.endswith(("\\", "/")):
                 raw_path = raw_path[:-1]
 
-            raw_path += ".zer"
+            raw_path += ".zyx"
 
             candidates = []
             if module.value.startswith("libs."):

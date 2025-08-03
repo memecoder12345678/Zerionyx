@@ -14,7 +14,7 @@
     "languages": [{
       "id": "zerionyx",
       "aliases": ["zerionyx", "zerionyx"],
-      "extensions": [".zer"],
+      "extensions": [".zyx"],
       "configuration": "./language-configuration.json"
     }],
     "grammars": [{

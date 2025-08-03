@@ -8,6 +8,7 @@ from .errors import (
 
 
 class Context:
+
     __slots__ = (
         "display_name",
         "parent",
@@ -25,6 +26,7 @@ class Context:
 
 
 class SymbolTable:
+
     __slots__ = ("symbols", "parent")
 
     def __init__(self, parent=None):
@@ -55,6 +57,7 @@ class SymbolTable:
 
 
 class Object:
+
     def __init__(self):
         self.set_pos()
         self.set_context()
@@ -187,6 +190,7 @@ class ThreadWrapper(Object):
 
 
 class NoneObject(Object):
+
     __slots__ = "value"
 
     def __init__(self, value):
@@ -607,6 +611,7 @@ class PyObject(Object):
 
 
 class List(Object):
+
     __slots__ = "value"
 
     def __init__(self, value):
@@ -687,7 +692,7 @@ class List(Object):
 
 
 class HashMap(Object):
-    __slots__ = "value"    
+
     def __init__(self, value):
         super().__init__()
         self.value: dict[str, Object] = {}
@@ -796,6 +801,7 @@ class HashMap(Object):
 
 
 class File(Object):
+
     __slots__ = ("name", "path")
 
     def __init__(self, name, path):
@@ -827,6 +833,9 @@ class File(Object):
 
     def __repr__(self):
         return f"<File {self.name}>"
+
+
+List.empty = List([])
 
 
 class NameSpace(Object):

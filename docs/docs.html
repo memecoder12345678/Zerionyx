@@ -217,27 +217,27 @@
             text-shadow: 0 0 3px var(--neon-green-accent);
         }
 
-        .highlight-Zerionyx .zer-keyword,
-        .highlight-Zerionyx .zer-types {
+        .highlight-Zerionyx .zyx-keyword,
+        .highlight-Zerionyx .zyx-types {
             color: var(--neon-blue);
             font-weight: bold;
         }
 
-        .highlight-Zerionyx .zer-func-def,
-        .highlight-Zerionyx .zer-func {
+        .highlight-Zerionyx .zyx-func-def,
+        .highlight-Zerionyx .zyx-func {
             color: var(--neon-green-accent);
             font-weight: bold;
         }
 
-        .highlight-Zerionyx .zer-string {
+        .highlight-Zerionyx .zyx-string {
             color: #e2fb8c;
         }
 
-        .highlight-Zerionyx .zer-number {
+        .highlight-Zerionyx .zyx-number {
             color: #ffb366;
         }
 
-        .highlight-Zerionyx .zer-comment {
+        .highlight-Zerionyx .zyx-comment {
             color: #667788;
             font-style: italic;
         }
@@ -299,7 +299,7 @@
                 <ul>
                     <li><b>Install Zerionyx</b>: <code>git clone https://github.com/memecoder12345678/Zerionyx</code>
                     </li>
-                    <li><b>Run a file</b>: <code>python zerionyx.py yourfile.zer</code></li>
+                    <li><b>Run a file</b>: <code>python zerionyx.py yourfile.zyx</code></li>
                     <li><b>Open interactive shell</b>: <code>python zerionyx.py</code></li>
                     <li>See the <a href="index.html" style="color:var(--neon-blue);">homepage</a> for more info.</li>
                 </ul>
@@ -500,7 +500,7 @@ Zerionyx may be magical, but its syntax must be real.
             <section id="standard-library">
                 <h2>Standard Library</h2>
                 <p>
-                    To use a library, add <code>load "libs.&lt;name&gt;"</code> at the top of your <b>.zer</b> file.
+                    To use a library, add <code>load "libs.&lt;name&gt;"</code> at the top of your <b>.zyx</b> file.
                     For example: <code>load "libs.math"</code>.
                 </p>
 
@@ -522,14 +522,14 @@ Zerionyx may be magical, but its syntax must be real.
                 <p>
                     To load a library from your current directory instead of the built-in ones, use the
                     <code>local.&lt;name&gt;</code> prefix.
-                    For example: <code>load "local.utils"</code> will include <code>utils.zer</code> from the current
+                    For example: <code>load "local.utils"</code> will include <code>utils.zyx</code> from the current
                     folder.
                 </p>
 
 
 
                 <div id="lib-mlist">
-                    <h3>mlist.zer</h3>
+                    <h3>mlist.zyx</h3>
                     <ul>
                         <li><b>map(f, l)</b> → list — Apply function <code>f</code> to each element of list
                             <code>l</code>
@@ -555,7 +555,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-string">
-                    <h3>string.zer</h3>
+                    <h3>string.zyx</h3>
                     <ul>
                         <li><b>split(s, s_="")</b> → list — Split string <code>s</code> by separator <code>sep</code></li>
                         <li><b>strip(s, s_=" ")</b> → list — Trims <code>sep</code> from both ends of <code>s</code></li>
@@ -586,7 +586,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-math">
-                    <h3>math.zer</h3>
+                    <h3>math.zyx</h3>
                     <ul>
                         <li><b>sqrt(a)</b> → number — Square root of <code>a</code></li>
                         <li><b>abs(a)</b> → number — Absolute value of <code>a</code></li>
@@ -610,7 +610,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-ffio">
-                    <h3>ffio.zer</h3>
+                    <h3>ffio.zyx</h3>
                     <ul>
                         <li><b>write(file, mode, text)</b> → none — Write <code>text</code> to <code>file</code> with
                             mode <code>mode</code> ("w", "a" or "wb")</li>
@@ -652,7 +652,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-hash">
-                    <h3>hash.zer</h3>
+                    <h3>hash.zyx</h3>
                     <ul>
                         <li><b>md5(s)</b> → bytes — MD5 hash of <code>s</code></li>
                         <li><b>sha1(s)</b> → bytes — SHA1 hash of <code>s</code></li>
@@ -662,7 +662,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-memory">
-                    <h3>memory.zer</h3>
+                    <h3>memory.zyx</h3>
                     <ul>
                         <li><b>remember(key, value)</b> → none — Store <code>value</code> with <code>key</code></li>
                         <li><b>recall(key)</b> → any/none — Retrieve value by <code>key</code></li>
@@ -674,7 +674,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-net">
-                    <h3>net.zer</h3>
+                    <h3>net.zyx</h3>
                     <ul>
                         <li><b>get_ip()</b> → str — Get public IP address</li>
                         <li><b>get_mac()</b> → str — Get MAC address</li>
@@ -687,7 +687,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-random">
-                    <h3>random.zer</h3>
+                    <h3>random.zyx</h3>
                     <ul>
                         <li><b>rand()</b> → number (float) — Random float in [0, 1]</li>
                         <li><b>rand_int(min, max)</b> → number (int) — Random integer in [min, max]</li>
@@ -698,7 +698,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-sys">
-                    <h3>sys.zer</h3>
+                    <h3>sys.zyx</h3>
                     <ul>
                         <li><b>system(cmd)</b> → none — Execute system command</li>
                         <li><b>osystem(cmd)</b> → list — Same as <code>system</code> but returns its result</li>
@@ -710,7 +710,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-threading">
-                    <h3>threading.zer</h3>
+                    <h3>threading.zyx</h3>
                     <ul>
                         <li><b>start(func, a=[])</b> → thread — Start a new thread</li>
                         <li><b>sleep(seconds)</b> → none — Sleep current thread</li>
@@ -720,7 +720,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-time">
-                    <h3>time.zer</h3>
+                    <h3>time.zyx</h3>
                     <ul>
                         <li><b>sleep(seconds)</b> → none — Sleep for <code>seconds</code></li>
                         <li><b>time()</b> → number (float) — Current time (seconds since epoch)</li>
@@ -728,7 +728,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-keyboard">
-                    <h3>keyboard.zer</h3>
+                    <h3>keyboard.zyx</h3>
                     <ul>
                         <li><b>write(text)</b> → none — Type <code>text</code> as keyboard input</li>
                         <li><b>press(key)</b> → none — Press a key</li>
@@ -738,7 +738,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-termcolor">
-                    <h3>termcolor.zer</h3>
+                    <h3>termcolor.zyx</h3>
                     <ul>
                         <li><b>cprint(text, c=none, b=none, s=none)</b> → none — Prints <code>text</code> with color,
                             background, and style with no newline</li>
@@ -749,7 +749,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-mouse">
-                    <h3>mouse.zer</h3>
+                    <h3>mouse.zyx</h3>
                     <ul>
                         <li><b>move(x, y)</b> → none — Moves the mouse cursor to position (<code>x</code>,
                             <code>y</code>)
@@ -762,7 +762,7 @@ Zerionyx may be magical, but its syntax must be real.
                 </div>
 
                 <div id="lib-screen">
-                    <h3>screen.zer</h3>
+                    <h3>screen.zyx</h3>
                     <ul>
                         <li><b>capture(path)</b> → none — Takes a screenshot of the entire screen and saves it to
                             <code>path</code>

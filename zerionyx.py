@@ -189,9 +189,9 @@ def main():
         return
     else:
         file_name = os.path.abspath(sys.argv[1])
-        if not file_name.endswith(".zer"):
+        if not file_name.endswith(".zyx"):
             print(
-                f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}The file must have a '.zer' extension{Fore.RESET}{Style.RESET_ALL}"
+                f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}The file must have a '.zyx' extension{Fore.RESET}{Style.RESET_ALL}"
             )
             return
         if not os.path.isfile(file_name):
