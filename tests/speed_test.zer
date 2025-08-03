@@ -48,6 +48,6 @@ sys.exit(0)
     # Slowest: 6.765600681304932 s
 
 # Zerionyx running on PyPy 3.11 (v7.3.19, 64-bit, jit on) on Intel Core i5-8250U:
-    # Average: 0.4947370052337646 s
-    # Fastest: 0.4817168712615967 s
-    # Slowest: 0.5502309799194336 s
+    # Average: 0.397565460205078 s
+    # Fastest: 0.361920118331909 s
+    # Slowest: 0.477966547012329 s
