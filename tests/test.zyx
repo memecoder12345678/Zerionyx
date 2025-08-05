@@ -1,0 +1,81 @@
+# Hello World
+println("Hello, World!")
+print("Hello, World!\n")
+
+# Arithmetic
+x = 10
+y = 20
+println(x + y)
+println(x - y)
+println(x * y)
+println(x / y)
+println(x % y)
+println(x // y)
+println(x ^ y)
+
+# Function definition
+defun add(a, b)
+    return a + b
+done
+
+# One-line function
+defun add(a, b) -> a += b
+
+println(add(5, 3))
+
+# Lists
+nums = [1, 2, 3, 4, 5]
+println(nums)
+println((nums$0))
+println((nums$4))
+
+# HashMaps
+users = {"name": "admin", "password": "admin"}
+println(users)
+println((users$"name"))
+println((users$"password"))
+
+# Bytes
+str_enc = to_bytes(to_hex("Hello, World!"))
+println(to_str(str_enc))
+println((str_enc$0))
+println((str_enc$4))
+
+# PyObject
+os = pyexec("import os", {})
+println(type(os))
+r = pyexec("os.system('echo Hello, World!')", os)
+
+# Conditional
+if x > y do
+    println("X is greater")
+elif x < y do
+    println("Y is greater")
+else
+    println("X is equals to Y")
+done
+
+# For-in loop
+for i in nums do
+    println(i)
+done
+
+# For loop
+for i = 1 to 11 do
+    println(i)
+done
+
+# While loop
+a = 1
+while a < 100 do
+    a += 1
+done
+println(a)
+
+# NameSpace
+namespace m
+    pi = 3.14
+    defun area(r) -> pi * r * r
+done
+
+println(m.area(5))

@@ -181,7 +181,7 @@ python -m pip install -r requirements.txt
 ### 3. Run a Zerionyx script
 
 ```bash
-python zerionyx.py tests/HaloWorld.zyx
+python zerionyx.py tests/test.zyx
 ```
 
 ### 4. Launch interactive shell
