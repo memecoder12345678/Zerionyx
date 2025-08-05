@@ -212,11 +212,11 @@ class NoneObject(Object):
     def is_true(self):
         return False
 
-    def __str__(self):
-        return "none"
+    def __str__(self) -> str:
+        return self.__repr__()
 
     def __repr__(self):
-        return str(self.value)
+        return str(self.value).lower()
 
     def type(self):
         return "<none>"
@@ -307,8 +307,8 @@ class Bool(Object):
     def get_comparison_ne(self, other):
         return self._get_comparison_result(other, operator.ne)
 
-    def __str__(self):
-        return "true" if self.value else "false"
+    def __str__(self) -> str:
+        return self.__repr__()
 
     def __repr__(self):
         return str(self).lower()
@@ -495,14 +495,8 @@ class Number(Object):
         else:
             return "<float>"
 
-    def __str__(self):
-        if self.value is None:
-            return "none"
-        if isinstance(self, Bool):
-            return "false" if not self.value else "true"
-        if str(self.value).find("e") != -1 or str(self.value).find("E") != -1:
-            return str(self.value).replace("e", "*10^(").replace("E", "*10^(") + ")"
-        return str(self.value)
+    def __str__(self) -> str:
+        return self.__repr__()
 
     def __repr__(self):
         if self.value is None:
@@ -575,7 +569,7 @@ class String(Object):
         return "<str>"
 
     def __str__(self):
-        return self.value.replace("\n", "\\n")
+        return self.value
 
     def dollared_by(self, index):
         if not isinstance(index, Number):
@@ -611,6 +605,15 @@ class PyObject(Object):
         c.set_pos(self.pos_start, self.pos_end)
         c.set_context(self.context)
         return c
+    
+    def __str__(self) -> str:
+        return self.__repr__()
+
+    def __repr__(self):
+        return f'<py_obj {self.value}>'
+    
+    def type(self):
+        return "<py_obj>"
 
 
 class List(Object):
@@ -687,8 +690,8 @@ class List(Object):
     def iter(self):
         return iter(self.value), None
 
-    def __str__(self):
-        return ", ".join([str(x) for x in self.value])
+    def __str__(self) -> str:
+        return self.__repr__()
 
     def __repr__(self):
         return f'[{", ".join([repr(x) for x in self.value])}]'
