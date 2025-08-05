@@ -269,18 +269,18 @@ class BuiltInFunction(BaseFunction):
     def execute_println(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
         if isinstance(value, String):
-            print(value.value)
+            print(value.value, flush=True)
             return RTResult().success(NoneObject.none)
-        print(repr(exec_ctx.symbol_table.get("value")))
+        print(repr(exec_ctx.symbol_table.get("value")), flush=True)
         return RTResult().success(NoneObject.none)
 
     @set_args(["value"], [String("")])
     def execute_print(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
         if isinstance(value, String):
-            print(value.value, end="")
+            print(value.value, end="", flush=True)
             return RTResult().success(NoneObject.none)
-        print(repr(exec_ctx.symbol_table.get("value")), end="")
+        print(repr(exec_ctx.symbol_table.get("value")), end="", flush=True)
         return RTResult().success(NoneObject.none)
 
     @set_args(["prompt"], [String("")])
@@ -4184,34 +4184,39 @@ class Interpreter:
 
     def visit_WhileNode(self, node, context):
         res = RTResult()
-        should_return_none = node.should_return_none
-        if not should_return_none:
-            value = []
+        elements = []
+
         while True:
             condition = res.register(self.visit(node.condition_node, context))
             if res.should_return():
                 return res
+
             if not condition.is_true():
                 break
+
             value = res.register(self.visit(node.body_node, context))
             if (
                 res.should_return()
-                and not res.loop_should_continue
-                and not res.loop_should_break
+                and res.loop_should_continue == False
+                and res.loop_should_break == False
             ):
                 return res
+
             if res.loop_should_continue:
                 continue
+
             if res.loop_should_break:
                 break
-            if not should_return_none:
-                value.append(value)
-        if should_return_none:
-            return res.success(NoneObject.none)
-        else:
-            return res.success(
-                List(value).set_context(context).set_pos(node.pos_start, node.pos_end)
-            )
+
+            elements.append(value)
+
+        return res.success(
+            Number.none
+            if node.should_return_none
+            else List(elements)
+            .set_context(context)
+            .set_pos(node.pos_start, node.pos_end)
+        )
 
     def visit_FuncDefNode(self, node, context):
         res = RTResult()

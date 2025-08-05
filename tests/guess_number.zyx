@@ -5,7 +5,7 @@ a = 0
 ma = 10
 sn = 0
 
-defun handle_input(m, m_)
+defun handle_input(m, m_, sn)
     i = to_int(input("Enter a number from " + to_str(m) + " to " + to_str(m_) + ": "), true)
     while i == none or (i < m or i > m_) do
         a += 1
@@ -23,7 +23,7 @@ defun guess_number(m, m_)
     a = 0
     sn = random.rand_int(m, m_)
     while a < ma do
-        i = handle_input(m, m_)
+        i = handle_input(m, m_, sn)
         a += 1
         if i == sn do
             println("You guessed it right!\nAttempts: " + to_str(a))
