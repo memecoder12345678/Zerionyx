@@ -4184,39 +4184,45 @@ class Interpreter:
 
     def visit_WhileNode(self, node, context):
         res = RTResult()
-        elements = []
+
+        condition_node = node.condition_node
+        body_node = node.body_node
+
+        if node.should_return_none:
+            elements = None
+        else:
+            elements = []
 
         while True:
-            condition = res.register(self.visit(node.condition_node, context))
+            condition = res.register(self.visit(condition_node, context))
             if res.should_return():
                 return res
 
             if not condition.is_true():
                 break
 
-            value = res.register(self.visit(node.body_node, context))
-            if (
-                res.should_return()
-                and res.loop_should_continue == False
-                and res.loop_should_break == False
-            ):
+            value = res.register(self.visit(body_node, context))
+
+            if res.should_return():
+                if res.loop_should_continue:
+                    continue
+                
+                if res.loop_should_break:
+                    break
+                
                 return res
 
-            if res.loop_should_continue:
-                continue
+            if elements is not None:
+                elements.append(value)
 
-            if res.loop_should_break:
-                break
-
-            elements.append(value)
-
-        return res.success(
-            Number.none
-            if node.should_return_none
-            else List(elements)
-            .set_context(context)
-            .set_pos(node.pos_start, node.pos_end)
-        )
+        if elements is None:
+            return res.success(NoneObject.none)
+        else:
+            return res.success(
+                List(elements)
+                .set_context(context)
+                .set_pos(node.pos_start, node.pos_end)
+            )
 
     def visit_FuncDefNode(self, node, context):
         res = RTResult()
