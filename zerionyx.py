@@ -93,8 +93,12 @@ WHILE_EXPR        ::=
       "while" EXPR "do" STATEMENT
       NEWLINE "done"
 
-PARAM_LIST        ::=
-      IDENTIFIER ("=" EXPR)? ("," IDENTIFIER ("=" EXPR)?)*
+PARAM_LIST        ::= PARAM ("," PARAM)*
+
+PARAM             ::= 
+     IDENTIFIER
+    | "let" IDENTIFIER "=" EXPR
+    | IDENTIFIER "=" EXPR
 
 DEF_FUNC          ::= 
       "defun" IDENTIFIER "(" PARAM_LIST? ")"
@@ -130,7 +134,7 @@ def main():
     if len(sys.argv) == 1:
         print(f"Zerionyx {INFO}")
         print(
-            "Type 'grammar', 'copyright', 'license' for more information or 'exit' to exit."
+            "Type 'grammar', 'copyright', 'credits', 'license'  for more information or 'exit' to exit."
         )
         try:
             while True:
@@ -156,13 +160,18 @@ def main():
                 if text.strip() == "license":
                     print(
                         ("=" * 96)
-                        + '\n\nMIT License\n\nWARNING: This project contains code adapted from multiple public sources.\n\nSome components are originally based on David Callanan’s interpreter tutorial (2019),\nlicensed under the MIT License. Other parts are believed to derive from Fus3n’s version,\nwhich did not include an explicit license but was publicly shared for free use and modification.\n\nOnly modifications made by MemeCoder are explicitly claimed under copyright.\nReasonable efforts have been made to trace original authors.\nIf you are an original author and believe attribution or licensing is missing,\nplease contact MemeCoder.\n\nCredits:\n- David Callanan (2019)\n- Fus3n (no license stated)\n- Modified by angelcaru (2024)\n- Further modified by MemeCoder (2025)\n\nCopyright (c) 2019–2025\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the "Software"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n\n'
+                        + '\n\nMIT License\n\nWARNING: This project contains code adapted from multiple public sources.\n\nSome components are originally based on David Callanan\'s interpreter tutorial (2019),\nlicensed under the MIT License. Other parts are believed to derive from Fus3n\'s version,\nwhich did not include an explicit license but was publicly shared for free use and modification.\n\nOnly modifications made by MemeCoder are explicitly claimed under copyright.\nReasonable efforts have been made to trace original authors.\nIf you are an original author and believe attribution or licensing is missing,\nplease contact MemeCoder.\n\nCredits:\n- David Callanan (2019)\n- Fus3n (no license stated)\n- Modified by angelcaru (2024)\n- Further modified by MemeCoder (2025)\n\nCopyright (c) 2019-2025\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the "Software"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n\n'
                         + ("=" * 96)
                         + "\n\nPlease scroll up to read from the beginning.\n"
                     )
                     continue
                 if text.strip() == "copyright":
-                    print("Copyright (c) 2025 MemeCoder.\nAll Rights Reserved.")
+                    print("Copyright (c) 2019-2025\nAll Rights Reserved.")
+                    continue
+                if text.strip() == "credits":
+                    print(
+                        "Credits:\n- David Callanan (2019)\n- Fus3n (no license stated)\n- Modified by angelcaru (2024)\n- Further modified by MemeCoder (2025)"
+                    )
                     continue
                 result, error = run("<stdin>", text)
                 if error:

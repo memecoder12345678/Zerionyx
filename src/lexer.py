@@ -37,7 +37,6 @@ class Lexer:
                         Token(TT_RPAREN, pos_start=rparen_pos, pos_end=rparen_pos)
                     )
                     self.open_bracket_stack.pop()
-
                 if self.open_bracket_stack:
                     self.advance()
                 else:
@@ -96,10 +95,8 @@ class Lexer:
                 self.tokens.append(Token(TT_RPAREN, pos_start=pos_start_closer))
                 self.advance()
                 self.tokens[-1].pos_end = self.pos.copy()
-
                 if not self.open_bracket_stack:
                     return [], ExpectedCharError(pos_start_closer, self.pos, "')'")
-
                 expected_closer, _ = self.open_bracket_stack[-1]
                 if expected_closer == ")":
                     self.open_bracket_stack.pop()
@@ -124,10 +121,8 @@ class Lexer:
                 self.tokens.append(Token(TT_RSQUARE, pos_start=pos_start_closer))
                 self.advance()
                 self.tokens[-1].pos_end = self.pos.copy()
-
                 if not self.open_bracket_stack:
                     return [], ExpectedCharError(pos_start_closer, self.pos, "']'")
-
                 expected_closer, _ = self.open_bracket_stack[-1]
                 if expected_closer == "]":
                     self.open_bracket_stack.pop()
@@ -162,10 +157,8 @@ class Lexer:
                 self.tokens.append(Token(TT_RBRACE, pos_start=pos_start_closer))
                 self.advance()
                 self.tokens[-1].pos_end = self.pos.copy()
-
                 if not self.open_bracket_stack:
                     return [], ExpectedCharError(pos_start_closer, self.pos, "'}'")
-
                 expected_closer, _ = self.open_bracket_stack[-1]
                 if expected_closer == "}":
                     self.open_bracket_stack.pop()
@@ -182,14 +175,12 @@ class Lexer:
                 char = self.current_char
                 self.advance()
                 return [], IllegalCharError(pos_start, self.pos, "'" + char + "'")
-
         if self.open_bracket_stack and self.open_bracket_stack[-1][0] == ")augmented":
             rparen_pos = self.pos.copy()
             self.tokens.append(
                 Token(TT_RPAREN, pos_start=rparen_pos, pos_end=rparen_pos)
             )
             self.open_bracket_stack.pop()
-
         if self.open_bracket_stack:
             expected_closer, opener_pos_start = self.open_bracket_stack[-1]
             if expected_closer == ")augmented":
@@ -201,7 +192,6 @@ class Lexer:
             return [], ExpectedCharError(
                 opener_pos_start, self.pos, f"Expected '{expected_closer}'"
             )
-
         self.tokens.append(Token(TT_EOF, pos_start=self.pos))
         return self.tokens, None
 
@@ -209,7 +199,6 @@ class Lexer:
         num_str = ""
         dot_count = 0
         pos_start = self.pos.copy()
-
         while self.current_char != None and self.current_char in DIGITS + ".":
             if self.current_char == ".":
                 if dot_count == 1:
@@ -217,7 +206,6 @@ class Lexer:
                 dot_count += 1
             num_str += self.current_char
             self.advance()
-
         if dot_count == 0:
             return Token(TT_INT, int(num_str), pos_start, self.pos)
         else:
@@ -231,16 +219,13 @@ class Lexer:
         string_content = []
         pos_start = self.pos.copy()
         self.advance()
-
         is_multiline = False
         closing_sequence = quote_char
         if self.current_char == quote_char and self.peek_foward_steps(1) == quote_char:
             is_multiline = True
             closing_sequence = quote_char * 3
             self.advance(2)
-
         escape_character = False
-
         while self.current_char is not None:
             if is_multiline:
                 if (
@@ -254,7 +239,6 @@ class Lexer:
                 if not escape_character and self.current_char == quote_char:
                     self.advance()
                     break
-
             if escape_character:
                 string_content.append(self.current_char)
                 escape_character = False
@@ -263,13 +247,10 @@ class Lexer:
                 escape_character = True
             else:
                 string_content.append(self.current_char)
-
             self.advance()
         else:
             return None, ExpectedCharError(pos_start, self.pos, f"'{closing_sequence}'")
-
         raw_string = "".join(string_content)
-
         try:
             processed_string = raw_string.encode("raw_unicode_escape").decode(
                 "unicode_escape"
@@ -278,7 +259,6 @@ class Lexer:
             return None, IllegalCharError(
                 pos_start, self.pos, f"Invalid escape sequence in string"
             )
-
         return Token(TT_STRING, processed_string, pos_start, self.pos), None
 
     def peek_foward_steps(self, steps) -> str | None:
@@ -302,7 +282,6 @@ class Lexer:
         op_token_pos_start: Position,
         op_token_pos_end: Position,
     ):
-
         self.tokens.append(
             Token(
                 TT_EQ,
@@ -310,7 +289,6 @@ class Lexer:
                 pos_end=eq_token_pos_end.copy(),
             )
         )
-
         self.tokens.append(
             Token(
                 TT_IDENTIFIER,
@@ -319,7 +297,6 @@ class Lexer:
                 pos_end=identifier_token_original.pos_end.copy(),
             )
         )
-
         self.tokens.append(
             Token(
                 base_op_type,
@@ -327,7 +304,6 @@ class Lexer:
                 pos_end=op_token_pos_end.copy(),
             )
         )
-
         lparen_aug_pos = op_token_pos_end.copy()
         self.tokens.append(
             Token(
@@ -342,7 +318,6 @@ class Lexer:
         self, base_op_type: str, pos_start_op_char: Position
     ):
         pos_end_op_char = self.pos.copy()
-
         if self.current_char == "=":
             if not self.tokens or self.tokens[-1].type != TT_IDENTIFIER:
                 self.tokens.append(
@@ -359,13 +334,10 @@ class Lexer:
                     Token(TT_EQ, pos_start=pos_start_eq, pos_end=pos_end_eq)
                 )
                 return
-
             identifier_token = self.tokens.pop()
-
             pos_start_eq_char = self.pos.copy()
             self.advance()
             pos_end_eq_char = self.pos.copy()
-
             self.tokens.append(identifier_token)
             self._emit_augmented_assignment_tokens(
                 base_op_type,
@@ -390,7 +362,6 @@ class Lexer:
     def handle_minus_or_augmented(self):
         pos_start_op = self.pos.copy()
         self.advance()
-
         if self.current_char == ">":
             self.advance()
             self.tokens.append(
@@ -417,7 +388,6 @@ class Lexer:
     def div_or_floordiv_or_augmented(self):
         pos_start_first_slash = self.pos.copy()
         self.advance()
-
         if self.current_char == "/":
             pos_start_operator = pos_start_first_slash
             self.advance()
@@ -428,19 +398,15 @@ class Lexer:
     def make_identifier(self) -> Token:
         id_str = ""
         pos_start_identifier = self.pos.copy()
-
         while (
             self.current_char is not None and self.current_char in LETTERS_DIGITS + "_"
         ):
             id_str += self.current_char
             self.advance()
-
         pos_end_identifier = self.pos.copy()
-
         peek_idx = self.pos.idx
         while peek_idx < len(self.text) and self.text[peek_idx] in " \t":
             peek_idx += 1
-
         should_insert_let = False
         if peek_idx < len(self.text):
             if (
@@ -452,7 +418,6 @@ class Lexer:
                 )
             ):
                 should_insert_let = True
-
             if not should_insert_let:
                 op_char1 = self.text[peek_idx]
                 op_char2 = (
@@ -461,7 +426,6 @@ class Lexer:
                 op_char3 = (
                     self.text[peek_idx + 2] if peek_idx + 2 < len(self.text) else None
                 )
-
                 if op_char1 == "=" and op_char2 != "=":
                     should_insert_let = True
                 elif op_char1 in ["+", "-", "*", "^", "%"] and op_char2 == "=":
@@ -470,12 +434,10 @@ class Lexer:
                     op_char2 == "=" or (op_char2 == "/" and op_char3 == "=")
                 ):
                     should_insert_let = True
-
         if should_insert_let and id_str not in KEYWORDS:
             pt: Token | None = self.previous_token()
             allowed_preceding_keywords_for_let = {"do", "else", "as"}
             insert_let = False
-
             if (
                 pt is None
                 or pt.type == TT_NEWLINE
@@ -491,22 +453,6 @@ class Lexer:
                 or pt.type == TT_LBRACE
             ):
                 insert_let = True
-
-            # Ngăn chặn việc chèn 'let' cho các tham số mặc định của hàm.
-            # Đây là trường hợp đặc biệt khi `identifier = value` không phải là khai báo biến.
-            if insert_let and pt and pt.type == TT_LPAREN:
-                # Chuỗi token sẽ là [..., KEYWORD:'defun', IDENTIFIER, LPAREN]
-                # khi chúng ta kiểm tra tham số mặc định.
-                if len(self.tokens) >= 3:
-                    token_before_lparen = self.tokens[-2]
-                    token_two_before_lparen = self.tokens[-3]
-                    if (
-                        token_two_before_lparen.type == TT_KEYWORD
-                        and token_two_before_lparen.value == "defun"
-                        and token_before_lparen.type == TT_IDENTIFIER
-                    ):
-                        insert_let = False
-
             if insert_let:
                 self.tokens.append(
                     Token(
@@ -516,14 +462,12 @@ class Lexer:
                         pos_end=pos_end_identifier.copy(),
                     )
                 )
-
         tok_type = TT_KEYWORD if id_str in KEYWORDS else TT_IDENTIFIER
         return Token(tok_type, id_str, pos_start_identifier, pos_end_identifier)
 
     def make_not_equals(self):
         pos_start = self.pos.copy()
         self.advance()
-
         if self.current_char == "=":
             self.advance()
             return Token(TT_NE, pos_start=pos_start, pos_end=self.pos.copy()), None
@@ -533,33 +477,27 @@ class Lexer:
         tok_type = TT_EQ
         pos_start = self.pos.copy()
         self.advance()
-
         if self.current_char == "=":
             self.advance()
             tok_type = TT_EE
-
         return Token(tok_type, pos_start=pos_start, pos_end=self.pos.copy())
 
     def make_less_than(self) -> Token:
         tok_type = TT_LT
         pos_start = self.pos.copy()
         self.advance()
-
         if self.current_char == "=":
             self.advance()
             tok_type = TT_LTE
-
         return Token(tok_type, pos_start=pos_start, pos_end=self.pos.copy())
 
     def make_greater_than(self) -> Token:
         tok_type = TT_GT
         pos_start = self.pos.copy()
         self.advance()
-
         if self.current_char == "=":
             self.advance()
             tok_type = TT_GTE
-
         return Token(tok_type, pos_start=pos_start, pos_end=self.pos.copy())
 
     def skip_comment(self) -> None:

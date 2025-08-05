@@ -1,12 +1,8 @@
-from colorama import Fore, Style
-
-
 class NumberNode:
     __slots__ = ["tok", "pos_start", "pos_end"]
 
     def __init__(self, tok):
         self.tok = tok
-
         self.pos_start = self.tok.pos_start
         self.pos_end = self.tok.pos_end
 
@@ -22,7 +18,6 @@ class StringNode:
 
     def __init__(self, tok):
         self.tok = tok
-
         self.pos_start = self.tok.pos_start
         self.pos_end = self.tok.pos_end
 
@@ -39,7 +34,6 @@ class ListNode:
 
     def __init__(self, element_nodes, pos_start, pos_end):
         self.element_nodes = element_nodes
-
         self.pos_start = pos_start
         self.pos_end = pos_end
 
@@ -52,7 +46,6 @@ class VarAccessNode:
 
     def __init__(self, var_name_tok):
         self.var_name_tok = var_name_tok
-
         self.pos_start = self.var_name_tok.pos_start
         self.pos_end = self.var_name_tok.pos_end
 
@@ -66,7 +59,6 @@ class VarAssignNode:
     def __init__(self, var_name_tok, value_node):
         self.var_name_tok = var_name_tok
         self.value_node = value_node
-
         self.pos_start = self.var_name_tok.pos_start
         self.pos_end = self.value_node.pos_end
 
@@ -81,7 +73,6 @@ class BinOpNode:
         self.left_node = left_node
         self.op_tok = op_tok
         self.right_node = right_node
-
         self.pos_start = self.left_node.pos_start
         self.pos_end = self.right_node.pos_end
 
@@ -98,7 +89,6 @@ class UnaryOpNode:
     def __init__(self, op_tok, node):
         self.op_tok = op_tok
         self.node = node
-
         self.pos_start = self.op_tok.pos_start
         self.pos_end = node.pos_end
 
@@ -115,7 +105,6 @@ class IfNode:
     def __init__(self, cases, else_case):
         self.cases = cases
         self.else_case = else_case
-
         self.pos_start = self.cases[0][0].pos_start
         self.pos_end = (self.else_case or self.cases[len(self.cases) - 1])[0].pos_end
 
@@ -156,7 +145,6 @@ class ForNode:
         self.step_value_node = step_value_node
         self.body_node = body_node
         self.should_return_none = should_return_none
-
         self.pos_start = self.var_name_tok.pos_start
         self.pos_end = self.body_node.pos_end
 
@@ -177,7 +165,6 @@ class WhileNode:
         self.condition_node = condition_node
         self.body_node = body_node
         self.should_return_none = should_return_none
-
         self.pos_start = self.condition_node.pos_start
         self.pos_end = self.body_node.pos_end
 
@@ -199,28 +186,26 @@ class FuncDefNode:
         self.defaults = defaults
         self.body_node = body_node
         self.should_auto_return = should_auto_return
-
         if self.var_name_tok:
             self.pos_start = self.var_name_tok.pos_start
         elif len(self.arg_name_toks) > 0:
             self.pos_start = self.arg_name_toks[0].pos_start
         else:
             self.pos_start = self.body_node.pos_start
-
         self.pos_end = self.body_node.pos_end
 
 
 class CallNode:
-    def __init__(self, node_to_call, arg_nodes):
+    def __init__(self, node_to_call, arg_nodes, pos_start=None, pos_end=None):
         self.node_to_call = node_to_call
         self.arg_nodes = arg_nodes
+        self.pos_start = pos_start or node_to_call.pos_start
+        self.pos_end = pos_end or (
+            arg_nodes[-1].pos_end if arg_nodes else node_to_call.pos_end
+        )
 
-        self.pos_start = self.node_to_call.pos_start
-
-        if len(self.arg_nodes) > 0:
-            self.pos_end = self.arg_nodes[len(self.arg_nodes) - 1].pos_end
-        else:
-            self.pos_end = self.node_to_call.pos_end
+    def __repr__(self):
+        return f"(Call: {self.node_to_call} with {self.arg_nodes})"
 
 
 class ReturnNode:
@@ -228,7 +213,6 @@ class ReturnNode:
 
     def __init__(self, node_to_return, pos_start, pos_end):
         self.node_to_return = node_to_return
-
         self.pos_start = pos_start
         self.pos_end = pos_end
 
@@ -274,7 +258,6 @@ class LoadNode:
     def __init__(self, module_name_tok):
         self.module_name_tok = module_name_tok
         self.file_path = module_name_tok.value
-
         self.pos_start = self.module_name_tok.pos_start
         self.pos_end = self.module_name_tok.pos_end
 
@@ -330,7 +313,6 @@ class VarAssignAsNode:
     def __init__(self, var_name_tok, var_name_tok2):
         self.var_name_tok = var_name_tok
         self.var_name_tok2 = var_name_tok2
-
         self.pos_start = self.var_name_tok.pos_start
         self.pos_end = self.var_name_tok2.pos_end
 
@@ -355,193 +337,6 @@ class NameSpaceNode:
         return f"NameSpaceNode({self.namespace_name}, {self.statements})"
 
 
-def astpretty(node, indent=0):
-    pad = "  " * indent
-    if node is None:
-        return pad + f"{Fore.LIGHTBLACK_EX}None{Style.RESET_ALL}"
-
-    def colorize_type(node_type):
-        return f"{Fore.BLUE}{node_type}{Style.RESET_ALL}"
-
-    def colorize_value(value):
-        return f"{Fore.YELLOW}{value}{Style.RESET_ALL}"
-
-    def colorize_string(value):
-        return f'{Fore.GREEN}"{value}"{Style.RESET_ALL}'
-
-    def colorize_keyword(keyword):
-        return f"{Fore.CYAN}{keyword}{Style.RESET_ALL}"
-
-    if isinstance(node, ListNode):
-        node_type = colorize_type("ListNode")
-        res = pad + f"{node_type}(\n"
-        for elem in node.element_nodes:
-            res += astpretty(elem, indent + 1) + ",\n"
-        res += pad + ")"
-        return res
-
-    if isinstance(node, LoadNode):
-        node_type = colorize_type("LoadNode")
-        return pad + f"{node_type}({colorize_string(node.file_path)})"
-
-    if isinstance(node, StringNode):
-        node_type = colorize_type("StringNode")
-        return pad + f"{node_type}({colorize_string(node.tok.value)})"
-    if isinstance(node, NumberNode):
-        node_type = colorize_type("NumberNode")
-        return pad + f"{node_type}({colorize_value(node.tok.value)})"
-
-    if isinstance(node, VarAccessNode):
-        node_type = colorize_type("VarAccessNode")
-        return pad + f"{node_type}({colorize_value(node.var_name_tok.value)})"
-    if isinstance(node, VarAssignNode):
-        node_type = colorize_type("VarAssignNode")
-        return (
-            pad
-            + f"{node_type}({colorize_value(node.var_name_tok.value)} {colorize_keyword('=')} {astpretty(node.value_node, 0)})"
-        )
-
-    if isinstance(node, BinOpNode):
-        node_type = colorize_type("BinOpNode")
-        return (
-            pad
-            + f"{node_type}(\n{astpretty(node.left_node, indent + 1)},\n{pad + '  ' + colorize_value(node.op_tok.type)},\n{astpretty(node.right_node, indent + 1)}\n{pad})"
-        )
-    if isinstance(node, UnaryOpNode):
-        node_type = colorize_type("UnaryOpNode")
-        return (
-            pad
-            + f"{node_type}({colorize_value(node.op_tok.type)}, {astpretty(node.node, indent + 1)})"
-        )
-
-    if isinstance(node, CallNode):
-        node_type = colorize_type("CallNode")
-        res = pad + f"{node_type}(\n{astpretty(node.node_to_call, indent + 1)}"
-        if node.arg_nodes:
-            res += ",\n" + pad + f"  {colorize_keyword('args')}=[\n"
-            for arg in node.arg_nodes:
-                res += astpretty(arg, indent + 2) + ",\n"
-            res += pad + "  ]"
-        res += f"\n{pad})"
-        return res
-
-    if isinstance(node, IfNode):
-        node_type = colorize_type("IfNode")
-        res = pad + f"{node_type}(\n"
-        for condition, expr, _ in node.cases:
-            res += (
-                pad
-                + f"  {colorize_keyword('if')}\n"
-                + astpretty(condition, indent + 2)
-                + ",\n"
-            )
-            res += (
-                pad
-                + f"  {colorize_keyword('do')}\n"
-                + astpretty(expr, indent + 2)
-                + ",\n"
-            )
-        if node.else_case:
-            expr, _ = node.else_case
-            res += (
-                pad
-                + f"  {colorize_keyword('else')}\n"
-                + astpretty(expr, indent + 2)
-                + ",\n"
-            )
-        res += pad + ")"
-        return res
-
-    if isinstance(node, ForNode):
-        node_type = colorize_type("ForNode")
-        return pad + (
-            f"{node_type}({colorize_value(node.var_name_tok.value)} "
-            f"{colorize_keyword('from')} {astpretty(node.start_value_node, 0)} "
-            f"{colorize_keyword('to')} {astpretty(node.end_value_node, 0)} "
-            f"{colorize_keyword('step')} {astpretty(node.step_value_node, 0)} "
-            f"{colorize_keyword('do')} {astpretty(node.body_node, indent + 1)})"
-        )
-
-    if isinstance(node, ForInNode):
-        node_type = colorize_type("ForInNode")
-        return pad + (
-            f"{node_type}({colorize_value(node.var_name_tok.value)} "
-            f"{colorize_keyword('in')} {astpretty(node.iterable_node, 0)} "
-            f"{colorize_keyword('do')} {astpretty(node.body_node, indent + 1)})"
-        )
-
-    if isinstance(node, VarAssignAsNode):
-        node_type = colorize_type("VarAssignAsNode")
-        return pad + (
-            f"{node_type}({colorize_value(node.var_name_tok.value)} "
-            f"{colorize_keyword('as')} {astpretty(node.var_name_tok2, 0)})"
-        )
-
-    if isinstance(node, WhileNode):
-        node_type = colorize_type("WhileNode")
-        return pad + (
-            f"{node_type}({colorize_keyword('while')} {astpretty(node.condition_node, 0)} "
-            f"{colorize_keyword('do')} {astpretty(node.body_node, indent + 1)})"
-        )
-
-    if isinstance(node, FuncDefNode):
-        node_type = colorize_type("FuncDefNode")
-        args = ", ".join(colorize_value(tok.value) for tok in node.arg_name_toks)
-        name = (
-            colorize_value(node.var_name_tok.value)
-            if node.var_name_tok
-            else colorize_keyword("anonymous")
-        )
-        return (
-            pad + f"{node_type}({name}({args}) {astpretty(node.body_node, indent + 1)})"
-        )
-
-    if isinstance(node, ReturnNode):
-        node_type = colorize_type("ReturnNode")
-        return pad + f"{node_type}({astpretty(node.node_to_return, indent + 1)})"
-    if isinstance(node, ContinueNode):
-        node_type = colorize_type("ContinueNode")
-        return pad + f"{node_type}()"
-    if isinstance(node, BreakNode):
-        node_type = colorize_type("BreakNode")
-        return pad + f"{node_type}()"
-
-    if isinstance(node, AccessNode):
-        node_type = colorize_type("AccessNode")
-        return (
-            pad + f"{node_type}({astpretty(node.obj, 0)}[{astpretty(node.index, 0)}])"
-        )
-
-    if isinstance(node, HashMapNode):
-        node_type = colorize_type("HashMapNode")
-        res = pad + f"{node_type}(\n"
-        for k, v in node.pairs:
-            res += pad + f"  {astpretty(k, 0)}: {astpretty(v, 0)},\n"
-        res += pad + ")"
-        return res
-
-    if isinstance(node, MemberAccessNode):
-        return (
-            pad
-            + colorize_type("MemberAccessNode")
-            + "("
-            + astpretty(node.object_node, 0)
-            + "."
-            + colorize_value(node.member_name)
-            + ")"
-        )
-
-    if isinstance(node, NameSpaceNode):
-        node_type = colorize_type("NameSpaceNode")
-        res = pad + f"{node_type}({colorize_value(node.namespace_name)}) (\n"
-        for stmt in node.statements:
-            res += astpretty(stmt, indent + 1) + "\n"
-        res += pad + ")"
-        return res
-
-    return pad + repr(node)
-
-
 class MemberAccessNode:
     __slots__ = ["object_node", "member_name", "pos_start", "pos_end"]
 
@@ -553,3 +348,14 @@ class MemberAccessNode:
 
     def __repr__(self):
         return f"(MemberAccessNode {self.object_node}.{self.member_name})"
+
+
+class NamedArgumentNode:
+    def __init__(self, param_name_tok, value_node, pos_start=None, pos_end=None):
+        self.param_name_tok = param_name_tok
+        self.value_node = value_node
+        self.pos_start = pos_start or param_name_tok.pos_start
+        self.pos_end = pos_end or value_node.pos_end
+
+    def __repr__(self):
+        return f"(NamedArg: {self.param_name_tok.value} = {self.value_node})"

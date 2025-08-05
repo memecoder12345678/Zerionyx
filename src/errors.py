@@ -114,7 +114,6 @@ class MError(Error):
         result = ""
         pos = self.pos_start
         ctx = self.context
-
         while ctx:
             if pos:
                 result = (
@@ -145,7 +144,6 @@ class IOError(Error):
         result = ""
         pos = self.pos_start
         ctx = self.context
-
         while ctx:
             if pos:
                 result = (
@@ -176,7 +174,6 @@ class TError(Error):
         result = ""
         pos = self.pos_start
         ctx = self.context
-
         while ctx:
             if pos:
                 result = (

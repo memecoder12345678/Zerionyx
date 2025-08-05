@@ -301,7 +301,7 @@
                     </li>
                     <li><b>Run a file</b>: <code>python zerionyx.py yourfile.zyx</code></li>
                     <li><b>Open interactive shell</b>: <code>python zerionyx.py</code></li>
-                    <li>See the <a href="index.html" style="color:var(--neon-blue);">homepage</a> for more info.</li>
+                    <li>See the <a href="https://github.com/memecoder12345678/Zerionyx" style="color:var(--neon-blue);">github repository</a> for more info.</li>
                 </ul>
             </section>
 
@@ -395,8 +395,12 @@ WHILE_EXPR        ::=
       "while" EXPR "do" STATEMENT
       NEWLINE "done"
 
-PARAM_LIST        ::=
-      IDENTIFIER ("=" EXPR)? ("," IDENTIFIER ("=" EXPR)?)*
+PARAM_LIST        ::= PARAM ("," PARAM)*
+
+PARAM             ::= 
+     IDENTIFIER
+    | "let" IDENTIFIER "=" EXPR
+    | IDENTIFIER "=" EXPR
 
 DEF_FUNC          ::= 
       "defun" IDENTIFIER "(" PARAM_LIST? ")"
@@ -489,8 +493,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <li><b>to_bytes(x, supress_error=false)</b> → bytes — Convert <code>x</code> (hex string) to bytes</li>
                     <li><b>to_hex(x, supress_error=false)</b> → str — Convert <code>x</code> to hex string</li>
                     <li><b>type(x)</b> → str/none — Return type of <code>x</code> as string or none</li>
-                    <li><b>pyexec(code, args={})</b> → hashmap — Executes embedded Python code and returns its result (args
-                        hashmap) (use with caution)</li>
+                    <li><b>pyexec(code, args={})</b> → hashmap — Executes embedded Python code and returns its result (use with caution)</li>
                     <li><b>slice(l, from=none, to=none, step=none)</b> → list/string/hashmap/bytes — Slice list/string/hashmap/bytes
                         <code>l</code> from <code>from</code> to <code>to</code> step <code>step</code> (exclusive)
                     </li>

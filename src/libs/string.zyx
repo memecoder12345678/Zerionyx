@@ -94,8 +94,8 @@ namespace string
         if len(s) != 1 do
             return false
         done
-        for i = 0 to len(list_ascii_letter) do
-            if s == list_ascii_letter>i do
+        for i = 0 to len(list_ascii_letters) do
+            if s == list_ascii_letters>i do
                 return true
             done
         done

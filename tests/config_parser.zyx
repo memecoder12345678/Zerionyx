@@ -8,7 +8,7 @@ defun parse_config(config_file)
     parsed_config_data = []
     current_section_name = "__global__"
     current_section_items = []
-    lines = string.split(ffio.read(config_file), "\n")
+    lines = string.split(ffio.read(config_file, "r"), "\n")
     for i = 0 to len(lines) do
         line = lines>i
         if line != "" do
@@ -20,14 +20,14 @@ defun parse_config(config_file)
             if len(current_section_items) > 0 or current_section_name != "__global__" do
                 append(parsed_config_data, [current_section_name, current_section_items])
             done
-            end_idx = index_of(split(line, ""), "]")
+            end_idx = mlist.index_of(string.split(line, ""), "]")
             if end_idx == none do
                 termcolor.cprint("Error", "red", none, "bold")
                 println(": line " + to_str(i + 1) + " has malformed section (missing ']'). Skipping.")
                 continue
             done
             raw_section_name = slice(line, 1, end_idx, none)
-            current_section_name = strip(raw_section_name, " \t")
+            current_section_name = string.strip(raw_section_name, " \t")
             if current_section_name == "" do
                 termcolor.cprint("Warning", "yellow", none, "bold")
                 println(": line " + to_str(i + 1) + " has an empty section name. Using '__empty_section__'.")
@@ -48,7 +48,7 @@ defun parse_config(config_file)
                 continue
             done
             key = string.strip(to_str(vals>0), " ")
-            val_str_raw = strip(to_str(join("", slice(vals, 1, len(vals), none))), " ")
+            val_str_raw = string.strip(to_str(string.join("", slice(vals, 1, len(vals), none))), " ")
             if key == "" or val_str_raw == "" do
                 termcolor.cprint("Error", "red", none, "bold")
                 println(": line " + to_str(i + 1) + " has an empty key or value.")
