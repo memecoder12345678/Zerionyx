@@ -60,7 +60,7 @@ ATOM               ::=
     | DEF_FUNC
     | COMMENT
 
-GET_INDEX         ::= "(" IDENTIFIER ">" EXPR ")
+GET_INDEX         ::= IDENTIFIER "$" EXPR
 
 GET_MEMBER        ::= IDENTIFIER  "." CALL
 

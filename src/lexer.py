@@ -170,6 +170,10 @@ class Lexer:
                 pos_start = self.pos.copy()
                 self.tokens.append(Token(TT_COLON, pos_start=pos_start))
                 self.advance()
+            elif self.current_char == "$":
+                pos_start = self.pos.copy()
+                self.tokens.append(Token(TT_DOLLAR, pos_start=pos_start))
+                self.advance()
             else:
                 pos_start = self.pos.copy()
                 char = self.current_char

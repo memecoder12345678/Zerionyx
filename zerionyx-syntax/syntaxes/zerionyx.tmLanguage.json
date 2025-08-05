@@ -132,7 +132,7 @@
             "patterns": [
                 {
                     "name": "keyword.operator.assignment.zerionyx",
-                    "match": "(=|\\+=|-=|\\*=|/=|//=|%=|\\^=|:|->)"
+                    "match": "(=|\\+=|-=|\\*=|/=|//=|%=|\\^=|:|->|\\$)"
                 },
                 {
                     "name": "keyword.operator.comparison.zerionyx",

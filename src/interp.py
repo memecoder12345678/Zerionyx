@@ -4058,6 +4058,7 @@ class Interpreter:
             TT_LTE: "get_comparison_lte",
             TT_GTE: "get_comparison_gte",
             TT_FLOORDIV: "floordived_by",
+            TT_DOLLAR: "dollared_by",
         }
         if op_type in ops:
             method = getattr(left, ops[op_type])

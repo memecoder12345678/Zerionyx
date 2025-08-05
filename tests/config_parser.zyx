@@ -10,7 +10,7 @@ defun parse_config(config_file)
     current_section_items = []
     lines = string.split(ffio.read(config_file, "r"), "\n")
     for i = 0 to len(lines) do
-        line = lines>i
+        line = lines$i
         if line != "" do
             line = string.strip(line, " ")
             if string.startswith(line, "#") or string.startswith(line, ";") do
@@ -47,7 +47,7 @@ defun parse_config(config_file)
                 println(": line " + to_str(i + 1) + " has too many '=' for a key-value pair.")
                 continue
             done
-            key = string.strip(to_str(vals>0), " ")
+            key = string.strip(to_str(vals$0), " ")
             val_str_raw = string.strip(to_str(string.join("", slice(vals, 1, len(vals), none))), " ")
             if key == "" or val_str_raw == "" do
                 termcolor.cprint("Error", "red", none, "bold")
@@ -61,7 +61,7 @@ defun parse_config(config_file)
                 in_double_quote = false
                 val_chars = string.split(val_str_raw, "")
                 for char_idx = 0 to len(val_chars) do
-                    c = val_chars>char_idx
+                    c = val_chars$char_idx
                     if c == "'"  and not in_double_quote do
                         in_single_quote = not in_single_quote
                     elif c == '"' and not in_single_quote do
@@ -105,13 +105,13 @@ done
 # use this function to get value from config
 # defun get_config_value(config_data, section_name, key_name, default_value)
 #     for i = 0 to len(config_data) do
-#         current_section = config_data>i
-#         if current_section>0 == section_name do
-#             items_in_section = current_section>1
+#         current_section = config_data$i
+#         if current_section$0 == section_name do
+#             items_in_section = current_section$1
 #             for j = 0 to len(items_in_section) do
-#                 kv_pair = items_in_section>j
-#                 if kv_pair>0 == key_name do
-#                     return kv_pair>1
+#                 kv_pair = items_in_section$j
+#                 if kv_pair$0 == key_name do
+#                     return kv_pair$1
 #                 done
 #             done
 #             return default_value
@@ -126,7 +126,7 @@ defun main()
         termcolor.cprintln("Usage: script_name <config_file_path>", "yellow", none, "bold")
         sys.exit(1)
     done
-    config_path = sys.argv>1
+    config_path = sys.argv$1
     if not ffio.exists(config_path) do
         termcolor.cprintln("Error: File does not exist: " + config_path, 'red', none, 'bold')
         sys.exit(1)
@@ -142,9 +142,9 @@ defun main()
     else
         println("\n--- Parsed Configuration ---")
         for i = 0 to len(config_data) do
-            section_block = config_data>i
-            section_name = section_block>0
-            section_items = section_block>1
+            section_block = config_data$i
+            section_name = section_block$0
+            section_items = section_block$1
             termcolor.cprint("[", "yellow", none, "bold")
             termcolor.cprint(to_str(section_name), "yellow", none, "bold")
             termcolor.cprintln("]", "yellow", none, "bold")
@@ -152,9 +152,9 @@ defun main()
                 termcolor.cprintln("  (empty section)", "grey", none, none)
             else
                 for j = 0 to len(section_items) do
-                    kv_pair = section_items>j
-                    key = kv_pair>0
-                    value = kv_pair>1
+                    kv_pair = section_items$j
+                    key = kv_pair$0
+                    value = kv_pair$1
                     print("  ")
                     termcolor.cprint(to_str(key), 'magenta', none, 'bold')
                     print(" = ")

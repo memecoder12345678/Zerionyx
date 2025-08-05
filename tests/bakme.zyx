@@ -6,7 +6,7 @@ load "libs.termcolor"
 defun backup_folder(path, cbp, rbp)
     lf = ffio.list_dir(path)
     for i = 0 to len(lf) do
-        f = lf>i
+        f = lf$i
         flp = path + ffio.os_sep + f
         fbd = cbp + ffio.os_sep + f
         if flp == rbp do
@@ -16,10 +16,10 @@ defun backup_folder(path, cbp, rbp)
         if ffio.is_file(flp) do
             e = is_err(ffio.copy, [flp, fbd + ".bak"])
             
-            if is_none(e>1) do
+            if is_none(e$1) do
                 termcolor.cprintln("Backup created: " + fbd + ".bak", "green", none, none)
             else
-                ems = e>1 
+                ems = e$1 
                 if string.startswith(ems, "File ") do
                     msg = slice(ems, len("File "), len(ems), none)
                     termcolor.cprintln(msg, "red", none, none)
@@ -27,8 +27,8 @@ defun backup_folder(path, cbp, rbp)
             done
         else
             e = is_err(ffio.make_dir, [fbd])
-            if not is_none(e>1) do
-                termcolor.cprintln("Error: Can not make subfolder in backup: " + fbd + " (Reason: " + (e>1) + ")", "red", none, none)
+            if not is_none(e$1) do
+                termcolor.cprintln("Error: Can not make subfolder in backup: " + fbd + " (Reason: " + (e$1) + ")", "red", none, none)
             else
                 backup_folder(flp, fbd, rbp)
             done
@@ -41,7 +41,7 @@ defun main()
         termcolor.cprintln("Usage: bakme.zyx <folder_to_backup>", "yellow", none, none)
         sys.exit(1)
     done
-    fp = sys.argv>1
+    fp = sys.argv$1
     if not ffio.exists(fp) do 
         termcolor.cprintln("Error: Folder does not exist: " + fp, "red", none, none) 
         sys.exit(1) 
@@ -52,11 +52,11 @@ defun main()
     done
     abrp = fp + ffio.os_sep + "backup"
     emmb = is_err(ffio.make_dir, [abrp])
-    if not is_none(emmb>1) do
+    if not is_none(emmb$1) do
         if ffio.exists(abrp) and not ffio.is_file(abrp) do
             termcolor.cprintln("Main backup folder already exists (and is a directory): " + abrp, "cyan", none, none)
         else
-            termcolor.cprintln("Error: Can not make main backup folder: " + abrp + " (Reason: " + (emmb>1) + ")", "red", none, none)
+            termcolor.cprintln("Error: Can not make main backup folder: " + abrp + " (Reason: " + (emmb$1) + ")", "red", none, none)
             sys.exit(1)
         done
     else

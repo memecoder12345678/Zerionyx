@@ -17,9 +17,9 @@ namespace termcolor
 
     defun get_color(name)
         for i = 0 to len(color_map) do
-            color = color_map>i
-            if color>0 == name do
-                return to_str(color>1)
+            color = color_map$i
+            if color$0 == name do
+                return to_str(color$1)
             done
         done
         return ''
@@ -27,9 +27,9 @@ namespace termcolor
 
     defun get_bg(name)
         for i = 0 to len(bg_map) do
-            bg = bg_map>i
-            if bg>0 == name do
-                return to_str(bg>1)
+            bg = bg_map$i
+            if bg$0 == name do
+                return to_str(bg$1)
             done
         done
         return ''
@@ -37,9 +37,9 @@ namespace termcolor
 
     defun get_style(name)
         for i = 0 to len(style_map) do
-            style = style_map>i
-            if style>0 == name do
-                return to_str(style>1)
+            style = style_map$i
+            if style$0 == name do
+                return to_str(style$1)
             done
         done
         return ''

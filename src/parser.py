@@ -313,7 +313,11 @@ class Parser:
 
     def dot_op(self):
         self.skip_newlines()
-        return self.bin_op(self.power, (TT_DOT,))
+        return self.bin_op(self.dollar_op, (TT_DOT,))
+    
+    def dollar_op(self):
+        self.skip_newlines()
+        return self.bin_op(self.power, (TT_DOLLAR,))
 
     def power(self):
         self.skip_newlines()

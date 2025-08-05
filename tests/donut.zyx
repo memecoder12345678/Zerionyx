@@ -51,10 +51,10 @@ while true do
                     o = x + 80 * y
                     N = to_int(8 * ((f * e - c * d * g) * m - c * d * e - f * g - l * d * n), false)
                     if o >= 0 and o < 1760 and y < 22 and y > 0 and x > 0 do
-                        z_val = z>o
+                        z_val = z$o
                         if D > z_val do
                             set(z, o, D)
-                            char = if N > 0 do shading>N else shading>0
+                            char = if N > 0 do shading$N else shading$0
                             set(b, o, char)
                         done
                     done
@@ -62,7 +62,7 @@ while true do
             done
             frame_str = ""
             for i = 0 to 1759 do
-                frame_str = frame_str + (b>i)
+                frame_str = frame_str + (b$i)
                 if i % 80 == 79 do
                     frame_str = frame_str + "\n"
                 done

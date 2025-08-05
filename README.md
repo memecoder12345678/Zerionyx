@@ -105,20 +105,20 @@ println(add(5, 3))
 # Lists
 nums = [1, 2, 3, 4, 5]
 println(nums)
-println((nums>0))
-println((nums>4))
+println((nums$0))
+println((nums$4))
 
 # HashMaps
 users = {"name": "admin", "password": "admin"}
 println(users)
-println((users>"name"))
-println((users>"password"))
+println((users$"name"))
+println((users$"password"))
 
 # Bytes
 str_enc = to_bytes(to_hex("Hello, World!"))
 println(to_str(str_enc))
-println((str_enc>0))
-println((str_enc>4))
+println((str_enc$0))
+println((str_enc$4))
 
 # PyObject
 os = pyexec("import os", {})

@@ -50,7 +50,7 @@ namespace string
             return false
         done
         for i = 0 to len(list_digits) do
-            if s == list_digits>i do
+            if s == list_digits$i do
                 return true
             done
         done
@@ -65,7 +65,7 @@ namespace string
             return false
         done
         for i = 0 to len(list_ascii_lowercase) do
-            if s == list_ascii_lowercase>i do
+            if s == list_ascii_lowercase$i do
                 return true
             done
         done
@@ -80,7 +80,7 @@ namespace string
             return false
         done
         for i = 0 to len(list_ascii_uppercase) do
-            if s == list_ascii_uppercase>i do
+            if s == list_ascii_uppercase$i do
                 return true
             done
         done
@@ -95,7 +95,7 @@ namespace string
             return false
         done
         for i = 0 to len(list_ascii_letters) do
-            if s == list_ascii_letters>i do
+            if s == list_ascii_letters$i do
                 return true
             done
         done

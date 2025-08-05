@@ -37,6 +37,7 @@ TT_LBRACE = "LBRACE"
 TT_RBRACE = "RBRACE"
 TT_EOF = "EOF"
 TT_COLON = "COLON"
+TT_DOLLAR = "DOLLAR"
 KEYWORDS = [
     "let",
     "and",

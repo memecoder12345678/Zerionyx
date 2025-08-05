@@ -77,6 +77,9 @@ class Object:
 
     def added_to(self, other):
         return None, self.illegal_operation(other)
+    
+    def dollared_by(self, other):
+        return None, self.illegal_operation(other)
 
     def subbed_by(self, other):
         return None, self.illegal_operation(other)
@@ -574,7 +577,7 @@ class String(Object):
     def __str__(self):
         return self.value.replace("\n", "\\n")
 
-    def get_comparison_gt(self, index):
+    def dollared_by(self, index):
         if not isinstance(index, Number):
             return None, self.illegal_operation(index, "Index must be a number")
         if index.value < 0 or index.value >= len(self.value):
@@ -655,7 +658,7 @@ class List(Object):
                 self, other, f"Can't multiply a list by a type of '{other.type()}'"
             )
 
-    def get_comparison_gt(self, other):
+    def dollared_by(self, other):
         if isinstance(other, Number):
             try:
                 return self.value[other.value], None
@@ -723,7 +726,7 @@ class HashMap(Object):
     def type(self):
         return "<hashmap>"
 
-    def get_comparison_gt(self, index):
+    def dollared_by(self, index):
         if not isinstance(index, String):
             return None, self.illegal_operation(index)
 
@@ -857,7 +860,7 @@ class NameSpace(Object):
         if name in self._internal:
             return self._internal[name]
 
-        r, err = self.value.get_comparison_gt(String(name))
+        r, err = self.value.dollared_by(String(name))
         if err:
             return None
         return r
@@ -912,7 +915,7 @@ class Bytes(Object):
             return Bool(self.value != other.value).set_context(self.context), None
         return Bool(True).set_context(self.context), None
 
-    def get_comparison_gt(self, index):
+    def dollared_by(self, index):
         if not isinstance(index, Number):
             return None, self.illegal_operation(index)
         try:

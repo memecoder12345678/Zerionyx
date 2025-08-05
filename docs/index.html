@@ -307,20 +307,20 @@
 <span class="zyx-comment"># Lists</span>
 <span class="zyx-var">nums</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-number">1</span><span class="zyx-types">,</span> <span class="zyx-number">2</span><span class="zyx-types">,</span> <span class="zyx-number">3</span><span class="zyx-types">,</span> <span class="zyx-number">4</span><span class="zyx-types">,</span> <span class="zyx-number">5</span><span class="zyx-types">]</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">)</span>
-<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">></span><span class="zyx-number">0</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
-<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">></span><span class="zyx-number">4</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">$</span><span class="zyx-number">4</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
 
 <span class="zyx-comment"># HashMaps</span>
 <span class="zyx-var">users</span> <span class="zyx-types">=</span> <span class="zyx-types">{</span><span class="zyx-string">"name"</span><span class="zyx-types">:</span> <span class="zyx-string">"admin"</span><span class="zyx-types">,</span> <span class="zyx-string">"password"</span><span class="zyx-types">:</span> <span class="zyx-string">"admin"</span><span class="zyx-types">}</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">)</span>
-<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">></span><span class="zyx-string">"name"</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
-<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">></span><span class="zyx-string">"password"</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">$</span><span class="zyx-string">"name"</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">$</span><span class="zyx-string">"password"</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
 
 <span class="zyx-comment"># Bytes</span>
 <span class="zyx-var">str_enc</span> <span class="zyx-types">=</span> <span class="zyx-func">to_bytes</span><span class="zyx-types">(</span><span class="zyx-func">to_hex</span><span class="zyx-types">(</span><span class="zyx-string">"Hello, World!"</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">str_enc</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
-<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-types">(</span><span class="zyx-var">str_enc</span><span class="zyx-types">></span><span class="zyx-number">0</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
-<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-types">(</span><span class="zyx-var">str_enc</span><span class="zyx-types">></span><span class="zyx-number">4</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-types">(</span><span class="zyx-var">str_enc</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-types">(</span><span class="zyx-var">str_enc</span><span class="zyx-types">$</span><span class="zyx-number">4</span><span class="zyx-types">)</span><span class="zyx-types">)</span>
 
 <span class="zyx-comment"># PyObject</span>
 <span class="zyx-var">os</span> <span class="zyx-types">=</span> <span class="zyx-func">pyexec</span><span class="zyx-types">(</span><span class="zyx-string">"import os"</span><span class="zyx-types">,</span> <span class="zyx-types">{}</span><span class="zyx-types">)</span>
