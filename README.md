@@ -92,6 +92,12 @@ println(x % y)
 println(x // y)
 println(x ^ y)
 
+# Alias
+a = 10
+a as b
+# println(a) <--- Error!
+println(b)
+
 # Function definition
 defun add(a, b)
     return a + b
@@ -288,4 +294,5 @@ Zerionyx is released under the **MIT License**. See [LICENSE](LICENSE).
 [1]: https://en.wikipedia.org/wiki/README "README"
 [2]: https://github.com/jehna/readme-best-practices "Best practices for writing a README for your open source project - GitHub"
 [3]: https://www.makeareadme.com/ "Make a README"
+
 
