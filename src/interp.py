@@ -3922,6 +3922,7 @@ class Interpreter:
         res = RTResult()
         orig_name = node.var_name_tok.value
         alias_name = node.var_name_tok2.value
+
         value = context.symbol_table.get(orig_name)
         if value is None:
             return res.failure(
@@ -3932,9 +3933,19 @@ class Interpreter:
                     context,
                 )
             )
+
         context.symbol_table.set(alias_name, value)
         context.private_symbol_table.set(alias_name, value)
+
+        try:
+            context.symbol_table.remove(orig_name)
+            context.private_symbol_table.remove(orig_name)
+        except KeyError:
+            pass
+
         return res.success(value)
+
+
 
     def initialize_namespace(self, namespace_obj):
         if namespace_obj.get("initialized_").value:
