@@ -50,7 +50,7 @@ class SymbolTable:
         del self.symbols[name]
 
     def exists(self, value):
-        return True if value in self.symbols.value() else False
+        return True if value in self.symbols.values() else False
 
     def copy(self):
         return SymbolTable().change(self)
@@ -77,7 +77,7 @@ class Object:
 
     def added_to(self, other):
         return None, self.illegal_operation(other)
-    
+
     def dollared_by(self, other):
         return None, self.illegal_operation(other)
 
@@ -578,7 +578,7 @@ class String(Object):
             return None, RTError(
                 index.pos_start,
                 index.pos_end,
-                "Element at this index could not be removed from String because index is out of bounds",
+                "Element at this index could not be removed from string because index is out of bounds",
                 self.context,
             )
         return String(self.value[index.value]), None
@@ -605,13 +605,13 @@ class PyObject(Object):
         c.set_pos(self.pos_start, self.pos_end)
         c.set_context(self.context)
         return c
-    
+
     def __str__(self) -> str:
         return self.__repr__()
 
     def __repr__(self):
-        return f'<py_obj {self.value}>'
-    
+        return f"<py_obj {self.value}>"
+
     def type(self):
         return "<py_obj>"
 
@@ -882,12 +882,6 @@ class NameSpace(Object):
         copied_ns.set_pos(self.pos_start, self.pos_end)
         copied_ns.set_context(self.context)
         return copied_ns
-
-    def added_to(self, other):
-
-        if not isinstance(other, NameSpace):
-            return None, self.illegal_operation(other)
-        return self.value.added_to(other.value)
 
     def type(self):
         return "<namespace>"
