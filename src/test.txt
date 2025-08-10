@@ -1,0 +1,1 @@
+`Bug Fix`: `hashmap`, `list`, `namespace`, `buitl-in function get`, `buitl-in function keys`, `buitl-in function items` & `libs.termcolor`

@@ -60,13 +60,13 @@ namespace termcolor
         done
         all_codes = []
         if color_code != '' do
-            all_codes = all_codes + [color_code]
+            all_codes = all_codes + color_code
         done
         if bg_code != '' do
-            all_codes = all_codes + [bg_code]
+            all_codes = all_codes + bg_code
         done
         if style_code != '' do
-            all_codes = all_codes + [style_code]
+            all_codes = all_codes + style_code
         done
         return string.join(';', all_codes)
     done

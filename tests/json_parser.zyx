@@ -12,8 +12,6 @@ if not ffio.exists(sys.argv$1) do
 done
 
 code = 'import json\nwith open(r"' + ffio.abs_path(sys.argv$1)  + '", "r") as f:\n    r = json.load(f)'
-r = get(pyexec(code, {}), "r", none)
+r = get(pyexec(code), "r", none)
 
-print("r = ")
-println(r)
-sys.exit(0)
+println("r = " + to_str(r))

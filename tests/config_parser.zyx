@@ -195,5 +195,4 @@ done
 
 if is_main do
     main()
-    sys.exit(0)
 done

@@ -27,7 +27,7 @@ while true do
             time.sleep(0.03)
             if keyboard.is_pressed("q") do
                 print(string.chr(27) + "[2J" + string.chr(27) + "[H")
-                sys.exit(0)
+                sys.exit()
             done
         else
             print("Rendering donut... (" + to_str(loop_count) + "/" + to_str(max_loop) + " frames)\r")

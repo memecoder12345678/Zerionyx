@@ -3223,7 +3223,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(List(list(hm.value.keys())))
+        return RTResult().success(List([String(k) for k in hm.value.keys()]))
 
     @set_args(["hm"])
     def execute_values(self, exec_ctx):
@@ -3251,7 +3251,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(List([List(list(i)) for i in hm.value.items()]))
+        return RTResult().success(List([List([String(k), v]) for k, v in hm.value.items()]))
 
     @set_args(["hm", "key"])
     def execute_has(self, exec_ctx):
@@ -3286,6 +3286,15 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         if isinstance(hm, HashMap):
+            if not isinstance(key, String):
+                return RTResult().failure(
+                    TError(
+                        self.pos_start,
+                        self.pos_end,
+                        "Second argument of 'get' must be a string when first argument is a hashmap",
+                        exec_ctx,
+                    )
+                )
             for k, v in hm.value.items():
                 if hasattr(k, "value") and k.value == key.value:
                     return RTResult().success(v)
@@ -3894,6 +3903,7 @@ class Interpreter:
         res = RTResult()
         var_name = node.var_name_tok.value
         value = context.symbol_table.get(var_name)
+        
         if value is None:
             value = context.private_symbol_table.get(var_name)
             if value is None:
@@ -3905,8 +3915,14 @@ class Interpreter:
                         context,
                     )
                 )
-        value = value.copy().set_pos(node.pos_start, node.pos_end).set_context(context)
-        return res.success(value)
+
+        if not isinstance(value, (NameSpace, List, HashMap)):
+            copied_value = value.copy()
+        else:
+            copied_value = value
+
+        copied_value = copied_value.set_pos(node.pos_start, node.pos_end).set_context(context)
+        return res.success(copied_value)
 
     def visit_VarAssignNode(self, node, context: Context):
         res = RTResult()
@@ -3982,7 +3998,9 @@ class Interpreter:
         obj = res.register(self.visit(node.object_node, context))
         if res.should_return():
             return res
+        print(not obj.get("initialized_").value)
         if isinstance(obj, NameSpace) and not obj.get("initialized_").value:
+            print("bug")
             self.initialize_namespace(obj)
         member = obj.get(node.member_name)
         if member is None:

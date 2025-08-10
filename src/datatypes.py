@@ -1,5 +1,6 @@
 from .lexer import RTResult
 import operator
+import reprlib
 from .errors import (
     TError,
     RTError,
@@ -311,7 +312,7 @@ class Bool(Object):
         return self.__repr__()
 
     def __repr__(self):
-        return str(self).lower()
+        return str(self.value).lower()
 
 
 Bool.true = Bool(True)
@@ -693,8 +694,8 @@ class List(Object):
     def __str__(self) -> str:
         return self.__repr__()
 
-    def __repr__(self):
-        return f'[{", ".join([repr(x) for x in self.value])}]'
+    def __repr__(self) -> str:
+        return reprlib.repr(self.value)
 
 
 class HashMap(Object):
@@ -802,8 +803,7 @@ class HashMap(Object):
         return self.__repr__()
 
     def __repr__(self) -> str:
-        __val = ", ".join([f"{repr(k)}: {repr(v)}" for k, v in self.value.items()])
-        return f"{{{__val}}}"
+        return reprlib.repr(self.value)
 
 
 class File(Object):
@@ -841,9 +841,6 @@ class File(Object):
         return f"<File {self.name}>"
 
 
-List.empty = List([])
-
-
 class NameSpace(Object):
     __slots__ = ("name", "value", "_internal")
 
@@ -858,6 +855,7 @@ class NameSpace(Object):
             "statements_": Number.none,
             "initialized_": Number.false,
         }
+        print(self._internal)
 
     def get(self, name):
         if name in self._internal:

@@ -2,10 +2,10 @@ load "libs.time"
 load "libs.sys"
 
 N = 1000000
-Repeats = 10
+repeats = 10
 times = []
 
-for r = 1 to Repeats + 1 do
+for r = 1 to repeats + 1 do
     total = 0
     start = time.time()
     for i = 1 to N + 1 do
@@ -29,26 +29,25 @@ for t in times do
     done
 done
 
-avg = sum / to_float(len(times), false)
+avg = sum / to_float(len(times))
 
-println("Average: " + to_str(avg) + " s")
+println("Average: " + to_str(avg)     + " s")
 println("Fastest: " + to_str(fastest) + " s")
 println("Slowest: " + to_str(slowest) + " s")
-sys.exit(0)
 
 
-# Zerionyx executed on PyPy 3.11 (v7.3.19, 64-bit, JIT disabled) on Intel Core i5-8250U laptop (plugged-in mode)
-#     Average: 38.33161084651947 s
-#     Fastest: 37.53442406654358 s
-#     Slowest: 39.03928422927856 s
+# Zerionyx executed on PyPy 3.11 (v7.3.19, 64-bit, JIT disabled) on AMD Ryzen 7 4800H laptop (plugged-in mode):
+# Average: 40.49288308620453 s
+# Fastest: 37.14694356918335 s
+# Slowest: 47.98423480987549 s
 
-# Zerionyx executed on Python 3.12.8 (64-bit) on Intel Core i5-8250U laptop (plugged-in mode)
-#     Average: 6.603876042366028 s
-#     Fastest: 6.456980466842651 s
-#     Slowest: 6.765600681304932 s
+# Zerionyx executed on Python 3.12.8 (64-bit) on AMD Ryzen 7 4800H laptop (plugged-in mode):
+# Average: 8.391884279251098 s
+# Fastest: 7.623247623443604 s
+# Slowest: 9.372247695922852 s
 
-# Zerionyx executed on PyPy 3.11 (v7.3.19, 64-bit, JIT enabled) on Intel Core i5-8250U laptop (plugged-in mode):
-#     Average: 0.3975654602050781 s
-#     Fastest: 0.3619201183319092 s
-#     Slowest: 0.4779665470123291 s
+# Zerionyx executed on PyPy 3.11 (v7.3.19, 64-bit, JIT enabled) on AMD Ryzen 7 4800H laptop (plugged-in mode):
+# Average: 0.7022020578384399 s
+# Fastest: 0.6396000385284424 s
+# Slowest: 0.8322160243988037 s
 

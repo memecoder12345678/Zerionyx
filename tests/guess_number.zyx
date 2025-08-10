@@ -11,7 +11,7 @@ defun handle_input(m, m_, sn)
         a += 1
         if a >= ma do
             println("You have used all your attempts!\nThe secret number was: " + to_str(sn))
-            sys.exit(0)
+            sys.exit(1)
         done
         println("Invalid input!")
         i = to_int(input("Enter a number from " + to_str(m) + " to " + to_str(m_) + ": "), true)
@@ -45,5 +45,4 @@ done
 
 if is_main do
     main()
-    sys.exit(0)
 done
