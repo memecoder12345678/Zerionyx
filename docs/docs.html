@@ -313,43 +313,43 @@
 STATEMENT          ::= SIMPLE_STATEMENT | COMPOUND_STATEMENT
 
 SIMPLE_STATEMENT   ::=
-      "load" STRING
-    | "return" EXPR
-    | "continue"
-    | "break"
+      <code>load</code> STRING
+    | <code>return</code> EXPR
+    | <code>continue</code>
+    | <code>break</code>
     | EXPR
 
-COMPOUND_STATEMENT ::=
+COMPOUND_STATEMENT ::= 
       IF_EXPR
     | FOR_EXPR
     | WHILE_EXPR
     | DEF_FUNC
 
 EXPR               ::= 
-      "let" IDENTIFIER "=" EXPR
-    | IDENTIFIER "=" EXPR
-    | "let" IDENTIFIER "as" EXPR
-    | IDENTIFIER "as" EXPR
-    | IDENTIFIER ("+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^=") EXPR
-    | COMP_EXPR (("and" | "or") COMP_EXPR)*
+      <code>let</code> IDENTIFIER <code>=</code> EXPR
+    | IDENTIFIER <code>=</code> EXPR
+    | <code>let</code> IDENTIFIER <code>as</code> EXPR
+    | IDENTIFIER <code>as</code> EXPR
+    | IDENTIFIER (<code>+=</code> | <code>-=</code> | <code>*=</code> | <code>/=</code> | <code>//=</code> | <code>%=</code> | <code>^=</code>) EXPR
+    | COMP_EXPR ((<code>and</code> | <code>or</code>) COMP_EXPR)*
 
 COMP_EXPR          ::= 
-      ARITH_EXPR (("==" | "<" | ">" | "<=" | ">=" | "!=") ARITH_EXPR)*
-    | "not" COMP_EXPR
+      ARITH_EXPR ((<code>==</code> | <code><</code> | <code>></code> | <code><=</code> | <code>>=</code> | <code>!=</code>) ARITH_EXPR)*
+    | <code>not</code> COMP_EXPR
 
-ARITH_EXPR         ::= TERM (("+" | "-") TERM)*
+ARITH_EXPR         ::= TERM ((<code>+</code> | <code>-</code>) TERM)*
 
-TERM               ::= FACTOR (("*" | "/" | "//" | "%") FACTOR)*
+TERM               ::= FACTOR ((<code>*</code> | <code>/</code> | <code>//</code> | <code>%</code>) FACTOR)*
 
-FACTOR             ::= ("+" | "-") FACTOR | POWER
+FACTOR             ::= (<code>+</code> | <code>-</code>) FACTOR | POWER
 
-POWER              ::= CALL ("^" FACTOR)*
+POWER              ::= CALL (<code>^</code> FACTOR)*
 
-CALL               ::= ATOM ("(" (EXPR ("," EXPR)*)? ")")?
+CALL               ::= ATOM (<code>(</code> (EXPR (<code>,</code> EXPR)*)? <code>)</code>)?
 
 ATOM               ::= 
       INT | FLOAT | STRING | IDENTIFIER
-    | "(" EXPR ")"
+    | <code>(</code> EXPR <code>)</code>
     | LIST_EXPR
     | LIST_INDEX
     | IF_EXPR
@@ -363,52 +363,52 @@ ATOM               ::=
     | DEF_FUNC
     | COMMENT
 
-GET_INDEX         ::= IDENTIFIER "$" EXPR
+GET_INDEX         ::= IDENTIFIER <code>$</code> EXPR
 
-GET_MEMBER        ::= IDENTIFIER  "." CALL
+GET_MEMBER        ::= IDENTIFIER <code>.</code> CALL
 
-LIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"
+LIST_EXPR         ::= <code>[</code> (EXPR (<code>,</code> EXPR)*)? <code>]</code>
 
-HASHMAP_EXPR      ::= "{" (STRING ":" EXPR ("," STRING ":" EXPR)*)? "}"
+HASHMAP_EXPR      ::= <code>{</code> (STRING <code>:</code> EXPR (<code>,</code> STRING <code>:</code> EXPR)*)? <code>}</code>
 
-NAMESPACE_EXPR    ::=
-      "namespace" IDENTIFIER
-      NEWLINE STATEMENT NEWLINE "done"
+NAMESPACE_EXPR    ::= 
+      <code>namespace</code> IDENTIFIER
+      NEWLINE STATEMENT NEWLINE <code>done</code>
 
 IF_EXPR           ::= 
-      "if" EXPR "do" STATEMENT
-      (NEWLINE "elif" EXPR "do" STATEMENT)*
-      (NEWLINE "else" STATEMENT)?
-      NEWLINE "done"
+      <code>if</code> EXPR <code>do</code> STATEMENT
+      (NEWLINE <code>elif</code> EXPR <code>do</code> STATEMENT)*
+      (NEWLINE <code>else</code> STATEMENT)?
+      NEWLINE <code>done</code>
 
-FOR_EXPR          ::=
-      "for" IDENTIFIER "=" EXPR "to" EXPR
-      ("step" EXPR)?
-      "do" STATEMENT
-      NEWLINE "done"
+FOR_EXPR          ::= 
+      <code>for</code> IDENTIFIER <code>=</code> EXPR <code>to</code> EXPR
+      (<code>step</code> EXPR)?
+      <code>do</code> STATEMENT
+      NEWLINE <code>done</code>
 
-FOR_IN_EXPR          ::=
-      "for" IDENTIFIER "in" EXPR
-      "do" STATEMENT
-      NEWLINE "done"
+FOR_IN_EXPR       ::= 
+      <code>for</code> IDENTIFIER <code>in</code> EXPR
+      <code>do</code> STATEMENT
+      NEWLINE <code>done</code>
 
 WHILE_EXPR        ::= 
-      "while" EXPR "do" STATEMENT
-      NEWLINE "done"
+      <code>while</code> EXPR <code>do</code> STATEMENT
+      NEWLINE <code>done</code>
 
-PARAM_LIST        ::= PARAM ("," PARAM)*
+PARAM_LIST        ::= PARAM (<code>,</code> PARAM)*
 
 PARAM             ::= 
      IDENTIFIER
-    | "let" IDENTIFIER "=" EXPR
-    | IDENTIFIER "=" EXPR
+    | <code>let</code> IDENTIFIER <code>=</code> EXPR
+    | IDENTIFIER <code>=</code> EXPR
 
 DEF_FUNC          ::= 
-      "defun" IDENTIFIER "(" PARAM_LIST? ")"
-      ("->" EXPR)?
-      NEWLINE STATEMENT NEWLINE "done"
+      <code>defun</code> IDENTIFIER <code>(</code> PARAM_LIST? <code>)</code>
+      (<code>-></code> EXPR)?
+      NEWLINE STATEMENT NEWLINE <code>done</code>
 
-COMMENT           ::= "#" /[^\n]*/
+COMMENT           ::= <code>#</code> /[^\n]*/
 </code></pre>
             </section>
 
