@@ -122,6 +122,8 @@ class Parser:
         res = ParseResult()
         pos_start = self.current_tok.pos_start.copy()
         self.skip_newlines()
+        if self.current_tok.matches(TT_KEYWORD, "using"):
+            return self.using_expr()
         if self.current_tok.matches(TT_KEYWORD, "defun"):
             func_def = res.register(self.func_def())
             if res.error:
@@ -314,7 +316,7 @@ class Parser:
     def dot_op(self):
         self.skip_newlines()
         return self.bin_op(self.dollar_op, (TT_DOT,))
-    
+
     def dollar_op(self):
         self.skip_newlines()
         return self.bin_op(self.power, (TT_DOLLAR,))
@@ -413,6 +415,53 @@ class Parser:
                         )
             return res.success(CallNode(atom, arg_nodes))
         return res.success(atom)
+
+    def using_expr(self):
+        res = ParseResult()
+        pos_start = self.current_tok.pos_start.copy()
+
+        res.register_advancement()
+        self.advance()
+
+        if self.current_tok.matches(TT_IDENTIFIER, "parent"):
+            res.register_advancement()
+            self.advance()
+
+            node_class = UsingParentNode
+            err_msg = "Expected identifier after 'using parent'"
+        else:
+            node_class = UsingNode
+            err_msg = "Expected identifier after 'using'"
+
+        if self.current_tok.type != TT_IDENTIFIER:
+            return res.failure(
+                InvalidSyntaxError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, err_msg
+                )
+            )
+
+        var_name_toks = [self.current_tok]
+        res.register_advancement()
+        self.advance()
+
+        while self.current_tok.type == TT_COMMA:
+            res.register_advancement()
+            self.advance()
+            if self.current_tok.type != TT_IDENTIFIER:
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected identifier",
+                    )
+                )
+            var_name_toks.append(self.current_tok)
+            res.register_advancement()
+            self.advance()
+
+        return res.success(
+            node_class(var_name_toks, pos_start, self.current_tok.pos_end.copy())
+        )
 
     def atom(self):
         self.skip_newlines()

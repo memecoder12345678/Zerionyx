@@ -31,21 +31,25 @@ println(add(5, 3))
 
 # Lists
 nums = [1, 2, 3, 4, 5]
+set(nums, 5, 6)
 println(nums)
-println((nums$0))
-println((nums$4))
+println(nums$0)
+println(nums$5)
 
 # HashMaps
-users = {"name": "admin", "password": "admin"}
+users = []
+set(users, 0, {})
+set(users$0, "name", "user-1")
+set(users$0, "password", "123456")
 println(users)
-println((users$"name"))
-println((users$"password"))
+println(users$0$"name")
+println(users$0$"password")
 
 # Bytes
-str_enc = to_bytes(to_hex("Hello, World!"))
+str_enc = to_bytes("Hello, World!")
 println(to_str(str_enc))
-println((str_enc$0))
-println((str_enc$4))
+println(str_enc$0)
+println(str_enc$4)
 
 # PyObject
 os = pyexec("import os", {})
@@ -73,7 +77,7 @@ done
 
 # While loop
 a = 1
-while a < 100 do
+while a > 100 do
     a += 1
 done
 println(a)

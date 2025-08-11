@@ -7,7 +7,7 @@ from .parser import *
 from .nodes import *
 from .datatypes import *
 from .consts import *
-from .errors import TError, IOError, MError, Error, RTError
+from .errors import TError, IError, MError, Error, RTError
 from shutil import rmtree, copy
 from .lexer import Lexer, RTResult
 
@@ -644,7 +644,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(File(file_name, file_path.value))
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f'Failed to open file "{file_path.value}": ' + str(e),
@@ -662,7 +662,7 @@ class BuiltInFunction(BaseFunction):
                     return RTResult().success(String(f.read()))
             except Exception as e:
                 return RTResult().failure(
-                    IOError(
+                    IError(
                         self.pos_start,
                         self.pos_end,
                         f'Failed to read file "{file.path}"\n' + str(e),
@@ -675,7 +675,7 @@ class BuiltInFunction(BaseFunction):
                     return RTResult().success(Bytes(f.read()))
             except Exception as e:
                 return RTResult().failure(
-                    IOError(
+                    IError(
                         self.pos_start,
                         self.pos_end,
                         f'Failed to read file "{file.path}": ' + str(e),
@@ -694,7 +694,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(Number.none)
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f'Failed to write to file "{file.path}": ' + str(e),
@@ -724,7 +724,7 @@ class BuiltInFunction(BaseFunction):
             )
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to check if file exists '{file_path}': " + str(e),
@@ -801,7 +801,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(String(os.getcwd()))
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to get current directory: " + str(e),
@@ -823,7 +823,7 @@ class BuiltInFunction(BaseFunction):
             )
         if not os.path.exists(name.value):
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Directory '{name.value}' does not exist",
@@ -835,7 +835,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(NoneObject.none)
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to set current directory to '{name.value}': " + str(e),
@@ -1149,7 +1149,7 @@ class BuiltInFunction(BaseFunction):
             )
         elif err_type_value == "IO":
             return RTResult().failure(
-                IOError(self.pos_start, self.pos_end, msg, exec_ctx)
+                IError(self.pos_start, self.pos_end, msg, exec_ctx)
             )
         elif err_type_value == "T":
             return RTResult().failure(
@@ -1275,7 +1275,7 @@ class BuiltInFunction(BaseFunction):
             )
         if not os.path.isdir(value.value):
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Directory '{value.value}' does not exist",
@@ -1288,7 +1288,7 @@ class BuiltInFunction(BaseFunction):
             )
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to list directory: {e}",
@@ -1310,7 +1310,7 @@ class BuiltInFunction(BaseFunction):
             )
         if os.path.exists(value.value):
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Directory '{value.value}' already exists",
@@ -1334,7 +1334,7 @@ class BuiltInFunction(BaseFunction):
             )
         if not os.path.exists(value.value):
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"File '{value.value}' does not exist",
@@ -1345,7 +1345,7 @@ class BuiltInFunction(BaseFunction):
             os.remove(value.value)
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to remove file: " + str(e),
@@ -1378,7 +1378,7 @@ class BuiltInFunction(BaseFunction):
             )
         if not os.path.exists(value1.value):
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"File or directory '{value1.value}' does not exist",
@@ -1389,7 +1389,7 @@ class BuiltInFunction(BaseFunction):
             os.rename(value1.value, value2.value)
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to rename file: {e}",
@@ -1412,7 +1412,7 @@ class BuiltInFunction(BaseFunction):
             )
         if not os.path.isdir(value1.value):
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"'{value1.value}' is not a directory",
@@ -1423,7 +1423,7 @@ class BuiltInFunction(BaseFunction):
             rmtree(value1.value)
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to remove directory: {e}",
@@ -1456,7 +1456,7 @@ class BuiltInFunction(BaseFunction):
             )
         if not os.path.exists(value1.value):
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"'{value1.value}' does not exist",
@@ -1467,7 +1467,7 @@ class BuiltInFunction(BaseFunction):
             copy(value1.value, value2.value)
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to copy file: {e}",
@@ -2304,6 +2304,8 @@ class BuiltInFunction(BaseFunction):
             return result
         elif isinstance(obj, PyObject):
             return obj.get_obj()
+        elif isinstance(obj, Bytes):
+            return obj.value
         else:
             return str(obj)
 
@@ -2321,13 +2323,15 @@ class BuiltInFunction(BaseFunction):
                 return Number(obj)
             elif isinstance(obj, float):
                 return Number(obj)
+            elif isinstance(obj, bytes):
+                return Bytes(obj)
             else:
                 return String(obj)
         elif isinstance(obj, list):
             items = []
             for item in obj:
                 if not isinstance(
-                    item, (bool, int, float, str, list, dict, tuple, type(None))
+                    item, (bool, int, float, str, list, dict, tuple, type(None), bytes)
                 ):
                     items.append(String(str(item)))
                 else:
@@ -2411,7 +2415,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(String(os.path.abspath(path.value)))
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to get absolute path for '{path.value}': {str(e)}",
@@ -2435,7 +2439,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(String(os.path.dirname(path.value)))
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to get directory name for '{path.value}': {str(e)}",
@@ -2459,7 +2463,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(String(os.path.basename(path.value)))
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to get base name for '{path.value}': {str(e)}",
@@ -2504,7 +2508,7 @@ class BuiltInFunction(BaseFunction):
                 )
         except OSError as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error creating symlink '{src.value}' -> '{dst.value}': {str(e)}",
@@ -2548,7 +2552,7 @@ class BuiltInFunction(BaseFunction):
                 )
         except OSError as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error reading link '{path_arg.value}': {str(e)}",
@@ -2600,7 +2604,7 @@ class BuiltInFunction(BaseFunction):
             )
         except OSError as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error getting stat for '{path_arg.value}': {str(e)}",
@@ -2640,7 +2644,7 @@ class BuiltInFunction(BaseFunction):
             )
         except OSError as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error getting lstat for '{path_arg.value}': {str(e)}",
@@ -2715,7 +2719,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(NoneObject.none)
         except OSError as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error changing mode for '{path_arg.value}': {str(e)}",
@@ -2779,7 +2783,7 @@ class BuiltInFunction(BaseFunction):
                 )
         except OSError as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error changing ownership for '{path_arg.value}': {str(e)}",
@@ -2845,7 +2849,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(NoneObject.none)
         except OSError as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error setting times for '{path_arg.value}': {str(e)}",
@@ -2899,7 +2903,7 @@ class BuiltInFunction(BaseFunction):
                 )
         except OSError as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"OS error creating hard link '{src.value}' -> '{dst.value}': {str(e)}",
@@ -2930,7 +2934,7 @@ class BuiltInFunction(BaseFunction):
             )
         if os.path.isdir(path_arg.value):
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Cannot unlink '{path_arg.value}': It is a directory\nTip: Use 'remove_dir' instead.",
@@ -2939,7 +2943,7 @@ class BuiltInFunction(BaseFunction):
             )
         if not os.path.exists(path_arg.value) and not os.path.islink(path_arg.value):
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"File or link '{path_arg.value}' does not exist",
@@ -2951,7 +2955,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(NoneObject.none)
         except OSError as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to remove file: {str(e)}",
@@ -3068,7 +3072,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(Number.true if is_dir else Number.false)
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to check if path is directory '{path_arg.value}': {str(e)}",
@@ -3093,7 +3097,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(Number.true if is_link else Number.false)
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to check if path is symlink '{path_arg.value}': {str(e)}",
@@ -3118,7 +3122,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(Number.true if is_mount else Number.false)
         except Exception as e:
             return RTResult().failure(
-                IOError(
+                IError(
                     self.pos_start,
                     self.pos_end,
                     f"Failed to check if path is mount point '{path_arg.value}': {str(e)}",
@@ -3251,7 +3255,9 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        return RTResult().success(List([List([String(k), v]) for k, v in hm.value.items()]))
+        return RTResult().success(
+            List([List([String(k), v]) for k, v in hm.value.items()])
+        )
 
     @set_args(["hm", "key"])
     def execute_has(self, exec_ctx):
@@ -3654,48 +3660,68 @@ class BuiltInFunction(BaseFunction):
                 RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
 
-    @set_args(["value", "supress_error"], [None, Number.false])
+    @set_args(["value", "from_hex", "supress_error"], [None, Bool.false, Number.false])
     def execute_to_bytes(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
-        supress_error = exec_ctx.symbol_table.get("supress_error")
-        if not isinstance(supress_error, Bool):
+        from_hex = exec_ctx.symbol_table.get("from_hex")
+        suppress_error = exec_ctx.symbol_table.get("supress_error")
+
+        if not isinstance(from_hex, Bool):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "Second argument of 'to_bytes' must be a boolean",
+                    "Second argument of 'to_bytes' must be a boolean (from_hex)",
                     exec_ctx,
                 )
             )
 
-        supress_error_ = bool(supress_error.value)
-        if isinstance(value, String):
-            try:
-                return RTResult().success(Bytes(bytes.fromhex(value.value)))
-            except ValueError:
-                if supress_error_:
-                    return RTResult().success(NoneObject.none)
+        if not isinstance(suppress_error, Bool):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Third argument of 'to_bytes' must be a boolean (supress_error)",
+                    exec_ctx,
+                )
+            )
+
+        from_hex_ = bool(from_hex.value)
+        suppress_error_ = bool(suppress_error.value)
+
+        try:
+            if isinstance(value, Number):
+                # Number -> hex string -> bytes
+                hex_str = hex(int(value.value))[2:]
+                return RTResult().success(Bytes(bytes.fromhex(hex_str)))
+
+            elif isinstance(value, String):
+                if from_hex_:
+                    # Parse as hex string
+                    return RTResult().success(Bytes(bytes.fromhex(value.value)))
                 else:
-                    return RTResult().failure(
-                        RTError(
-                            self.pos_start,
-                            self.pos_end,
-                            f"Failed to convert '{value.value}' of type '{value.type()}' to bytes",
-                            exec_ctx,
-                        )
-                    )
-        else:
-            if supress_error_:
+                    # Treat as plain string
+                    return RTResult().success(Bytes(value.value.encode()))
+
+            elif isinstance(value, Bytes):
+                return RTResult().success(Bytes(value.value))
+
+            else:
+                raise TypeError(f"Cannot convert type '{value.type()}' to bytes")
+
+        except Exception as e:
+            if suppress_error_:
                 return RTResult().success(NoneObject.none)
             else:
                 return RTResult().failure(
                     RTError(
                         self.pos_start,
                         self.pos_end,
-                        f"Failed to convert value of type '{value.type()}' to bytes",
+                        f"Failed to convert value of type '{value.type()}' to bytes: {e}",
                         exec_ctx,
                     )
                 )
+
 
     @set_args(["value"])
     def execute_is_bytes(self, exec_ctx):
@@ -3797,46 +3823,7 @@ class BuiltInFunction(BaseFunction):
         is_py_obj = isinstance(exec_ctx.symbol_table.get("value"), PyObject)
         return RTResult().success(Number.true if is_py_obj else Number.false)
 
-    @set_args(["value", "supress_error"], [None, Number.false])
-    def execute_to_hex(self, exec_ctx):
-        value = exec_ctx.symbol_table.get("value")
-        suppress_error = exec_ctx.symbol_table.get("supress_error")
-        if not isinstance(suppress_error, Bool):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'to_hex' must be a boolean",
-                    exec_ctx,
-                )
-            )
-        suppress_error_ = bool(suppress_error.value)
 
-        try:
-            if isinstance(value, Number):
-                hex_str = hex(int(value.value))[2:]
-                return RTResult().success(String(hex_str))
-            elif isinstance(value, String):
-                b = value.value.encode()
-                hex_str = b.hex()
-                return RTResult().success(String(hex_str))
-            elif isinstance(value, Bytes):
-                hex_str = value.value.hex()
-                return RTResult().success(String(hex_str))
-            else:
-                raise TypeError(f"Cannot convert type '{value.type()}' to hex")
-        except Exception as e:
-            if suppress_error_:
-                return RTResult().success(String("none"))
-            else:
-                return RTResult().failure(
-                    RTError(
-                        self.pos_start,
-                        self.pos_end,
-                        f"Failed to convert value of type '{value.type()}' to hex: {e}",
-                        exec_ctx,
-                    )
-                )
 
     @set_args(["value"])
     def execute_is_nan(self, exec_ctx):
@@ -3902,26 +3889,38 @@ class Interpreter:
     def visit_VarAccessNode(self, node, context: Context):
         res = RTResult()
         var_name = node.var_name_tok.value
-        value = context.symbol_table.get(var_name)
-        
-        if value is None:
-            value = context.private_symbol_table.get(var_name)
+        value = None
+
+        if var_name in context.nonlocal_vars:
+            value = context.parent.symbol_table.get(var_name)
+        elif var_name in context.using_vars:
+            global_st = context.symbol_table
+            while global_st.parent:
+                global_st = global_st.parent
+            value = global_st.get(var_name)
+        else:
+            value = context.symbol_table.get(var_name)
             if value is None:
-                return res.failure(
-                    RTError(
-                        node.pos_start,
-                        node.pos_end,
-                        f"'{var_name}' is not defined",
-                        context,
-                    )
+                value = context.private_symbol_table.get(var_name)
+
+        if value is None:
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"'{var_name}' is not defined",
+                    context,
                 )
+            )
 
         if not isinstance(value, (NameSpace, List, HashMap)):
             copied_value = value.copy()
         else:
             copied_value = value
 
-        copied_value = copied_value.set_pos(node.pos_start, node.pos_end).set_context(context)
+        copied_value = copied_value.set_pos(node.pos_start, node.pos_end).set_context(
+            context
+        )
         return res.success(copied_value)
 
     def visit_VarAssignNode(self, node, context: Context):
@@ -3930,8 +3929,21 @@ class Interpreter:
         value = res.register(self.visit(node.value_node, context))
         if res.should_return():
             return res
-        context.symbol_table.set(var_name, value)
+
+        if var_name in context.using_vars:
+            global_symbol_table = context.symbol_table
+            while global_symbol_table.parent:
+                global_symbol_table = global_symbol_table.parent
+            global_symbol_table.set(var_name, value)
+
+        elif var_name in context.nonlocal_vars:
+            context.parent.symbol_table.set(var_name, value)
+
+        else:
+            context.symbol_table.set(var_name, value)
+
         context.private_symbol_table.set(var_name, value)
+
         return res.success(value)
 
     def visit_VarAssignAsNode(self, node, context: Context):
@@ -3960,8 +3972,6 @@ class Interpreter:
             pass
 
         return res.success(value)
-
-
 
     def initialize_namespace(self, namespace_obj):
         if namespace_obj.get("initialized_").value:
@@ -3998,9 +4008,16 @@ class Interpreter:
         obj = res.register(self.visit(node.object_node, context))
         if res.should_return():
             return res
-        print(not obj.get("initialized_").value)
+        if not isinstance(obj, NameSpace):
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    "Member access operation requires a NameSpace object.",
+                    context,
+                )
+            )
         if isinstance(obj, NameSpace) and not obj.get("initialized_").value:
-            print("bug")
             self.initialize_namespace(obj)
         member = obj.get(node.member_name)
         if member is None:
@@ -4235,10 +4252,10 @@ class Interpreter:
             if res.should_return():
                 if res.loop_should_continue:
                     continue
-                
+
                 if res.loop_should_break:
                     break
-                
+
                 return res
 
             if elements is not None:
@@ -4450,6 +4467,66 @@ class Interpreter:
                 List(value).set_context(context).set_pos(node.pos_start, node.pos_end)
             )
 
+    def visit_UsingNode(self, node, context: Context):
+        res = RTResult()
+
+        if not context.parent:
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    "'using' cannot be used at the global level",
+                    context,
+                )
+            )
+
+        global_symbol_table = context.symbol_table
+        while global_symbol_table.parent:
+            global_symbol_table = global_symbol_table.parent
+
+        for var_tok in node.var_name_toks:
+            var_name = var_tok.value
+            if global_symbol_table.get(var_name) is None:
+                return res.failure(
+                    RTError(
+                        var_tok.pos_start,
+                        var_tok.pos_end,
+                        f"Name '{var_name}' is not defined in the global scope",
+                        context,
+                    )
+                )
+            context.using_vars.add(var_name)
+
+        return res.success(NoneObject.none)
+
+    def visit_UsingParentNode(self, node, context: Context):
+        res = RTResult()
+
+        if not context.parent:
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    "'using parent' can only be used in a nested scope.",
+                    context,
+                )
+            )
+
+        for var_tok in node.var_name_toks:
+            var_name = var_tok.value
+            if context.parent.symbol_table.get(var_name) is None:
+                return res.failure(
+                    RTError(
+                        var_tok.pos_start,
+                        var_tok.pos_end,
+                        f"No binding for nonlocal variable '{var_name}' found",
+                        context,
+                    )
+                )
+            context.nonlocal_vars.add(var_name)
+
+        return res.success(NoneObject.none)
+
 
 global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv[1:]]))
 global_symbol_table.set("os_sep_fp", String(os.sep))
@@ -4535,7 +4612,7 @@ def run(fn, text):
         else:
             result.value = ""
         return result.value, result.error
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, EOFError):
         print(
             f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Interrupt Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}User Terminated{Fore.RESET}{Style.RESET_ALL}"
         )

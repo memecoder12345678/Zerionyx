@@ -16,6 +16,8 @@ class Context:
         "parent_entry_pos",
         "symbol_table",
         "private_symbol_table",
+        "using_vars",
+        "nonlocal_vars",
     )
 
     def __init__(self, display_name, parent=None, parent_entry_pos=None):
@@ -24,6 +26,8 @@ class Context:
         self.parent_entry_pos = parent_entry_pos
         self.symbol_table = None
         self.private_symbol_table = None
+        self.using_vars = set()
+        self.nonlocal_vars = set()
 
 
 class SymbolTable:
@@ -58,6 +62,7 @@ class SymbolTable:
 
 
 class Object:
+    __slots__ = ("fields", "pos_start", "pos_end", "context")
 
     def __init__(self):
         self.set_pos()
@@ -139,7 +144,7 @@ class Object:
         return None, self.illegal_operation(other)
 
     def get(self, other):
-        return None, self.illegal_operation(other)
+        return self.illegal_operation(other)
 
     def iter(self):
         return None, self.illegal_operation(
@@ -592,7 +597,7 @@ class String(Object):
 
 
 class PyObject(Object):
-    __slots__ = ("value",)
+    __slots__ = "value"
 
     def __init__(self, obj):
         super().__init__()
@@ -699,6 +704,7 @@ class List(Object):
 
 
 class HashMap(Object):
+    __slots__ = "value"
 
     def __init__(self, value):
         super().__init__()
@@ -835,10 +841,10 @@ class File(Object):
         return copy
 
     def type(self):
-        return "<File>"
+        return "<file>"
 
     def __repr__(self):
-        return f"<File {self.name}>"
+        return f"<file {self.name}>"
 
 
 class NameSpace(Object):
@@ -855,7 +861,6 @@ class NameSpace(Object):
             "statements_": Number.none,
             "initialized_": Number.false,
         }
-        print(self._internal)
 
     def get(self, name):
         if name in self._internal:

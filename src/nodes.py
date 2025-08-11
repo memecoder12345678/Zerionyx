@@ -359,3 +359,23 @@ class NamedArgumentNode:
 
     def __repr__(self):
         return f"(NamedArg: {self.param_name_tok.value} = {self.value_node})"
+
+
+class UsingNode:
+    def __init__(self, var_name_toks, pos_start, pos_end):
+        self.var_name_toks = var_name_toks
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+
+    def __repr__(self):
+        return f"UsingNode({self.var_name_toks})"
+
+
+class UsingParentNode:
+    def __init__(self, var_name_toks, pos_start, pos_end):
+        self.var_name_toks = var_name_toks
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+
+    def __repr__(self):
+        return f"UsingParentNode({self.var_name_toks})"

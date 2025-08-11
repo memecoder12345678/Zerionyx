@@ -3,8 +3,7 @@
   <h1 align="center">Zerionyx Programming Language</h1>
   <p align="center">
     <img src="https://img.shields.io/badge/python-3.11%2B-00ffcc?style=for-the-badge&logo=python" alt="Python 3.11+" />
-    <img src="https://img.shields.io/badge/donate-Monero-00ffcc?style=for-the-badge&logo=monero" />
-    <img src="https://img.shields.io/badge/Zerionyx-v3.0.0-00ffcc?style=for-the-badge&logo=lightning" alt="Zerionyx v3.0.0" />
+    <img src="https://img.shields.io/badge/Zerionyx-v3.0.1-00ffcc?style=for-the-badge&logo=lightning" alt="Zerionyx v3.0.1" />
     <img src="https://img.shields.io/badge/build-passing-00ffcc?style=for-the-badge&logo=githubactions" alt="Build Status" />
     <img src="https://img.shields.io/github/contributors/memecoder12345678/Zerionyx?style=for-the-badge&color=00ffcc">
     <img src="https://img.shields.io/github/stars/memecoder12345678/Zerionyx?style=for-the-badge&color=00ffcc">
@@ -26,7 +25,6 @@
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [Looking for Contributors](#looking-for-contributors)
-- [Support Zerionyx 💸](#support-zerionyx-)
 - [Acknowledgments](#acknowledgments)
 - [License](#license)
 - [Contact](#contact)
@@ -110,21 +108,25 @@ println(add(5, 3))
 
 # Lists
 nums = [1, 2, 3, 4, 5]
+set(nums, 5, 6)
 println(nums)
-println((nums$0))
-println((nums$4))
+println(nums$0)
+println(nums$5)
 
 # HashMaps
-users = {"name": "admin", "password": "admin"}
+users = []
+set(users, 0, {})
+set(users$0, "name", "user-1")
+set(users$0, "password", "123456")
 println(users)
-println((users$"name"))
-println((users$"password"))
+println(users$0$"name")
+println(users$0$"password")
 
 # Bytes
 str_enc = to_bytes(to_hex("Hello, World!"))
 println(to_str(str_enc))
-println((str_enc$0))
-println((str_enc$4))
+println(str_enc$0)
+println(str_enc$4)
 
 # PyObject
 os = pyexec("import os", {})
@@ -152,7 +154,7 @@ done
 
 # While loop
 a = 1
-while a < 100 do
+while a > 100 do
     a += 1
 done
 println(a)
@@ -162,7 +164,6 @@ namespace m
     pi = 3.14
     defun area(r) -> pi * r * r
 done
-
 println(m.area(5))
 ```
 
@@ -254,28 +255,10 @@ We're especially looking for contributors interested in:
 Let’s make Zerionyx better, together 💚
 
 ---
-## Support Zerionyx 💸
 
-If you find this project useful and want to support its development **anonymously and securely**, you can donate via **Monero (XMR)**:
-
-**Monero Address:**  
-```
-49vK21oktPG6TXymtpzPNcWh9u2nBCJ4v9wcX2Xo5iWJf8p4ZFBVhv6Y2SLo6qxCmsPMi3Q14RcXsf8USjtrgmyzJubFfpm
-```
-
-**Monero QR:**  
-<p align="center">
-  <img src="imgs/qr.png" alt="Monero Donation QR Code" width="200"/>
-</p>
-
-> Use wallets like [Feather Wallet](https://featherwallet.org/) or [Monero GUI](https://www.getmonero.org/downloads/) to send donations.
-
-
-
----
 ## Acknowledgments
 
-Thanks to the open-source makers and template authors (Owne Readme, Jeff Nyman) for README inspiration ([github.com][2], [en.wikipedia.org][1], [makeareadme.com][3]).
+Thanks to the open-source makers and template authors for README inspiration ([github.com][2], [en.wikipedia.org][1], [makeareadme.com][3]).
 
 ---
 

@@ -361,7 +361,11 @@ ATOM               ::=
     | NAMESPACE_EXPR
     | WHILE_EXPR
     | DEF_FUNC
-    | COMMENT
+    | COMMENT    
+    | USING_STATEMENT
+    | EXPR
+
+USING_STATEMENT    ::= </code>using</code> (<code>parent</code>)? IDENTIFIER (<code>,</code> IDENTIFIER)*
 
 GET_INDEX         ::= IDENTIFIER <code>$</code> EXPR
 
@@ -504,9 +508,8 @@ Zerionyx may be magical, but its syntax must be real.
                         <code>none</code> if fail and <code>silent</code> true else raise
                     </li>
                     <li><b>to_str(x)</b> &rarr; str &mdash; Convert <code>x</code> to string</li>
-                    <li><b>to_bytes(x, supress_error=false)</b> &rarr; bytes &mdash; Convert <code>x</code> (hex string)
+                    <li><b>to_bytes(x, from_hex=false, supress_error=false)</b> &rarr; bytes &mdash; Convert <code>x</code> 
                         to bytes</li>
-                    <li><b>to_hex(x, supress_error=false)</b> &rarr; str &mdash; Convert <code>x</code> to hex string
                     </li>
                     <li><b>type(x)</b> &rarr; str/none &mdash; Return type of <code>x</code> as string or none</li>
                     <li><b>pyexec(code, args={})</b> &rarr; hashmap &mdash; Executes embedded Python code and returns

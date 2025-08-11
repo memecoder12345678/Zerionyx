@@ -1,0 +1,87 @@
+load "libs.hash"
+
+users = []
+current_user = none
+
+defun hash_password(password) -> hash.sha256(to_bytes(password))
+
+defun sign_up()
+    user_name = input("Enter your name: ")
+    hashed_password = hash_password(get_password("Enter your password: "))
+    r = false
+    for user in users do
+        if user$"user_name" == user_name do
+            println("User name already exists")
+            input("Press enter to continue...")
+            return
+        done
+    done
+    append(users, {"user_name": user_name, "hashed_password": hashed_password})
+    println("User created successfully")
+    input("Press enter to continue...")
+done
+
+defun log_in()
+    using current_user
+    if current_user != none do
+        println("You are already logged in as " + current_user)
+        input("Press enter to continue...")
+        return
+    done
+    user_name = input("Enter your user name: ")
+    hashed_password = hash_password(get_password("Enter your password: "))
+    found = false
+    for user in users do
+        if user$"user_name" == user_name and user$"hashed_password" == hashed_password do
+            println("Login successful")
+            current_user = user$"user_name"
+            found = true
+            break
+        done
+    done
+    if not found do
+        println("Invalid user name or password")
+    done
+    input("Press enter to continue...")
+done
+
+defun log_out()
+    using current_user
+    if current_user == none do
+        println("You are not logged in")
+    else
+        current_user = none
+        println("Logged out successfully")
+    done
+    input("Press enter to continue...")
+done
+
+defun main()
+    while true do
+        clear()
+        println("Welcome to the user management system (" + to_str(current_user) + ")")
+        println("1. Sign up")
+        println("2. Log in")
+        if current_user != none do
+            println("3. Log out")
+            println("4. Exit")
+        else
+            println("3. Exit")
+        done
+        choice = to_int(input("Enter your choice: "), true)
+        if choice == 1 do
+            sign_up()
+        elif choice == 2 do
+            log_in()
+        elif choice == 3 do
+            log_out()
+        elif choice == 4 do
+            break
+        else
+            println("Invalid choice")
+            input("Press enter to continue...")
+        done
+    done
+done
+
+main()
