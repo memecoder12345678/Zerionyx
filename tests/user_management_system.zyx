@@ -61,25 +61,38 @@ defun main()
         clear()
         println("Welcome to the user management system (" + to_str(current_user) + ")")
         println("1. Sign up")
-        println("2. Log in")
+        if current_user == none do
+            println("2. Log in")
+        done
         if current_user != none do
-            println("3. Log out")
-            println("4. Exit")
+            println("2. Log out")
+            println("3. Exit")
         else
             println("3. Exit")
         done
         choice = to_int(input("Enter your choice: "), true)
-        if choice == 1 do
-            sign_up()
-        elif choice == 2 do
-            log_in()
-        elif choice == 3 do
-            log_out()
-        elif choice == 4 do
-            break
+        if current_user != none do
+            if choice == 1 do
+                sign_up()
+            if choice == 2 do
+                log_out()
+            elif choice == 3 do
+                break
+            else
+                println("Invalid choice")
+                input("Press enter to continue...")
+            done
         else
-            println("Invalid choice")
-            input("Press enter to continue...")
+            if choice == 1 do
+                sign_up()
+            elif choice == 2 do
+                log_in()
+            elif choice == 3 do
+                break
+            else
+                println("Invalid choice")
+                input("Press enter to continue...")
+            done
         done
     done
 done
