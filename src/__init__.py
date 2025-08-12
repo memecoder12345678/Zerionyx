@@ -1,1 +1,6 @@
-from .interp import run, INFO, Fore, Style
+from .interp import (
+    run,
+    INFO,
+    Fore,
+    Style,
+)

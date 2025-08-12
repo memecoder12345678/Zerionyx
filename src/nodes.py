@@ -379,3 +379,16 @@ class UsingParentNode:
 
     def __repr__(self):
         return f"UsingParentNode({self.var_name_toks})"
+    
+
+class IndexAssignNode:
+    def __init__(self, obj_node, index_node, value_node):
+        self.obj_node = obj_node
+        self.index_node = index_node
+        self.value_node = value_node
+
+        self.pos_start = self.obj_node.pos_start
+        self.pos_end = self.value_node.pos_end
+    
+    def __repr__(self):
+        return f"IndexAssignNode({self.obj_node} [{self.index_node}] = {self.value_node})"

@@ -365,9 +365,13 @@ ATOM               ::=
     | USING_STATEMENT
     | EXPR
 
-USING_STATEMENT    ::= </code>using</code> (<code>parent</code>)? IDENTIFIER (<code>,</code> IDENTIFIER)*
+USING_STATEMENT   ::= </code>using</code> (<code>parent</code>)? IDENTIFIER (<code>,</code> IDENTIFIER)*
 
 GET_INDEX         ::= IDENTIFIER <code>$</code> EXPR
+
+SET_INDEX         ::=
+      IDENTIFIER <code>$</code> EXPR <code>=</code> EXPR
+    | <code>let</code> IDENTIFIER <code>$</code> EXPR <code>=</code> EXPR
 
 GET_MEMBER        ::= IDENTIFIER <code>.</code> CALL
 
@@ -403,7 +407,7 @@ WHILE_EXPR        ::=
 PARAM_LIST        ::= PARAM (<code>,</code> PARAM)*
 
 PARAM             ::= 
-     IDENTIFIER
+      IDENTIFIER
     | <code>let</code> IDENTIFIER <code>=</code> EXPR
     | IDENTIFIER <code>=</code> EXPR
 
@@ -484,10 +488,6 @@ Zerionyx may be magical, but its syntax must be real.
                     <li><b>get(hmol, koi, default=none)</b> &rarr; any &mdash; Return value for <code>koi</code> or
                         <code>default</code>
                         if not found</li>
-                    <li><b>set(hmol, koi, value=none)</b> &rarr; hashmap/list &mdash; Add or update
-                        <code>koi</code> in
-                        <code>hmol</code> with <code>value</code>
-                    </li>
                     <li><b>del(hm, key)</b> &rarr; none &mdash; Delete <code>key</code> and its value from
                         <code>hm</code></li>
                     <li><b>len(x)</b> &rarr; number &mdash; Get length of <code>x</code></li>
@@ -518,6 +518,7 @@ Zerionyx may be magical, but its syntax must be real.
                         list/string/hashmap/bytes
                         <code>l</code> from <code>from</code> to <code>to</code> step <code>step</code> (exclusive)
                     </li>
+                    <li><b>is_nan(n)</b> &rarr; bool &mdash; Check if <code>n</code> is NaN (Not a Number)</li>
                 </ul>
             </section>
 

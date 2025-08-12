@@ -62,9 +62,13 @@ ATOM               ::=
     | USING_STATEMENT
     | EXPR
 
-USING_STATEMENT    ::= "using" ("parent")? IDENTIFIER ("," IDENTIFIER)*
+USING_STATEMENT   ::= "using" ("parent")? IDENTIFIER ("," IDENTIFIER)*
 
 GET_INDEX         ::= IDENTIFIER "$" EXPR
+
+SET_INDEX         ::=
+      IDENTIFIER "$" EXPR "=" EXPR
+    | "let" IDENTIFIER "$" EXPR "=" EXPR
 
 GET_MEMBER        ::= IDENTIFIER  "." CALL
 
@@ -100,7 +104,7 @@ WHILE_EXPR        ::=
 PARAM_LIST        ::= PARAM ("," PARAM)*
 
 PARAM             ::= 
-     IDENTIFIER
+      IDENTIFIER
     | "let" IDENTIFIER "=" EXPR
     | IDENTIFIER "=" EXPR
 

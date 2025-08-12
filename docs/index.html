@@ -312,16 +312,16 @@
 
 <span class="zyx-comment"># Lists</span>
 <span class="zyx-var">nums</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-number">1</span><span class="zyx-types">,</span> <span class="zyx-number">2</span><span class="zyx-types">,</span> <span class="zyx-number">3</span><span class="zyx-types">,</span> <span class="zyx-number">4</span><span class="zyx-types">,</span> <span class="zyx-number">5</span><span class="zyx-types">]</span>
-<span class="zyx-func">set</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">,</span> <span class="zyx-number">5</span><span class="zyx-types">,</span> <span class="zyx-number">6</span><span class="zyx-types">)</span>
+<span class="zyx-var">nums</span><span class="zyx-types">$</span><span class="zyx-number">5</span><span class="zyx-types"> = </span> <span class="zyx-number">6</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">)</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">)</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">$</span><span class="zyx-number">5</span><span class="zyx-types">)</span>
 
 <span class="zyx-comment"># HashMaps</span>
 <span class="zyx-var">users</span> <span class="zyx-types">=</span> <span class="zyx-types">[]</span>
-<span class="zyx-func">set</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">,</span> <span class="zyx-number">0</span><span class="zyx-types">,</span> <span class="zyx-types">{})</span>
-<span class="zyx-func">set</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">,</span> <span class="zyx-string">"name"</span><span class="zyx-types">,</span> <span class="zyx-string">"user-1"</span><span class="zyx-types">)</span>
-<span class="zyx-func">set</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">,</span> <span class="zyx-string">"password"</span><span class="zyx-types">,</span> <span class="zyx-string">"123456"</span><span class="zyx-types">)</span>
+<span class="zyx-func">append</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">,</span> <span class="zyx-types">{})</span>
+<span class="zyx-var">users</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">$</span><span class="zyx-string">"name"</span><span class="zyx-types"> = </span> <span class="zyx-string">"user-1"</span>
+<span class="zyx-var">users</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">$</span><span class="zyx-string">"password"</span><span class="zyx-types"> = </span> <span class="zyx-string">"123456"</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">)</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">$</span><span class="zyx-string">"name"</span><span class="zyx-types">)</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">$</span><span class="zyx-string">"password"</span><span class="zyx-types">)</span>
@@ -407,5 +407,3 @@
     </footer>
 </body>
 </html>
-
-

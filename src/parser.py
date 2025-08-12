@@ -258,6 +258,7 @@ class Parser:
         node = res.register(
             self.bin_op(self.comp_expr, ((TT_KEYWORD, "and"), (TT_KEYWORD, "or")))
         )
+
         if res.error:
             return res.failure(
                 InvalidSyntaxError(
@@ -266,6 +267,18 @@ class Parser:
                     "Expected 'let', 'if', 'for', 'while', 'defun', int, float, identifier, '+', '-', '(', '[', '{' or 'not'",
                 )
             )
+
+        if isinstance(node, BinOpNode) and node.op_tok.type == TT_DOLLAR:
+            if self.current_tok.type == TT_EQ:
+                res.register_advancement()
+                self.advance()
+
+                value_node = res.register(self.expr())
+                if res.error:
+                    return res
+
+                return res.success(IndexAssignNode(node.left_node, node.right_node, value_node))
+
         return res.success(node)
 
     def comp_expr(self):

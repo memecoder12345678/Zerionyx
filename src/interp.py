@@ -3318,47 +3318,6 @@ class BuiltInFunction(BaseFunction):
                 return RTResult().success(hm.value[int(key.value)])
         return RTResult().success(default)
 
-    @set_args(["hm", "key", "value"], [None, None, Number.none])
-    def execute_set(self, exec_ctx):
-        hm = exec_ctx.symbol_table.get("hm")
-        key = exec_ctx.symbol_table.get("key")
-        value = exec_ctx.symbol_table.get("value")
-        if not isinstance(hm, (HashMap, List)):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'set' must be a hashmap or list",
-                    exec_ctx,
-                )
-            )
-        if isinstance(hm, HashMap):
-            hm.value[key] = value
-            return RTResult().success(hm)
-        else:
-            if not isinstance(key, Number):
-                return RTResult().failure(
-                    TError(
-                        self.pos_start,
-                        self.pos_end,
-                        "Second argument of 'set' must be a number index when first argument is a list",
-                        exec_ctx,
-                    )
-                )
-            idx = int(key.value)
-            if 0 <= idx < len(hm.value):
-                hm.value[idx] = value
-                return RTResult().success(hm)
-            else:
-                return RTResult().failure(
-                    RTError(
-                        self.pos_start,
-                        self.pos_end,
-                        f"Index {idx} is out of bounds for list of size {len(hm.value)}",
-                        exec_ctx,
-                    )
-                )
-
     @set_args(["hm", "key"])
     def execute_del(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
@@ -3691,16 +3650,13 @@ class BuiltInFunction(BaseFunction):
 
         try:
             if isinstance(value, Number):
-                # Number -> hex string -> bytes
                 hex_str = hex(int(value.value))[2:]
                 return RTResult().success(Bytes(bytes.fromhex(hex_str)))
 
             elif isinstance(value, String):
                 if from_hex_:
-                    # Parse as hex string
                     return RTResult().success(Bytes(bytes.fromhex(value.value)))
                 else:
-                    # Treat as plain string
                     return RTResult().success(Bytes(value.value.encode()))
 
             elif isinstance(value, Bytes):
@@ -4526,6 +4482,52 @@ class Interpreter:
             context.nonlocal_vars.add(var_name)
 
         return res.success(NoneObject.none)
+    
+    def visit_IndexAssignNode(self, node, context):
+        res = RTResult()
+
+        collection_obj = res.register(self.visit(node.obj_node, context))
+        if res.should_return(): return res
+
+        index_obj = res.register(self.visit(node.index_node, context))
+        if res.should_return(): return res
+        
+        value_to_set = res.register(self.visit(node.value_node, context))
+        if res.should_return(): return res
+
+        if isinstance(collection_obj, List):
+            if not isinstance(index_obj, Number):
+                return res.failure(RTError(
+                    node.index_node.pos_start, node.index_node.pos_end,
+                    "List index must be a number", context
+                ))
+            
+            idx = int(index_obj.value)
+            try:
+                collection_obj.value[idx] = value_to_set
+            except IndexError:
+                return res.failure(RTError(
+                    node.index_node.pos_start, node.index_node.pos_end,
+                    f"Index {idx} is out of bounds for list of size {len(collection_obj.value)}", context
+                ))
+
+        elif isinstance(collection_obj, HashMap):
+            if not isinstance(index_obj, String):
+                return res.failure(RTError(
+                    node.index_node.pos_start, node.index_node.pos_end,
+                    "HashMap key must be a string", context
+                ))
+            
+            key = index_obj.value
+            collection_obj.value[key] = value_to_set
+
+        else:
+            return res.failure(RTError(
+                node.obj_node.pos_start, node.obj_node.pos_end,
+                "Indexed assignment can only be performed on a List or HashMap", context
+            ))
+        
+        return res.success(value_to_set)
 
 
 global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv[1:]]))

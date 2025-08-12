@@ -31,22 +31,22 @@ println(add(5, 3))
 
 # Lists
 nums = [1, 2, 3, 4, 5]
-set(nums, 5, 6)
+nums$5 = 6
 println(nums)
 println(nums$0)
 println(nums$5)
 
 # HashMaps
 users = []
-set(users, 0, {})
-set(users$0, "name", "user-1")
-set(users$0, "password", "123456")
+append(users, {})
+users$0$"name" = "user-1"
+users$0$"password" = "123456"
 println(users)
 println(users$0$"name")
 println(users$0$"password")
 
 # Bytes
-str_enc = to_bytes("Hello, World!")
+str_enc = to_bytes(to_hex("Hello, World!"))
 println(to_str(str_enc))
 println(str_enc$0)
 println(str_enc$4)
@@ -87,5 +87,4 @@ namespace m
     pi = 3.14
     defun area(r) -> pi * r * r
 done
-
 println(m.area(5))

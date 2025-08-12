@@ -74,7 +74,7 @@ It offers:
 
 ## Code Samples
 
-```ruby
+```
 # Hello World
 println("Hello, World!")
 print("Hello, World!\n")
@@ -108,16 +108,16 @@ println(add(5, 3))
 
 # Lists
 nums = [1, 2, 3, 4, 5]
-set(nums, 5, 6)
+nums$5 = 6
 println(nums)
 println(nums$0)
 println(nums$5)
 
 # HashMaps
 users = []
-set(users, 0, {})
-set(users$0, "name", "user-1")
-set(users$0, "password", "123456")
+append(users, {})
+users$0$"name" = "user-1"
+users$0$"password" = "123456"
 println(users)
 println(users$0$"name")
 println(users$0$"password")

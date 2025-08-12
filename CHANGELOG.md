@@ -1,58 +1,51 @@
-### **Changelog: Version 3.0.1 - Scope Control & Stability Update**
+### **Changelog: Version 3.0.2 - Ergonomics & Expressiveness Update**
 
-**Date:** August 11, 2025
+**Date:** August 12, 2025
 
-We are pleased to release version 3.0.1, a major update that introduces advanced scope management features and significant improvements to built-in functions. This release focuses on enhancing the expressiveness of the language and improving stability for complex program structures.
-
----
-
-### New Features
-
-#### **1. Global Scope Access with `using`**
-
-A new keyword, `using`, has been introduced to control variable access in the global scope from within functions. This keyword, similar to Python's `global`, allows a function to declare its intention to modify a variable in the top-level global scope.
-
-*   **Syntax:** `using IDENTIFIER ("," IDENTIFIER)*`
-*   **Behavior:** When a variable is declared with `using`, subsequent assignments to it modify the global variable, not a local copy. Accessing the variable correctly retrieves the global value.
-*   **Constraint:** `using` can only be used inside a function.
-
-#### **2. Nonlocal Scope Access with `using parent`**
-
-For managing variables in nested functions, the `using parent` keyword has been added. This functions similarly to Python's `nonlocal` statement, allowing a nested function to modify a variable in its immediate enclosing (parent) scope.
-
-*   **Syntax:** `using parent IDENTIFIER ("," IDENTIFIER)*`
-*   **Behavior:** When a variable is declared with `using parent`, assignments to it modify the variable in the parent function's scope.
-*   **Constraint:** `using parent` can only be used inside a nested function where a valid parent scope exists.
+We are excited to launch version 3.0.2, an update centered on improving the core developer experience. The centerpiece of this release is a major syntactic enhancement that makes writing code more intuitive and readable.
 
 ---
 
-### Bug Fixes & Stability 🐛
+### 🚀 New Feature: Intuitive Indexed Assignment with `$`
 
-#### **1. Corrected Variable Access for `using` and `using parent`**
+To improve code readability and developer ergonomics, we are introducing a major syntactic sugar enhancement. This change replaces the more verbose `set(...)` function call with a direct and intuitive assignment operator. Our goal is to make the language feel more familiar and to let you write cleaner, more expressive code.
 
-**Fix:** A critical bug was identified in how the interpreter handled variable access after a `using` or `using parent` declaration. Previously, only the assignment operation was redirected; variable access still read a stale local copy. This has been corrected. Accessing a variable declared with `using` or `using parent` now correctly reads the current value from the target scope (global or parent), ensuring proper state synchronization.
+#### **How It Works**
 
-#### **2. Namespace Context Resolution**
+The new syntax leverages the existing `$` access operator, combining it with the standard assignment operator `=`. This allows you to modify elements within a `List` and `HashMap` directly.
 
-**Fix:** Addressed an issue where lazily-initialized namespaces might fail to resolve variables from their enclosing context during member access. The context resolution logic for namespaces has been stabilized, ensuring that namespace members correctly inherit and access variables from the scope in which the namespace was defined.
+*   **For Lists:** You can assign a new value to an element using its numeric index.
+    *   **Syntax:** `IDENTIFIER $ NUMBER = EXPR`
 
----
+*   **For HashMaps:** You can assign a new value to an entry using its string key.
+    *   **Syntax:** `IDENTIFIER $ STRING = EXPR`
 
-### Changes & Improvements
+#### **Examples: Before vs. After**
 
-#### **1. `to_bytes` Function Overhaul**
+The improvement is best illustrated by comparing the old and new code.
 
-The built-in `to_bytes` function has been significantly upgraded from a specific hex-to-bytes converter to a more general data utility.
+**Before: Using the `set()` function**
+```
+let my_list = [10, 20, 30]
+let my_map = {"status": "pending", "id": 123}
 
-*   **Expanded Input Types:** Now accepts `number`, `string`, and `bytes` as input.
-*   **New Parameter (`from_hex`)**: A new boolean parameter `from_hex` (defaulting to `false`) allows control over conversion.
-    *   If `from_hex=false`, strings are converted using standard character encoding (e.g., UTF-8).
-    *   If `from_hex=true`, strings are parsed as hexadecimal values (legacy behavior).
+# Required a function call to modify
+set(my_list, 0, 99)
+set(my_map, "status", "complete")
 
----
+println(my_list)   #> [99, 20, 30]
+println(my_map)    #> {"status": "complete", "id": 123}
+```
 
-### Deprecations & Removals
+**Now: Using Direct Indexed Assignment**
+```
+let my_list = [10, 20, 30]
+let my_map = {"status": "pending", "id": 123}
 
-#### **1. Removed `to_hex` Built-in Function**
+# The new syntax is much cleaner and more intuitive!
+my_list$0 = 99
+my_map$"status" = "complete"
 
-The built-in function `to_hex` has been removed. Its functionality is considered specialized and can be achieved through other core language primitives, streamlining the standard library.
+println(my_list)   #> [99, 20, 30]
+println(my_map)    #> {"status": "complete", "id": 123}
+```

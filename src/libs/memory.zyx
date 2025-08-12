@@ -6,7 +6,7 @@ defun remember_(k, v)
     for i = 0 to len(mem_) do 
         pair = mem_$i
         if pair$0 == k do 
-            set(pair, 1, v)
+            pair$1 = v
             return none
         done
     done
