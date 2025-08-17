@@ -2082,7 +2082,7 @@ class BuiltInFunction(BaseFunction):
         return RTResult().success(Number(index))
 
     @set_args(["func", "args"], [None, List([])])
-    def execute_is_err(self, exec_ctx):
+    def execute_is_panic(self, exec_ctx):
         func = exec_ctx.symbol_table.get("func")
         args = exec_ctx.symbol_table.get("args")
         if not isinstance(func, BaseFunction):
@@ -2090,7 +2090,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'is_err' must be a function",
+                    "First argument of 'is_panic' must be a function",
                     exec_ctx,
                 )
             )
@@ -2099,7 +2099,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "Second argument of 'is_err' must be a list",
+                    "Second argument of 'is_panic' must be a list",
                     exec_ctx,
                 )
             )
@@ -2157,7 +2157,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    f"Unexpected error in 'is_err': {err}",
+                    f"Unexpected error in 'is_panic': {err}",
                     exec_ctx,
                 )
             )
@@ -4463,7 +4463,7 @@ class Interpreter:
                 RTError(
                     node.pos_start,
                     node.pos_end,
-                    "'using parent' can only be used in a nested scope.",
+                    "'using parent' can only be used in a nested scope",
                     context,
                 )
             )
@@ -4524,7 +4524,7 @@ class Interpreter:
         else:
             return res.failure(RTError(
                 node.obj_node.pos_start, node.obj_node.pos_end,
-                "Indexed assignment can only be performed on a List or HashMap", context
+                "Indexed assignment can only be performed on a list or hashmap", context
             ))
         
         return res.success(value_to_set)

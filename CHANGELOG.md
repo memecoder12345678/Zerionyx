@@ -1,10 +1,27 @@
 ### **Changelog: Version 3.0.2 - Ergonomics & Expressiveness Update**
 
-**Date:** August 12, 2025
+**Date:** August 17, 2025
 
 We are excited to launch version 3.0.2, an update centered on improving the core developer experience. The centerpiece of this release is a major syntactic enhancement that makes writing code more intuitive and readable.
 
 ---
+
+### Function Renaming: `is_panic`
+
+The diagnostic helper function has been renamed from `is_err` to `is_panic` for greater clarity and consistency.
+
+New Signature:
+```
+is_panic(func, args=[])
+```
+
+Returns `[result, none, none]` if execution succeeds.
+
+Returns `[none, err_msg, err_name]` if execution fails.
+
+err_name is one of `"RT"`, `"M"`, `"IO"`, or `"T"`.
+
+This makes error checking more intuitive and emphasizes the panic semantics of runtime exceptions.
 
 ### 🚀 New Feature: Intuitive Indexed Assignment with `$`
 
