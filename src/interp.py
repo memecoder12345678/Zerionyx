@@ -2937,7 +2937,7 @@ class BuiltInFunction(BaseFunction):
                 IError(
                     self.pos_start,
                     self.pos_end,
-                    f"Cannot unlink '{path_arg.value}': It is a directory\nTip: Use 'remove_dir' instead.",
+                    f"Cannot unlink '{path_arg.value}': It is a directory\nTip: Use 'remove_dir' instead",
                     exec_ctx,
                 )
             )
@@ -3966,10 +3966,10 @@ class Interpreter:
             return res
         if not isinstance(obj, NameSpace):
             return res.failure(
-                RTError(
+                TError(
                     node.pos_start,
                     node.pos_end,
-                    "Member access operation requires a NameSpace object.",
+                    "Illegal operation -> unknown",
                     context,
                 )
             )
@@ -4515,7 +4515,7 @@ class Interpreter:
             if not isinstance(index_obj, String):
                 return res.failure(RTError(
                     node.index_node.pos_start, node.index_node.pos_end,
-                    "HashMap key must be a string", context
+                    "Hashmap key must be a string", context
                 ))
             
             key = index_obj.value
@@ -4615,7 +4615,7 @@ def run(fn, text):
             result.value = ""
         return result.value, result.error
     except (KeyboardInterrupt, EOFError):
-        print(
-            f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Interrupt Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}User Terminated{Fore.RESET}{Style.RESET_ALL}"
-        )
+        print("---------------------------------------------------------------------------")
+        print("InterruptError                            Traceback (most recent call last)")
+        print("{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}InterruptError{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}User Terminated{Fore.RESET}{Style.RESET_ALL}")
         sys.exit(2)
