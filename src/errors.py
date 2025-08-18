@@ -1,29 +1,23 @@
 from colorama import init, Fore, Style
 
-init(autoreset=True)
+init(autoreset=True, strip=False)
 
 
-def string_with_arrows(text, pos_start, pos_end, indent):
-    result = " " * indent
-    idx_start = max(text.rfind("\n", 0, pos_start.idx), 0)
-    idx_end = text.find("\n", idx_start + 1)
-    if idx_end < 0:
-        idx_end = len(text)
-    line_count = pos_end.ln - pos_start.ln + 1
-    for i in range(line_count):
-        line = text[idx_start:idx_end]
-        col_start = pos_start.col if i == 0 else 0
-        col_end = pos_end.col if i == line_count - 1 else len(line) - 1
-        line: str
-        result += line.replace("\n", "") + "\n"
-        result += " " * (col_start + indent) + f"{Fore.LIGHTRED_EX}^{Fore.RESET}" * (
-            col_end - col_start
-        )
-        idx_start = idx_end
-        idx_end = text.find("\n", idx_start + 1)
-        if idx_end < 0:
-            idx_end = len(text)
-    return result.replace("\t", "")
+def get_line_from_text(text, line_number):
+    if not text:
+        return None
+    lines = text.split("\n")
+    if 0 <= line_number < len(lines):
+        return lines[line_number]
+    return None
+
+
+def create_traceback_header(error_name, total_width=75):
+    line1 = "-" * total_width + "\n"
+    traceback_str = "Traceback (most recent call last)"
+    remaining_space = total_width - len(error_name)
+    line2 = f"{error_name}{traceback_str:>{remaining_space}}\n"
+    return line1 + line2
 
 
 class Error:
@@ -36,151 +30,81 @@ class Error:
         self.details = details
 
     def __str__(self):
-        result = f"File {Fore.MAGENTA}'{self.pos_start.fn}'{Fore.RESET}, line {Fore.MAGENTA}{self.pos_start.ln + 1}{Fore.RESET}\n"
-        result += (
-            string_with_arrows(
-                self.pos_start.ftxt, self.pos_start, self.pos_end, 2
-            ).rstrip()
-            + Fore.RESET
-        )
-        result += f"\n{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{self.error_name}{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{self.details}"
+        result = create_traceback_header(self.error_name)
+
+        result += f'  File "{Fore.MAGENTA}{self.pos_start.fn}{Style.RESET_ALL}", line {Fore.MAGENTA}{self.pos_start.ln + 1}{Style.RESET_ALL}\n'
+
+        line_text = get_line_from_text(self.pos_start.ftxt, self.pos_start.ln)
+
+        if line_text is not None:
+            result += f"{Fore.LIGHTRED_EX}--> {line_text.strip()}{Style.RESET_ALL}\n"
+
+        result += f"\n{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{self.error_name}{Style.RESET_ALL}: {Fore.MAGENTA}{self.details}{Style.RESET_ALL}"
         return result
 
 
 class IllegalCharError(Error):
-
     def __init__(self, pos_start, pos_end, details):
-        super().__init__(pos_start, pos_end, "Illegal Character", details)
+        super().__init__(pos_start, pos_end, "IllegalCharacterError", details)
 
 
 class ExpectedCharError(Error):
-
     def __init__(self, pos_start, pos_end, details):
-        super().__init__(pos_start, pos_end, "Expected Character", details)
+        super().__init__(pos_start, pos_end, "ExpectedCharacterError", details)
 
 
 class InvalidSyntaxError(Error):
-
     def __init__(self, pos_start, pos_end, details=""):
-        super().__init__(pos_start, pos_end, "Invalid Syntax", details)
+        super().__init__(pos_start, pos_end, "InvalidSyntaxError", details)
 
 
 class RTError(Error):
-
     def __init__(self, pos_start, pos_end, details, context):
-        super().__init__(pos_start, pos_end, "Runtime Error", details)
+        super().__init__(pos_start, pos_end, "RuntimeError", details)
         self.context = context
 
-    def __str__(self):
-        result = self.generate_traceback()
-        result += string_with_arrows(
-            self.pos_start.ftxt, self.pos_start, self.pos_end, 4
-        ).rstrip()
-        result += f"\n{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{self.error_name}{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{self.details}"
-        return result
-
-    def generate_traceback(self):
-        result = ""
-        pos = self.pos_start
+    def generate_traceback_frames(self):
+        frames = []
         ctx = self.context
-
+        pos = self.pos_start
         while ctx:
             if pos:
-                result = (
-                    f"  File {Fore.MAGENTA}'{pos.fn}'{Fore.RESET}, line {Fore.MAGENTA}{str(pos.ln + 1)}{Fore.RESET}, in {Fore.MAGENTA}{ctx.display_name}{Fore.RESET}\n"
-                    + result
-                )
-                pos = ctx.parent_entry_pos
+                frames.append({"pos": pos, "display_name": ctx.display_name})
+            pos = ctx.parent_entry_pos
             ctx = ctx.parent
+        return list(reversed(frames))
 
-        return "Traceback (most recent call last):\n" + result
+    def __str__(self):
+        result = create_traceback_header(self.error_name)
+        frames = self.generate_traceback_frames()
+
+        for frame in frames:
+            pos = frame["pos"]
+            display_name = frame["display_name"]
+
+            result += f'  File "{Fore.MAGENTA}{pos.fn}{Style.RESET_ALL}", line {Fore.MAGENTA}{pos.ln + 1}{Style.RESET_ALL}, in {Fore.MAGENTA}{display_name}{Style.RESET_ALL}\n'
+
+        line_text = get_line_from_text(self.pos_start.ftxt, self.pos_start.ln)
+        if line_text is not None:
+            result += f"{Fore.LIGHTRED_EX}--> {line_text.strip()}{Style.RESET_ALL}\n"
+
+        result += f"\n{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{self.error_name}{Style.RESET_ALL}: {Fore.MAGENTA}{self.details}{Style.RESET_ALL}"
+        return result
 
 
-class MError(Error):
-
+class MError(RTError):
     def __init__(self, pos_start, pos_end, details, context):
-        super().__init__(pos_start, pos_end, "Math Error", details)
-        self.context = context
-
-    def __str__(self):
-        result = self.generate_traceback()
-        result += string_with_arrows(
-            self.pos_start.ftxt, self.pos_start, self.pos_end, 4
-        ).rstrip()
-        result += f"\n{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{self.error_name}{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{self.details}"
-        return result
-
-    def generate_traceback(self):
-        result = ""
-        pos = self.pos_start
-        ctx = self.context
-        while ctx:
-            if pos:
-                result = (
-                    f"  File {Fore.MAGENTA}'{pos.fn}'{Fore.RESET}, line {Fore.MAGENTA}{str(pos.ln + 1)}{Fore.RESET}, in {Fore.MAGENTA}{ctx.display_name}{Fore.RESET}\n"
-                    + result
-                )
-                pos = ctx.parent_entry_pos
-            ctx = ctx.parent
-
-        return "Traceback (most recent call last):\n" + result
+        super().__init__(pos_start, pos_end, details, context)
+        self.error_name = "MathError"
 
 
-class IError(Error):
-
+class IError(RTError):
     def __init__(self, pos_start, pos_end, details, context):
-        super().__init__(pos_start, pos_end, "IO Error", details)
-        self.context = context
-
-    def __str__(self):
-        result = self.generate_traceback()
-        result += string_with_arrows(
-            self.pos_start.ftxt, self.pos_start, self.pos_end, 4
-        ).rstrip()
-        result += f"\n{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{self.error_name}{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{self.details}"
-        return result
-
-    def generate_traceback(self):
-        result = ""
-        pos = self.pos_start
-        ctx = self.context
-        while ctx:
-            if pos:
-                result = (
-                    f"  File {Fore.MAGENTA}'{pos.fn}'{Fore.RESET}, line {Fore.MAGENTA}{str(pos.ln + 1)}{Fore.RESET}, in {Fore.MAGENTA}{ctx.display_name}{Fore.RESET}\n"
-                    + result
-                )
-                pos = ctx.parent_entry_pos
-            ctx = ctx.parent
-
-        return "Traceback (most recent call last):\n" + result
+        super().__init__(pos_start, pos_end, details, context)
+        self.error_name = "IOError"
 
 
-class TError(Error):
-
+class TError(RTError):
     def __init__(self, pos_start, pos_end, details, context):
-        super().__init__(pos_start, pos_end, "Type Error", details)
-        self.context = context
-
-    def __str__(self):
-        result = self.generate_traceback()
-        result += string_with_arrows(
-            self.pos_start.ftxt, self.pos_start, self.pos_end, 4
-        ).rstrip()
-        result += f"\n{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{self.error_name}{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}{self.details}"
-        return result
-
-    def generate_traceback(self):
-        result = ""
-        pos = self.pos_start
-        ctx = self.context
-        while ctx:
-            if pos:
-                result = (
-                    f"  File {Fore.MAGENTA}'{pos.fn}'{Fore.RESET}, line {Fore.MAGENTA}{str(pos.ln + 1)}{Fore.RESET}, in {Fore.MAGENTA}{ctx.display_name}{Fore.RESET}\n"
-                    + result
-                )
-                pos = ctx.parent_entry_pos
-            ctx = ctx.parent
-
-        return "Traceback (most recent call last):\n" + result
+        super().__init__(pos_start, pos_end, details, context)
+        self.error_name = "TypeError"
