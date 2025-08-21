@@ -365,7 +365,7 @@ ATOM               ::=
     | USING_STATEMENT
     | EXPR
 
-USING_STATEMENT   ::= </code>using</code> (<code>parent</code>)? IDENTIFIER (<code>,</code> IDENTIFIER)*
+USING_STATEMENT   ::= <code>using</code> (<code>parent</code>)? IDENTIFIER (<code>,</code> IDENTIFIER)*
 
 GET_INDEX         ::= IDENTIFIER <code>$</code> EXPR
 
@@ -374,6 +374,10 @@ SET_INDEX         ::=
     | <code>let</code> IDENTIFIER <code>$</code> EXPR <code>=</code> EXPR
 
 GET_MEMBER        ::= IDENTIFIER <code>.</code> CALL
+
+SET_MEMBER        ::= 
+      IDENTIFIER <code>.</code> CALL <code>=</code> EXPR
+    | <code>let</code> IDENTIFIER <code>.</code> CALL <code>=</code> EXPR
 
 LIST_EXPR         ::= <code>[</code> (EXPR (<code>,</code> EXPR)*)? <code>]</code>
 
@@ -511,7 +515,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <li><b>to_bytes(x, from_hex=false, supress_error=false)</b> &rarr; bytes &mdash; Convert <code>x</code> 
                         to bytes</li>
                     </li>
-                    <li><b>type(x)</b> &rarr; str/none &mdash; Return type of <code>x</code> as string or none</li>
+                    <li><b>type(x)</b> &rarr; str &mdash; Return type of <code>x</code> as string</li>
                     <li><b>pyexec(code, args={})</b> &rarr; hashmap &mdash; Executes embedded Python code and returns
                         its result (use with caution)</li>
                     <li><b>slice(l, from=none, to=none, step=none)</b> &rarr; list/string/hashmap/bytes &mdash; Slice
@@ -519,6 +523,7 @@ Zerionyx may be magical, but its syntax must be real.
                         <code>l</code> from <code>from</code> to <code>to</code> step <code>step</code> (exclusive)
                     </li>
                     <li><b>is_nan(n)</b> &rarr; bool &mdash; Check if <code>n</code> is NaN (Not a Number)</li>
+                    <li><b>clone(value)</b> &rarr; any &mdash; Clone and return <code>value</code></li>
                 </ul>
             </section>
 
@@ -575,7 +580,7 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>zip_longest(l1, l2)</b> &rarr; list &mdash; Pair elements from <code>l1</code> and
                             <code>l2</code>
                             (fill with <code>none</code> if lengths differ)</li>
-                        <li><b>sort(l, r=false)</b> &rarr; list &mdash; Sort list <code>l</code></li>
+                        <li><b>sort(l, reverse=false)</b> &rarr; list &mdash; Sort list <code>l</code></li>
                         <li><b>count(l, v)</b> &rarr; number &mdash; Count occurrences of <code>v</code> in
                             <code>l</code></li>
                         <li><b>index_of(l, v)</b> &rarr; number/none &mdash; Index of <code>v</code> in <code>l</code>
@@ -589,9 +594,9 @@ Zerionyx may be magical, but its syntax must be real.
                 <div id="lib-string">
                     <h3>string.zyx</h3>
                     <ul>
-                        <li><b>split(s, s_="")</b> &rarr; list &mdash; Split string <code>s</code> by separator
+                        <li><b>split(s, sep="")</b> &rarr; list &mdash; Split string <code>s</code> by separator
                             <code>sep</code></li>
-                        <li><b>strip(s, s_=" ")</b> &rarr; list &mdash; Trims <code>sep</code> from both ends of
+                        <li><b>strip(s, sep=" ")</b> &rarr; list &mdash; Trims <code>sep</code> from both ends of
                             <code>s</code></li>
                         <li><b>join(sep, l)</b> &rarr; str &mdash; Join list <code>l</code> with separator
                             <code>sep</code></li>
@@ -662,7 +667,7 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>exists(file)</b> &rarr; bool &mdash; Check if <code>file</code> exists</li>
                         <li><b>get_cdir()</b> &rarr; str &mdash; Get current directory</li>
                         <li><b>set_cdir(dir)</b> &rarr; none &mdash; Change current directory</li>
-                        <li><b>list_dir(d=".")</b> &rarr; list &mdash; List files in directory</li>
+                        <li><b>list_dir(dir=".")</b> &rarr; list &mdash; List files in directory</li>
                         <li><b>make_dir(dir)</b> &rarr; none &mdash; Create directory</li>
                         <li><b>remove_file(file)</b> &rarr; none &mdash; Remove file</li>
                         <li><b>rename(old, new)</b> &rarr; none &mdash; Rename file or directory</li>
@@ -728,10 +733,10 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>get_ip()</b> &rarr; str &mdash; Get public IP address</li>
                         <li><b>get_mac()</b> &rarr; str &mdash; Get MAC address</li>
                         <li><b>ping(host)</b> &rarr; str &mdash; Ping host</li>
-                        <li><b>downl(url, t=15)</b> &rarr; str &mdash; Download file from URL</li>
+                        <li><b>downl(url, timeout=15)</b> &rarr; str &mdash; Download file from URL</li>
                         <li><b>get_local_ip()</b> &rarr; str &mdash; Get local IP address</li>
                         <li><b>get_hostname()</b> &rarr; str &mdash; Get hostname</li>
-                        <li><b>request(url, method, headers, data, t=15)</b> &rarr; list/hashmap &mdash; Send HTTP
+                        <li><b>request(url, method, headers, data, timeout=15)</b> &rarr; list/hashmap &mdash; Send HTTP
                             request and
                             return response JSON</li>
                     </ul>
@@ -755,7 +760,7 @@ Zerionyx may be magical, but its syntax must be real.
                         </li>
                         <li><b>get_env(name)</b> &rarr; str &mdash; Get environment variable</li>
                         <li><b>set_env(name, value)</b> &rarr; none &mdash; Set environment variable</li>
-                        <li><b>exit(e=0)</b> &rarr; none &mdash; Exit program</li>
+                        <li><b>exit(exit_code=0)</b> &rarr; none &mdash; Exit program</li>
                         <li><b>argv</b> &mdash; List of command-line arguments</li>
                         <li><b>os_name</b> &mdash; OS name</li>
                     </ul>
@@ -763,9 +768,9 @@ Zerionyx may be magical, but its syntax must be real.
                 <div id="lib-threading">
                     <h3>threading.zyx</h3>
                     <ul>
-                        <li><b>start(func, a=[])</b> &rarr; thread &mdash; Start a new thread</li>
+                        <li><b>start(func, args=[])</b> &rarr; thread &mdash; Start a new thread</li>
                         <li><b>sleep(seconds)</b> &rarr; none &mdash; Sleep current thread</li>
-                        <li><b>join(thread, t=15)</b> &rarr; none &mdash; Wait for thread to finish</li>
+                        <li><b>join(thread, timeout=15)</b> &rarr; none &mdash; Wait for thread to finish</li>
                         <li><b>is_alive(thread)</b> &rarr; bool &mdash; Is thread alive</li>
                         <li><b>cancel(thread)</b> &rarr; none &mdash; Cancel thread</li>
                     </ul>
@@ -791,13 +796,13 @@ Zerionyx may be magical, but its syntax must be real.
                 <div id="lib-termcolor">
                     <h3>termcolor.zyx</h3>
                     <ul>
-                        <li><b>cprint(text, c=none, b=none, s=none)</b> &rarr; none &mdash; Prints <code>text</code>
+                        <li><b>cprint(text, color=none, background=none, style=none)</b> &rarr; none &mdash; Prints <code>text</code>
                             with color,
                             background, and style with no newline</li>
-                        <li><b>cprintln(text, c=none, b=none, s=none)</b> &rarr; none &mdash; Same as
+                        <li><b>cprintln(text, color=none, background=none, style=none)</b> &rarr; none &mdash; Same as
                             <code>cprint</code> but adds a
                             newline</li>
-                        <li><b>get_code(c=none, b=none, s=none)</b> &rarr; str &mdash; Return ANSI escape code string
+                        <li><b>get_code(color=none, background=none, style=none)</b> &rarr; str &mdash; Return ANSI escape code string
                             for the given
                             color, background, and style</li>
                     </ul>

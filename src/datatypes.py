@@ -1,4 +1,5 @@
 from .lexer import RTResult
+import copy as deepcody
 import operator
 import reprlib
 from .errors import (
@@ -682,10 +683,7 @@ class List(Object):
             return None, Object.illegal_operation(self, other, "Index must be a number")
 
     def copy(self):
-        copy = List(self.value)
-        copy.set_pos(self.pos_start, self.pos_end)
-        copy.set_context(self.context)
-        return copy
+        return deepcody.deepcopy(self)
 
     def is_true(self):
         return len(self.value) > 0
@@ -800,10 +798,7 @@ class HashMap(Object):
         return len(self.value)
 
     def copy(self):
-        copied_map = HashMap(self.value.copy())
-        copied_map.set_pos(self.pos_start, self.pos_end)
-        copied_map.set_context(self.context)
-        return copied_map
+        return deepcody.deepcopy(self)
 
     def __str__(self) -> str:
         return self.__repr__()
@@ -879,12 +874,7 @@ class NameSpace(Object):
         return self
 
     def copy(self):
-        copied_ns = NameSpace(self.name)
-        copied_ns.value = self.value.copy()
-        copied_ns._internal = self._internal.copy()
-        copied_ns.set_pos(self.pos_start, self.pos_end)
-        copied_ns.set_context(self.context)
-        return copied_ns
+        return deepcody.deepcopy(self)
 
     def type(self):
         return "<namespace>"

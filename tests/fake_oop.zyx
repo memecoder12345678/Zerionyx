@@ -1,0 +1,66 @@
+load "libs.hash"
+load "libs.string"
+
+# --- PSOP: Prototype Space-Oriented Programming ---
+# Core idea:
+# - Namespace = Prototype (a template object, clonable into instances via built-in function clone).
+# - Space = Self-reference to the current instance (like 'this' or 'self').
+# - Composition = Modules (spaces) talk to each other via absolute paths.
+# Together, this makes code modular, reusable, and clone-friendly.
+
+# --- PROTOTYPE DEFINITION (The "P" in PSOP) ---
+# 'App' is the top-level prototype for our program.
+namespace App
+
+    # 'Network' prototype: holds state + behavior for auth logic
+    namespace Network
+        # State (properties)
+        user_name = none
+        hashed_password = none
+
+        # Utility function (hashing)
+        defun hash_password(password) -> hash.sha256(to_bytes(password))
+
+        # Behavior (login method)
+        defun login()
+            # --- THE 'space' KEYWORD (The "S" in PSOP) ---
+            # 'space' is the self-reference to this namespace instance.
+            # Enables clarity, encapsulation, and clone support.
+            if space.user_name == "zerionyx" do
+                if space.hashed_password == to_bytes("38643936396565663665636164336332396133613632393238306536383663663063336635643561383661666633636131323032306339323361646336633932", from_hex=true) do
+                    println("Log in successful")
+                else
+                    println("Invalid credentials")
+                done
+            else
+                println("Invalid credentials")
+            done
+        done
+    done
+
+    # 'TUI' prototype: handles user input and talks to Network
+    namespace TUI
+        defun ask()
+            # --- INTER-SPACE COMMUNICATION ---
+            # TUI updates Network state via absolute path, then calls its method.
+            App.Network.user_name = string.strip(
+                input("Enter username: ")
+            )
+            App.Network.hashed_password = App.Network.hash_password(
+                string.strip(
+                    get_password("Enter password: ")
+                )
+            )
+            App.Network.login()
+        done
+    done
+done
+
+defun main()
+    # App starts from TUI.ask()
+    App.TUI.ask()
+done
+
+if is_main do
+    main()
+done

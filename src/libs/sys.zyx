@@ -23,7 +23,7 @@ namespace sys
         return none
     done
 
-    defun exit(e=0)
-        exit_fp(e)
+    defun exit(exit_code=0)
+        exit_fp(exit_code)
     done
 done

@@ -3,6 +3,7 @@ import sys
 import time
 import random
 import math
+from copy import deepcopy
 from .parser import *
 from .nodes import *
 from .datatypes import *
@@ -59,7 +60,15 @@ def load_module(fn, interpreter, context):
         result.value = "" if str(result.value) == "none" else result.value
         return result.value, result.error
     except KeyboardInterrupt:
-        print("Interrupt Error: User Terminated")
+        print(
+            "\n---------------------------------------------------------------------------"
+        )
+        print(
+            "InterruptError                            Traceback (most recent call last)\n"
+        )
+        print(
+            f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}InterruptError{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}User Terminated{Fore.RESET}{Style.RESET_ALL}"
+        )
         sys.exit(2)
 
 
@@ -3678,7 +3687,6 @@ class BuiltInFunction(BaseFunction):
                     )
                 )
 
-
     @set_args(["value"])
     def execute_is_bytes(self, exec_ctx):
         is_bytes = isinstance(exec_ctx.symbol_table.get("value"), Bytes)
@@ -3779,8 +3787,6 @@ class BuiltInFunction(BaseFunction):
         is_py_obj = isinstance(exec_ctx.symbol_table.get("value"), PyObject)
         return RTResult().success(Number.true if is_py_obj else Number.false)
 
-
-
     @set_args(["value"])
     def execute_is_nan(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
@@ -3790,6 +3796,11 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(Number.true)
         else:
             return RTResult().success(Number.false)
+
+    @set_args(["value"])
+    def execute_clone(self, exec_ctx):
+        value = exec_ctx.symbol_table.get("value")
+        return RTResult().success(deepcopy(value))
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -3950,6 +3961,7 @@ class Interpreter:
         ns_context = Context(node.namespace_name, context, node.pos_start)
         ns_context.symbol_table = SymbolTable(context.symbol_table)
         ns_context.private_symbol_table = SymbolTable(context.private_symbol_table)
+        ns_context.symbol_table.set("space", namespace)
         stmts = node.statements
         if hasattr(stmts, "element_nodes"):
             stmts = stmts.element_nodes
@@ -4339,6 +4351,7 @@ class Interpreter:
             tmp_path = os.path.join(LIBS_PATH, node.file_path)
             if os.path.isfile(tmp_path):
                 path = os.path.join(LIBS_PATH, node.file_path)
+                
             else:
                 return res.failure(
                     RTError(
@@ -4482,51 +4495,100 @@ class Interpreter:
             context.nonlocal_vars.add(var_name)
 
         return res.success(NoneObject.none)
-    
+
     def visit_IndexAssignNode(self, node, context):
         res = RTResult()
 
         collection_obj = res.register(self.visit(node.obj_node, context))
-        if res.should_return(): return res
+        if res.should_return():
+            return res
 
         index_obj = res.register(self.visit(node.index_node, context))
-        if res.should_return(): return res
-        
+        if res.should_return():
+            return res
+
         value_to_set = res.register(self.visit(node.value_node, context))
-        if res.should_return(): return res
+        if res.should_return():
+            return res
 
         if isinstance(collection_obj, List):
             if not isinstance(index_obj, Number):
-                return res.failure(RTError(
-                    node.index_node.pos_start, node.index_node.pos_end,
-                    "List index must be a number", context
-                ))
-            
+                return res.failure(
+                    RTError(
+                        node.index_node.pos_start,
+                        node.index_node.pos_end,
+                        "List index must be a number",
+                        context,
+                    )
+                )
+
             idx = int(index_obj.value)
             try:
                 collection_obj.value[idx] = value_to_set
             except IndexError:
-                return res.failure(RTError(
-                    node.index_node.pos_start, node.index_node.pos_end,
-                    f"Index {idx} is out of bounds for list of size {len(collection_obj.value)}", context
-                ))
+                return res.failure(
+                    RTError(
+                        node.index_node.pos_start,
+                        node.index_node.pos_end,
+                        f"Index {idx} is out of bounds for list of size {len(collection_obj.value)}",
+                        context,
+                    )
+                )
 
         elif isinstance(collection_obj, HashMap):
             if not isinstance(index_obj, String):
-                return res.failure(RTError(
-                    node.index_node.pos_start, node.index_node.pos_end,
-                    "Hashmap key must be a string", context
-                ))
-            
+                return res.failure(
+                    RTError(
+                        node.index_node.pos_start,
+                        node.index_node.pos_end,
+                        "Hashmap key must be a string",
+                        context,
+                    )
+                )
+
             key = index_obj.value
             collection_obj.value[key] = value_to_set
 
         else:
-            return res.failure(RTError(
-                node.obj_node.pos_start, node.obj_node.pos_end,
-                "Indexed assignment can only be performed on a list or hashmap", context
-            ))
-        
+            return res.failure(
+                RTError(
+                    node.obj_node.pos_start,
+                    node.obj_node.pos_end,
+                    "Indexed assignment can only be performed on a list or hashmap",
+                    context,
+                )
+            )
+
+        return res.success(value_to_set)
+
+    def visit_MemberAssignNode(self, node, context):
+        res = RTResult()
+
+        obj = res.register(self.visit(node.object_node, context))
+        if res.should_return():
+            return res
+
+        value_to_set = res.register(self.visit(node.value_node, context))
+        if res.should_return():
+            return res
+
+        member_name = node.member_name_tok.value
+
+        if not isinstance(obj, NameSpace):
+            return res.failure(
+                TError(
+                    node.pos_start,
+                    node.pos_end,
+                    "Member assignment can only be performed on a namespace",
+                    context,
+                )
+            )
+
+        if not obj.get("initialized_").value:
+            self.initialize_namespace(obj)
+
+        obj.set(member_name, value_to_set)
+
         return res.success(value_to_set)
 
 
@@ -4615,7 +4677,13 @@ def run(fn, text):
             result.value = ""
         return result.value, result.error
     except (KeyboardInterrupt, EOFError):
-        print("---------------------------------------------------------------------------")
-        print("InterruptError                            Traceback (most recent call last)")
-        print("{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}InterruptError{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}User Terminated{Fore.RESET}{Style.RESET_ALL}")
+        print(
+            "\n---------------------------------------------------------------------------"
+        )
+        print(
+            "InterruptError                            Traceback (most recent call last)\n"
+        )
+        print(
+            f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}InterruptError{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}User Terminated{Fore.RESET}{Style.RESET_ALL}"
+        )
         sys.exit(2)

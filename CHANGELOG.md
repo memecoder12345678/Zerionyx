@@ -1,68 +1,73 @@
-### **Changelog: Version 3.0.2 - Ergonomics & Expressiveness Update**
+### **Changelog: Version 4.0.0 - The PSOP Revolution**
 
-**Date:** August 17, 2025
+**Date:** August 21, 2025
 
-We are excited to launch version 3.0.2, an update centered on improving the core developer experience. The centerpiece of this release is a major syntactic enhancement that makes writing code more intuitive and readable.
+This is a landmark release. Version 4.0.0 fundamentally evolves Zerionyx from a simple scripting language into a powerful, organized, and expressive language centered around a new programming paradigm: **Prototype Space-Oriented Programming (PSOP)**. This update introduces revolutionary ways to structure, reuse, and write code, alongside critical bug fixes and ergonomic improvements.
 
 ---
 
-### Function Renaming: `is_panic`
+### 🌟 New Paradigm: Prototype Space-Oriented Programming (PSOP)
 
-The diagnostic helper function has been renamed from `is_err` to `is_panic` for greater clarity and consistency.
+Zerionyx now formally embraces PSOP, a model that combines the organizational power of namespaces with the flexibility of prototypal instantiation.
 
-New Signature:
-```
-is_panic(func, args=[])
-```
+*   **Core Concepts:**
+    1.  **Prototype (`namespace`):** The `namespace` block is now treated as a "live template" or a complete prototype object, encapsulating both state (variables) and behavior (functions).
+    2.  **Instance (`clone()`):** A new built-in function, `clone()`, allows you to create deep copies of any namespace, producing new, independent instances with their own state.
+    3.  **Context (`space`):** The `space` keyword provides a consistent, unambiguous reference to the current instance's context, eliminating the complexities of `this` found in other languages.
 
-Returns `[result, none, none]` if execution succeeds.
+This paradigm offers the encapsulation benefits of OOP without the rigidity of classes and inheritance, making code both highly structured and incredibly flexible.
 
-Returns `[none, err_msg, err_name]` if execution fails.
+### 🚀 New Features & Syntactic Enhancements
 
-err_name is one of `"RT"`, `"M"`, `"IO"`, or `"T"`.
+#### 1. Prototypal Instantiation with `clone()`
 
-This makes error checking more intuitive and emphasizes the panic semantics of runtime exceptions.
+The cornerstone of the PSOP model is the new `clone()` built-in function. It empowers developers to create multiple instances from a single namespace prototype.
 
-### 🚀 New Feature: Intuitive Indexed Assignment with `$`
+*   **Syntax:** `clone(NAMESPACE_PROTOTYPE)`
+*   **Behavior:** Performs a deep copy of the given namespace, creating a new instance with its own sandboxed state. The original prototype and other instances are not affected by changes to the clone.
 
-To improve code readability and developer ergonomics, we are introducing a major syntactic sugar enhancement. This change replaces the more verbose `set(...)` function call with a direct and intuitive assignment operator. Our goal is to make the language feel more familiar and to let you write cleaner, more expressive code.
+**Example: Creating Multiple Instances**
+```zyx
+namespace UserPrototype
+    name = "default"
+    defun greet() -> "Hello, " + to_str(space.name)
+done
 
-#### **How It Works**
+# Create two independent user instances from the prototype
+let user1 = clone(UserPrototype)
+let user2 = clone(UserPrototype)
 
-The new syntax leverages the existing `$` access operator, combining it with the standard assignment operator `=`. This allows you to modify elements within a `List` and `HashMap` directly.
+user1.name = "Alice"
+user2.name = "Bob"
 
-*   **For Lists:** You can assign a new value to an element using its numeric index.
-    *   **Syntax:** `IDENTIFIER $ NUMBER = EXPR`
-
-*   **For HashMaps:** You can assign a new value to an entry using its string key.
-    *   **Syntax:** `IDENTIFIER $ STRING = EXPR`
-
-#### **Examples: Before vs. After**
-
-The improvement is best illustrated by comparing the old and new code.
-
-**Before: Using the `set()` function**
-```
-let my_list = [10, 20, 30]
-let my_map = {"status": "pending", "id": 123}
-
-# Required a function call to modify
-set(my_list, 0, 99)
-set(my_map, "status", "complete")
-
-println(my_list)   #> [99, 20, 30]
-println(my_map)    #> {"status": "complete", "id": 123}
+println(user1.greet()) #> Hello, Alice
+println(user2.greet()) #> Hello, Bob
 ```
 
-**Now: Using Direct Indexed Assignment**
-```
-let my_list = [10, 20, 30]
-let my_map = {"status": "pending", "id": 123}
+#### 2. Direct Member Assignment (`.`)
 
-# The new syntax is much cleaner and more intuitive!
-my_list$0 = 99
-my_map$"status" = "complete"
+To align with the dynamic nature of PSOP, we've introduced a more intuitive way to modify the state of namespaces and their instances. You can now assign values to members directly using the familiar dot (`.`) and assignment (`=`) operators.
 
-println(my_list)   #> [99, 20, 30]
-println(my_map)    #> {"status": "complete", "id": 123}
+*   **Syntax:** `NAMESPACE_INSTANCE.MEMBER_NAME = EXPR`
+
+**Example: Before vs. After**
+```zyx
+# Before: No standard way to modify members after creation
+# Now: Simple and direct!
+
+let my_app_config = clone(AppConfigPrototype)
+
+# The new syntax is clean and universally understood
+my_app_config.port = 8080
+my_app_config.debug_mode = true
 ```
+
+---
+
+### 🐛 Bug Fixes & Stability Improvements
+
+*   **Parser Stability:** Fixed a critical `IndexError` crash in the `load` statement handler. The parser will now produce a user-friendly error message if a module path does not start with the required `libs.` or `local.` prefix, instead of exiting unexpectedly.
+*   **Error Message Clarity:** Improved the error message for invalid `load` paths to guide the user on the correct syntax, enhancing the overall developer experience.
+*   **General Fixes:** Addressed various minor bugs to improve the overall stability and predictability of the interpreter.
+
+This update represents a major leap forward for Zerionyx, establishing a clear and powerful identity. We believe the PSOP model will enable you to write more scalable, maintainable, and elegant code. We can't wait to see what you build with it

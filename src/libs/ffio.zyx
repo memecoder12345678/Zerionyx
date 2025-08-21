@@ -41,8 +41,8 @@ namespace ffio
         return none
     done
 
-    defun list_dir(d=".")
-        return list_dir_fp(d)
+    defun list_dir(dir=".")
+        return list_dir_fp(dir)
         return none
     done
 

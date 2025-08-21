@@ -1,8 +1,8 @@
 # libs.threading
 
 namespace threading
-    defun start(f, a=[])
-        return thread_start_fp(f, a)
+    defun start(f, args=[])
+        return thread_start_fp(f, args)
     done
 
     defun sleep(s)
@@ -10,8 +10,8 @@ namespace threading
         return none
     done
 
-    defun join(h, t=15)
-        thread_join(h, t)
+    defun join(h, timeout=15)
+        thread_join(h, timeout)
         return none
     done
 

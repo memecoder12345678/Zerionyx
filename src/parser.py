@@ -246,6 +246,14 @@ class Parser:
                         raw_path[6:],
                     )
                 candidates.append(local_path)
+            else:
+                return res.failure(
+                InvalidSyntaxError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "Invalid module path format\nTip: Paths must start with 'libs.' or 'local.'",
+                )
+            )
             chosen_path = None
             for path in candidates:
                 if os.path.exists(path):
@@ -277,7 +285,9 @@ class Parser:
                 if res.error:
                     return res
 
-                return res.success(IndexAssignNode(node.left_node, node.right_node, value_node))
+                return res.success(
+                    IndexAssignNode(node.left_node, node.right_node, value_node)
+                )
 
         return res.success(node)
 
@@ -341,12 +351,14 @@ class Parser:
     def call(self):
         self.skip_newlines()
         res = ParseResult()
-        atom = res.register(self.atom())
+        node = res.register(self.atom())
         if res.error:
             return res
+
         while self.current_tok.type == TT_DOT:
             res.register_advancement()
             self.advance()
+
             if self.current_tok.type != TT_IDENTIFIER:
                 return res.failure(
                     InvalidSyntaxError(
@@ -355,13 +367,26 @@ class Parser:
                         "Expected identifier",
                     )
                 )
-            member_name = self.current_tok.value
+
+            member_name_tok = self.current_tok
             res.register_advancement()
             self.advance()
 
-            atom = MemberAccessNode(
-                atom, member_name, atom.pos_start, self.current_tok.pos_end.copy()
+            if self.current_tok.type == TT_EQ:
+                res.register_advancement()
+                self.advance()
+                value = res.register(self.expr())
+                if res.error:
+                    return res
+                return res.success(MemberAssignNode(node, member_name_tok, value))
+
+            node = MemberAccessNode(
+                node,
+                member_name_tok.value,
+                node.pos_start,
+                self.current_tok.pos_end.copy(),
             )
+
         if self.current_tok.type == TT_LPAREN:
             res.register_advancement()
             self.advance()
@@ -426,8 +451,8 @@ class Parser:
                                 "Expected ',' or ')'",
                             )
                         )
-            return res.success(CallNode(atom, arg_nodes))
-        return res.success(atom)
+            return res.success(CallNode(node, arg_nodes))
+        return res.success(node)
 
     def using_expr(self):
         res = ParseResult()

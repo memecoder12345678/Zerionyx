@@ -70,7 +70,11 @@ SET_INDEX         ::=
       IDENTIFIER "$" EXPR "=" EXPR
     | "let" IDENTIFIER "$" EXPR "=" EXPR
 
-GET_MEMBER        ::= IDENTIFIER  "." CALL
+GET_MEMBER        ::= IDENTIFIER "." CALL
+
+SET_MEMBER        ::= 
+      IDENTIFIER "." CALL "=" EXPR
+    | "let" IDENTIFIER "." CALL "=" EXPR
 
 LIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"
 
