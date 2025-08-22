@@ -16,7 +16,7 @@ println(x ^ y)
 # Alias
 a = 10
 a as b
-# println(a) <--- Error!
+# println(a) <-- Error!
 println(b)
 
 # Function definition
