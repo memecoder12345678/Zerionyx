@@ -1,6 +1,23 @@
 MIT License
 
-Copyright (c) 2025 MemeCoder
+WARNING: This project contains code adapted from multiple public sources.
+
+Some components are originally based on David Callanan’s interpreter tutorial (2019),
+licensed under the MIT License. Other parts are believed to derive from Fus3n’s version,
+which did not include an explicit license but was publicly shared for free use and modification.
+
+Only modifications made by MemeCoder are explicitly claimed under copyright.
+Reasonable efforts have been made to trace original authors.
+If you are an original author and believe attribution or licensing is missing,
+please contact MemeCoder.
+
+Credits:
+- David Callanan (2019)
+- Fus3n (2022, no license stated)
+- Modified by angelcaru (2024)
+- Further modified by MemeCoder (2025)
+
+Copyright (c) 2019–2025
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
