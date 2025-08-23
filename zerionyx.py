@@ -87,7 +87,7 @@ NAMESPACE_EXPR    ::=
 IF_EXPR           ::= 
       "if" EXPR "do" STATEMENT
       (NEWLINE "elif" EXPR "do" STATEMENT)*
-      (NEWLINE "else" STATEMENT)?
+      (NEWLINE "else" "do" STATEMENT)?
       NEWLINE "done"
 
 FOR_EXPR          ::=

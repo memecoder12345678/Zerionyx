@@ -29,10 +29,10 @@ namespace App
             if space.user_name == "zerionyx" do
                 if space.hashed_password == to_bytes("38643936396565663665636164336332396133613632393238306536383663663063336635643561383661666633636131323032306339323361646336633932", from_hex=true) do
                     println("Log in successful")
-                else
+                else do
                     println("Invalid credentials")
                 done
-            else
+            else do
                 println("Invalid credentials")
             done
         done

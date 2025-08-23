@@ -390,7 +390,7 @@ NAMESPACE_EXPR    ::=
 IF_EXPR           ::= 
       <code>if</code> EXPR <code>do</code> STATEMENT
       (NEWLINE <code>elif</code> EXPR <code>do</code> STATEMENT)*
-      (NEWLINE <code>else</code> STATEMENT)?
+      (NEWLINE <code>else</code> <code>do</code> STATEMENT)?
       NEWLINE <code>done</code>
 
 FOR_EXPR          ::= 
@@ -439,7 +439,6 @@ if is a command, not a value.
 Whitespace is free; newlines are not.
 Write like a poet, execute like a machine.
 Code is for humans first, machines second.
-<code>elif</code> is enough &mdash; no need for <code>else if</code>.
 <code>load</code> means include &mdash; not magic.
 Indentation is rhythm, not restriction.
 When in doubt, don&rsquo;t guess &mdash; define it.

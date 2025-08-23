@@ -30,7 +30,7 @@ defun forget_(k)
         pair = mem_$i
         if pair$0 == k do
             pop(mem_, i)
-        else
+        else do
             i = i + 1
         done
     done

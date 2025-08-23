@@ -156,7 +156,7 @@ namespace mlist
         if type(l) != list do
             panic("First argument of 'sort' must be a list", "T")
         done
-        if not (len(filter(defun a(x) -> if type(x) == str do return true else return false, l)) == len(l) or len(filter(defun a(x) -> if type(x) == int or type(x) == float do return true else return false, l)) == len(l)) do
+        if not (len(filter(defun a(x) -> if type(x) == str do return true else do return false, l)) == len(l) or len(filter(defun a(x) -> if type(x) == int or type(x) == float do return true else do return false, l)) == len(l)) do
             panic("All elements of the list must be a either numbers or strings", "T")
         done
         s = sort_fp(l, reverse)

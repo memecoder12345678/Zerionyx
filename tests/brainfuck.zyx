@@ -19,7 +19,7 @@ defun brainfuck(nput)
             if pointer+1 > 30000 do
                 println("Memory Error")
                 sys.exit(1)
-            else
+            else do
                 if pointer+1 >= len(memory) do
                     append(memory, 0)
                 done
@@ -63,7 +63,7 @@ defun brainfuck(nput)
                     done
                 done
             done
-        else
+        else do
             pass()
         done
         i += 1
@@ -84,7 +84,7 @@ defun main()
             continue
         elif len(output) == 0 do
             continue
-        else
+        else do
             println(output)
         done
     done

@@ -138,7 +138,7 @@ if x > y do
     println("X is greater")
 elif x < y do
     println("Y is greater")
-else
+else do
     println("X is equals to Y")
 done
 

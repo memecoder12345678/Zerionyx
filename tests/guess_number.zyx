@@ -31,7 +31,7 @@ defun guess_number(m, m_)
             return none
         elif i < sn do
             println("Your guess is lower than the secret number!")
-        else
+        else do
             println("Your guess is higher than the secret number!")
         done
     done

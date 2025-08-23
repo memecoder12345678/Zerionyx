@@ -49,7 +49,7 @@ defun log_out()
     using current_user
     if current_user == none do
         println("You are not logged in")
-    else
+    else do
         current_user = none
         println("Logged out successfully")
     done
@@ -74,12 +74,12 @@ defun main()
                 log_in()
             elif choice == 3 do
                 break
-            else
+            else do
                 println("Invalid choice")
                 input("Press enter to continue...")
             done
 
-        else
+        else do
             println("1. Log out")
             println("2. Exit")
 
@@ -89,7 +89,7 @@ defun main()
                 log_out()
             elif choice == 2 do
                 break
-            else
+            else do
                 println("Invalid choice")
                 input("Press enter to continue...")
             done

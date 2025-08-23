@@ -75,7 +75,7 @@ defun parse_config(config_file)
             if is_num(to_int(val_str_processed, true)) do
                 if string.endswith(to_str(to_float(val_str_processed, false)), ".0") do
                     val = to_int(val_str_processed, false)
-                else
+                else do
                     val = to_float(val_str_processed, false)
                 done
             elif val_str_processed == "none" do
@@ -86,7 +86,7 @@ defun parse_config(config_file)
                 val = false
             elif (string.startswith(val_str_processed, '"') and string.endswith(val_str_processed, '"')) or (string.startswith(val_str_processed, "'") and string.endswith(val_str_processed, "'")) do
                 val = to_str(slice(val_str_processed, 1, -1, none))
-            else
+            else do
                 val = to_str(val_str_processed)
             done
             append(current_section_items, [key, val])
@@ -139,7 +139,7 @@ defun main()
     config_data = parse_config(config_path)
     if len(config_data) == 0 do
         termcolor.cprintln("No configuration entries found or file is effectively empty.", "yellow")
-    else
+    else do
         println("\n--- Parsed Configuration ---")
         for i = 0 to len(config_data) do
             section_block = config_data$i
@@ -150,7 +150,7 @@ defun main()
             termcolor.cprintln("]", "yellow", none, "bold")
             if len(section_items) == 0 do
                 termcolor.cprintln("  (empty section)", "grey", none, none)
-            else
+            else do
                 for j = 0 to len(section_items) do
                     kv_pair = section_items$j
                     key = kv_pair$0

@@ -75,7 +75,7 @@ namespace termcolor
         code_str = get_code(color, background, style)
         if not is_none(code_str) do
             print(string.chr(27) + '[' + code_str + 'm' + to_str(t) + string.chr(27) + '[0m')
-        else
+        else do
             print(t)
         done
         return none
@@ -85,7 +85,7 @@ namespace termcolor
         code_str = get_code(color, background, style)
         if not is_none(code_str) do
             println(string.chr(27) + '[' + code_str + 'm' + to_str(t) + string.chr(27) + '[0m')
-        else
+        else do
             println(t)
         done
         return none

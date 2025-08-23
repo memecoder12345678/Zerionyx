@@ -18,18 +18,18 @@ defun backup_folder(path, cbp, rbp)
             
             if is_none(e$1) do
                 termcolor.cprintln("Backup created: " + fbd + ".bak", "green", none, none)
-            else
+            else do
                 ems = e$1 
                 if string.startswith(ems, "File ") do
                     msg = slice(ems, len("File "), len(ems), none)
                     termcolor.cprintln(msg, "red", none, none)
                 done
             done
-        else
+        else do
             e = is_err(ffio.make_dir, [fbd])
             if not is_none(e$1) do
                 termcolor.cprintln("Error: Can not make subfolder in backup: " + fbd + " (Reason: " + (e$1) + ")", "red", none, none)
-            else
+            else do
                 backup_folder(flp, fbd, rbp)
             done
         done
@@ -55,11 +55,11 @@ defun main()
     if not is_none(emmb$1) do
         if ffio.exists(abrp) and not ffio.is_file(abrp) do
             termcolor.cprintln("Main backup folder already exists (and is a directory): " + abrp, "cyan", none, none)
-        else
+        else do
             termcolor.cprintln("Error: Can not make main backup folder: " + abrp + " (Reason: " + (emmb$1) + ")", "red", none, none)
             sys.exit(1)
         done
-    else
+    else do
         termcolor.cprintln("Main backup folder created: " + abrp, "blue", none, none)
     done
     termcolor.cprintln("Starting backup of: " + fp, "cyan", none, none)

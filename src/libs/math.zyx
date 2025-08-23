@@ -14,7 +14,7 @@ namespace math
         done
         if b == none do
             pass()
-        else
+        else do
             if type(b) != int and type(b) != float do
                 panic("Second argument of '" + f + "' must be a number", "T")
             done

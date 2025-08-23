@@ -785,6 +785,14 @@ class Parser:
         if self.current_tok.matches(TT_KEYWORD, "else"):
             res.register_advancement()
             self.advance()
+            if not self.current_tok.matches(TT_KEYWORD, "do"):
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        f"Expected 'do'",
+                    )
+                )
             if self.current_tok.type == TT_NEWLINE:
                 res.register_advancement()
                 self.advance()
