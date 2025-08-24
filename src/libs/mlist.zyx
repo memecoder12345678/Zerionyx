@@ -173,7 +173,7 @@ namespace mlist
                 if to_str(l$i) == v do
                     c = c + 1
                 done
-            else
+            else do
                 if l$i == v do
                     c = c + 1
                 done
@@ -191,7 +191,7 @@ namespace mlist
                 if to_str(l$i) == v do
                     return i
                 done
-            else
+            else do
                 if l$i == v do
                     return i
                 done

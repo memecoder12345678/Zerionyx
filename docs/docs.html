@@ -484,21 +484,25 @@ Zerionyx may be magical, but its syntax must be real.
                     <li><b>keys(hm)</b> &rarr; list &mdash; Return list of all keys in <code>hm</code> (a hashmap)</li>
                     <li><b>values(hm)</b> &rarr; list &mdash; Return list of all values in <code>hm</code></li>
                     <li><b>items(hm)</b> &rarr; list &mdash; Return list of <code>[key, value]</code> pairs in
-                        <code>hm</code></li>
+                        <code>hm</code>
+                    </li>
                     <li><b>has(hm, key)</b> &rarr; bool &mdash; Return <code>true</code> if <code>key</code> exists in
                         <code>hm</code>
                     </li>
                     <li><b>get(hmol, koi, default=none)</b> &rarr; any &mdash; Return value for <code>koi</code> or
                         <code>default</code>
-                        if not found</li>
+                        if not found
+                    </li>
                     <li><b>del(hm, key)</b> &rarr; none &mdash; Delete <code>key</code> and its value from
-                        <code>hm</code></li>
+                        <code>hm</code>
+                    </li>
                     <li><b>len(x)</b> &rarr; number &mdash; Get length of <code>x</code></li>
                     <li><b>panic(msg, type="RT")</b> &mdash; Stop with err <code>msg</code> and
                         <code>type ("RT": "Runtime Error", "M": "Math Error", "IO": "IO Error" or "T": "Type Error")</code>
                     </li>
                     <li><b>pop(lst, i)</b> &rarr; any &mdash; Remove and return item at <code>i</code> in
-                        <code>lst</code></li>
+                        <code>lst</code>
+                    </li>
                     <li><b>print(value="")</b> &rarr; none &mdash; Prints <code>text</code> to the standard output with
                         no newline</li>
                     <li><b>println(value="")</b> &rarr; none &mdash; Same as <code>print</code> but adds a newline</li>
@@ -511,7 +515,8 @@ Zerionyx may be magical, but its syntax must be real.
                         <code>none</code> if fail and <code>silent</code> true else raise
                     </li>
                     <li><b>to_str(x)</b> &rarr; str &mdash; Convert <code>x</code> to string</li>
-                    <li><b>to_bytes(x, from_hex=false, supress_error=false)</b> &rarr; bytes &mdash; Convert <code>x</code> 
+                    <li><b>to_bytes(x, from_hex=false, supress_error=false)</b> &rarr; bytes &mdash; Convert
+                        <code>x</code>
                         to bytes</li>
                     </li>
                     <li><b>type(x)</b> &rarr; str &mdash; Return type of <code>x</code> as string</li>
@@ -522,7 +527,6 @@ Zerionyx may be magical, but its syntax must be real.
                         <code>l</code> from <code>from</code> to <code>to</code> step <code>step</code> (exclusive)
                     </li>
                     <li><b>is_nan(n)</b> &rarr; bool &mdash; Check if <code>n</code> is NaN (Not a Number)</li>
-                    <li><b>clone(value)</b> &rarr; any &mdash; Clone and return <code>value</code></li>
                 </ul>
             </section>
 
@@ -566,22 +570,27 @@ Zerionyx may be magical, but its syntax must be real.
                         </li>
                         <li><b>filter(f, l)</b> &rarr; list &mdash; Filter list <code>l</code> by function
                             <code>f</code> (keep
-                            elements where <code>f(x)</code> is true)</li>
+                            elements where <code>f(x)</code> is true)
+                        </li>
                         <li><b>reduce(f, l, i)</b> &rarr; any &mdash; Reduce list <code>l</code> with function
                             <code>f</code> and
-                            initial value <code>i</code></li>
+                            initial value <code>i</code>
+                        </li>
                         <li><b>min(l)</b> &rarr; number &mdash; Minimum value in list <code>l</code></li>
                         <li><b>max(l)</b> &rarr; number &mdash; Maximum value in list <code>l</code></li>
                         <li><b>reverse(l)</b> &rarr; list &mdash; Reverse the list <code>l</code></li>
                         <li><b>zip(l1, l2)</b> &rarr; list &mdash; Pair elements from <code>l1</code> and
                             <code>l2</code> (shortest
-                            length)</li>
+                            length)
+                        </li>
                         <li><b>zip_longest(l1, l2)</b> &rarr; list &mdash; Pair elements from <code>l1</code> and
                             <code>l2</code>
-                            (fill with <code>none</code> if lengths differ)</li>
+                            (fill with <code>none</code> if lengths differ)
+                        </li>
                         <li><b>sort(l, reverse=false)</b> &rarr; list &mdash; Sort list <code>l</code></li>
                         <li><b>count(l, v)</b> &rarr; number &mdash; Count occurrences of <code>v</code> in
-                            <code>l</code></li>
+                            <code>l</code>
+                        </li>
                         <li><b>index_of(l, v)</b> &rarr; number/none &mdash; Index of <code>v</code> in <code>l</code>
                             or
                             <code>none</code> if not found
@@ -594,11 +603,14 @@ Zerionyx may be magical, but its syntax must be real.
                     <h3>string.zyx</h3>
                     <ul>
                         <li><b>split(s, sep="")</b> &rarr; list &mdash; Split string <code>s</code> by separator
-                            <code>sep</code></li>
+                            <code>sep</code>
+                        </li>
                         <li><b>strip(s, sep=" ")</b> &rarr; list &mdash; Trims <code>sep</code> from both ends of
-                            <code>s</code></li>
+                            <code>s</code>
+                        </li>
                         <li><b>join(sep, l)</b> &rarr; str &mdash; Join list <code>l</code> with separator
-                            <code>sep</code></li>
+                            <code>sep</code>
+                        </li>
                         <li><b>replace(s, old, new, c=-1)</b> &rarr; str &mdash; Replace <code>old</code> with
                             <code>new</code> in
                             <code>s</code>
@@ -613,7 +625,8 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>is_ascii_letter(s)</b> &rarr; bool &mdash; Is <code>s</code> a letter</li>
                         <li><b>is_space(s)</b> &rarr; bool &mdash; Is <code>s</code> a whitespace character</li>
                         <li><b>find(s, v)</b> &rarr; number/none &mdash; Index of substring <code>v</code> in
-                            <code>s</code></li>
+                            <code>s</code>
+                        </li>
                         <li><b>find_all(s, v)</b> &rarr; list &mdash; All indices of substring <code>v</code> in
                             <code>s</code>
                         </li>
@@ -658,7 +671,8 @@ Zerionyx may be magical, but its syntax must be real.
                     <ul>
                         <li><b>write(file, mode, text)</b> &rarr; none &mdash; Write <code>text</code> to
                             <code>file</code> with
-                            mode <code>mode</code> ("w", "a" or "wb")</li>
+                            mode <code>mode</code> ("w", "a" or "wb")
+                        </li>
                         <li><b>read(file, mode)</b> &rarr; str/bytes &mdash; Read contents of <code>file</code> with
                             mode
                             <code>mode</code> ("r" or "rb")
@@ -677,7 +691,8 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>base_name(file)</b> &rarr; str &mdash; Get file name</li>
                         <li><b>dir_name(file)</b> &rarr; str &mdash; Get parent folder</li>
                         <li><b>symlink(src, dst)</b> &rarr; none &mdash; Create symbolic link from src to
-                            <code>dst</code></li>
+                            <code>dst</code>
+                        </li>
                         <li><b>readlink(path)</b> &rarr; str &mdash; Read destination of a symbolic link</li>
                         <li><b>stat(path)</b> &rarr; list &mdash; Get file or directory metadata (follow symlinks)</li>
                         <li><b>lstat(path)</b> &rarr; list &mdash; Get file or directory metadata (don&rsquo;t follow
@@ -717,7 +732,8 @@ Zerionyx may be magical, but its syntax must be real.
                     <h3>memory.zyx</h3>
                     <ul>
                         <li><b>remember(key, value)</b> &rarr; none &mdash; Store <code>value</code> with
-                            <code>key</code></li>
+                            <code>key</code>
+                        </li>
                         <li><b>recall(key)</b> &rarr; any/none &mdash; Retrieve value by <code>key</code></li>
                         <li><b>forget(key)</b> &rarr; none &mdash; Remove <code>key</code> from memory</li>
                         <li><b>clear_memory()</b> &rarr; none &mdash; Clear all memory</li>
@@ -795,13 +811,16 @@ Zerionyx may be magical, but its syntax must be real.
                 <div id="lib-termcolor">
                     <h3>termcolor.zyx</h3>
                     <ul>
-                        <li><b>cprint(text, color=none, background=none, style=none)</b> &rarr; none &mdash; Prints <code>text</code>
+                        <li><b>cprint(text, color=none, background=none, style=none)</b> &rarr; none &mdash; Prints
+                            <code>text</code>
                             with color,
                             background, and style with no newline</li>
                         <li><b>cprintln(text, color=none, background=none, style=none)</b> &rarr; none &mdash; Same as
                             <code>cprint</code> but adds a
-                            newline</li>
-                        <li><b>get_code(color=none, background=none, style=none)</b> &rarr; str &mdash; Return ANSI escape code string
+                            newline
+                        </li>
+                        <li><b>get_code(color=none, background=none, style=none)</b> &rarr; str &mdash; Return ANSI
+                            escape code string
                             for the given
                             color, background, and style</li>
                     </ul>
@@ -836,7 +855,8 @@ Zerionyx may be magical, but its syntax must be real.
                         </li>
                         <li><b>get_color(x, y)</b> &rarr; str &mdash; Returns the color at (<code>x</code>,
                             <code>y</code>) as a
-                            hex string like <code>#rrggbb</code></li>
+                            hex string like <code>#rrggbb</code>
+                        </li>
                     </ul>
                 </div>
 

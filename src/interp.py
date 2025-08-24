@@ -1506,7 +1506,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "keyboard module not available\nTip: Install with: pip install keyboard",
+                    "keyboard module not available",
                     exec_ctx,
                 )
             )
@@ -1533,7 +1533,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "keyboard module not available\nTip: Install with: pip install keyboard",
+                    "keyboard module not available",
                     exec_ctx,
                 )
             )
@@ -1560,7 +1560,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "keyboard module not available\nTip: Install with: pip install keyboard",
+                    "keyboard module not available",
                     exec_ctx,
                 )
             )
@@ -1587,7 +1587,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "keyboard module not available\nTip: Install with: pip install keyboard",
+                    "keyboard module not available",
                     exec_ctx,
                 )
             )
@@ -1615,7 +1615,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "keyboard module not available\nTip: Install with: pip install keyboard",
+                    "keyboard module not available",
                     exec_ctx,
                 )
             )
@@ -2946,7 +2946,7 @@ class BuiltInFunction(BaseFunction):
                 IError(
                     self.pos_start,
                     self.pos_end,
-                    f"Cannot unlink '{path_arg.value}': It is a directory\nTip: Use 'remove_dir' instead",
+                    f"Cannot unlink '{path_arg.value}': It is a directory",
                     exec_ctx,
                 )
             )
@@ -3210,7 +3210,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "requests module not available\nTip: Install with: pip install requests",
+                    "requests module not available",
                     exec_ctx,
                 )
             )
@@ -3382,7 +3382,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    "pyautogui module not available",
                     exec_ctx,
                 )
             )
@@ -3403,7 +3403,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    "pyautogui module not available",
                     exec_ctx,
                 )
             )
@@ -3424,7 +3424,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    "pyautogui module not available",
                     exec_ctx,
                 )
             )
@@ -3455,7 +3455,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    "pyautogui module not available",
                     exec_ctx,
                 )
             )
@@ -3476,7 +3476,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    "pyautogui module not available",
                     exec_ctx,
                 )
             )
@@ -3507,7 +3507,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    "pyautogui module not available",
                     exec_ctx,
                 )
             )
@@ -3577,7 +3577,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "Pillow module not available\nTip: Install with: pip install pillow",
+                    "Pillow module not available",
                     exec_ctx,
                 )
             )
@@ -3619,7 +3619,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "pyautogui module not available\nTip: Install with: pip install pyautogui",
+                    "pyautogui module not available",
                     exec_ctx,
                 )
             )
@@ -3797,11 +3797,6 @@ class BuiltInFunction(BaseFunction):
         else:
             return RTResult().success(Number.false)
 
-    @set_args(["value"])
-    def execute_clone(self, exec_ctx):
-        value = exec_ctx.symbol_table.get("value")
-        return RTResult().success(deepcopy(value))
-
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
     func_name = method_name[8:]
@@ -3961,7 +3956,6 @@ class Interpreter:
         ns_context = Context(node.namespace_name, context, node.pos_start)
         ns_context.symbol_table = SymbolTable(context.symbol_table)
         ns_context.private_symbol_table = SymbolTable(context.private_symbol_table)
-        ns_context.symbol_table.set("space", namespace)
         stmts = node.statements
         if hasattr(stmts, "element_nodes"):
             stmts = stmts.element_nodes
@@ -4351,7 +4345,7 @@ class Interpreter:
             tmp_path = os.path.join(LIBS_PATH, node.file_path)
             if os.path.isfile(tmp_path):
                 path = os.path.join(LIBS_PATH, node.file_path)
-                
+
             else:
                 return res.failure(
                     RTError(
@@ -4561,36 +4555,6 @@ class Interpreter:
 
         return res.success(value_to_set)
 
-    def visit_MemberAssignNode(self, node, context):
-        res = RTResult()
-
-        obj = res.register(self.visit(node.object_node, context))
-        if res.should_return():
-            return res
-
-        value_to_set = res.register(self.visit(node.value_node, context))
-        if res.should_return():
-            return res
-
-        member_name = node.member_name_tok.value
-
-        if not isinstance(obj, NameSpace):
-            return res.failure(
-                TError(
-                    node.pos_start,
-                    node.pos_end,
-                    "Member assignment can only be performed on a namespace",
-                    context,
-                )
-            )
-
-        if not obj.get("initialized_").value:
-            self.initialize_namespace(obj)
-
-        obj.set(member_name, value_to_set)
-
-        return res.success(value_to_set)
-
 
 global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv[1:]]))
 global_symbol_table.set("os_sep_fp", String(os.sep))
@@ -4655,6 +4619,8 @@ def clean_value(value):
 def run(fn, text):
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
+    # for token in tokens:
+    #     print(f"DEBUG: {token}")
     if error:
         return None, error
     result = None

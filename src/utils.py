@@ -23,14 +23,14 @@ class Token:
         if self.value:
             if self.type == "STRING":
                 return (
-                    f"{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}STRING{Fore.RESET}{Style.RESET_ALL}: {Fore.CYAN}'{self.value}'".replace(
+                    f"{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}STRING{Fore.RESET}{Style.RESET_ALL}: {Fore.CYAN}'{self.value}'{Fore.RESET}{Style.RESET_ALL}".replace(
                         "\n", "\\n"
                     )
                     .replace("\t", "\\t")
                     .replace("\r", "\\r")
                     .replace("\\", "\\\\")
                     if self.value.find("'") == -1
-                    else f'{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}STRING{Fore.RESET}{Style.RESET_ALL}: {Fore.CYAN}"{self.value}"'.replace(
+                    else f'{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}STRING{Fore.RESET}{Style.RESET_ALL}: {Fore.CYAN}"{self.value}"{Fore.RESET}{Style.RESET_ALL}'.replace(
                         "\n", "\\n"
                     )
                     .replace("\t", "\\t")

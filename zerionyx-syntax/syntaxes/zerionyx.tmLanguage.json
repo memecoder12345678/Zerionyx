@@ -66,7 +66,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.zerionyx",
-                    "match": "\\b(if|else|elif|for|while|in|to|step|do|done|return|break|continue|defun|namespace|load|let|as)\\b"
+                    "match": "\\b(if||elif|for|while|in|to|step|do|done|return|break|continue|defun|namespace|load|let|as)\\b"
                 }
             ]
         },
