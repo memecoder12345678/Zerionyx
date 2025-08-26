@@ -185,16 +185,25 @@ cd Zerionyx
 python -m pip install -r requirements.txt
 ```
 
-### 3. Run a Zerionyx script
+### 3. Compile zerionyx to an executable (optional)
+
+```bash
+scripts/build.bat
+# or chmod +x ./scripts/build.sh && ./scripts/build.sh
+```
+
+### 4. Run a Zerionyx script
 
 ```bash
 python zerionyx.py tests/test.zyx
+# zerionyx tests/test.zyx
 ```
 
-### 4. Launch interactive shell
+### 5. Launch interactive shell
 
 ```bash
 python zerionyx.py
+# or zerionyx
 ```
 
 Use commands such as `grammar`, `license`, etc., for more details.
@@ -277,4 +286,5 @@ Zerionyx is released under the **MIT License**. See [LICENSE](LICENSE).
 [1]: https://en.wikipedia.org/wiki/README "README"
 [2]: https://github.com/jehna/readme-best-practices "Best practices for writing a README for your open source project - GitHub"
 [3]: https://www.makeareadme.com/ "Make a README"
+
 
