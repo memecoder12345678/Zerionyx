@@ -11,5 +11,5 @@ VS Code extension for Zerionyx language syntax highlighting.
 
 ```ruby
 defun add(a, b) -> a + b
-if x > y do println("x > y") done
+if x > y do println("x > y")
 ```
