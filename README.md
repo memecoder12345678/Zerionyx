@@ -196,7 +196,7 @@ scripts/build.bat
 
 ```bash
 python zerionyx.py tests/test.zyx
-# zerionyx tests/test.zyx
+# output/zerionyx tests/test.zyx
 ```
 
 ### 5. Launch interactive shell
