@@ -3,7 +3,7 @@
   <h1 align="center">Zerionyx Programming Language</h1>
   <p align="center">
     <img src="https://img.shields.io/badge/python-3.11%2B-00ffcc?style=for-the-badge&logo=python" alt="Python 3.11+" />
-    <img src="https://img.shields.io/badge/Zerionyx-v4.0.0-00ffcc?style=for-the-badge&logo=lightning" alt="Zerionyx v4.0.0" />
+    <img src="https://img.shields.io/badge/Zerionyx-v4.0.2-00ffcc?style=for-the-badge&logo=lightning" alt="Zerionyx v4.0.2" />
     <img src="https://img.shields.io/badge/build-passing-00ffcc?style=for-the-badge&logo=githubactions" alt="Build Status" />
     <img src="https://img.shields.io/github/contributors/memecoder12345678/Zerionyx?style=for-the-badge&color=00ffcc">
     <img src="https://img.shields.io/github/stars/memecoder12345678/Zerionyx?style=for-the-badge&color=00ffcc">
@@ -277,3 +277,4 @@ Zerionyx is released under the **MIT License**. See [LICENSE](LICENSE).
 [1]: https://en.wikipedia.org/wiki/README "README"
 [2]: https://github.com/jehna/readme-best-practices "Best practices for writing a README for your open source project - GitHub"
 [3]: https://www.makeareadme.com/ "Make a README"
+
