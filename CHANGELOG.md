@@ -1,60 +1,49 @@
-# Changelog: Version 4.0.1 &mdash; The Stabilization & Syntax Alignment Update
+# Changelog: Version 4.0.2 &mdash; The Data Toolkit & Refinement Update
 
-**Date:** August 24, 2025
+**Date:** August 26, 2025
 
-After the experimental leap in 4.0.0, this release restores Zerionyx to a **stable, consistent, and ergonomic scripting language**. Version 4.0.1 removes disruptive features, fixes critical bugs, and introduces **syntax alignment** to unify and simplify how code is written across the language.
-
----
-
-## Removed Experimental Features
-
-* **PSOP (Prototype Space-Oriented Programming):** The `namespace` prototypes, `clone()` instantiation, and `space` keyword have been removed.
-* **Dot-Notation Assignment:** Direct member assignment using `.` has been reverted to the prior model.
-* **Experimental Keywords:** All constructs introduced in 4.0.0 that broke syntax consistency have been eliminated.
+Building on the stability established in v4.0.1, this release expands Zerionyx's utility by introducing modern data handling tools and continuing to refine the interpreter's reliability and security. This update is focused on empowering developers with more robust tools for real-world scripting.
 
 ---
 
-## Bug Fixes & Improvements
+## New Features
 
-1. **Parser Crash &mdash; `load` Statement**
+### 1. Introducing the `json` Standard Library
 
-   * Fixed a crash when `load` did not use the required `libs.` or `local.` prefix.
-   * The parser now displays a clear, actionable error message.
+To meet the growing demand for data interchange, the `json` library is now an official part of the Zerionyx standard library. You can now effortlessly parse and stringify JSON data—a critical feature for working with web APIs, configuration files, and modern automation tasks.
 
-2. **Error Message Consistency**
+*   **`json.parse(string)`:** Converts a JSON string into a Zerionyx `hashmap` or `list`.
+*   **`json.stringify(object)`:** Converts a `hashmap` or `list` into a JSON string.
 
-   * Unified error message style for all interpreter errors.
-   * Messages are concise, consistent, and include suggested fixes.
+```zyx
+# Usage Example
+load "libs.json"
 
-3. **Runtime Stability**
+# Parse a JSON string
+user_json = '{"name": "memecoder", "projects": ["Zerionyx", "DCry"]}'
+user_data = json.parse(user_json)
+println("Welcome, " + user_data$"name")
 
-   * Fixed crashes in recursive function calls under deep call chains.
-   * Optimized memory handling for large strings to prevent freezes.
-
----
-
-## Syntax Alignment
-
-To ensure long-term maintainability, this release standardizes several aspects of Zerionyx syntax:
-
-* **Conditionals:** All `if / else` must use explicit block form.
-
-  ```zyx
-    # Before
-    if x > 0 do
-        println("positive")
-    else
-        println("negative")
-    done
-
-    # Now
-    if x > 0 do
-        println("positive")
-    else do
-        println("negative")
-    done
-  ```
+# Stringify a hashmap
+new_data = {"status": "active", "version": 4.0.2}
+json_string = json.stringify(new_data)
+println("Current status: " + json_string)
+```
 
 ---
 
-Zerionyx 4.0.1 is a **reset and refinement release**: stable, predictable, and consistent. By removing experimental paradigms and unifying the syntax, it ensures developers can write, read, and maintain code with confidence.
+## 🐞 Bug Fixes & Improvements
+
+1.  **Interpreter Security &mdash; Hidden Attribute Protection**
+    *   Fixed a critical vulnerability where internal interpreter-managed attributes (e.g., internal object metadata) could be accessed and potentially modified from user scripts, which could lead to unexpected behavior or crashes.
+    *   Access to these internal properties is now properly restricted, ensuring a more stable and secure execution environment.
+
+2.  **Enhanced Type Error Diagnostics**
+    *   Error messages for type mismatches (e.g., adding a string to a number) now provide more context, including the types of both operands involved, making debugging faster and more intuitive for learners.
+
+3.  **Performance Tune-up for `HashMap`**
+    *   Optimized the underlying implementation of `HashMap` for faster key lookups and insertions, resulting in a noticeable performance improvement in scripts that heavily rely on dictionary-like objects.
+
+---
+
+Zerionyx 4.0.2 marks a significant step forward in scripting capability. By introducing a vital data-handling tool like the `json` library and hardening the interpreter's core, this release empowers users to build more complex and reliable automation scripts with confidence.

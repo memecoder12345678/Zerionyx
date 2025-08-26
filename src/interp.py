@@ -3,7 +3,7 @@ import sys
 import time
 import random
 import math
-from copy import deepcopy
+import json
 from .parser import *
 from .nodes import *
 from .datatypes import *
@@ -3796,6 +3796,47 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(Number.true)
         else:
             return RTResult().success(Number.false)
+        
+    @set_args(["value"])
+    def execute_parse_fp(self, exec_ctx):
+        value = exec_ctx.symbol_table.get("value")
+        if not isinstance(value, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'parse' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            parsed = json.loads(value.value)
+            return RTResult().success(self.validate_pyexec_result(parsed))
+        except json.JSONDecodeError as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to parse JSON: {e}",
+                    exec_ctx,
+                )
+            )
+    @set_args(["value"])
+    def execute_stringify_fp(self, exec_ctx):
+        value = exec_ctx.symbol_table.get("value")
+        try:
+            stringified = json.dumps(self.convert_zer_to_py(value))
+            return RTResult().success(String(stringified))
+        except (TypeError, OverflowError) as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to stringify to JSON: {e}",
+                    exec_ctx,
+                )
+            )
+
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -3936,17 +3977,17 @@ class Interpreter:
         return res.success(value)
 
     def initialize_namespace(self, namespace_obj):
-        if namespace_obj.get("initialized_").value:
+        if namespace_obj.get("initialized_", checked=True).value:
             return
-        stmts = namespace_obj.get("statements_")
-        ns_context = namespace_obj.get("context_")
+        stmts = namespace_obj.get("statements_", checked=True)
+        ns_context = namespace_obj.get("context_", checked=True)
         for stmt in stmts:
             _ = self.visit(stmt, ns_context)
         for k, v in ns_context.symbol_table.symbols.items():
             namespace_obj.set(k, v)
         for k, v in ns_context.private_symbol_table.symbols.items():
             namespace_obj.set(k, v)
-        namespace_obj.set("initialized_", Number.true)
+        namespace_obj.set("initialized_", Number.true, checked=True)
 
     def visit_NameSpaceNode(self, node, context):
         res = RTResult()
@@ -3959,8 +4000,8 @@ class Interpreter:
         stmts = node.statements
         if hasattr(stmts, "element_nodes"):
             stmts = stmts.element_nodes
-        namespace.set("statements_", stmts)
-        namespace.set("context_", ns_context)
+        namespace.set("statements_", stmts, checked=True)
+        namespace.set("context_", ns_context, checked=True)
         context.symbol_table.set(node.namespace_name, namespace)
         context.private_symbol_table.set(node.namespace_name, namespace)
         return res.success(namespace)
@@ -3979,7 +4020,7 @@ class Interpreter:
                     context,
                 )
             )
-        if isinstance(obj, NameSpace) and not obj.get("initialized_").value:
+        if isinstance(obj, NameSpace) and not obj.get("initialized_", checked=True).value:
             self.initialize_namespace(obj)
         member = obj.get(node.member_name)
         if member is None:

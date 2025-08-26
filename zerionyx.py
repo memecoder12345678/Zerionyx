@@ -148,7 +148,7 @@ def main():
     if len(sys.argv) == 1:
         print(f"Zerionyx {INFO}")
         print(
-            "Type 'grammar', 'copyright', 'credits', 'license' for more information or 'exit' to exit."
+            "Type 'grammar', 'copyright', 'credits', 'license', 'docs' for more information or 'exit' to exit."
         )
         try:
             while True:
@@ -186,6 +186,9 @@ def main():
                     print(
                         "Credits:\n- David Callanan (2019)\n- Fus3n (2022, no license stated)\n- Modified by angelcaru (2024)\n- Further modified by MemeCoder (2025)"
                     )
+                    continue
+                if text.strip() == "docs":
+                    print("Documentation: https://memecoder12345678.github.io/Zerionyx/docs.html")
                     continue
                 result, error = run("<stdin>", text)
                 if error:

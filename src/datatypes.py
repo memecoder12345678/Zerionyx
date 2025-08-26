@@ -59,7 +59,7 @@ class SymbolTable:
         return True if value in self.symbols.values() else False
 
     def copy(self):
-        return SymbolTable().change(self)
+        return deepcody.deepcopy(self)
 
 
 class Object:
@@ -171,10 +171,7 @@ class ThreadWrapper(Object):
         self.thread = thread
 
     def copy(self):
-        copy = ThreadWrapper(self.thread)
-        copy.set_pos(self.pos_start, self.pos_end)
-        copy.set_context(self.context)
-        return copy
+        return deepcody.deepcopy(self)
 
     def type(self):
         return "<thread>"
@@ -211,10 +208,7 @@ class NoneObject(Object):
         return other, None
 
     def copy(self):
-        copy = NoneObject(self.value)
-        copy.set_pos(self.pos_start, self.pos_end)
-        copy.set_context(self.context)
-        return copy
+        return deepcody.deepcopy(self)
 
     def is_true(self):
         return False
@@ -266,10 +260,7 @@ class Bool(Object):
         self.value = bool(value)
 
     def copy(self):
-        copy = Bool(self.value)
-        copy.set_pos(self.pos_start, self.pos_end)
-        copy.set_context(self.context)
-        return copy
+        return deepcody.deepcopy(self)
 
     def is_true(self):
         return self.value
@@ -488,10 +479,7 @@ class Number(Object):
         return Number(self.value * -1).set_context(self.context), None
 
     def copy(self):
-        copy = Number(self.value)
-        copy.set_pos(self.pos_start, self.pos_end)
-        copy.set_context(self.context)
-        return copy
+        return deepcody.deepcopy(self)
 
     def is_true(self):
         return bool(self.value) if self.value is not None else False
@@ -567,10 +555,7 @@ class String(Object):
         return len(self.value) > 0
 
     def copy(self):
-        copy = String(self.value)
-        copy.set_pos(self.pos_start, self.pos_end)
-        copy.set_context(self.context)
-        return copy
+        return deepcody.deepcopy(self)
 
     def type(self):
         return "<str>"
@@ -608,10 +593,7 @@ class PyObject(Object):
         return self.value
 
     def copy(self):
-        c = PyObject(self.value)
-        c.set_pos(self.pos_start, self.pos_end)
-        c.set_context(self.context)
-        return c
+        return deepcody.deepcopy(self)
 
     def __str__(self) -> str:
         return self.__repr__()
@@ -830,10 +812,7 @@ class File(Object):
         return self._make_comparison(other, operator.ne, File)
 
     def copy(self):
-        copy = File(self.name, self.path)
-        copy.set_pos(self.pos_start, self.pos_end)
-        copy.set_context(self.context)
-        return copy
+        return deepcody.deepcopy(self)
 
     def type(self):
         return "<file>"
@@ -857,8 +836,8 @@ class NameSpace(Object):
             "initialized_": Number.false,
         }
 
-    def get(self, name):
-        if name in self._internal:
+    def get(self, name, checked=False):
+        if name in self._internal and checked:
             return self._internal[name]
 
         r, err = self.value.dollared_by(String(name))
@@ -866,8 +845,8 @@ class NameSpace(Object):
             return None
         return r
 
-    def set(self, name, value):
-        if name in self._internal:
+    def set(self, name, value, checked=False):
+        if name in self._internal and checked:
             self._internal[name] = value
         else:
             self.value = self.value.set_index(String(name), value)

@@ -1,8 +1,9 @@
 load "libs.sys"
 load "libs.ffio"
+load "libs.json"
 
 if len(sys.argv) != 2 do
-    println("Usage: " + ffio.abs_path(sys.argv$0) + "<your-json-file>")
+    println("Usage: " + ffio.abs_path(sys.argv$0) + " <your-json-file>")
     sys.exit(1)
 done
 
@@ -11,7 +12,7 @@ if not ffio.exists(sys.argv$1) do
     sys.exit(1)
 done
 
-code = 'import json\nwith open(r"' + ffio.abs_path(sys.argv$1)  + '", "r") as f:\n    r = json.load(f)'
-r = get(pyexec(code), "r", none)
+j = ffio.read(sys.argv$1, "r")
+r = json.parse(j)
 
 println("r = " + to_str(r))

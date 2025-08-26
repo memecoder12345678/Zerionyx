@@ -1,0 +1,9 @@
+namespace json
+    defun parse(s)
+        return parse_fp(s)
+    done
+
+    defun stringify(o)
+        return stringify_fp(o)
+    done
+done
