@@ -121,4 +121,5 @@ if "%1"=="--clean" (
 
 :end
 endlocal
+
 exit /b %EXIT_code%
