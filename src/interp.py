@@ -4661,7 +4661,7 @@ def run(fn, text):
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
     # for token in tokens:
-    #     print(f"DEBUG: {token}")
+    #     print(f"{Fore.LIGHTRED_EX}{Style.BRIGHT}DEBUG{Fore.RESET}{Style.RESET_ALL}: {token}")
     if error:
         return None, error
     result = None
