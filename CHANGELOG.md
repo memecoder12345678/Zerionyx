@@ -38,9 +38,9 @@ Zerionyx now supports decorator syntax (`@`) for metaprogramming. Decorators are
 # Usage Example
 defun log_call(fn)
     defun wrapper(*vargs, **kargs)
-        println("Calling function: " + fn.name)
+        println("Calling function: " + slice(to_str(fn), 10, -1))
         result = fn(*vargs, **kargs)
-        println("Function " + fn.name + " finished.")
+        println("Function " + slice(to_str(fn), 10, -1) + " finished.")
         return result
     done
     return wrapper
