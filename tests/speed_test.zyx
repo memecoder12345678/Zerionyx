@@ -35,19 +35,12 @@ println("Average: " + to_str(avg)     + " s")
 println("Fastest: " + to_str(fastest) + " s")
 println("Slowest: " + to_str(slowest) + " s")
 
-
-# Zerionyx executed on PyPy 3.11 (v7.3.19, 64-bit, JIT disabled) on AMD Ryzen 7 4800H laptop (plugged-in mode):
-# Average: 40.49288308620453 s
-# Fastest: 37.14694356918335 s
-# Slowest: 47.98423480987549 s
-
 # Zerionyx executed on Python 3.12.8 (64-bit) on AMD Ryzen 7 4800H laptop (plugged-in mode):
-# Average: 8.391884279251098 s
-# Fastest: 7.623247623443604 s
-# Slowest: 9.372247695922852 s
+# Average: 6.663556218147278 s
+# Fastest: 6.343989849090576 s
+# Slowest: 7.311691522598267 s
 
 # Zerionyx executed on PyPy 3.11 (v7.3.19, 64-bit, JIT enabled) on AMD Ryzen 7 4800H laptop (plugged-in mode):
-# Average: 0.7022020578384399 s
-# Fastest: 0.6396000385284424 s
-# Slowest: 0.8322160243988037 s
-
+# Average: 0.385618782043457 s
+# Fastest: 0.343375682830810 s
+# Slowest: 0.444282054901123 s
