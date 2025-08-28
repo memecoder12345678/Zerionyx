@@ -1,5 +1,6 @@
 **/__pycache__/
 **/backup/
 **/Zerionyx-*/
-**/Zerionyx-*.zip
-**/Zerionyx-*.tag.gz
+**/*.zip
+**/*.tar.gz
+**/*.tar

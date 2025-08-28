@@ -1,20 +1,69 @@
-# Changelog: Version 4.0.3 &mdash; The Core Engine Optimization Update
+# Changelog: Version 4.0.4 &mdash; The Expressiveness & Metaprogramming Update
 
-**Date:** August 28, 2025
+**Date:** August 29, 2025
 
-Following the addition of powerful data tools in v4.0.2, this release shifts focus from new features to a critical, under-the-hood enhancement of the core interpreter. Version 4.0.3 is dedicated to a single, impactful optimization that significantly improves the runtime performance and efficiency of Zerionyx, making the language faster and more scalable for complex applications.
-
----
-
-## 🚀 Performance Optimizations
-
-### 1. Reduced Function Call Overhead
-
-This release's primary focus was a deep optimization of the interpreter's call stack management. This has resulted in a significant reduction in the overhead associated with function invocation.
-
-*   Scripts that rely on deep recursion or contain frequent function calls will now execute noticeably faster.
-*   This foundational improvement makes Zerionyx more suitable for building larger, function-heavy applications and lays the groundwork for future performance enhancements.
+This is a landmark release for Zerionyx, fundamentally enhancing the language's expressiveness and introducing powerful metaprogramming capabilities. Version 4.0.4 brings two of the most requested features from modern dynamic languages: arbitrary argument lists (`*vargs`/`**kargs`) and function decorators, making function definitions more flexible and code more reusable.
 
 ---
 
-Zerionyx 4.0.3 is a testament to our commitment to expanding the language's features and ensuring its core is as fast and efficient as possible. By strengthening the interpreter's foundation, this update ensures that Zerionyx can handle more demanding scripts with improved speed and stability, paving the way for more ambitious projects.
+## ✨ New Features
+
+### 1. Arbitrary Argument Lists (`*vargs` & `**kargs`)
+
+Function definitions now support Python-like syntax for capturing a variable number of positional and keyword arguments. This makes it possible to create highly flexible functions that can accept any number of inputs.
+
+*   `*vargs`: Captures all additional positional arguments into a `list`.
+*   `**kargs`: Captures all additional keyword arguments into a `hashmap`.
+
+```zyx
+# Usage Example
+defun logger(prefix, *vargs, **kargs)
+    print(prefix)
+    for arg in vargs do
+        println("  - Positional: " + to_str(arg))
+    done
+    for item in items(kargs) do
+        println("  - Keyword: " + item$0 + " = " + to_str(item$1))
+    done
+done
+
+logger("Processing Data:", 101, "active", user="memecoder", status="online")
+```
+
+### 2. Function Decorators
+
+Zerionyx now supports decorator syntax (`@`) for metaprogramming. Decorators are functions that take another function as input, add functionality to it, and return the modified function. This is a powerful pattern for separating concerns and reusing code (e.g., for logging, timing, or authentication).
+
+```zyx
+# Usage Example
+defun log_call(fn)
+    defun wrapper(*vargs, **kargs)
+        println("Calling function: " + fn.name)
+        result = fn(*vargs, **kargs)
+        println("Function " + fn.name + " finished.")
+        return result
+    done
+    return wrapper
+done
+
+@log_call
+defun add(a, b) -> a + b
+
+add(5, 3)
+```
+**Output:**
+```
+Calling function: add
+Function add finished.
+```
+---
+
+## 🐞 Bug Fixes & Improvements
+
+1.  **Lexer Robustness:** The lexer has been improved to correctly handle multi-character operators (`**`, `=>`) without ambiguity.
+
+2.  **Parser Enhancements:** The function definition parser has been completely rewritten to support the new flexible argument syntax.
+
+---
+
+Zerionyx 4.0.4 is a major leap forward, providing developers with sophisticated tools to write cleaner, more powerful, and more reusable code. These new metaprogramming features unlock advanced design patterns and solidify Zerionyx's position as a highly capable modern scripting language.

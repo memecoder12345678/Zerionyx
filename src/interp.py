@@ -96,101 +96,113 @@ class BaseFunction(Object):
         self,
         param_names,
         defaults,
-        defaults_are_nodes,
+        vargs_name,
+        kargs_name,
         positional_args,
         keyword_args,
         exec_ctx,
     ):
         res = RTResult()
         interpreter = Interpreter()
-        populated_args = {}
-        for i in range(len(param_names)):
-            param_name = param_names[i]
-            if i < len(defaults) and defaults[i] is not None:
-                default_val = defaults[i]
-                if defaults_are_nodes:
+
+        for i, param_name in enumerate(param_names):
+            if i < len(positional_args):
+                exec_ctx.symbol_table.set(param_name, positional_args[i])
+            elif param_name in keyword_args:
+                exec_ctx.symbol_table.set(param_name, keyword_args.pop(param_name))
+            elif i < len(defaults):
+                default_value = defaults[i]
+                if default_value is None:
+                    return res.failure(
+                        RTError(
+                            self.pos_start,
+                            self.pos_end,
+                            f"Missing required argument '{param_name}'",
+                            exec_ctx,
+                        )
+                    )
+                is_node = not isinstance(default_value, Object)
+                if is_node:
                     evaluated_default = res.register(
-                        interpreter.visit(default_val, exec_ctx)
+                        interpreter.visit(default_value, exec_ctx)
                     )
                     if res.should_return():
                         return res
-                    populated_args[param_name] = evaluated_default
+                    exec_ctx.symbol_table.set(param_name, evaluated_default)
                 else:
-                    populated_args[param_name] = default_val
-        if len(positional_args) > len(param_names):
+                    final_default = (
+                        default_value if default_value is not None else NoneObject.none
+                    )
+                    exec_ctx.symbol_table.set(param_name, final_default)
+            else:
+                return res.failure(
+                    RTError(
+                        self.pos_start,
+                        self.pos_end,
+                        f"Missing required argument '{param_name}'",
+                        exec_ctx,
+                    )
+                )
+        if vargs_name:
+            remaining_pos_args_count = len(positional_args) - len(param_names)
+            if remaining_pos_args_count > 0:
+                vargs_list = List(positional_args[len(param_names) :])
+            else:
+                vargs_list = List([])
+            exec_ctx.symbol_table.set(vargs_name, vargs_list.set_context(exec_ctx))
+        if kargs_name:
+            kargs_map = HashMap(keyword_args)
+            exec_ctx.symbol_table.set(kargs_name, kargs_map.set_context(exec_ctx))
+        elif keyword_args:
+            first_unknown = list(keyword_args.keys())[0]
             return res.failure(
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    f"Too many arguments passed to function '{self.name}'",
+                    f"Function got an unexpected keyword argument '{first_unknown}'",
                     exec_ctx,
                 )
             )
-        for i in range(len(positional_args)):
-            param_name = param_names[i]
-            arg_value = positional_args[i]
-            if param_name in keyword_args:
-                return res.failure(
-                    RTError(
-                        self.pos_start,
-                        self.pos_end,
-                        f"Argument '{param_name}' got multiple values",
-                        exec_ctx,
-                    )
-                )
-            populated_args[param_name] = arg_value
-        for arg_name, arg_value in keyword_args.items():
-            if arg_name not in param_names:
-                return res.failure(
-                    RTError(
-                        self.pos_start,
-                        self.pos_end,
-                        f"'{arg_name}' is not a valid parameter for function '{self.name}'",
-                        exec_ctx,
-                    )
-                )
-            populated_args[arg_name] = arg_value
-        for param_name in param_names:
-            if param_name not in populated_args:
-                return res.failure(
-                    RTError(
-                        self.pos_start,
-                        self.pos_end,
-                        f"Missing required argument '{param_name}' for function '{self.name}'",
-                        exec_ctx,
-                    )
-                )
-        for name, value in populated_args.items():
-            value.set_context(exec_ctx)
-            exec_ctx.symbol_table.set(name, value)
         return res.success(None)
 
 
 class Function(BaseFunction):
-    __slots__ = ("name", "body_node", "arg_names", "defaults", "should_auto_return")
-
-    def __init__(self, name, body_node, arg_names, defaults, should_auto_return):
+    def __init__(
+        self,
+        name,
+        body_node,
+        arg_names,
+        defaults,
+        vargs_name_tok,
+        kargs_name_tok,
+        should_auto_return,
+    ):
         super().__init__(name)
         self.body_node = body_node
         self.arg_names = arg_names
         self.defaults = defaults
+        self.vargs_name = vargs_name_tok.value if vargs_name_tok else None
+        self.kargs_name = kargs_name_tok.value if kargs_name_tok else None
         self.should_auto_return = should_auto_return
 
     def execute(self, positional_args, keyword_args):
         res = RTResult()
         exec_ctx = self.generate_new_context()
+
         res.register(
             self.handle_arguments(
-                param_names=self.arg_names,
-                defaults=self.defaults,
-                defaults_are_nodes=True,
-                positional_args=positional_args,
-                keyword_args=keyword_args,
-                exec_ctx=exec_ctx,
+                self.arg_names,
+                self.defaults,
+                self.vargs_name,
+                self.kargs_name,
+                positional_args,
+                keyword_args,
+                exec_ctx,
             )
         )
         if res.should_return():
             return res
+
         interpreter = Interpreter()
         value = res.register(interpreter.visit(self.body_node, exec_ctx))
         if res.should_return() and res.func_return_value is None:
@@ -208,6 +220,8 @@ class Function(BaseFunction):
             self.body_node,
             self.arg_names,
             self.defaults,
+            Token(TT_IDENTIFIER, self.vargs_name) if self.vargs_name else None,
+            Token(TT_IDENTIFIER, self.kargs_name) if self.kargs_name else None,
             self.should_auto_return,
         )
         copy.set_context(self.context)
@@ -236,7 +250,8 @@ class BuiltInFunction(BaseFunction):
             self.handle_arguments(
                 param_names=method.arg_names,
                 defaults=method.defaults,
-                defaults_are_nodes=False,
+                vargs_name=None,
+                kargs_name=None,
                 positional_args=positional_args,
                 keyword_args=keyword_args,
                 exec_ctx=exec_ctx,
@@ -3195,7 +3210,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         try:
-            import requests
+            import requests  # type: ignore
 
             response = requests.request(
                 method_arg.value,
@@ -3796,7 +3811,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(Number.true)
         else:
             return RTResult().success(Number.false)
-        
+
     @set_args(["value"])
     def execute_parse_fp(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
@@ -3821,6 +3836,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
+
     @set_args(["value"])
     def execute_stringify_fp(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
@@ -3836,7 +3852,6 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -4020,7 +4035,10 @@ class Interpreter:
                     context,
                 )
             )
-        if isinstance(obj, NameSpace) and not obj.get("initialized_", checked=True).value:
+        if (
+            isinstance(obj, NameSpace)
+            and not obj.get("initialized_", checked=True).value
+        ):
             self.initialize_namespace(obj)
         member = obj.get(node.member_name)
         if member is None:
@@ -4278,18 +4296,31 @@ class Interpreter:
         func_name = node.var_name_tok.value if node.var_name_tok else None
         body_node = node.body_node
         arg_names = [arg_name.value for arg_name in node.arg_name_toks]
-        default_nodes = node.defaults
+
         func_value = (
             Function(
                 func_name,
                 body_node,
                 arg_names,
-                default_nodes,
+                node.defaults,
+                node.vargs_name_tok,
+                node.kargs_name_tok,
                 node.should_auto_return,
             )
             .set_context(context)
             .set_pos(node.pos_start, node.pos_end)
         )
+
+        if node.decorator_nodes:
+            for deco_node in reversed(node.decorator_nodes):
+                decorator = res.register(self.visit(deco_node, context))
+                if res.should_return():
+                    return res
+                wrapped_func = res.register(decorator.execute([func_value], {}))
+                if res.should_return():
+                    return res
+                func_value = wrapped_func
+
         if node.var_name_tok:
             context.symbol_table.set(func_name, func_value)
 
@@ -4298,42 +4329,65 @@ class Interpreter:
     def visit_CallNode(self, node, context):
         try:
             res = RTResult()
-
             value_to_call = res.register(self.visit(node.node_to_call, context))
             if res.should_return():
                 return res
             value_to_call = value_to_call.copy().set_pos(node.pos_start, node.pos_end)
             value_to_call.set_context(context)
-
             positional_args = []
             keyword_args = {}
-
             for arg_node in node.arg_nodes:
-                if isinstance(arg_node, VarAssignNode):
+                if isinstance(arg_node, VargsUnpackNode):
+                    list_to_unpack = res.register(
+                        self.visit(arg_node.node_to_unpack, context)
+                    )
+                    if res.should_return():
+                        return res
+                    if not isinstance(list_to_unpack, List):
+                        return res.failure(
+                            RTError(
+                                arg_node.pos_start,
+                                arg_node.pos_end,
+                                "Value to unpack with * must be a list",
+                                context,
+                            )
+                        )
+                    positional_args.extend(list_to_unpack.value)
+                elif isinstance(arg_node, KargsUnpackNode):
+                    map_to_unpack = res.register(
+                        self.visit(arg_node.node_to_unpack, context)
+                    )
+                    if res.should_return():
+                        return res
+                    if not isinstance(map_to_unpack, HashMap):
+                        return res.failure(
+                            RTError(
+                                arg_node.pos_start,
+                                arg_node.pos_end,
+                                "Value to unpack with ** must be a hashmap",
+                                context,
+                            )
+                        )
+                    for k, v in map_to_unpack.value.items():
+                        if not isinstance(k, str):
+                            return res.failure(
+                                RTError(
+                                    arg_node.pos_start,
+                                    arg_node.pos_end,
+                                    "Keyword argument keys must be strings",
+                                    context,
+                                )
+                            )
+                        keyword_args[k] = v
+
+                elif isinstance(arg_node, VarAssignNode):
                     arg_name = arg_node.var_name_tok.value
                     arg_value = res.register(self.visit(arg_node.value_node, context))
                     if res.should_return():
                         return res
-                    if arg_name in keyword_args:
-                        return res.failure(
-                            RTError(
-                                arg_node.pos_start,
-                                arg_node.pos_end,
-                                f"Argument '{arg_name}' passed more than once",
-                                context,
-                            )
-                        )
                     keyword_args[arg_name] = arg_value
+
                 else:
-                    if keyword_args:
-                        return res.failure(
-                            RTError(
-                                arg_node.pos_start,
-                                arg_node.pos_end,
-                                "Positional argument cannot follow keyword arguments",
-                                context,
-                            )
-                        )
                     positional_args.append(res.register(self.visit(arg_node, context)))
                     if res.should_return():
                         return res
@@ -4660,8 +4714,6 @@ def clean_value(value):
 def run(fn, text):
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
-    # for token in tokens:
-    #     print(f"{Fore.LIGHTRED_EX}{Style.BRIGHT}DEBUG{Fore.RESET}{Style.RESET_ALL}: {token}")
     if error:
         return None, error
     result = None
