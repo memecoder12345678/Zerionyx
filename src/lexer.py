@@ -65,12 +65,9 @@ class Lexer:
             elif self.current_char == "-":
                 self.handle_minus_or_augmented()
             elif self.current_char == "*":
-                self.handle_mul_or_dstar_or_augmented()
+                self.handle_mul_or_augmented()
             elif self.current_char == "/":
                 self.div_or_floordiv_or_augmented()
-            elif self.current_char == "@":
-                self.tokens.append(Token(TT_AT, pos_start=self.pos))
-                self.advance()
             elif self.current_char == "\\":
                 if self.peek_foward_steps(1) == "\n":
                     self.advance()
@@ -377,16 +374,10 @@ class Lexer:
         else:
             self._handle_augmented_assignment_common(TT_MINUS, pos_start_op)
 
-    def handle_mul_or_dstar_or_augmented(self):
+    def handle_mul_or_augmented(self):
         pos_start_op = self.pos.copy()
         self.advance()
-        if self.current_char == "*":
-            self.advance()
-            self.tokens.append(
-                Token(TT_DOUBLE_STAR, pos_start=pos_start_op, pos_end=self.pos.copy())
-            )
-        else:
-            self._handle_augmented_assignment_common(TT_MUL, pos_start_op)
+        self._handle_augmented_assignment_common(TT_MUL, pos_start_op)
 
     def handle_pow_or_augmented(self):
         pos_start_op = self.pos.copy()

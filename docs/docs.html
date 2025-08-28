@@ -335,32 +335,35 @@ EXPR               ::=
     | COMP_EXPR ((<code>and</code> | <code>or</code>) COMP_EXPR)*
 
 COMP_EXPR          ::= 
-      ARITH_EXPR ((<code>==</code> | <code>&lt;</code> | <code>&gt;</code> | <code>&lt;=</code> | <code>&gt;=</code> | <code>!=</code>) ARITH_EXPR)*
+      ARITH_EXPR ((<code>==</code> | <code><</code> | <code>></code> | <code><=</code> | <code>>=</code> | <code>!=</code>) ARITH_EXPR)*
     | <code>not</code> COMP_EXPR
 
 ARITH_EXPR         ::= TERM ((<code>+</code> | <code>-</code>) TERM)*
 
 TERM               ::= FACTOR ((<code>*</code> | <code>/</code> | <code>//</code> | <code>%</code>) FACTOR)*
 
-FACTOR             ::= (<code>+</code> | <code>-</code>) FACTOR 
-                   | <code>*</code> EXPR         // Argument unpacking
-                   | <code>**</code> EXPR        // Keyword argument unpacking
-                   | POWER
+FACTOR             ::= (<code>+</code> | <code>-</code>) FACTOR | POWER
+
+
+
 
 POWER              ::= CALL (<code>^</code> FACTOR)*
 
-CALL               ::= ATOM (<code>(</code> ARG_LIST? <code>)</code>)?
+CALL               ::= ATOM (<code>(</code> (EXPR (<code>,</code> EXPR)*)? <code>)</code>)?
 
-ARG_LIST           ::= ARG (<code>,</code> ARG)*
-ARG                ::= EXPR 
+
+
 
 ATOM               ::= 
       INT | FLOAT | STRING | IDENTIFIER
     | <code>(</code> EXPR <code>)</code>
     | LIST_EXPR
+    | LIST_INDEX
     | IF_EXPR
     | FOR_EXPR
     | FOR_IN_EXPR
+    | GET_INDEX
+    | GET_MEMBER
     | HASHMAP_EXPR
     | NAMESPACE_EXPR
     | WHILE_EXPR
@@ -371,11 +374,23 @@ ATOM               ::=
 
 USING_STATEMENT   ::= <code>using</code> (<code>parent</code>)? IDENTIFIER (<code>,</code> IDENTIFIER)*
 
+GET_INDEX         ::= IDENTIFIER <code>$</code> EXPR
+
+SET_INDEX         ::=
+      IDENTIFIER <code>$</code> EXPR <code>=</code> EXPR
+    | <code>let</code> IDENTIFIER <code>$</code> EXPR <code>=</code> EXPR
+
+GET_MEMBER        ::= IDENTIFIER <code>.</code> CALL
+
+SET_MEMBER        ::= 
+      IDENTIFIER <code>.</code> CALL <code>=</code> EXPR
+    | <code>let</code> IDENTIFIER <code>.</code> CALL <code>=</code> EXPR
+
 LIST_EXPR         ::= <code>[</code> (EXPR (<code>,</code> EXPR)*)? <code>]</code>
 
 HASHMAP_EXPR      ::= <code>{</code> (STRING <code>:</code> EXPR (<code>,</code> STRING <code>:</code> EXPR)*)? <code>}</code>
 
-NAMESPACE_EXPR    ::=
+NAMESPACE_EXPR    ::= 
       <code>namespace</code> IDENTIFIER
       NEWLINE STATEMENT NEWLINE <code>done</code>
 
@@ -383,38 +398,38 @@ IF_EXPR           ::=
       <code>if</code> EXPR <code>do</code> STATEMENT
       (NEWLINE <code>elif</code> EXPR <code>do</code> STATEMENT)*
       (NEWLINE <code>else</code> <code>do</code> STATEMENT)?
-      (NEWLINE <code>done</code>)?
+      NEWLINE <code>done</code>
 
-FOR_EXPR          ::=
+FOR_EXPR          ::= 
       <code>for</code> IDENTIFIER <code>=</code> EXPR <code>to</code> EXPR
       (<code>step</code> EXPR)?
       <code>do</code> STATEMENT
-      (NEWLINE <code>done</code>)?
+      NEWLINE <code>done</code>
 
-FOR_IN_EXPR       ::=
+FOR_IN_EXPR       ::= 
       <code>for</code> IDENTIFIER <code>in</code> EXPR
       <code>do</code> STATEMENT
-      (NEWLINE <code>done</code>)?
+      NEWLINE <code>done</code>
 
 WHILE_EXPR        ::= 
       <code>while</code> EXPR <code>do</code> STATEMENT
-      (NEWLINE <code>done</code>)?
+      NEWLINE <code>done</code>
 
-PARAM_LIST        ::= (PARAMS (<code>,</code> VAR_PARAMS)? | VAR_PARAMS)?
+PARAM_LIST        ::= PARAM (<code>,</code> PARAM)*
 
-PARAMS            ::= PARAM (<code>,</code> PARAM)*
-PARAM             ::= (<code>let</code>)? IDENTIFIER (<code>=</code> EXPR)?
+PARAM             ::= 
+      IDENTIFIER
+    | <code>let</code> IDENTIFIER <code>=</code> EXPR
+    | IDENTIFIER <code>=</code> EXPR
 
-VAR_PARAMS        ::= VARARGS_PARAM (<code>,</code> KWARGS_PARAM)? | KWARGS_PARAM
-VARARGS_PARAM     ::= <code>*</code> IDENTIFIER
-KWARGS_PARAM      ::= <code>**</code> IDENTIFIER
 
-DECORATOR         ::= <code>@</code> EXPR NEWLINE*
+
+
 
 DEF_FUNC          ::= 
-      DECORATOR* <code>defun</code> IDENTIFIER? <code>(</code> PARAM_LIST? <code>)</code>
-      (<code>-&gt;</code> EXPR)?
-      (NEWLINE STATEMENT NEWLINE <code>done</code>)?
+      <code>defun</code> IDENTIFIER <code>(</code> PARAM_LIST? <code>)</code>
+      (<code>-></code> EXPR)?
+      NEWLINE STATEMENT NEWLINE <code>done</code>
 
 COMMENT           ::= <code>#</code> /[^\n]*/
 </code></pre>

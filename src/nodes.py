@@ -178,21 +178,14 @@ class FuncDefNode:
         var_name_tok,
         arg_name_toks,
         defaults,
-        vargs_name_tok,
-        kargs_name_tok,
         body_node,
         should_auto_return,
-        decorator_nodes,
     ):
         self.var_name_tok = var_name_tok
         self.arg_name_toks = arg_name_toks
         self.defaults = defaults
-        self.vargs_name_tok = vargs_name_tok
-        self.kargs_name_tok = kargs_name_tok
         self.body_node = body_node
         self.should_auto_return = should_auto_return
-        self.decorator_nodes = decorator_nodes
-
         if self.var_name_tok:
             self.pos_start = self.var_name_tok.pos_start
         elif len(self.arg_name_toks) > 0:
@@ -200,24 +193,6 @@ class FuncDefNode:
         else:
             self.pos_start = self.body_node.pos_start
         self.pos_end = self.body_node.pos_end
-
-
-class VargsUnpackNode:
-    __slots__ = ["node_to_unpack", "pos_start", "pos_end"]
-
-    def __init__(self, node_to_unpack):
-        self.node_to_unpack = node_to_unpack
-        self.pos_start = node_to_unpack.pos_start
-        self.pos_end = node_to_unpack.pos_end
-
-
-class KargsUnpackNode:
-    __slots__ = ["node_to_unpack", "pos_start", "pos_end"]
-
-    def __init__(self, node_to_unpack):
-        self.node_to_unpack = node_to_unpack
-        self.pos_start = node_to_unpack.pos_start
-        self.pos_end = node_to_unpack.pos_end
 
 
 class CallNode:

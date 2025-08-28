@@ -16,7 +16,7 @@ SIMPLE_STATEMENT   ::=
     | "break"
     | EXPR
 
-COMPOUND_STATEMENT ::= 
+COMPOUND_STATEMENT ::=
       IF_EXPR
     | FOR_EXPR
     | WHILE_EXPR
@@ -38,26 +38,22 @@ ARITH_EXPR         ::= TERM (("+" | "-") TERM)*
 
 TERM               ::= FACTOR (("*" | "/" | "//" | "%") FACTOR)*
 
-FACTOR             ::= ("+" | "-") FACTOR 
-                   | "*" EXPR
-                   | "**" EXPR
-                   | POWER
+FACTOR             ::= ("+" | "-") FACTOR | POWER
 
 POWER              ::= CALL ("^" FACTOR)*
 
-CALL               ::= ATOM ("(" ARG_LIST? ")")?
-
-// Mới: Định nghĩa danh sách đối số cho lời gọi hàm
-ARG_LIST           ::= ARG ("," ARG)*
-ARG                ::= EXPR 
+CALL               ::= ATOM ("(" (EXPR ("," EXPR)*)? ")")?
 
 ATOM               ::= 
       INT | FLOAT | STRING | IDENTIFIER
     | "(" EXPR ")"
     | LIST_EXPR
+    | LIST_INDEX
     | IF_EXPR
     | FOR_EXPR
     | FOR_IN_EXPR
+    | GET_INDEX
+    | GET_MEMBER
     | HASHMAP_EXPR
     | NAMESPACE_EXPR
     | WHILE_EXPR
@@ -67,6 +63,18 @@ ATOM               ::=
     | EXPR
 
 USING_STATEMENT   ::= "using" ("parent")? IDENTIFIER ("," IDENTIFIER)*
+
+GET_INDEX         ::= IDENTIFIER "$" EXPR
+
+SET_INDEX         ::=
+      IDENTIFIER "$" EXPR "=" EXPR
+    | "let" IDENTIFIER "$" EXPR "=" EXPR
+
+GET_MEMBER        ::= IDENTIFIER "." CALL
+
+SET_MEMBER        ::= 
+      IDENTIFIER "." CALL "=" EXPR
+    | "let" IDENTIFIER "." CALL "=" EXPR
 
 LIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"
 
@@ -80,38 +88,36 @@ IF_EXPR           ::=
       "if" EXPR "do" STATEMENT
       (NEWLINE "elif" EXPR "do" STATEMENT)*
       (NEWLINE "else" "do" STATEMENT)?
-      (NEWLINE "done")? // 'done' là tùy chọn cho one-liner
+      NEWLINE "done"
 
 FOR_EXPR          ::=
       "for" IDENTIFIER "=" EXPR "to" EXPR
       ("step" EXPR)?
       "do" STATEMENT
-      (NEWLINE "done")?
+      NEWLINE "done"
 
-FOR_IN_EXPR       ::=
+FOR_IN_EXPR          ::=
       "for" IDENTIFIER "in" EXPR
       "do" STATEMENT
-      (NEWLINE "done")?
+      NEWLINE "done"
 
 WHILE_EXPR        ::= 
       "while" EXPR "do" STATEMENT
-      (NEWLINE "done")?
+      NEWLINE "done"
 
-PARAM_LIST        ::= (PARAMS ("," VAR_PARAMS)? | VAR_PARAMS)?
+PARAM_LIST        ::= PARAM ("," PARAM)*
 
-PARAMS            ::= PARAM ("," PARAM)*
-PARAM             ::= ("let")? IDENTIFIER ("=" EXPR)?
-
-VAR_PARAMS        ::= VARARGS_PARAM ("," KWARGS_PARAM)? | KWARGS_PARAM
-VARARGS_PARAM     ::= "*" IDENTIFIER
-KWARGS_PARAM      ::= "**" IDENTIFIER
-
-DECORATOR         ::= "@" EXPR NEWLINE*
+PARAM             ::= 
+      IDENTIFIER
+    | "let" IDENTIFIER "=" EXPR
+    | IDENTIFIER "=" EXPR
 
 DEF_FUNC          ::= 
-      DECORATOR* "defun" IDENTIFIER? "(" PARAM_LIST? ")"
+      "defun" IDENTIFIER "(" PARAM_LIST? ")"
       ("->" EXPR)?
-      (NEWLINE STATEMENT NEWLINE "done")?
+      NEWLINE STATEMENT NEWLINE "done"
+
+
 
 COMMENT           ::= "#" /[^\n]*/
 
@@ -181,9 +187,7 @@ def main():
                     )
                     continue
                 if text.strip() == "docs":
-                    print(
-                        "Documentation: https://memecoder12345678.github.io/Zerionyx/docs.html"
-                    )
+                    print("Documentation: https://memecoder12345678.github.io/Zerionyx/docs.html")
                     continue
                 result, error = run("<stdin>", text)
                 if error:
