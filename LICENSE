@@ -2,8 +2,8 @@ MIT License
 
 WARNING: This project contains code adapted from multiple public sources.
 
-Some components are originally based on David Callanan’s interpreter tutorial (2019),
-licensed under the MIT License. Other parts are believed to derive from Fus3n’s version,
+Some components are originally based on David Callanan's interpreter tutorial (2019),
+licensed under the MIT License. Other parts are believed to derive from Fus3n's version,
 which did not include an explicit license but was publicly shared for free use and modification.
 
 Only modifications made by MemeCoder are explicitly claimed under copyright.
