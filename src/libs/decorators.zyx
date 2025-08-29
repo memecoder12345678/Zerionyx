@@ -1,0 +1,178 @@
+# libs.decorators
+
+load "libs.time"
+load "libs.threading"
+
+namespace decorators
+
+    defun name(fn) -> slice(to_str(fn), 10, -1)
+
+    defun cache(fn)
+        let cache_storage = {}
+        defun wrapper(*vargs, **kargs)
+            let key = to_str(vargs) + to_str(items(kargs))
+            
+            if has(cache_storage, key) do
+                return cache_storage$key
+            done
+            
+            let result = fn(*vargs, **kargs)
+            cache_storage$key = result
+            return result
+        done
+        return wrapper
+    done
+
+    defun once(fn)
+        let has_run = false
+        let result = none
+
+        defun wrapper(*vargs, **kargs)
+            using parent has_run
+            using parent result
+            if has_run do
+                return result
+            done
+            result = fn(*vargs, **kargs)
+            has_run = true
+            return result
+        done
+        return wrapper
+    done
+
+    defun retry(times)
+        defun decorator(fn)
+            defun wrapper(*vargs, **kargs)
+                for i = 1 to times + 1 do
+                    let res = is_panic(fn, vargs)
+                    let result = res$0
+                    let err = res$1
+                    
+                    if is_none(err) do
+                        return result
+                    done
+                    
+                    println("Attempt " + to_str(i) + "/" + to_str(times) + " failed: " + err)
+                done
+                
+                panic("Function " + name(fn) + " failed after " + to_str(times) + " retries", "RT")
+            done
+            return wrapper
+        done
+        return decorator
+    done
+
+    defun timeout(ms)
+        defun decorator(fn)
+            defun wrapper(*vargs, **kargs)
+                let state = {"result": none, "error": none, "done": false}
+
+                defun target()
+                    let res = is_panic(fn, vargs)
+                    if res$1 do
+                        state$"error" = res$1
+                    else do
+                        state$"result" = res$0
+                    done
+                    state$"done" = true
+                done
+
+                let t = threading.start(target)
+                threading.join(t, timeout=(ms / 1000.0))
+
+                if not state$"done" do
+                    threading.cancel(t)
+                    panic("Function " + name(fn) + " timed out after " + to_str(ms) + "ms", "RT")
+                done
+                
+                if state$"error" do
+                    panic(state$"error", "RT")
+                done
+
+                return state$"result"
+            done
+            return wrapper
+        done
+        return decorator
+    done
+
+    defun log_call(fn)
+        defun wrapper(*vargs, **kargs)
+            println("--> Calling function '" + name(fn) + "'...")
+            let result = fn(*vargs, **kargs)
+            println("<-- Function '" + name(fn) + "' returned.")
+            return result
+        done
+        return wrapper
+    done
+    
+    defun measure_time(fn)
+        defun wrapper(*vargs, **kargs)
+            let start = time.time()
+            let result = fn(*vargs, **kargs)
+            let end = time.time()
+            let duration = (end - start) * 1000
+            println("Execution time for '" + name(fn) + "': " + to_str(duration) + " ms")
+            return result
+        done
+        return wrapper
+    done
+
+    defun repeat(n)
+        defun decorator(fn)
+            defun wrapper(*vargs, **kargs)
+                let last_result = none
+                for i = 1 to n + 1 do
+                    last_result = fn(*vargs, **kargs)
+                done
+                return last_result
+            done
+            return wrapper
+        done
+        return decorator
+    done
+
+    defun ignore_error(default=none)
+        defun decorator(fn)
+            defun wrapper(*vargs, **kargs)
+                let res = is_panic(fn, vargs)
+                if res$1 do
+                    return default
+                done
+                return res$0
+            done
+            return wrapper
+        done
+        return decorator
+    done
+
+    defun deprecated(msg)
+        defun decorator(fn)
+            defun wrapper(*vargs, **kargs)
+                println("DEPRECATION WARNING: Function '" + name(fn) + "' is deprecated. " + msg)
+                return fn(*vargs, **kargs)
+            done
+            return wrapper
+        done
+        return decorator
+    done
+    
+    defun lazy(fn)
+        let computed = false
+        let value = none
+        
+        defun wrapper(*vargs, **kargs)
+            using parent computed
+            using parent value
+            if computed do
+                return value
+            done
+            
+            value = fn(*vargs, **kargs)
+            computed = true
+            return value
+        done
+        return wrapper
+    done
+
+done

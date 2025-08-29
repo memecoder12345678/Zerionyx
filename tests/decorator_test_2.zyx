@@ -1,0 +1,39 @@
+load "libs.decorators"
+
+@decorators.cache
+defun fib(n)
+    if n < 2 do
+        return n
+    done
+    let a = 0
+    let b = 1
+    for i = 1 to n do
+        let temp = b
+        b = a + b
+        a = temp
+    done
+    return b
+done
+println("Fib(40) with cache...")
+@decorators.measure_time
+defun cached_fib() -> fib(40)
+println(cached_fib())
+println(cached_fib())
+
+let counter = 0
+@decorators.retry(3)
+defun might_fail()
+    using counter
+    counter += 1
+    if counter < 3 do
+        panic("Network failed!")
+    done
+    return "Success on attempt " + to_str(counter)
+done
+println(might_fail())
+
+@decorators.ignore_error(default=0)
+defun risky(a, b) -> a / b
+println("Result of risky function: " + to_str(risky(4, 2)))
+println("Result of risky function: " + to_str(risky(1, 0)))
+

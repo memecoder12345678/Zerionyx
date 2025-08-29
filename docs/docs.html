@@ -335,35 +335,32 @@ EXPR               ::=
     | COMP_EXPR ((<code>and</code> | <code>or</code>) COMP_EXPR)*
 
 COMP_EXPR          ::= 
-      ARITH_EXPR ((<code>==</code> | <code><</code> | <code>></code> | <code><=</code> | <code>>=</code> | <code>!=</code>) ARITH_EXPR)*
+      ARITH_EXPR ((<code>==</code> | <code>&lt;</code> | <code>&gt;</code> | <code>&lt;=</code> | <code>&gt;=</code> | <code>!=</code>) ARITH_EXPR)*
     | <code>not</code> COMP_EXPR
 
 ARITH_EXPR         ::= TERM ((<code>+</code> | <code>-</code>) TERM)*
 
 TERM               ::= FACTOR ((<code>*</code> | <code>/</code> | <code>//</code> | <code>%</code>) FACTOR)*
 
-FACTOR             ::= (<code>+</code> | <code>-</code>) FACTOR | POWER
-
-
-
+FACTOR             ::= (<code>+</code> | <code>-</code>) FACTOR 
+                   | <code>*</code> EXPR
+                   | <code>**</code> EXPR
+                   | POWER
 
 POWER              ::= CALL (<code>^</code> FACTOR)*
 
-CALL               ::= ATOM (<code>(</code> (EXPR (<code>,</code> EXPR)*)? <code>)</code>)?
+CALL               ::= ATOM (<code>(</code> ARG_LIST? <code>)</code>)?
 
-
-
+ARG_LIST           ::= ARG (<code>,</code> ARG)*
+ARG                ::= EXPR 
 
 ATOM               ::= 
       INT | FLOAT | STRING | IDENTIFIER
     | <code>(</code> EXPR <code>)</code>
     | LIST_EXPR
-    | LIST_INDEX
     | IF_EXPR
     | FOR_EXPR
     | FOR_IN_EXPR
-    | GET_INDEX
-    | GET_MEMBER
     | HASHMAP_EXPR
     | NAMESPACE_EXPR
     | WHILE_EXPR
@@ -374,23 +371,11 @@ ATOM               ::=
 
 USING_STATEMENT   ::= <code>using</code> (<code>parent</code>)? IDENTIFIER (<code>,</code> IDENTIFIER)*
 
-GET_INDEX         ::= IDENTIFIER <code>$</code> EXPR
-
-SET_INDEX         ::=
-      IDENTIFIER <code>$</code> EXPR <code>=</code> EXPR
-    | <code>let</code> IDENTIFIER <code>$</code> EXPR <code>=</code> EXPR
-
-GET_MEMBER        ::= IDENTIFIER <code>.</code> CALL
-
-SET_MEMBER        ::= 
-      IDENTIFIER <code>.</code> CALL <code>=</code> EXPR
-    | <code>let</code> IDENTIFIER <code>.</code> CALL <code>=</code> EXPR
-
 LIST_EXPR         ::= <code>[</code> (EXPR (<code>,</code> EXPR)*)? <code>]</code>
 
 HASHMAP_EXPR      ::= <code>{</code> (STRING <code>:</code> EXPR (<code>,</code> STRING <code>:</code> EXPR)*)? <code>}</code>
 
-NAMESPACE_EXPR    ::= 
+NAMESPACE_EXPR    ::=
       <code>namespace</code> IDENTIFIER
       NEWLINE STATEMENT NEWLINE <code>done</code>
 
@@ -398,38 +383,38 @@ IF_EXPR           ::=
       <code>if</code> EXPR <code>do</code> STATEMENT
       (NEWLINE <code>elif</code> EXPR <code>do</code> STATEMENT)*
       (NEWLINE <code>else</code> <code>do</code> STATEMENT)?
-      NEWLINE <code>done</code>
+      (NEWLINE <code>done</code>)?
 
-FOR_EXPR          ::= 
+FOR_EXPR          ::=
       <code>for</code> IDENTIFIER <code>=</code> EXPR <code>to</code> EXPR
       (<code>step</code> EXPR)?
       <code>do</code> STATEMENT
-      NEWLINE <code>done</code>
+      (NEWLINE <code>done</code>)?
 
-FOR_IN_EXPR       ::= 
+FOR_IN_EXPR       ::=
       <code>for</code> IDENTIFIER <code>in</code> EXPR
       <code>do</code> STATEMENT
-      NEWLINE <code>done</code>
+      (NEWLINE <code>done</code>)?
 
 WHILE_EXPR        ::= 
       <code>while</code> EXPR <code>do</code> STATEMENT
-      NEWLINE <code>done</code>
+      (NEWLINE <code>done</code>)?
 
-PARAM_LIST        ::= PARAM (<code>,</code> PARAM)*
+PARAM_LIST        ::= (PARAMS (<code>,</code> VAR_PARAMS)? | VAR_PARAMS)?
 
-PARAM             ::= 
-      IDENTIFIER
-    | <code>let</code> IDENTIFIER <code>=</code> EXPR
-    | IDENTIFIER <code>=</code> EXPR
+PARAMS            ::= PARAM (<code>,</code> PARAM)*
+PARAM             ::= (<code>let</code>)? IDENTIFIER (<code>=</code> EXPR)?
 
+VAR_PARAMS        ::= VARARGS_PARAM (<code>,</code> KWARGS_PARAM)? | KWARGS_PARAM
+VARARGS_PARAM     ::= <code>*</code> IDENTIFIER
+KWARGS_PARAM      ::= <code>**</code> IDENTIFIER
 
-
-
+DECORATOR         ::= <code>@</code> EXPR NEWLINE*
 
 DEF_FUNC          ::= 
-      <code>defun</code> IDENTIFIER <code>(</code> PARAM_LIST? <code>)</code>
-      (<code>-></code> EXPR)?
-      NEWLINE STATEMENT NEWLINE <code>done</code>
+      DECORATOR* <code>defun</code> IDENTIFIER? <code>(</code> PARAM_LIST? <code>)</code>
+      (<code>-&gt;</code> EXPR)?
+      (NEWLINE STATEMENT NEWLINE <code>done</code>)?
 
 COMMENT           ::= <code>#</code> /[^\n]*/
 </code></pre>
@@ -528,7 +513,8 @@ Zerionyx may be magical, but its syntax must be real.
                     <li><b>to_str(x)</b> &rarr; str &mdash; Convert <code>x</code> to string</li>
                     <li><b>to_bytes(x, from_hex=false, supress_error=false)</b> &rarr; bytes &mdash; Convert
                         <code>x</code>
-                        to bytes</li>
+                        to bytes
+                    </li>
                     </li>
                     <li><b>type(x)</b> &rarr; str &mdash; Return type of <code>x</code> as string</li>
                     <li><b>pyexec(code, args={})</b> &rarr; hashmap &mdash; Executes embedded Python code and returns
@@ -825,7 +811,8 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>cprint(text, color=none, background=none, style=none)</b> &rarr; none &mdash; Prints
                             <code>text</code>
                             with color,
-                            background, and style with no newline</li>
+                            background, and style with no newline
+                        </li>
                         <li><b>cprintln(text, color=none, background=none, style=none)</b> &rarr; none &mdash; Same as
                             <code>cprint</code> but adds a
                             newline
@@ -876,6 +863,31 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>parse(o)</b> &rarr; str &mdash; Convert <code>o</code> to JSON string</li>
                         <li><b>stringify(s)</b> &rarr; any &mdash; Parse JSON string <code>s</code> to Zerionyx object
                         </li>
+                    </ul>
+                </div>
+
+                <div id="lib-decorators">
+                    <h3>decorators.nyx</h3>
+                    <ul>
+                        <li><b>cache(fn)</b> &rarr; func &mdash; Store results of function calls and return cached value
+                            for the same inputs</li>
+                        <li><b>once(fn)</b> &rarr; func &mdash; Ensure the function runs only once, subsequent calls
+                            return the first result</li>
+                        <li><b>retry(times)</b> &rarr; func &mdash; Retry a function up to <code>times</code> if it
+                            raises an error</li>
+                        <li><b>timeout(ms)</b> &rarr; func &mdash; Cancel function execution if it exceeds
+                            <code>ms</code> milliseconds</li>
+                        <li><b>log_call(fn)</b> &rarr; func &mdash; Print logs before and after calling the function</li>
+                        <li><b>measure_time(fn)</b> &rarr; func &mdash; Measure and print execution time (in ms)</li>
+                        <li><b>repeat(n)</b> &rarr; func &mdash; Execute a function <code>n</code> times and return
+                            the last result</li>
+                        <li><b>ignore_error(default=none)</b> &rarr; func &mdash; Ignore errors and return
+                            <code>default</code> if an exception occurs</li>
+                        <li><b>deprecated(msg)</b> &rarr; func &mdash; Print a warning when calling a deprecated
+                            function</li>
+                        <li><b>lazy(fn)</b> &rarr; func &mdash; Compute the value once and reuse it on subsequent calls
+                        </li>
+                        <li><b>name(fn)</b> &rarr; str &mdash; Return the function name</li>
                     </ul>
                 </div>
 
