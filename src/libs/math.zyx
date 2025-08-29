@@ -128,4 +128,15 @@ namespace math
         check_number(x, none, "round")
         return round_fp(x)
     done
+
+    defun is_close(v1, v2, rel_tol=1*10^(-9), abs_tol=0.0)
+        check_number(v1, v2, "is_close")
+        if type(rel_tol) != int and type(rel_tol) != float do
+            panic("Third argument of 'is_close' must be a number", "T")
+        done
+        if type(abs_tol) != int and type(abs_tol) != float do
+            panic("Fourth argument of 'is_close' must be a number", "T")
+        done
+        return is_close_fp(v1, v2, rel_tol, abs_tol)
+    done
 done

@@ -1,0 +1,22 @@
+# libs.channel
+
+namespace channel
+
+    defun new()
+        return channel_new_fp()
+    done
+
+    defun is_empty(ch)
+        return channel_is_empty_fp(ch)
+    done
+    
+    defun send(ch, value)
+        channel_send_fp(ch, value)
+        return none
+    done
+
+    defun recv(ch)
+        return channel_receive_fp(ch)
+    done
+
+done

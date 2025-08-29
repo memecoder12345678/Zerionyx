@@ -11,7 +11,7 @@ namespace threading
     done
 
     defun join(h, timeout=15)
-        thread_join(h, timeout)
+        thread_join_fp(h, timeout)
         return none
     done
 

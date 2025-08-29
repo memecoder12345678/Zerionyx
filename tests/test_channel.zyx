@@ -1,0 +1,33 @@
+load "libs.threading"
+load "libs.channel"
+load "libs.time"
+
+println("--- Channel Demo ---")
+
+let messages = channel.new()
+
+defun worker()
+    println("  (Worker thread started)")
+    time.sleep(2)
+    println("  (Worker sending message: 'Hello from thread!')")
+    channel.send(messages, "Hello from thread!")
+
+    time.sleep(1)
+    println("  (Worker sending message: 'Work done.')")
+    channel.send(messages, "Work done.")
+    println("  (Worker thread finished)")
+done
+
+println("Main: Starting worker thread...")
+let t = threading.start(worker)
+
+println("Main: Waiting to receive a message...")
+let msg1 = channel.recv(messages)
+println("Main: Received -> " + to_str(msg1))
+
+println("Main: Waiting for the next message...")
+let msg2 = channel.recv(messages)
+println("Main: Received -> " + to_str(msg2))
+
+threading.join(t)
+println("--- Demo Finished ---")

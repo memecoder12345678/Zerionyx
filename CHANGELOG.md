@@ -1,69 +1,76 @@
-# Changelog: Version 4.0.4 &mdash; The Expressiveness & Metaprogramming Update
+# Changelog: Version 4.0.5 — **Concurrency & Reliability Update**
 
 **Date:** August 29, 2025
 
-This is a landmark release for Zerionyx, fundamentally enhancing the language's expressiveness and introducing powerful metaprogramming capabilities. Version 4.0.4 brings two of the most requested features from modern dynamic languages: arbitrary argument lists (`*vargs`/`**kargs`) and function decorators, making function definitions more flexible and code more reusable.
+Zerionyx 4.0.5 focuses on improving concurrency primitives and overall runtime reliability. This release adds a first-class `channel` library for safe thread communication, introduces a new `is_close` function in `libs.math` for robust floating-point comparison, and fixes several correctness and stability issues (deep copy, threading startup, floating-point behavior, and numeric comparisons).
 
 ---
 
 ## ✨ New Features
 
-### 1. Arbitrary Argument Lists (`*vargs` & `**kargs`)
+### Channel library (`libs.channel`)
 
-Function definitions now support Python-like syntax for capturing a variable number of positional and keyword arguments. This makes it possible to create highly flexible functions that can accept any number of inputs.
-
-*   `*vargs`: Captures all additional positional arguments into a `list`.
-*   `**kargs`: Captures all additional keyword arguments into a `hashmap`.
+A simple, safe message-passing primitive for thread-to-thread communication. Channels make it easy to send and receive values between threads without manual locking.
 
 ```zyx
-# Usage Example
-defun logger(prefix, *vargs, **kargs)
-    print(prefix)
-    for arg in vargs do
-        println("  - Positional: " + to_str(arg))
-    done
-    for item in items(kargs) do
-        println("  - Keyword: " + item$0 + " = " + to_str(item$1))
-    done
+load "libs.threading"
+load "libs.channel"
+load "libs.time"
+
+println("--- Channel Demo ---")
+
+let messages = channel.new()
+
+defun worker()
+    println("  (Worker thread started)")
+    time.sleep(2)
+    println("  (Worker sending message: 'Hello from thread!')")
+    channel.send(messages, "Hello from thread!")
+
+    time.sleep(1)
+    println("  (Worker sending message: 'Work done.')")
+    channel.send(messages, "Work done.")
+    println("  (Worker thread finished)")
 done
 
-logger("Processing Data:", 101, "active", user="memecoder", status="online")
+println("Main: Starting worker thread...")
+let t = threading.start(worker)
+
+println("Main: Waiting to receive a message...")
+let msg1 = channel.recv(messages)
+println("Main: Received -> " + to_str(msg1))
+
+println("Main: Waiting for the next message...")
+let msg2 = channel.recv(messages)
+println("Main: Received -> " + to_str(msg2))
+
+threading.join(t)
+println("--- Demo Finished ---")
 ```
 
-### 2. Function Decorators
+### Floating-point comparison (`libs.math.is_close`)
 
-Zerionyx now supports decorator syntax (`@`) for metaprogramming. Decorators are functions that take another function as input, add functionality to it, and return the modified function. This is a powerful pattern for separating concerns and reusing code (e.g., for logging, timing, or authentication).
+A new utility function to compare two floating-point numbers with tolerance. This prevents false negatives from rounding errors.
 
 ```zyx
-# Usage Example
-defun log_call(fn)
-    defun wrapper(*vargs, **kargs)
-        println("Calling function: " + slice(to_str(fn), 10, -1))
-        result = fn(*vargs, **kargs)
-        println("Function " + slice(to_str(fn), 10, -1) + " finished.")
-        return result
-    done
-    return wrapper
-done
+load "libs.math"
 
-@log_call
-defun add(a, b) -> a + b
+println(math.is_close(0.1 + 0.2, 0.3))     # true
+println(math.is_close(1.0000000001, 1.0))  # true  
+println(math.is_close(1.1, 1.2))           # false
+```
 
-add(5, 3)
-```
-**Output:**
-```
-Calling function: add
-Function add finished.
-```
 ---
 
 ## 🐞 Bug Fixes & Improvements
 
-1.  **Lexer Robustness:** The lexer has been improved to correctly handle multi-character operators (`**`, `=>`) without ambiguity.
-
-2.  **Parser Enhancements:** The function definition parser has been completely rewritten to support the new flexible argument syntax.
+* **List deep-copy fix:** Fixed an issue where copying lists could drop or omit elements — deep copies now preserve full data and internal structure.
+* **Threading `start` stability:** Fixed bugs in `libs.threading` that caused `start` to behave inconsistently or fail in edge cases. Thread startup and lifecycle handling are now more robust.
+* **Added `libs.channel`:** New standard library for channel-based message passing between threads.
+* **Added `math.is_close`:** New floating-point comparison function with tolerance to handle rounding errors reliably.
+* **Floating-point fixes:** Corrected floating-point handling bugs that caused incorrect results or instability in numeric operations.
+* **Numeric comparison fix:** Fixed edge cases in numeric comparisons so equality/ordering behaves correctly across integer/float boundaries.
 
 ---
 
-Zerionyx 4.0.4 is a major leap forward, providing developers with sophisticated tools to write cleaner, more powerful, and more reusable code. These new metaprogramming features unlock advanced design patterns and solidify Zerionyx's position as a highly capable modern scripting language.
+Zerionyx 4.0.5 tightens concurrency primitives and hardens numeric behavior — a practical release that makes parallel code safer and numerical logic more reliable.

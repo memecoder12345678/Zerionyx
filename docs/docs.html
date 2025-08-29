@@ -288,6 +288,8 @@
                 <li><a href="#lib-mouse">mouse</a></li>
                 <li><a href="#lib-screen">screen</a></li>
                 <li><a href="#lib-json">json</a></li>
+                <li><a href="#lib-decorators">json</a></li>
+                <li><a href="#lib-channel">json</a></li>
             </ul>
 
         </aside>
@@ -660,6 +662,8 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>cosh(x)</b> &rarr; number &mdash; Hyperbolic cosine</li>
                         <li><b>tanh(x)</b> &rarr; number &mdash; Hyperbolic tangent</li>
                         <li><b>round(x)</b> &rarr; number &mdash; Round <code>x</code> to nearest integer</li>
+                        <li><b>is_close(a, b, rel_tol=1e-9, abs_tol=0.0)</b> &rarr; bool &mdash; Compare two floats
+                            within a tolerance</li>
                         <li>Constants: <b>PI</b>, <b>E</b>, <b>ln2</b></li>
                     </ul>
                 </div>
@@ -876,18 +880,33 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>retry(times)</b> &rarr; func &mdash; Retry a function up to <code>times</code> if it
                             raises an error</li>
                         <li><b>timeout(ms)</b> &rarr; func &mdash; Cancel function execution if it exceeds
-                            <code>ms</code> milliseconds</li>
-                        <li><b>log_call(fn)</b> &rarr; func &mdash; Print logs before and after calling the function</li>
+                            <code>ms</code> milliseconds
+                        </li>
+                        <li><b>log_call(fn)</b> &rarr; func &mdash; Print logs before and after calling the function
+                        </li>
                         <li><b>measure_time(fn)</b> &rarr; func &mdash; Measure and print execution time (in ms)</li>
                         <li><b>repeat(n)</b> &rarr; func &mdash; Execute a function <code>n</code> times and return
                             the last result</li>
                         <li><b>ignore_error(default=none)</b> &rarr; func &mdash; Ignore errors and return
-                            <code>default</code> if an exception occurs</li>
+                            <code>default</code> if an exception occurs
+                        </li>
                         <li><b>deprecated(msg)</b> &rarr; func &mdash; Print a warning when calling a deprecated
                             function</li>
                         <li><b>lazy(fn)</b> &rarr; func &mdash; Compute the value once and reuse it on subsequent calls
                         </li>
                         <li><b>name(fn)</b> &rarr; str &mdash; Return the function name</li>
+                    </ul>
+                </div>
+                <div id="lib-channel">
+                    <h3>channel.zyx</h3>
+                    <ul>
+                        <li><b>new()</b> &rarr; channel &mdash; Create a new channel</li>
+                        <li><b>send(ch, value)</b> &rarr; none &mdash; Send <code>value</code> into channel
+                            <code>ch</code></li>
+                        <li><b>recv(ch)</b> &rarr; any &mdash; Receive a value from channel <code>ch</code> (blocks if
+                            empty)</li>
+                        <li><b>is_empty(ch)</b> &rarr; bool &mdash; Check if channel <code>ch</code> has no pending
+                            values</li>
                     </ul>
                 </div>
 
