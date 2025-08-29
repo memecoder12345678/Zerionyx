@@ -337,22 +337,18 @@ Bool.true = Bool(True)
 Bool.false = Bool(False)
 
 
-from fractions import Fraction
-import operator
-
-
 class Number(Object):
     __slots__ = ("value", "context", "pos_start", "pos_end", "fields")
 
     def __init__(self, value, context=None, pos_start=None, pos_end=None):
-        if isinstance(value, Fraction):
+        if isinstance(value, Fraction | Bool):
             self.value = value
-        elif isinstance(value, (int, float)):
+        elif isinstance(value, int):
             self.value = value
-        elif isinstance(value, str) and "." in value:
-            self.value = Fraction(value)
+        elif isinstance(value, float) and "." in str(value):
+            self.value = Fraction(str(value))
         else:
-            self.value = int(value) if value is not None else None
+            self.value = float(value) if value is not None else None
 
         self.context = context
         self.pos_start = pos_start
@@ -365,66 +361,44 @@ class Number(Object):
     def added_to(self, other):
         if isinstance(other, Number):
             return Number(self.value + other.value).set_context(self.context), None
-        return None, self.illegal_operation(
-            self, other, f"Can't add number to '{other.type()}'"
-        )
+        return None, Object.illegal_operation(self, other, f"Can't add number to '{other.type()}'")
 
     def subbed_by(self, other):
         if isinstance(other, Number):
             return Number(self.value - other.value).set_context(self.context), None
-        return None, self.illegal_operation(
-            self, other, f"Can't subtract number from '{other.type()}'"
-        )
+        return None, Object.illegal_operation(self, other, f"Can't subtract number from '{other.type()}'")
 
     def multed_by(self, other):
         if isinstance(other, Number):
             return Number(self.value * other.value).set_context(self.context), None
-        return None, self.illegal_operation(
-            self, other, f"Can't multiply number by '{other.type()}'"
-        )
+        return None, Object.illegal_operation(self, other, f"Can't multiply number by '{other.type()}'")
 
     def dived_by(self, other):
         if isinstance(other, Number):
             if other.value == 0:
-                return None, RTError(
-                    other.pos_start, other.pos_end, "Division by zero", self.context
-                )
+                return None, RTError(other.pos_start, other.pos_end, "Division by zero", self.context)
             return Number(self.value / other.value).set_context(self.context), None
-        return None, self.illegal_operation(
-            self, other, f"Can't divide number by '{other.type()}'"
-        )
+        return None, Object.illegal_operation(self, other, f"Can't divide number by '{other.type()}'")
 
     def moduled_by(self, other):
         if isinstance(other, Number):
             return Number(self.value % other.value).set_context(self.context), None
-        return None, self.illegal_operation(
-            self, other, f"Can't mod number by '{other.type()}'"
-        )
+        return None, Object.illegal_operation(self, other, f"Can't mod number by '{other.type()}'")
 
     def powed_by(self, other):
         if isinstance(other, Number):
-            return Number(self.value**other.value).set_context(self.context), None
-        return None, self.illegal_operation(
-            self, other, f"Can't power number by '{other.type()}'"
-        )
+            return Number(self.value ** other.value).set_context(self.context), None
+        return None, Object.illegal_operation(self, other, f"Can't power number by '{other.type()}'")
 
     def floordived_by(self, other):
         if isinstance(other, Number):
             if other.value == 0:
-                return None, MError(
-                    other.pos_start, other.pos_end, "Division by zero", self.context
-                )
+                return None, MError(other.pos_start, other.pos_end, "Division by zero", self.context)
             return Number(self.value // other.value).set_context(self.context), None
-        return None, self.illegal_operation(
-            self, other, f"Can't floor divide number by '{other.type()}'"
-        )
+        return None, Object.illegal_operation(self, other, f"Can't floor divide number by '{other.type()}'")
 
     def _get_comparison_result(self, other, op):
-        if (
-            isinstance(other, Number)
-            and self.value is not None
-            and other.value is not None
-        ):
+        if isinstance(other, Number) and self.value is not None and other.value is not None:
             return Bool(op(self.value, other.value)).set_context(self.context), None
         if self.value is None:
             if isinstance(other, NoneObject):
@@ -434,66 +408,30 @@ class Number(Object):
             return Bool(result).set_context(self.context), None
         return Bool(op is operator.ne).set_context(self.context), None
 
-    def get_comparison_eq(self, other):
-        return self._get_comparison_result(other, operator.eq)
-
-    def get_comparison_ne(self, other):
-        return self._get_comparison_result(other, operator.ne)
-
-    def get_comparison_lt(self, other):
-        return self._get_comparison_result(other, operator.lt)
-
-    def get_comparison_gt(self, other):
-        return self._get_comparison_result(other, operator.gt)
-
-    def get_comparison_lte(self, other):
-        return self._get_comparison_result(other, operator.le)
-
-    def get_comparison_gte(self, other):
-        return self._get_comparison_result(other, operator.ge)
+    def get_comparison_eq(self, other): return self._get_comparison_result(other, operator.eq)
+    def get_comparison_ne(self, other): return self._get_comparison_result(other, operator.ne)
+    def get_comparison_lt(self, other): return self._get_comparison_result(other, operator.lt)
+    def get_comparison_gt(self, other): return self._get_comparison_result(other, operator.gt)
+    def get_comparison_lte(self, other): return self._get_comparison_result(other, operator.le)
+    def get_comparison_gte(self, other): return self._get_comparison_result(other, operator.ge)
 
     def anded_by(self, other):
         if not isinstance(other, Number):
-            return None, self.illegal_operation(
-                self, other, f"Can't compare number to '{other.type()}'"
-            )
+            return None, Object.illegal_operation(self, other, f"Can't compare number to '{other.type()}'")
         if self.value is None or other.value is None:
-            return None, TError(
-                self.pos_start,
-                self.pos_end,
-                "Cannot perform logical operation with 'none'",
-                self.context,
-            )
-        return (
-            Bool((self.value != 0) and (other.value != 0)).set_context(self.context),
-            None,
-        )
+            return None, TError(self.pos_start, self.pos_end, "Cannot perform logical operation with 'none'", self.context)
+        return Bool((self.value != 0) and (other.value != 0)).set_context(self.context), None
 
     def ored_by(self, other):
         if not isinstance(other, Number):
-            return None, self.illegal_operation(
-                self, other, f"Can't compare number to '{other.type()}'"
-            )
+            return None, Object.illegal_operation(self, other, f"Can't compare number to '{other.type()}'")
         if self.value is None or other.value is None:
-            return None, TError(
-                self.pos_start,
-                self.pos_end,
-                "Cannot perform logical operation with 'none'",
-                self.context,
-            )
-        return (
-            Bool((self.value != 0) or (other.value != 0)).set_context(self.context),
-            None,
-        )
+            return None, TError(self.pos_start, self.pos_end, "Cannot perform logical operation with 'none'", self.context)
+        return Bool((self.value != 0) or (other.value != 0)).set_context(self.context), None
 
     def notted(self):
         if self.value is None:
-            return None, TError(
-                self.pos_start,
-                self.pos_end,
-                "Cannot perform logical operation with 'none'",
-                self.context,
-            )
+            return None, TError(self.pos_start, self.pos_end, "Cannot perform logical operation with 'none'", self.context)
         return Bool(not bool(self.value)).set_context(self.context), None
 
     def is_true(self):
