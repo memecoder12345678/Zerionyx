@@ -48,7 +48,7 @@ threading.join(t)
 println("--- Demo Finished ---")
 ```
 
-### Floating-point comparison (`libs.math.is_close`)
+### Floating-point comparison (`math.is_close`)
 
 A new utility function to compare two floating-point numbers with tolerance. This prevents false negatives from rounding errors.
 

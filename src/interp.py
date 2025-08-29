@@ -3923,6 +3923,11 @@ class BuiltInFunction(BaseFunction):
         return RTResult().success(
             Bool(math.isclose(v1, v2, rel_tol=rel_tol, abs_tol=abs_tol))
         )
+    
+    @set_args(["value"])
+    def execute_is_channel(self, exec_ctx):
+        is_channel = isinstance(exec_ctx.symbol_table.get("value"), Channel)
+        return RTResult().success(Number.true if is_channel else Number.false)
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -4762,6 +4767,7 @@ global_symbol_table.set("none_type", String("<none>"))
 global_symbol_table.set("nan", Number(float("nan")))
 global_symbol_table.set("inf", Number(float("inf")))
 global_symbol_table.set("neg_inf", Number(float("-inf")))
+global_symbol_table.set("channel_type", String("<channel>"))
 
 for func in BUILTIN_FUNCTIONS:
     global_symbol_table.set(func, getattr(BuiltInFunction, func))

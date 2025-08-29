@@ -526,6 +526,7 @@ Zerionyx may be magical, but its syntax must be real.
                         <code>l</code> from <code>from</code> to <code>to</code> step <code>step</code> (exclusive)
                     </li>
                     <li><b>is_nan(n)</b> &rarr; bool &mdash; Check if <code>n</code> is NaN (Not a Number)</li>
+                    <li><b>is_channel(n)</b> &rarr; bool &mdash; Check if <code>n</code> is channel</li>
                 </ul>
             </section>
 
@@ -900,7 +901,7 @@ Zerionyx may be magical, but its syntax must be real.
                 <div id="lib-channel">
                     <h3>channel.zyx</h3>
                     <ul>
-                        <li><b>new()</b> &rarr; channel &mdash; Create a new channel</li>
+                        <li><b>new()</b> &rarr; channel_type &mdash; Create a new channel</li>
                         <li><b>send(ch, value)</b> &rarr; none &mdash; Send <code>value</code> into channel
                             <code>ch</code></li>
                         <li><b>recv(ch)</b> &rarr; any &mdash; Receive a value from channel <code>ch</code> (blocks if
