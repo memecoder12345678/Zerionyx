@@ -45,6 +45,7 @@
             max-width: 1200px;
             margin: 0 auto;
             display: flex;
+            align-items: center;
             justify-content: space-between;
             padding: 0.8rem 20px;
         }
@@ -90,6 +91,16 @@
         nav a:hover {
             color: var(--neon-blue);
             text-shadow: 0 0 5px var(--neon-blue);
+        }
+
+        .nav-toggle {
+            display: none;
+            font-size: 1.8rem;
+            color: var(--light-text);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
         }
 
         .docs-wrapper {
@@ -241,8 +252,126 @@
             color: #667788;
             font-style: italic;
         }
+
+
+
+        @media (max-width: 768px) {
+            .header-inner {
+                flex-wrap: wrap;
+                justify-content: center;
+                padding: 0.8rem 15px;
+            }
+
+            nav {
+                width: 100%;
+                margin-top: 1rem;
+                display: none;
+                flex-direction: column;
+                text-align: center;
+            }
+
+            nav.active {
+                display: flex;
+            }
+
+            nav a {
+                margin: 10px 0;
+                padding: 8px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            nav a:last-child {
+                border-bottom: none;
+            }
+
+            .nav-toggle {
+                display: block;
+                order: 1;
+            }
+
+            .logo {
+                flex-grow: 1;
+                justify-content: flex-start;
+            }
+
+            .docs-wrapper {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+                padding: 1.5rem 1rem;
+            }
+
+            .main-content {
+                padding: 1.5rem 1rem;
+            }
+
+            .main-content h1 {
+                font-size: 2rem;
+            }
+
+            .main-content h2 {
+                font-size: 1.6rem;
+                margin-top: 2rem;
+            }
+
+            .main-content h3 {
+                font-size: 1.2rem;
+                margin-top: 1.5rem;
+            }
+
+            footer {
+                padding: 1.5rem 1rem;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .header-inner {
+                padding: 0.8rem 20px;
+            }
+
+            .docs-wrapper {
+                padding: 0 15px;
+            }
+
+            .sidebar {
+                width: 200px;
+                padding: 1.5rem 0.8rem;
+            }
+
+            .main-content {
+                padding: 2rem 2rem;
+            }
+
+            .main-content h1 {
+                font-size: 2.2rem;
+            }
+
+            .main-content h2 {
+                font-size: 1.7rem;
+            }
+
+            .main-content h3 {
+                font-size: 1.3rem;
+            }
+        }
     </style>
 </head>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const navToggle = document.querySelector('.nav-toggle');
+        const nav = document.querySelector('nav');
+
+        navToggle.addEventListener('click', function () {
+            nav.classList.toggle('active');
+        });
+    });
+</script>
 
 <body>
     <header>
@@ -251,6 +380,7 @@
                 <img src="favicon.ico" alt="Zerionyx logo">
                 <a href="index.html">Zeriony<span>x</span></a>
             </div>
+            <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
             <nav>
                 <a href="index.html">Home</a>
                 <a href="https://github.com/memecoder12345678/Zerionyx" target="_blank">GitHub</a>
@@ -513,7 +643,9 @@ Zerionyx may be magical, but its syntax must be real.
                         <code>none</code> if fail and <code>silent</code> true else raise
                     </li>
                     <li><b>to_str(x)</b> &rarr; str &mdash; Convert <code>x</code> to string</li>
-                    <li><b>to_cfloat(x, precision=10, supress_error=false)</b> &rarr; cfloat &mdash; Convert <code>x</code> to cfloat (correct float)</li>
+                    <li><b>to_cfloat(x, precision=10, supress_error=false)</b> &rarr; cfloat &mdash; Convert
+                        <code>x</code> to cfloat (correct float)
+                    </li>
                     <li><b>to_bytes(x, from_hex=false, supress_error=false)</b> &rarr; bytes &mdash; Convert
                         <code>x</code>
                         to bytes
@@ -904,7 +1036,8 @@ Zerionyx may be magical, but its syntax must be real.
                     <ul>
                         <li><b>new()</b> &rarr; channel_type &mdash; Create a new channel</li>
                         <li><b>send(ch, value)</b> &rarr; none &mdash; Send <code>value</code> into channel
-                            <code>ch</code></li>
+                            <code>ch</code>
+                        </li>
                         <li><b>recv(ch)</b> &rarr; any &mdash; Receive a value from channel <code>ch</code> (blocks if
                             empty)</li>
                         <li><b>is_empty(ch)</b> &rarr; bool &mdash; Check if channel <code>ch</code> has no pending
@@ -927,5 +1060,3 @@ Zerionyx may be magical, but its syntax must be real.
 
 
 </html>
-
-
