@@ -2,7 +2,7 @@
 
 **Date:** August 29, 2025
 
-Zerionyx 4.0.5 focuses on improving concurrency primitives and overall runtime reliability. This release adds a first-class `channel` library for safe thread communication, introduces a new `is_close` function in `libs.math` for robust floating-point comparison, and fixes several correctness and stability issues (deep copy, threading startup, floating-point behavior, and numeric comparisons).
+Zerionyx 4.0.5 focuses on improving concurrency primitives and overall runtime reliability. This release adds a first-class `channel` library for safe thread communication, introduces a new `is_close` function in `libs.math` for robust floating-point comparison, and fixes several correctness and stability issues (deep copy, threading startup, and numeric comparisons).
 
 ---
 
@@ -68,8 +68,6 @@ println(math.is_close(1.1, 1.2))           # false
 * **Threading `start` stability:** Fixed bugs in `libs.threading` that caused `start` to behave inconsistently or fail in edge cases. Thread startup and lifecycle handling are now more robust.
 * **Added `libs.channel`:** New standard library for channel-based message passing between threads.
 * **Added `math.is_close`:** New floating-point comparison function with tolerance to handle rounding errors reliably.
-* **Floating-point fixes:** Corrected floating-point handling bugs that caused incorrect results or instability in numeric operations.
-* **Numeric comparison fix:** Fixed edge cases in numeric comparisons so equality/ordering behaves correctly across integer/float boundaries.
 
 ---
 

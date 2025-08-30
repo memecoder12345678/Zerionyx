@@ -1,5 +1,4 @@
 from .lexer import RTResult
-from fractions import Fraction
 from queue import Queue as PyQueue
 import operator
 import reprlib
@@ -341,15 +340,7 @@ class Number(Object):
     __slots__ = ("value", "context", "pos_start", "pos_end", "fields")
 
     def __init__(self, value, context=None, pos_start=None, pos_end=None):
-        if isinstance(value, Fraction | Bool):
-            self.value = value
-        elif isinstance(value, int):
-            self.value = value
-        elif isinstance(value, float) and "." in str(value):
-            self.value = Fraction(str(value))
-        else:
-            self.value = float(value) if value is not None else None
-
+        self.value = value
         self.context = context
         self.pos_start = pos_start
         self.pos_end = pos_end
@@ -442,11 +433,8 @@ class Number(Object):
             return "<int>"
         elif isinstance(self.value, float):
             return "<float>"
-        elif isinstance(self.value, Fraction):
-            return "<int>" if self.value.denominator == 1 else "<float>"
         elif self.value is None:
             return "<none>"
-        return "<unknown>"
 
     def __str__(self):
         return self.__repr__()
@@ -456,8 +444,6 @@ class Number(Object):
             return "none"
         if isinstance(self.value, Bool):
             return "true" if self.value else "false"
-        if isinstance(self.value, Fraction):
-            return str(float(self.value))
         s = str(self.value)
         if "e" in s or "E" in s:
             return s.replace("e", "*10^(").replace("E", "*10^(") + ")"
