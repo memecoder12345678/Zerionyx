@@ -3,15 +3,15 @@
 namespace ffio
     os_sep = os_sep_fp
 
-    defun write(f, m)
-        if m != "w" and m != "a" and mode != "wb" do
+    defun write(f, m, t)
+        if m != "w" and m != "a" and m != "wb" do
             panic("Invalid mode for write operation", "IO")
         done
         if type(f) != str do
             panic("First argument of 'write' must be a string", "T")
         done
         f_ = open_fp(f)
-        write_fp(f_, m)
+        write_fp(f_, m, t)
     done
 
     defun read(f, m)
