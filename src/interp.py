@@ -102,22 +102,34 @@ class BaseFunction(Object):
         res = RTResult()
         interpreter = Interpreter()
 
+        if not vargs_name and len(positional_args) > len(param_names):
+            return res.failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Function takes {len(param_names)} positional arguments but {len(positional_args)} were given",
+                    exec_ctx,
+                )
+            )
+
         for i, param_name in enumerate(param_names):
             if i < len(positional_args):
                 exec_ctx.symbol_table.set(param_name, positional_args[i])
             elif param_name in keyword_args:
                 exec_ctx.symbol_table.set(param_name, keyword_args.pop(param_name))
-            elif i < len(defaults):
-                default_value = defaults[i]
-                if default_value is None:
-                    return res.failure(
-                        RTError(
-                            self.pos_start,
-                            self.pos_end,
-                            f"Missing required argument '{param_name}'",
-                            exec_ctx,
-                        )
+            elif i < len(param_names) - len(defaults):
+                return res.failure(
+                    RTError(
+                        self.pos_start,
+                        self.pos_end,
+                        f"Missing required argument '{param_name}'",
+                        exec_ctx,
                     )
+                )
+            else:
+                default_index = i - (len(param_names) - len(defaults))
+                default_value = defaults[default_index]
+                
                 is_node = not isinstance(default_value, Object)
                 if is_node:
                     evaluated_default = res.register(
@@ -131,27 +143,17 @@ class BaseFunction(Object):
                         default_value if default_value is not None else Number.none
                     )
                     exec_ctx.symbol_table.set(param_name, final_default)
-            else:
-                return res.failure(
-                    RTError(
-                        self.pos_start,
-                        self.pos_end,
-                        f"Missing required argument '{param_name}'",
-                        exec_ctx,
-                    )
-                )
+
         if vargs_name:
-            remaining_pos_args_count = len(positional_args) - len(param_names)
-            if remaining_pos_args_count > 0:
-                vargs_list = List(positional_args[len(param_names) :])
-            else:
-                vargs_list = List([])
+            remaining_pos_args = positional_args[len(param_names):]
+            vargs_list = List(remaining_pos_args)
             exec_ctx.symbol_table.set(vargs_name, vargs_list.set_context(exec_ctx))
+
         if kargs_name:
             kargs_map = HashMap(keyword_args)
             exec_ctx.symbol_table.set(kargs_name, kargs_map.set_context(exec_ctx))
         elif keyword_args:
-            first_unknown = list(keyword_args.keys())[0]
+            first_unknown = next(iter(keyword_args.keys()))
             return res.failure(
                 RTError(
                     self.pos_start,
@@ -160,6 +162,7 @@ class BaseFunction(Object):
                     exec_ctx,
                 )
             )
+
         return res.success(None)
 
 
