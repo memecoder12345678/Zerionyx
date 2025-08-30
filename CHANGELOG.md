@@ -68,6 +68,7 @@ println(math.is_close(1.1, 1.2))           # false
 * **Threading `start` stability:** Fixed bugs in `libs.threading` that caused `start` to behave inconsistently or fail in edge cases. Thread startup and lifecycle handling are now more robust.
 * **Added `libs.channel`:** New standard library for channel-based message passing between threads.
 * **Added `math.is_close`:** New floating-point comparison function with tolerance to handle rounding errors reliably.
+* **Added `to_cfloat`:** New built-in function for high-precision decimal conversion with customizable precision and error suppression.
 
 ---
 

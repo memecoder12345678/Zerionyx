@@ -7,6 +7,7 @@ import json
 from .parser import *
 from .nodes import *
 from .datatypes import *
+
 from .consts import *
 from .errors import TError, IError, MError, Error, RTError
 from shutil import rmtree, copy
@@ -129,7 +130,7 @@ class BaseFunction(Object):
             else:
                 default_index = i - (len(param_names) - len(defaults))
                 default_value = defaults[default_index]
-                
+
                 is_node = not isinstance(default_value, Object)
                 if is_node:
                     evaluated_default = res.register(
@@ -145,7 +146,7 @@ class BaseFunction(Object):
                     exec_ctx.symbol_table.set(param_name, final_default)
 
         if vargs_name:
-            remaining_pos_args = positional_args[len(param_names):]
+            remaining_pos_args = positional_args[len(param_names) :]
             vargs_list = List(remaining_pos_args)
             exec_ctx.symbol_table.set(vargs_name, vargs_list.set_context(exec_ctx))
 
@@ -3926,11 +3927,88 @@ class BuiltInFunction(BaseFunction):
         return RTResult().success(
             Bool(math.isclose(v1, v2, rel_tol=rel_tol, abs_tol=abs_tol))
         )
-    
+
     @set_args(["value"])
     def execute_is_channel(self, exec_ctx):
         is_channel = isinstance(exec_ctx.symbol_table.get("value"), Channel)
         return RTResult().success(Number.true if is_channel else Number.false)
+    
+    @set_args(["value"])
+    def execute_is_cfloat(self, exec_ctx):
+        is_cfloat = isinstance(exec_ctx.symbol_table.get("value"), CFloat)
+        return RTResult().success(Number.true if is_cfloat else Number.false)
+
+    @set_args(["value", "precision", "supress_error"], [None, Number(10), Bool.false])
+    def execute_to_cfloat(self, exec_ctx):
+        value = exec_ctx.symbol_table.get("value")
+        precision = exec_ctx.symbol_table.get("precision")
+        supress_error = exec_ctx.symbol_table.get("supress_error")
+
+        if not isinstance(precision, Number) or not isinstance(precision.value, int):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument must be an integer",
+                    exec_ctx,
+                )
+            )
+
+        if not isinstance(supress_error, Bool):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Third argument must be a boolean",
+                    exec_ctx,
+                )
+            )
+
+        precision_value = int(precision.value)
+        supress_error_ = bool(supress_error.value)
+
+        try:
+            if isinstance(value, CFloat):
+                result = CFloat(value.value, precision_value)
+                return RTResult().success(result)
+
+            elif isinstance(value, Number):
+                decimal_value = Decimal(str(value.value))
+                result = CFloat(decimal_value, precision_value)
+                return RTResult().success(result)
+
+            elif isinstance(value, String):
+                decimal_value = Decimal(value.value)
+                result = CFloat(decimal_value, precision_value)
+                return RTResult().success(result)
+
+            else:
+                if supress_error_:
+                    result = CFloat(Decimal("0"), precision_value)
+                    return RTResult().success(result)
+                else:
+                    return RTResult().failure(
+                        RTError(
+                            self.pos_start,
+                            self.pos_end,
+                            f"Cannot convert '{value.type()}' to decimal",
+                            exec_ctx,
+                        )
+                    )
+
+        except (InvalidOperation, ValueError, TypeError) as e:
+            if supress_error_:
+                result = CFloat(Decimal("0"), precision_value)
+                return RTResult().success(result)
+            else:
+                return RTResult().failure(
+                    RTError(
+                        self.pos_start,
+                        self.pos_end,
+                        f"Failed to convert to decimal: {str(e)}",
+                        exec_ctx,
+                    )
+                )
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -4767,6 +4845,7 @@ global_symbol_table.set("os_name_fp", String(os.name))
 global_symbol_table.set("PI_fp", Number(math.pi))
 global_symbol_table.set("E_fp", Number(math.e))
 global_symbol_table.set("none_type", String("<none>"))
+global_symbol_table.set("cfloat", String("<cfloat>"))
 global_symbol_table.set("nan", Number(float("nan")))
 global_symbol_table.set("inf", Number(float("inf")))
 global_symbol_table.set("neg_inf", Number(float("-inf")))
