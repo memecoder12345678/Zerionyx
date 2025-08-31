@@ -1,0 +1,9 @@
+namespace asyncio
+    async defun gather(coroutines_list)
+        return await gather_fp(coroutines_list)
+    done
+
+    async defun sleep(duration)
+        return await sleep_async_fp(duration)
+    done
+done

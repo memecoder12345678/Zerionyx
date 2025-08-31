@@ -1,0 +1,29 @@
+println("--- Async/Await Test ---")
+
+async defun worker(name, duration)
+    println("Worker " + name + " started.")
+    await sleep_async_fp(duration)
+    println("Worker " + name + " finished.")
+    return "Result from " + name
+done
+
+async defun main()
+    println("Main function started.")
+
+    let task1 = worker("A", 2)
+    let task2 = worker("B", 1)
+
+    println("Type of task1: " + type(task1))
+    println("Type of task2: " + type(task2))
+
+    println("Awaiting tasks sequentially...")
+
+    let result1 = await task1
+    let result2 = await task2
+
+    println("All tasks completed.")
+    println("Result 1: " + result1)
+    println("Result 2: " + result2)
+done
+
+await main()

@@ -183,6 +183,7 @@ class FuncDefNode:
         body_node,
         should_auto_return,
         decorator_nodes,
+        is_async=False,
     ):
         self.var_name_tok = var_name_tok
         self.arg_name_toks = arg_name_toks
@@ -192,6 +193,7 @@ class FuncDefNode:
         self.body_node = body_node
         self.should_auto_return = should_auto_return
         self.decorator_nodes = decorator_nodes
+        self.is_async = is_async
 
         if self.var_name_tok:
             self.pos_start = self.var_name_tok.pos_start
@@ -200,6 +202,18 @@ class FuncDefNode:
         else:
             self.pos_start = self.body_node.pos_start
         self.pos_end = self.body_node.pos_end
+
+
+class AwaitNode:
+    __slots__ = ["node_to_await", "pos_start", "pos_end"]
+
+    def __init__(self, node_to_await):
+        self.node_to_await = node_to_await
+        self.pos_start = node_to_await.pos_start
+        self.pos_end = node_to_await.pos_end
+
+    def __repr__(self):
+        return f"(Await: {self.node_to_await})"
 
 
 class VargsUnpackNode:

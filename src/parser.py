@@ -143,6 +143,12 @@ class Parser:
                     return res
                 self.skip_newlines()
 
+            is_async = False
+            if self.current_tok.matches(TT_KEYWORD, "async"):
+                res.register_advancement()
+                self.advance()
+                is_async = True
+
             if not self.current_tok.matches(TT_KEYWORD, "defun"):
                 return res.failure(
                     InvalidSyntaxError(
@@ -152,7 +158,7 @@ class Parser:
                     )
                 )
 
-            func_def_node = res.register(self.func_def())
+            func_def_node = res.register(self.func_def(is_async))
             if res.error:
                 return res
 
@@ -161,6 +167,19 @@ class Parser:
 
         if self.current_tok.matches(TT_KEYWORD, "using"):
             return self.using_expr()
+
+        if self.current_tok.matches(TT_KEYWORD, "async"):
+            res.register_advancement()
+            self.advance()
+            if not self.current_tok.matches(TT_KEYWORD, "defun"):
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected 'defun' after 'async'",
+                    )
+                )
+            return self.func_def(is_async=True)
 
         if self.current_tok.matches(TT_KEYWORD, "defun"):
             return self.func_def()
@@ -614,6 +633,28 @@ class Parser:
             if res.error:
                 return res
             return res.success(func_def)
+        elif tok.matches(TT_KEYWORD, "async"):
+            res.register_advancement()
+            self.advance()
+            if not self.current_tok.matches(TT_KEYWORD, "defun"):
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected 'defun' after 'async'",
+                    )
+                )
+            func_def = res.register(self.func_def(is_async=True))
+            if res.error:
+                return res
+            return res.success(func_def)
+        elif tok.matches(TT_KEYWORD, "await"):
+            res.register_advancement()
+            self.advance()
+            expr_to_await = res.register(self.expr())
+            if res.error:
+                return res
+            return res.success(AwaitNode(expr_to_await))
         elif tok.matches(TT_KEYWORD, "namespace"):
             namespace = res.register(self.namespace())
             if res.error:
@@ -629,7 +670,7 @@ class Parser:
             InvalidSyntaxError(
                 tok.pos_start,
                 tok.pos_end,
-                "Expected int, float, identifier, '+', '-', '(', '[', '{', 'if', 'for', 'while' or 'defun'",
+                "Expected int, float, identifier, '+', '-', '(', '[', '{', 'if', 'for', 'while', 'defun', 'async', or 'await'",
             )
         )
 
@@ -1194,7 +1235,7 @@ class Parser:
             return res
         return res.success(WhileNode(condition, body, False))
 
-    def func_def(self):
+    def func_def(self, is_async=False):
         res = ParseResult()
         pos_start = self.current_tok.pos_start.copy()
 
@@ -1365,6 +1406,7 @@ class Parser:
                     body,
                     True,
                     [],
+                    is_async,
                 )
             )
         elif self.current_tok.type == TT_NEWLINE:
@@ -1393,6 +1435,7 @@ class Parser:
                     body,
                     False,
                     [],
+                    is_async,
                 )
             )
         else:

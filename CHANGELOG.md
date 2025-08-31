@@ -1,75 +1,93 @@
-# Changelog: Version 4.0.5 — **Concurrency & Reliability Update**
+# Changelog: Version 5.0.0 — The Asynchronous Update
 
-**Date:** August 29, 2025
+**Date:** August 31, 2025
 
-Zerionyx 4.0.5 focuses on improving concurrency primitives and overall runtime reliability. This release adds a first-class `channel` library for safe thread communication, introduces a new `is_close` function in `libs.math` for robust floating-point comparison, and fixes several correctness and stability issues (deep copy, threading startup, and numeric comparisons).
+Zerionyx 5.0.0 marks a monumental leap forward by introducing a complete asynchronous programming model to the language. This release brings first-class `async/await` syntax, enabling developers to write highly efficient, non-blocking code for I/O-bound operations like network requests, file access, and concurrent task management.
+
+This update is designed to feel intuitive and powerful, integrating seamlessly with the existing language features while unlocking new possibilities for performance and responsiveness.
 
 ---
 
-## ✨ New Features
+## ✨ Major New Features
 
-### Channel library (`libs.channel`)
+### 1. Asynchronous Functions (`async defun`)
 
-A simple, safe message-passing primitive for thread-to-thread communication. Channels make it easy to send and receive values between threads without manual locking.
+You can now declare non-blocking functions, known as coroutines, using the new `async defun` syntax. Calling an `async` function does not execute it immediately; instead, it returns a special `coroutine` object, ready to be run by the event loop.
 
 ```zyx
-load "libs.threading"
-load "libs.channel"
-load "libs.time"
+load "libs.asyncio"
 
-println("--- Channel Demo ---")
+# Defines a coroutine that waits for 1 second before returning a value.
+async defun get_user_data()
+    println("(Task: fetching user data...)")
+    await asyncio.sleep(1) # This pauses the function without blocking the program
+    return {"id": 101, "name": "Alex"}
+done
+```
 
-let messages = channel.new()
+### 2. The `await` Expression
 
-defun worker()
-    println("  (Worker thread started)")
-    time.sleep(2)
-    println("  (Worker sending message: 'Hello from thread!')")
-    channel.send(messages, "Hello from thread!")
+The `await` keyword is used to pause the execution of a coroutine and wait for another coroutine to complete. It can only be used inside an `async` function. This is the core mechanism that allows the event loop to run other tasks while one is waiting.
 
-    time.sleep(1)
-    println("  (Worker sending message: 'Work done.')")
-    channel.send(messages, "Work done.")
-    println("  (Worker thread finished)")
+```zyx
+async defun main()
+    println("Calling the async function...")
+    let user_data_coro = get_user_data() # This returns a coroutine object
+
+    println("Awaiting the result...")
+    let data = await user_data_coro # Execution pauses here until get_user_data is done
+    
+    println("Result received: ")
+    print(data)
 done
 
-println("Main: Starting worker thread...")
-let t = threading.start(worker)
-
-println("Main: Waiting to receive a message...")
-let msg1 = channel.recv(messages)
-println("Main: Received -> " + to_str(msg1))
-
-println("Main: Waiting for the next message...")
-let msg2 = channel.recv(messages)
-println("Main: Received -> " + to_str(msg2))
-
-threading.join(t)
-println("--- Demo Finished ---")
+# The top-level 'await' starts the main coroutine
+await main()
 ```
 
-### Floating-point comparison (`math.is_close`)
+### 3. Concurrent Task Execution with `asyncio.gather`
 
-A new utility function to compare two floating-point numbers with tolerance. This prevents false negatives from rounding errors.
+To unlock the full power of `async`, the new built-in function `asyncio.gather` runs a list of coroutines concurrently. It starts all of them at once and waits for them all to finish, returning a list of their results. The total time taken is determined by the longest-running coroutine, not the sum of all durations.
 
 ```zyx
+load "libs.time"
 load "libs.math"
+load "libs.asyncio"
 
-println(math.is_close(0.1 + 0.2, 0.3))     # true
-println(math.is_close(1.0000000001, 1.0))  # true  
-println(math.is_close(1.1, 1.2))           # false
+async defun task(name, duration)
+    await asyncio.sleep(duration)
+    return "Task '" + name + "' finished."
+done
+
+async defun run_concurrently()
+    let start = time.time()
+    
+    let results = await asyncio.gather([
+        task("A", 2),
+        task("B", 1),
+        task("C", 3)
+    ])
+    
+    let duration = time.time() - start
+    
+    # Total time will be ~3 seconds, not 6 seconds.
+    println("All tasks completed in ~" + to_str(math.round(duration)) + "s")
+    println(results)
+done
+
+await run_concurrently()
 ```
 
 ---
 
-## 🐞 Bug Fixes & Improvements
+## 🐞 Other Changes & Improvements
 
-* **List deep-copy fix:** Fixed an issue where copying lists could drop or omit elements — deep copies now preserve full data and internal structure.
-* **Threading `start` stability:** Fixed bugs in `libs.threading` that caused `start` to behave inconsistently or fail in edge cases. Thread startup and lifecycle handling are now more robust.
-* **Added `libs.channel`:** New standard library for channel-based message passing between threads.
-* **Added `math.is_close`:** New floating-point comparison function with tolerance to handle rounding errors reliably.
-* **Added `to_cfloat`:** New built-in function for high-precision decimal conversion with customizable precision and error suppression.
+*   **New Keywords:** Added `async` and `await` to the language grammar.
+*   **New Data Type:** Introduced the internal `<coroutine>` object type.
+*   **New library**: Added `libs.asyncio` with event loop, tasks, and coroutine utilities.
+*   **Interpreter Core:** The entire interpreter engine has been upgraded to be asynchronous, enabling the event loop to manage the execution stack.
+*   **Error Handling:** Tracebacks and error messages have been improved to provide clear context when exceptions occur within `async` functions or during an `await`.
 
 ---
 
-Zerionyx 4.0.5 tightens concurrency primitives and hardens numeric behavior — a practical release that makes parallel code safer and numerical logic more reliable.
+Zerionyx 5.0.0 fundamentally changes how concurrent code can be written, making it easier than ever to build fast, scalable, and responsive applications.

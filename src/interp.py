@@ -4,6 +4,7 @@ import time
 import random
 import math
 import json
+import asyncio
 from .parser import *
 from .nodes import *
 from .datatypes import *
@@ -34,7 +35,7 @@ BUILTIN_FUNCTIONS = []
 global_symbol_table = SymbolTable()
 
 
-def load_module(fn, interpreter, context):
+async def load_module(fn, interpreter, context):
     result = None
     with open(fn, "r", encoding="utf-8") as f:
         text = f.read()
@@ -54,7 +55,7 @@ def load_module(fn, interpreter, context):
         context.symbol_table = global_symbol_table
         context.private_symbol_table = SymbolTable()
         context.private_symbol_table.set("is_main", Number.false)
-        result = interpreter.visit(ast.node, context)
+        result = await interpreter.visit(ast.node, context)
         result.value = "" if str(result.value) == "none" else result.value
         return result.value, result.error
     except KeyboardInterrupt:
@@ -90,7 +91,7 @@ class BaseFunction(Object):
         )
         return new_context
 
-    def handle_arguments(
+    async def handle_arguments(
         self,
         param_names,
         defaults,
@@ -134,7 +135,7 @@ class BaseFunction(Object):
                 is_node = not isinstance(default_value, Object)
                 if is_node:
                     evaluated_default = res.register(
-                        interpreter.visit(default_value, exec_ctx)
+                        await interpreter.visit(default_value, exec_ctx)
                     )
                     if res.should_return():
                         return res
@@ -177,6 +178,7 @@ class Function(BaseFunction):
         vargs_name_tok,
         kargs_name_tok,
         should_auto_return,
+        is_async=False,
     ):
         super().__init__(name)
         self.body_node = body_node
@@ -185,13 +187,22 @@ class Function(BaseFunction):
         self.vargs_name = vargs_name_tok.value if vargs_name_tok else None
         self.kargs_name = kargs_name_tok.value if kargs_name_tok else None
         self.should_auto_return = should_auto_return
+        self.is_async = is_async
 
-    def execute(self, positional_args, keyword_args):
+    async def execute(self, positional_args, keyword_args):
         res = RTResult()
+        interpreter = Interpreter()
         exec_ctx = self.generate_new_context()
 
+        if self.is_async:
+            return res.success(
+                Coroutine(self, positional_args, keyword_args)
+                .set_context(exec_ctx)
+                .set_pos(self.pos_start, self.pos_end)
+            )
+
         res.register(
-            self.handle_arguments(
+            await self.handle_arguments(
                 self.arg_names,
                 self.defaults,
                 self.vargs_name,
@@ -204,10 +215,10 @@ class Function(BaseFunction):
         if res.should_return():
             return res
 
-        interpreter = Interpreter()
-        value = res.register(interpreter.visit(self.body_node, exec_ctx))
+        value = res.register(await interpreter.visit(self.body_node, exec_ctx))
         if res.should_return() and res.func_return_value is None:
             return res
+
         ret_value = (
             (value if self.should_auto_return else None)
             or res.func_return_value
@@ -224,16 +235,21 @@ class Function(BaseFunction):
             Token(TT_IDENTIFIER, self.vargs_name) if self.vargs_name else None,
             Token(TT_IDENTIFIER, self.kargs_name) if self.kargs_name else None,
             self.should_auto_return,
+            self.is_async,
         )
         copy.set_context(self.context)
         copy.set_pos(self.pos_start, self.pos_end)
         return copy
 
     def __repr__(self):
-        return f"<function {self.name}>"
+        return (
+            f"<async function {self.name}>"
+            if self.is_async
+            else f"<function {self.name}>"
+        )
 
     def type(self):
-        return "<func>"
+        return "<async_func>" if self.is_async else "<func>"
 
 
 class BuiltInFunction(BaseFunction):
@@ -242,13 +258,21 @@ class BuiltInFunction(BaseFunction):
     def __init__(self, name):
         super().__init__(name)
 
-    def execute(self, positional_args, keyword_args):
+    async def execute(self, positional_args, keyword_args):
         res = RTResult()
         exec_ctx = self.generate_new_context()
         method_name = f"execute_{self.name}"
         method = getattr(self, method_name, self.no_execute_method)
+
+        if asyncio.iscoroutinefunction(method):
+            return res.success(
+                Coroutine(self, positional_args, keyword_args)
+                .set_context(exec_ctx)
+                .set_pos(self.pos_start, self.pos_end)
+            )
+
         res.register(
-            self.handle_arguments(
+            await self.handle_arguments(
                 param_names=method.arg_names,
                 defaults=method.defaults,
                 vargs_name=None,
@@ -260,7 +284,9 @@ class BuiltInFunction(BaseFunction):
         )
         if res.should_return():
             return res
+
         return_value = res.register(method(exec_ctx))
+
         if res.should_return():
             return res
 
@@ -289,6 +315,21 @@ class BuiltInFunction(BaseFunction):
             return f
 
         return _args
+
+    @set_args(["seconds"])
+    async def execute_sleep_async_fp(self, exec_ctx):
+        seconds = exec_ctx.symbol_table.get("seconds")
+        if not isinstance(seconds, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'sleep' must be a number",
+                    exec_ctx,
+                )
+            )
+        await asyncio.sleep(seconds.value)
+        return RTResult().success(Number.none)
 
     @set_args(["value"], [String("")])
     def execute_println(self, exec_ctx):
@@ -1669,7 +1710,7 @@ class BuiltInFunction(BaseFunction):
             def thread_wrapper():
                 context = func.generate_new_context()
                 context.private_symbol_table.set("is_main", Number.false)
-                func.execute(args.value, {})
+                asyncio.run(func.execute(args.value, {}))
 
             thread = threading.Thread(target=thread_wrapper, daemon=True)
             thread.start()
@@ -2105,7 +2146,7 @@ class BuiltInFunction(BaseFunction):
         return RTResult().success(Number(index))
 
     @set_args(["func", "args"], [None, List([])])
-    def execute_is_panic(self, exec_ctx):
+    async def execute_is_panic(self, exec_ctx):
         func = exec_ctx.symbol_table.get("func")
         args = exec_ctx.symbol_table.get("args")
         if not isinstance(func, BaseFunction):
@@ -2129,7 +2170,7 @@ class BuiltInFunction(BaseFunction):
         try:
             positional_args = args.value
             keyword_args = {}
-            res = func.execute(positional_args, keyword_args)
+            res = await func.execute(positional_args, keyword_args)
             if res.error:
                 err = res.error
                 if isinstance(err, Error):
@@ -3932,7 +3973,7 @@ class BuiltInFunction(BaseFunction):
     def execute_is_channel(self, exec_ctx):
         is_channel = isinstance(exec_ctx.symbol_table.get("value"), Channel)
         return RTResult().success(Number.true if is_channel else Number.false)
-    
+
     @set_args(["value"])
     def execute_is_cfloat(self, exec_ctx):
         is_cfloat = isinstance(exec_ctx.symbol_table.get("value"), CFloat)
@@ -4009,6 +4050,125 @@ class BuiltInFunction(BaseFunction):
                         exec_ctx,
                     )
                 )
+            
+    @set_args(["value"])
+    def execute_is_coroutine(self, exec_ctx):
+        is_coroutine = isinstance(exec_ctx.symbol_table.get("value"), Coroutine)
+        return RTResult().success(Number.true if is_coroutine else Number.false)
+
+    async def _run_interpreter_coro(self, coro_obj, context):
+        res = RTResult()
+        interpreter = Interpreter()
+
+        func = coro_obj.func
+        exec_ctx = func.generate_new_context()
+
+        if isinstance(func, Function):
+            res.register(
+                await func.handle_arguments(
+                    func.arg_names,
+                    func.defaults,
+                    func.vargs_name,
+                    func.kargs_name,
+                    coro_obj.positional_args,
+                    coro_obj.keyword_args,
+                    exec_ctx,
+                )
+            )
+            if res.should_return():
+                return res
+
+            value = res.register(await interpreter.visit(func.body_node, exec_ctx))
+            if res.should_return() and res.func_return_value is None:
+                return res
+
+            ret_value = (
+                (value if func.should_auto_return else None)
+                or res.func_return_value
+                or Number.none
+            )
+            return res.success(ret_value)
+
+        elif isinstance(func, BuiltInFunction):
+            method_name = f"execute_{func.name}"
+            method = getattr(func, method_name, func.no_execute_method)
+
+            res.register(
+                await func.handle_arguments(
+                    param_names=method.arg_names,
+                    defaults=method.defaults,
+                    vargs_name=None,
+                    kargs_name=None,
+                    positional_args=coro_obj.positional_args,
+                    keyword_args=coro_obj.keyword_args,
+                    exec_ctx=exec_ctx,
+                )
+            )
+            if res.should_return():
+                return res
+
+            return_value = res.register(await method(exec_ctx))
+            if res.should_return():
+                return res
+
+            return res.success(return_value)
+
+        return RTResult().failure(
+            TError(
+                coro_obj.pos_start,
+                coro_obj.pos_end,
+                "Object is not a valid coroutine function",
+                context,
+            )
+        )
+
+    @set_args(["coroutines"])
+    async def execute_gather_fp(self, exec_ctx):
+        coroutines_list = exec_ctx.symbol_table.get("coroutines")
+
+        if not isinstance(coroutines_list, List):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Argument passed to 'gather_fp' must be a list, but got {coroutines_list.type()}.",
+                    exec_ctx,
+                )
+            )
+
+        tasks = []
+        for i, coro_obj in enumerate(coroutines_list.value):
+            if not isinstance(coro_obj, Coroutine):
+                return RTResult().failure(
+                    TError(
+                        self.pos_start,
+                        self.pos_end,
+                        f"All items in the list passed to 'gather_fp' must be coroutines. Item at index {i} is a {coro_obj.type()}.",
+                        exec_ctx,
+                    )
+                )
+            tasks.append(self._run_interpreter_coro(coro_obj, exec_ctx))
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        final_results = []
+        for res in results:
+            if isinstance(res, BaseException):
+                return RTResult().failure(
+                    RTError(
+                        self.pos_start,
+                        self.pos_end,
+                        f"A concurrent task failed with a Python exception: {res}",
+                        exec_ctx,
+                    )
+                )
+
+            if res.error:
+                return res
+
+            final_results.append(res.value)
+
+        return RTResult().success(List(final_results))
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -4029,39 +4189,115 @@ class Interpreter:
                     node_type = attr_name[len("visit_") :]
                     self.visit_table[node_type] = method
 
-    def visit(self, node, context):
+    async def visit(self, node, context):
         node_type = type(node).__name__
         method = self.visit_table.get(node_type)
         if method is None:
             raise Exception(f"No visit method defined for {node_type}")
-        return method(node, context)
+        return await method(node, context)
 
-    def visit_NumberNode(self, node, context: Context):
+    async def visit_AwaitNode(self, node, context):
+        res = RTResult()
+        value_to_await = res.register(await self.visit(node.node_to_await, context))
+        if res.should_return():
+            return res
+
+        if not isinstance(value_to_await, Coroutine):
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    "Object is not awaitable",
+                    context,
+                )
+            )
+
+        coro = value_to_await
+        func = coro.func
+        exec_ctx = func.generate_new_context()
+
+        if isinstance(func, Function):
+            interpreter = Interpreter()
+            res.register(
+                await func.handle_arguments(
+                    func.arg_names,
+                    func.defaults,
+                    func.vargs_name,
+                    func.kargs_name,
+                    coro.positional_args,
+                    coro.keyword_args,
+                    exec_ctx,
+                )
+            )
+            if res.should_return():
+                return res
+
+            value = res.register(await interpreter.visit(func.body_node, exec_ctx))
+            if res.should_return() and res.func_return_value is None:
+                return res
+
+            ret_value = (
+                (value if func.should_auto_return else None)
+                or res.func_return_value
+                or Number.none
+            )
+            return res.success(ret_value)
+
+        elif isinstance(func, BuiltInFunction):
+            method_name = f"execute_{func.name}"
+            method = getattr(func, method_name, func.no_execute_method)
+
+            res.register(
+                await func.handle_arguments(
+                    param_names=method.arg_names,
+                    defaults=method.defaults,
+                    vargs_name=None,
+                    kargs_name=None,
+                    positional_args=coro.positional_args,
+                    keyword_args=coro.keyword_args,
+                    exec_ctx=exec_ctx,
+                )
+            )
+            if res.should_return():
+                return res
+
+            return_value = None
+            if asyncio.iscoroutinefunction(method):
+                return_value = res.register(await method(exec_ctx))
+            else:
+                return_value = res.register(method(exec_ctx))
+
+            if res.should_return():
+                return res
+
+            return res.success(return_value)
+
+    async def visit_NumberNode(self, node, context: Context):
         return RTResult().success(
             Number(node.tok.value)
             .set_context(context)
             .set_pos(node.pos_start, node.pos_end)
         )
 
-    def visit_StringNode(self, node, context: Context):
+    async def visit_StringNode(self, node, context: Context):
         return RTResult().success(
             String(node.tok.value)
             .set_context(context)
             .set_pos(node.pos_start, node.pos_end)
         )
 
-    def visit_ListNode(self, node, context: Context):
+    async def visit_ListNode(self, node, context: Context):
         res = RTResult()
         value = []
         for element_node in node.element_nodes:
-            value.append(res.register(self.visit(element_node, context)))
+            value.append(res.register(await self.visit(element_node, context)))
             if res.should_return():
                 return res
         return res.success(
             List(value).set_context(context).set_pos(node.pos_start, node.pos_end)
         )
 
-    def visit_VarAccessNode(self, node, context: Context):
+    async def visit_VarAccessNode(self, node, context: Context):
         res = RTResult()
         var_name = node.var_name_tok.value
         value = None
@@ -4098,10 +4334,10 @@ class Interpreter:
         )
         return res.success(copied_value)
 
-    def visit_VarAssignNode(self, node, context: Context):
+    async def visit_VarAssignNode(self, node, context: Context):
         res = RTResult()
         var_name = node.var_name_tok.value
-        value = res.register(self.visit(node.value_node, context))
+        value = res.register(await self.visit(node.value_node, context))
         if res.should_return():
             return res
 
@@ -4121,7 +4357,7 @@ class Interpreter:
 
         return res.success(value)
 
-    def visit_VarAssignAsNode(self, node, context: Context):
+    async def visit_VarAssignAsNode(self, node, context: Context):
         res = RTResult()
         orig_name = node.var_name_tok.value
         alias_name = node.var_name_tok2.value
@@ -4148,20 +4384,20 @@ class Interpreter:
 
         return res.success(value)
 
-    def initialize_namespace(self, namespace_obj):
+    async def initialize_namespace(self, namespace_obj):
         if namespace_obj.get("initialized_", checked=True).value:
             return
         stmts = namespace_obj.get("statements_", checked=True)
         ns_context = namespace_obj.get("context_", checked=True)
         for stmt in stmts:
-            _ = self.visit(stmt, ns_context)
+            _ = await self.visit(stmt, ns_context)
         for k, v in ns_context.symbol_table.symbols.items():
             namespace_obj.set(k, v)
         for k, v in ns_context.private_symbol_table.symbols.items():
             namespace_obj.set(k, v)
         namespace_obj.set("initialized_", Number.true, checked=True)
 
-    def visit_NameSpaceNode(self, node, context):
+    async def visit_NameSpaceNode(self, node, context):
         res = RTResult()
         namespace = NameSpace(node.namespace_name)
         namespace.set_pos(node.pos_start, node.pos_end)
@@ -4178,9 +4414,9 @@ class Interpreter:
         context.private_symbol_table.set(node.namespace_name, namespace)
         return res.success(namespace)
 
-    def visit_MemberAccessNode(self, node, context):
+    async def visit_MemberAccessNode(self, node, context):
         res = RTResult()
-        obj = res.register(self.visit(node.object_node, context))
+        obj = res.register(await self.visit(node.object_node, context))
         if res.should_return():
             return res
         if not isinstance(obj, NameSpace):
@@ -4196,7 +4432,7 @@ class Interpreter:
             isinstance(obj, NameSpace)
             and not obj.get("initialized_", checked=True).value
         ):
-            self.initialize_namespace(obj)
+            await self.initialize_namespace(obj)
         member = obj.get(node.member_name)
         if member is None:
             return res.failure(
@@ -4211,12 +4447,12 @@ class Interpreter:
             return res.failure(member)
         return res.success(member)
 
-    def visit_BinOpNode(self, node, context):
+    async def visit_BinOpNode(self, node, context):
         res = RTResult()
-        left = res.register(self.visit(node.left_node, context))
+        left = res.register(await self.visit(node.left_node, context))
         if res.should_return():
             return res
-        right = res.register(self.visit(node.right_node, context))
+        right = res.register(await self.visit(node.right_node, context))
         if res.should_return():
             return res
         op_type = node.op_tok.type
@@ -4304,9 +4540,9 @@ class Interpreter:
             return res.failure(error)
         return res.success(result.set_pos(node.pos_start, node.pos_end))
 
-    def visit_UnaryOpNode(self, node, context):
+    async def visit_UnaryOpNode(self, node, context):
         res = RTResult()
-        value = res.register(self.visit(node.node, context))
+        value = res.register(await self.visit(node.node, context))
         if res.should_return():
             return res
         if isinstance(value, Number) and value.value is None:
@@ -4342,35 +4578,35 @@ class Interpreter:
             return res.failure(error)
         return res.success(result.set_pos(node.pos_start, node.pos_end))
 
-    def visit_IfNode(self, node, context):
+    async def visit_IfNode(self, node, context):
         res = RTResult()
         for condition, expr, should_return_none in node.cases:
-            condition_value = res.register(self.visit(condition, context))
+            condition_value = res.register(await self.visit(condition, context))
             if res.should_return():
                 return res
             if condition_value.is_true():
-                expr_value = res.register(self.visit(expr, context))
+                expr_value = res.register(await self.visit(expr, context))
                 if res.should_return():
                     return res
                 return res.success(Number.none if should_return_none else expr_value)
         if node.else_case:
             expr, should_return_none = node.else_case
-            expr_value = res.register(self.visit(expr, context))
+            expr_value = res.register(await self.visit(expr, context))
             if res.should_return():
                 return res
             return res.success(Number.none if should_return_none else expr_value)
         return res.success(Number.none)
 
-    def visit_ForNode(self, node, context):
+    async def visit_ForNode(self, node, context):
         res = RTResult()
-        start_value = res.register(self.visit(node.start_value_node, context))
+        start_value = res.register(await self.visit(node.start_value_node, context))
         if res.should_return():
             return res
-        end_value = res.register(self.visit(node.end_value_node, context))
+        end_value = res.register(await self.visit(node.end_value_node, context))
         if res.should_return():
             return res
         if node.step_value_node:
-            step_value = res.register(self.visit(node.step_value_node, context))
+            step_value = res.register(await self.visit(node.step_value_node, context))
             if res.should_return():
                 return res
         else:
@@ -4385,7 +4621,7 @@ class Interpreter:
         context.symbol_table.set(var_name, loop_var)
         for i in range(start_int, end_int, step_int):
             loop_var.value = i
-            value = res.register(self.visit(body_node, context))
+            value = res.register(await self.visit(body_node, context))
             if (
                 res.should_return()
                 and not res.loop_should_continue
@@ -4404,7 +4640,7 @@ class Interpreter:
             else Number.none
         )
 
-    def visit_WhileNode(self, node, context):
+    async def visit_WhileNode(self, node, context):
         res = RTResult()
 
         condition_node = node.condition_node
@@ -4416,14 +4652,14 @@ class Interpreter:
             elements = []
 
         while True:
-            condition = res.register(self.visit(condition_node, context))
+            condition = res.register(await self.visit(condition_node, context))
             if res.should_return():
                 return res
 
             if not condition.is_true():
                 break
 
-            value = res.register(self.visit(body_node, context))
+            value = res.register(await self.visit(body_node, context))
 
             if res.should_return():
                 if res.loop_should_continue:
@@ -4446,7 +4682,7 @@ class Interpreter:
                 .set_pos(node.pos_start, node.pos_end)
             )
 
-    def visit_FuncDefNode(self, node, context):
+    async def visit_FuncDefNode(self, node, context):
         res = RTResult()
         func_name = node.var_name_tok.value if node.var_name_tok else None
         body_node = node.body_node
@@ -4461,6 +4697,7 @@ class Interpreter:
                 node.vargs_name_tok,
                 node.kargs_name_tok,
                 node.should_auto_return,
+                node.is_async,
             )
             .set_context(context)
             .set_pos(node.pos_start, node.pos_end)
@@ -4468,10 +4705,10 @@ class Interpreter:
 
         if node.decorator_nodes:
             for deco_node in reversed(node.decorator_nodes):
-                decorator = res.register(self.visit(deco_node, context))
+                decorator = res.register(await self.visit(deco_node, context))
                 if res.should_return():
                     return res
-                wrapped_func = res.register(decorator.execute([func_value], {}))
+                wrapped_func = res.register(await decorator.execute([func_value], {}))
                 if res.should_return():
                     return res
                 func_value = wrapped_func
@@ -4481,10 +4718,10 @@ class Interpreter:
 
         return res.success(func_value)
 
-    def visit_CallNode(self, node, context):
+    async def visit_CallNode(self, node, context):
         try:
             res = RTResult()
-            value_to_call = res.register(self.visit(node.node_to_call, context))
+            value_to_call = res.register(await self.visit(node.node_to_call, context))
             if res.should_return():
                 return res
             value_to_call = value_to_call.copy().set_pos(node.pos_start, node.pos_end)
@@ -4494,7 +4731,7 @@ class Interpreter:
             for arg_node in node.arg_nodes:
                 if isinstance(arg_node, VargsUnpackNode):
                     list_to_unpack = res.register(
-                        self.visit(arg_node.node_to_unpack, context)
+                        await self.visit(arg_node.node_to_unpack, context)
                     )
                     if res.should_return():
                         return res
@@ -4510,7 +4747,7 @@ class Interpreter:
                     positional_args.extend(list_to_unpack.value)
                 elif isinstance(arg_node, KargsUnpackNode):
                     map_to_unpack = res.register(
-                        self.visit(arg_node.node_to_unpack, context)
+                        await self.visit(arg_node.node_to_unpack, context)
                     )
                     if res.should_return():
                         return res
@@ -4537,18 +4774,22 @@ class Interpreter:
 
                 elif isinstance(arg_node, VarAssignNode):
                     arg_name = arg_node.var_name_tok.value
-                    arg_value = res.register(self.visit(arg_node.value_node, context))
+                    arg_value = res.register(
+                        await self.visit(arg_node.value_node, context)
+                    )
                     if res.should_return():
                         return res
                     keyword_args[arg_name] = arg_value
 
                 else:
-                    positional_args.append(res.register(self.visit(arg_node, context)))
+                    positional_args.append(
+                        res.register(await self.visit(arg_node, context))
+                    )
                     if res.should_return():
                         return res
 
             return_value = res.register(
-                value_to_call.execute(positional_args, keyword_args)
+                await value_to_call.execute(positional_args, keyword_args)
             )
             if res.should_return():
                 return res
@@ -4572,23 +4813,23 @@ class Interpreter:
                 )
             )
 
-    def visit_ReturnNode(self, node, context):
+    async def visit_ReturnNode(self, node, context):
         res = RTResult()
         if node.node_to_return:
-            value = res.register(self.visit(node.node_to_return, context))
+            value = res.register(await self.visit(node.node_to_return, context))
             if res.should_return():
                 return res
         else:
             value = Number.none
         return res.success_return(value)
 
-    def visit_ContinueNode(self, _, __):
+    async def visit_ContinueNode(self, _, __):
         return RTResult().success_continue()
 
-    def visit_BreakNode(self, _, __):
+    async def visit_BreakNode(self, _, __):
         return RTResult().success_break()
 
-    def visit_LoadNode(self, node: LoadNode, context: Context):
+    async def visit_LoadNode(self, node: LoadNode, context: Context):
         res = RTResult()
         path = node.file_path
         if not os.path.isfile(path):
@@ -4605,7 +4846,7 @@ class Interpreter:
                         context,
                     )
                 )
-        result, err = load_module(path, self, context)
+        result, err = await load_module(path, self, context)
         if err:
             if isinstance(err, Error):
                 return res.failure(err)
@@ -4619,11 +4860,11 @@ class Interpreter:
             )
         return res.success(result)
 
-    def visit_HashMapNode(self, node, context):
+    async def visit_HashMapNode(self, node, context):
         res = RTResult()
         result = {}
         for key_node, value_node in node.pairs:
-            key = res.register(self.visit(key_node, context))
+            key = res.register(await self.visit(key_node, context))
             if res.should_return():
                 return res
 
@@ -4636,18 +4877,18 @@ class Interpreter:
                         context,
                     )
                 )
-            val = res.register(self.visit(value_node, context))
+            val = res.register(await self.visit(value_node, context))
             if res.should_return():
                 return res
             result[key.value] = val
         return res.success(HashMap(result))
 
-    def visit_ForInNode(self, node: ForInNode, context: Context) -> RTResult:
+    async def visit_ForInNode(self, node: ForInNode, context: Context) -> RTResult:
         res = RTResult()
         var_name = node.var_name_tok.value
         body = node.body_node
         should_return_none = node.should_return_none
-        iterable = res.register(self.visit(node.iterable_node, context))
+        iterable = res.register(await self.visit(node.iterable_node, context))
         if res.should_return():
             return res
         iterator, error = iterable.iter()
@@ -4658,7 +4899,7 @@ class Interpreter:
             while True:
                 current = next(iterator)
                 context.symbol_table.set(var_name, current)
-                value = res.register(self.visit(body, context))
+                value = res.register(await self.visit(body, context))
                 if (
                     res.should_return()
                     and not res.loop_should_continue
@@ -4680,7 +4921,7 @@ class Interpreter:
                 List(value).set_context(context).set_pos(node.pos_start, node.pos_end)
             )
 
-    def visit_UsingNode(self, node, context: Context):
+    async def visit_UsingNode(self, node, context: Context):
         res = RTResult()
 
         if not context.parent:
@@ -4712,7 +4953,7 @@ class Interpreter:
 
         return res.success(Number.none)
 
-    def visit_UsingParentNode(self, node, context: Context):
+    async def visit_UsingParentNode(self, node, context: Context):
         res = RTResult()
 
         if not context.parent:
@@ -4740,18 +4981,18 @@ class Interpreter:
 
         return res.success(Number.none)
 
-    def visit_IndexAssignNode(self, node, context):
+    async def visit_IndexAssignNode(self, node, context):
         res = RTResult()
 
-        collection_obj = res.register(self.visit(node.obj_node, context))
+        collection_obj = res.register(await self.visit(node.obj_node, context))
         if res.should_return():
             return res
 
-        index_obj = res.register(self.visit(node.index_node, context))
+        index_obj = res.register(await self.visit(node.index_node, context))
         if res.should_return():
             return res
 
-        value_to_set = res.register(self.visit(node.value_node, context))
+        value_to_set = res.register(await self.visit(node.value_node, context))
         if res.should_return():
             return res
 
@@ -4805,7 +5046,7 @@ class Interpreter:
 
         return res.success(value_to_set)
 
-    def visit_VargsUnpackNode(self, node, context):
+    async def visit_VargsUnpackNode(self, node, context):
         return RTResult().failure(
             RTError(
                 node.pos_start,
@@ -4815,7 +5056,7 @@ class Interpreter:
             )
         )
 
-    def visit_KargsUnpackNode(self, node, context):
+    async def visit_KargsUnpackNode(self, node, context):
         return RTResult().failure(
             RTError(
                 node.pos_start,
@@ -4834,6 +5075,7 @@ global_symbol_table.set("true", Number.true)
 global_symbol_table.set("list", String("<list>"))
 global_symbol_table.set("str", String("<str>"))
 global_symbol_table.set("int", String("<int>"))
+global_symbol_table.set("coroutine", String("<coroutine>"))
 global_symbol_table.set("float", String("<float>"))
 global_symbol_table.set("func", String("<func>"))
 global_symbol_table.set("bool", String("<bool>"))
@@ -4889,29 +5131,37 @@ def clean_value(value):
 
 
 def run(fn, text):
-    lexer = Lexer(fn, text)
-    tokens, error = lexer.make_tokens()
-    if error:
-        return None, error
-    result = None
-    context = None
-    try:
+    async def async_run():
+        lexer = Lexer(fn, text)
+        tokens, error = lexer.make_tokens()
+        if error:
+            return None, error
+
         parser = Parser(tokens)
         ast = parser.parse()
         if ast.error:
             return None, ast.error
+
         interpreter = Interpreter()
         context = Context("<program>")
         context.symbol_table = global_symbol_table
         context.private_symbol_table = private_symbol_table
         context.private_symbol_table.set("is_main", Number.true)
-        result = interpreter.visit(ast.node, context)
+
+        result = await interpreter.visit(ast.node, context)
+
         if fn == "<stdin>":
             value = result.value
             result.value = clean_value(value)
         else:
             result.value = ""
+
         return result.value, result.error
+
+    try:
+        loop = asyncio.get_event_loop()
+        value, error = loop.run_until_complete(async_run())
+        return value, error
     except (KeyboardInterrupt, EOFError):
         print(
             "\n---------------------------------------------------------------------------"
