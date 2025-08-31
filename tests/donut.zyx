@@ -54,7 +54,7 @@ while true do
                         z_val = z$o
                         if D > z_val do
                             z$o = D
-                            char = if N > 0 do shading$N else shading$0
+                            char = if N > 0 do shading$N else do shading$0
                             b$o = char
                         done
                     done

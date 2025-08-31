@@ -67,7 +67,6 @@
             max-width: 1200px;
             margin: 0 auto;
             display: flex;
-            align-items: center;
             justify-content: space-between;
             padding: 0.8rem 20px;
         }
@@ -113,6 +112,23 @@
         nav a:hover {
             color: var(--neon-blue);
             text-shadow: 0 0 5px var(--neon-blue);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 20px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--muted-text);
+            margin-bottom: 2.5rem;
         }
 
         .nav-toggle {
@@ -252,31 +268,6 @@
         footer a {
             color: var(--neon-green-accent);
             text-shadow: 0 0 3px var(--neon-green-accent);
-        }
-
-        .highlight-Zerionyx .zyx-keyword,
-        .highlight-Zerionyx .zyx-types {
-            color: var(--neon-blue);
-            font-weight: bold;
-        }
-
-        .highlight-Zerionyx .zyx-func-def,
-        .highlight-Zerionyx .zyx-func {
-            color: var(--neon-green-accent);
-            font-weight: bold;
-        }
-
-        .highlight-Zerionyx .zyx-string {
-            color: #e2fb8c;
-        }
-
-        .highlight-Zerionyx .zyx-number {
-            color: #ffb366;
-        }
-
-        .highlight-Zerionyx .zyx-comment {
-            color: #667788;
-            font-style: italic;
         }
 
 
@@ -526,7 +517,7 @@ ARG ::= EXPR
 ATOM ::=
 INT | FLOAT | STRING | IDENTIFIER
 | <code>(</code> EXPR <code>)</code>
-| <code>await</code> CALL <span class="comment">-- MỚI: Biểu thức Await</span>
+| <code>await</code> CALL
 | LIST_EXPR
 | IF_EXPR
 | FOR_EXPR
@@ -582,7 +573,7 @@ KWARGS_PARAM ::= <code>**</code> IDENTIFIER
 DECORATOR ::= <code>@</code> EXPR NEWLINE*
 
 DEF_FUNC ::=
-DECORATOR* (<code>async</code>)? <code>defun</code> IDENTIFIER? <code>(</code> PARAM_LIST? <code>)</code> <span class="comment">-- SỬA ĐỔI: Thêm 'async' tùy chọn</span>
+DECORATOR* (<code>async</code>)? <code>defun</code> IDENTIFIER? <code>(</code> PARAM_LIST? <code>)</code>
 (<code>-&gt;</code> EXPR)?
 (NEWLINE STATEMENT NEWLINE <code>done</code>)?
 
@@ -681,7 +672,7 @@ Zerionyx may be magical, but its syntax must be real.
                         <code>none</code> if fail and <code>silent</code> true else raise
                     </li>
                     <li><b>to_str(x)</b> &rarr; str &mdash; Convert <code>x</code> to string</li>
-                    <li><b>to_cfloat(x, precision=10, supress_error=false)</b> &rarr; cfloat &mdash; Convert
+                    <li><b>to_cfloat(x, supress_error=false)</b> &rarr; cfloat &mdash; Convert
                         <code>x</code> to cfloat (correct float)
                     </li>
                     <li><b>to_bytes(x, from_hex=false, supress_error=false)</b> &rarr; bytes &mdash; Convert

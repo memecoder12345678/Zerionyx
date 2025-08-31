@@ -8,115 +8,115 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="repla
 
 G = """
 
-PROGRAM            ::= (STATEMENT NEWLINE*)*
+PROGRAM ::= (STATEMENT NEWLINE*)*
 
-STATEMENT          ::= SIMPLE_STATEMENT | COMPOUND_STATEMENT
+STATEMENT ::= SIMPLE_STATEMENT | COMPOUND_STATEMENT
 
-SIMPLE_STATEMENT   ::=
-      "load" STRING
-    | "return" EXPR
-    | "continue"
-    | "break"
-    | EXPR
+SIMPLE_STATEMENT ::=
+"load" STRING
+| "return" EXPR
+| "continue"
+| "break"
+| EXPR
 
-COMPOUND_STATEMENT ::= 
-      IF_EXPR
-    | FOR_EXPR
-    | WHILE_EXPR
-    | DEF_FUNC
+COMPOUND_STATEMENT ::=
+IF_EXPR
+| FOR_EXPR
+| WHILE_EXPR
+| DEF_FUNC
 
-EXPR               ::= 
-      "let" IDENTIFIER "=" EXPR
-    | IDENTIFIER "=" EXPR
-    | "let" IDENTIFIER "as" EXPR
-    | IDENTIFIER "as" EXPR
-    | IDENTIFIER ("+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^=") EXPR
-    | COMP_EXPR (("and" | "or") COMP_EXPR)*
+EXPR ::=
+"let" IDENTIFIER "=" EXPR
+| IDENTIFIER "=" EXPR
+| "let" IDENTIFIER "as" EXPR
+| IDENTIFIER "as" EXPR
+| IDENTIFIER ("+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^=") EXPR
+| COMP_EXPR (("and" | "or") COMP_EXPR)*
 
-COMP_EXPR          ::= 
-      ARITH_EXPR (("==" | "<" | ">" | "<=" | ">=" | "!=") ARITH_EXPR)*
-    | "not" COMP_EXPR
+COMP_EXPR ::=
+ARITH_EXPR (("==" | "&lt;" | "&gt;" | "&lt;=" | "&gt;=" | "!=") ARITH_EXPR)*
+| "not" COMP_EXPR
 
-ARITH_EXPR         ::= TERM (("+" | "-") TERM)*
+ARITH_EXPR ::= TERM (("+" | "-") TERM)*
 
-TERM               ::= FACTOR (("*" | "/" | "//" | "%") FACTOR)*
+TERM ::= FACTOR (("*" | "/" | "//" | "%") FACTOR)*
 
-FACTOR             ::= ("+" | "-") FACTOR 
-                   | "*" EXPR
-                   | "**" EXPR
-                   | POWER
+FACTOR ::= ("+" | "-") FACTOR
+| "*" EXPR
+| "**" EXPR
+| POWER
 
-POWER              ::= CALL ("^" FACTOR)*
+POWER ::= CALL ("^" FACTOR)*
 
-CALL               ::= ATOM ("(" ARG_LIST? ")")?
+CALL ::= ATOM ("(" ARG_LIST? ")")?
 
-ARG_LIST           ::= ARG ("," ARG)*
+ARG_LIST ::= ARG ("," ARG)*
+ARG ::= EXPR
 
-ARG                ::= EXPR 
+ATOM ::=
+INT | FLOAT | STRING | IDENTIFIER
+| "(" EXPR ")"
+| "await" CALL
+| LIST_EXPR
+| IF_EXPR
+| FOR_EXPR
+| FOR_IN_EXPR
+| HASHMAP_EXPR
+| NAMESPACE_EXPR
+| WHILE_EXPR
+| DEF_FUNC
+| COMMENT
+| USING_STATEMENT
+| EXPR
 
-ATOM               ::= 
-      INT | FLOAT | STRING | IDENTIFIER
-    | "(" EXPR ")"
-    | LIST_EXPR
-    | IF_EXPR
-    | FOR_EXPR
-    | FOR_IN_EXPR
-    | HASHMAP_EXPR
-    | NAMESPACE_EXPR
-    | WHILE_EXPR
-    | DEF_FUNC
-    | COMMENT    
-    | USING_STATEMENT
-    | EXPR
+USING_STATEMENT ::= "using" ("parent")? IDENTIFIER ("," IDENTIFIER)*
 
-USING_STATEMENT   ::= "using" ("parent")? IDENTIFIER ("," IDENTIFIER)*
+LIST_EXPR ::= "[" (EXPR ("," EXPR)*)? "]"
 
-LIST_EXPR         ::= "[" (EXPR ("," EXPR)*)? "]"
+HASHMAP_EXPR ::= "{" (STRING ":" EXPR ("," STRING ":" EXPR)*)? "}"
 
-HASHMAP_EXPR      ::= "{" (STRING ":" EXPR ("," STRING ":" EXPR)*)? "}"
+NAMESPACE_EXPR ::=
+"namespace" IDENTIFIER
+NEWLINE STATEMENT NEWLINE "done"
 
-NAMESPACE_EXPR    ::=
-      "namespace" IDENTIFIER
-      NEWLINE STATEMENT NEWLINE "done"
+IF_EXPR ::=
+"if" EXPR "do" STATEMENT
+(NEWLINE "elif" EXPR "do" STATEMENT)*
+(NEWLINE "else" "do" STATEMENT)?
+(NEWLINE "done")?
 
-IF_EXPR           ::= 
-      "if" EXPR "do" STATEMENT
-      (NEWLINE "elif" EXPR "do" STATEMENT)*
-      (NEWLINE "else" "do" STATEMENT)?
-      (NEWLINE "done")?
+FOR_EXPR ::=
+"for" IDENTIFIER "=" EXPR "to" EXPR
+("step" EXPR)?
+"do" STATEMENT
+(NEWLINE "done")?
 
-FOR_EXPR          ::=
-      "for" IDENTIFIER "=" EXPR "to" EXPR
-      ("step" EXPR)?
-      "do" STATEMENT
-      (NEWLINE "done")?
+FOR_IN_EXPR ::=
+"for" IDENTIFIER "in" EXPR
+"do" STATEMENT
+(NEWLINE "done")?
 
-FOR_IN_EXPR       ::=
-      "for" IDENTIFIER "in" EXPR
-      "do" STATEMENT
-      (NEWLINE "done")?
+WHILE_EXPR ::=
+"while" EXPR "do" STATEMENT
+(NEWLINE "done")?
 
-WHILE_EXPR        ::= 
-      "while" EXPR "do" STATEMENT
-      (NEWLINE "done")?
+PARAM_LIST ::= (PARAMS ("," VAR_PARAMS)? | VAR_PARAMS)?
 
-PARAM_LIST        ::= (PARAMS ("," VAR_PARAMS)? | VAR_PARAMS)?
+PARAMS ::= PARAM ("," PARAM)*
+PARAM ::= ("let")? IDENTIFIER ("=" EXPR)?
 
-PARAMS            ::= PARAM ("," PARAM)*
-PARAM             ::= ("let")? IDENTIFIER ("=" EXPR)?
+VAR_PARAMS ::= VARARGS_PARAM ("," KWARGS_PARAM)? | KWARGS_PARAM
+VARARGS_PARAM ::= "*" IDENTIFIER
+KWARGS_PARAM ::= "**" IDENTIFIER
 
-VAR_PARAMS        ::= VARARGS_PARAM ("," KWARGS_PARAM)? | KWARGS_PARAM
-VARARGS_PARAM     ::= "*" IDENTIFIER
-KWARGS_PARAM      ::= "**" IDENTIFIER
+DECORATOR ::= "@" EXPR NEWLINE*
 
-DECORATOR         ::= "@" EXPR NEWLINE*
+DEF_FUNC ::=
+DECORATOR* ("async")? "defun" IDENTIFIER? "(" PARAM_LIST? ")" <span class="comment">-- SỬA ĐỔI: Thêm 'async' tùy chọn</span>
+("-&gt;" EXPR)?
+(NEWLINE STATEMENT NEWLINE "done")?
 
-DEF_FUNC          ::= 
-      DECORATOR* "defun" IDENTIFIER? "(" PARAM_LIST? ")"
-      ("->" EXPR)?
-      (NEWLINE STATEMENT NEWLINE "done")?
-
-COMMENT           ::= "#" /[^\n]*/
+COMMENT ::= "#" /[^\n]*/
 
 """
 

@@ -31,7 +31,7 @@ println(add(5, 3))
 
 # Lists
 nums = [1, 2, 3, 4, 5]
-nums$5 = 6
+append(nums, 6)
 println(nums)
 println(nums$0)
 println(nums$5)
@@ -46,7 +46,7 @@ println(users$0$"name")
 println(users$0$"password")
 
 # Bytes
-str_enc = to_bytes(to_hex("Hello, World!"))
+str_enc = to_bytes("Hello, World!")
 println(to_str(str_enc))
 println(str_enc$0)
 println(str_enc$4)
@@ -55,6 +55,15 @@ println(str_enc$4)
 os = pyexec("import os", {})
 println(type(os))
 r = pyexec("os.system('echo Hello, World!')", os)
+
+# CFloat
+to_cfloat as tcf
+lst = [tcf("1/9")] * 9
+x = tcf(0)
+for i in lst do
+    x += i
+done
+println(x == 1)
 
 # Conditional
 if x > y do

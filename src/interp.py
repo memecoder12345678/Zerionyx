@@ -69,6 +69,17 @@ async def load_module(fn, interpreter, context):
             f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}InterruptError{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}User Terminated{Fore.RESET}{Style.RESET_ALL}"
         )
         sys.exit(2)
+    except OverflowError:
+        print(
+            "\n---------------------------------------------------------------------------"
+        )
+        print(
+            "MemoryOverflowError                         Traceback (most recent call last)\n"
+        )
+        print(
+            f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}MemoryOverflowError{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}Memory Overflow{Fore.RESET}{Style.RESET_ALL}"
+        )
+        sys.exit(2)
 
 
 class BaseFunction(Object):
@@ -3979,53 +3990,41 @@ class BuiltInFunction(BaseFunction):
         is_cfloat = isinstance(exec_ctx.symbol_table.get("value"), CFloat)
         return RTResult().success(Number.true if is_cfloat else Number.false)
 
-    @set_args(["value", "precision", "supress_error"], [None, Number(10), Bool.false])
+    @set_args(["value", "supress_error"], [None, Bool.false])
     def execute_to_cfloat(self, exec_ctx):
         value = exec_ctx.symbol_table.get("value")
-        precision = exec_ctx.symbol_table.get("precision")
         supress_error = exec_ctx.symbol_table.get("supress_error")
-
-        if not isinstance(precision, Number) or not isinstance(precision.value, int):
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument must be an integer",
-                    exec_ctx,
-                )
-            )
 
         if not isinstance(supress_error, Bool):
             return RTResult().failure(
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "Third argument must be a boolean",
+                    "Second argument must be a boolean",
                     exec_ctx,
                 )
             )
 
-        precision_value = int(precision.value)
         supress_error_ = bool(supress_error.value)
 
         try:
             if isinstance(value, CFloat):
-                result = CFloat(value.value, precision_value)
+                result = CFloat(value.value)
                 return RTResult().success(result)
 
             elif isinstance(value, Number):
-                decimal_value = Decimal(str(value.value))
-                result = CFloat(decimal_value, precision_value)
+                decimal_value = Fraction(str(value.value))
+                result = CFloat(decimal_value)
                 return RTResult().success(result)
 
             elif isinstance(value, String):
-                decimal_value = Decimal(value.value)
-                result = CFloat(decimal_value, precision_value)
+                decimal_value = Fraction(value.value)
+                result = CFloat(decimal_value)
                 return RTResult().success(result)
 
             else:
                 if supress_error_:
-                    result = CFloat(Decimal("0"), precision_value)
+                    result = CFloat(Fraction("0"))
                     return RTResult().success(result)
                 else:
                     return RTResult().failure(
@@ -4037,9 +4036,9 @@ class BuiltInFunction(BaseFunction):
                         )
                     )
 
-        except (InvalidOperation, ValueError, TypeError) as e:
+        except (ValueError, TypeError) as e:
             if supress_error_:
-                result = CFloat(Decimal("0"), precision_value)
+                result = CFloat(Fraction("0"))
                 return RTResult().success(result)
             else:
                 return RTResult().failure(
@@ -4050,7 +4049,7 @@ class BuiltInFunction(BaseFunction):
                         exec_ctx,
                     )
                 )
-            
+
     @set_args(["value"])
     def execute_is_coroutine(self, exec_ctx):
         is_coroutine = isinstance(exec_ctx.symbol_table.get("value"), Coroutine)
@@ -5171,5 +5170,16 @@ def run(fn, text):
         )
         print(
             f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}InterruptError{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}User Terminated{Fore.RESET}{Style.RESET_ALL}"
+        )
+        sys.exit(2)
+    except OverflowError:
+        print(
+            "\n---------------------------------------------------------------------------"
+        )
+        print(
+            "MemoryOverflowError                         Traceback (most recent call last)\n"
+        )
+        print(
+            f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}MemoryOverflowError{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}Memory Overflow{Fore.RESET}{Style.RESET_ALL}"
         )
         sys.exit(2)

@@ -44,7 +44,7 @@ namespace decorators
         defun decorator(fn)
             defun wrapper(*vargs, **kargs)
                 for i = 1 to times + 1 do
-                    let res = is_panic(fn, vargs)
+                    let res = await is_panic(fn, vargs)
                     let result = res$0
                     let err = res$1
                     
@@ -68,7 +68,7 @@ namespace decorators
                 let state = {"result": none, "error": none, "done": false}
 
                 defun target()
-                    let res = is_panic(fn, vargs)
+                    let res = await is_panic(fn, vargs)
                     if res$1 do
                         state$"error" = res$1
                     else do
@@ -135,7 +135,7 @@ namespace decorators
     defun ignore_error(default=none)
         defun decorator(fn)
             defun wrapper(*vargs, **kargs)
-                let res = is_panic(fn, vargs)
+                let res = await is_panic(fn, vargs)
                 if res$1 do
                     return default
                 done

@@ -1,5 +1,5 @@
 from .lexer import RTResult
-from decimal import Decimal, getcontext, ROUND_HALF_UP, InvalidOperation
+from fractions import Fraction
 from queue import Queue as PyQueue
 import operator
 import reprlib
@@ -361,18 +361,14 @@ Bool.false = Bool(False)
 
 
 class CFloat(Object):
-    __slots__ = ("value", "context", "pos_start", "pos_end", "fields", "precision")
+    __slots__ = ("value", "context", "pos_start", "pos_end", "fields")
 
-    def __init__(self, value, precision=10, context=None, pos_start=None, pos_end=None):
-        getcontext().prec = precision
-        getcontext().rounding = ROUND_HALF_UP
-
-        if isinstance(value, Decimal):
+    def __init__(self, value, context=None, pos_start=None, pos_end=None):
+        if isinstance(value, Fraction):
             self.value = value
         else:
-            self.value = Decimal(str(value))
+            self.value = Fraction(str(value))
 
-        self.precision = precision
         self.context = context
         self.pos_start = pos_start
         self.pos_end = pos_end
@@ -384,111 +380,111 @@ class CFloat(Object):
 
     def copy(self):
         return CFloat(
-            self.value, self.precision, self.context, self.pos_start, self.pos_end
+            self.value, self.context, self.pos_start, self.pos_end
         )
 
-    def _convert_to_decimal(self, other):
+    def _convert_to_fraction(self, other):
         if isinstance(other, (Number, CFloat)):
-            if isinstance(other.value, Decimal):
+            if isinstance(other.value, Fraction):
                 return other.value
-            return Decimal(str(other.value))
+            return Fraction(str(other.value))
         return None
 
     def added_to(self, other):
-        other_decimal = self._convert_to_decimal(other)
-        if other_decimal is not None:
-            result = self.value + other_decimal
-            return CFloat(result, self.precision).set_context(self.context), None
+        other_frac = self._convert_to_fraction(other)
+        if other_frac is not None:
+            result = self.value + other_frac
+            return CFloat(result).set_context(self.context), None
         return None, Object.illegal_operation(
             self, other, f"Can't add cfloat to '{other.type()}'"
         )
 
     def subbed_by(self, other):
-        other_decimal = self._convert_to_decimal(other)
-        if other_decimal is not None:
-            result = self.value - other_decimal
-            return CFloat(result, self.precision).set_context(self.context), None
+        other_frac = self._convert_to_fraction(other)
+        if other_frac is not None:
+            result = self.value - other_frac
+            return CFloat(result).set_context(self.context), None
         return None, Object.illegal_operation(
             self, other, f"Can't subtract cfloat from '{other.type()}'"
         )
 
     def multed_by(self, other):
-        other_decimal = self._convert_to_decimal(other)
-        if other_decimal is not None:
-            result = self.value * other_decimal
-            return CFloat(result, self.precision).set_context(self.context), None
+        other_frac = self._convert_to_fraction(other)
+        if other_frac is not None:
+            result = self.value * other_frac
+            return CFloat(result).set_context(self.context), None
         return None, Object.illegal_operation(
             self, other, f"Can't multiply cfloat by '{other.type()}'"
         )
 
     def dived_by(self, other):
-        other_decimal = self._convert_to_decimal(other)
-        if other_decimal is not None:
-            if other_decimal == Decimal("0"):
+        other_frac = self._convert_to_fraction(other)
+        if other_frac is not None:
+            if other_frac == 0:
                 return None, RTError(
                     other.pos_start, other.pos_end, "Division by zero", self.context
                 )
-            result = self.value / other_decimal
-            return CFloat(result, self.precision).set_context(self.context), None
+            result = self.value / other_frac
+            return CFloat(result).set_context(self.context), None
         return None, Object.illegal_operation(
             self, other, f"Can't divide cfloat by '{other.type()}'"
         )
 
     def moduled_by(self, other):
-        other_decimal = self._convert_to_decimal(other)
-        if other_decimal is not None:
-            if other_decimal == Decimal("0"):
+        other_frac = self._convert_to_fraction(other)
+        if other_frac is not None:
+            if other_frac == 0:
                 return None, RTError(
                     other.pos_start, other.pos_end, "Division by zero", self.context
                 )
-            result = self.value % other_decimal
-            return CFloat(result, self.precision).set_context(self.context), None
+            result = self.value % other_frac
+            return CFloat(result).set_context(self.context), None
         return None, Object.illegal_operation(
             self, other, f"Can't mod cfloat by '{other.type()}'"
         )
 
     def powed_by(self, other):
-        other_decimal = self._convert_to_decimal(other)
-        if other_decimal is not None:
+        other_frac = self._convert_to_fraction(other)
+        if other_frac is not None:
             try:
-                result = self.value**other_decimal
-                return CFloat(result, self.precision).set_context(self.context), None
-            except:
+                result = self.value**other_frac
+                return CFloat(result).set_context(self.context), None
+            except ValueError:
                 return None, RTError(
-                    self.pos_start, self.pos_end, "Exponentiation error", self.context
+                    self.pos_start, self.pos_end, "Math domain error (e.g., negative base with fractional exponent)", self.context
                 )
         return None, Object.illegal_operation(
             self, other, f"Can't power cfloat by '{other.type()}'"
         )
 
     def floordived_by(self, other):
-        other_decimal = self._convert_to_decimal(other)
-        if other_decimal is not None:
-            if other_decimal == Decimal("0"):
+        other_frac = self._convert_to_fraction(other)
+        if other_frac is not None:
+            if other_frac == 0:
                 return None, MError(
                     other.pos_start, other.pos_end, "Division by zero", self.context
                 )
-            result = self.value // other_decimal
-            return CFloat(result, self.precision).set_context(self.context), None
+            result = self.value // other_frac
+            return Number(int(result)).set_context(self.context), None
         return None, Object.illegal_operation(
             self, other, f"Can't floor divide cfloat by '{other.type()}'"
         )
 
     def _get_comparison_result(self, other, op):
-        other_decimal = self._convert_to_decimal(other)
-        if (
-            other_decimal is not None
-            and self.value is not None
-            and other_decimal is not None
-        ):
-            return Bool(op(self.value, other_decimal)).set_context(self.context), None
+        other_frac = self._convert_to_fraction(other)
+        if other_frac is not None and self.value is not None:
+            return Bool(op(self.value, other_frac)).set_context(self.context), None
+        
         if self.value is None:
-            if isinstance(other, NoneObject):
-                result = op in (operator.eq, operator.le, operator.ge)
-            else:
-                result = op is operator.ne
-            return Bool(result).set_context(self.context), None
-        return Bool(op is operator.ne).set_context(self.context), None
+            is_none_other = isinstance(other, NoneObject)
+            if op == operator.eq:
+                return Bool(is_none_other).set_context(self.context), None
+            if op == operator.ne:
+                return Bool(not is_none_other).set_context(self.context), None
+
+        return None, Object.illegal_operation(
+            self, other, f"Cannot compare cfloat with '{other.type()}'"
+        )
 
     def get_comparison_eq(self, other):
         return self._get_comparison_result(other, operator.eq)
@@ -511,56 +507,25 @@ class CFloat(Object):
     def anded_by(self, other):
         if not isinstance(other, (Number, CFloat)):
             return None, Object.illegal_operation(
-                self, other, f"Can't compare cfloat to '{other.type()}'"
+                self, other, f"Can't perform logical AND on cfloat and '{other.type()}'"
             )
-        if self.value is None or other.value is None:
-            return None, TError(
-                self.pos_start,
-                self.pos_end,
-                "Cannot perform logical operation with 'none'",
-                self.context,
-            )
-        return (
-            Bool(
-                (self.value != Decimal("0")) and (other.value != Decimal("0"))
-            ).set_context(self.context),
-            None,
-        )
+        return Bool(self.is_true() and other.is_true()).set_context(self.context), None
 
     def ored_by(self, other):
         if not isinstance(other, (Number, CFloat)):
             return None, Object.illegal_operation(
-                self, other, f"Can't compare cfloat to '{other.type()}'"
+                self, other, f"Can't perform logical OR on cfloat and '{other.type()}'"
             )
-        if self.value is None or other.value is None:
-            return None, TError(
-                self.pos_start,
-                self.pos_end,
-                "Cannot perform logical operation with 'none'",
-                self.context,
-            )
-        return (
-            Bool(
-                (self.value != Decimal("0")) or (other.value != Decimal("0"))
-            ).set_context(self.context),
-            None,
-        )
+        return Bool(self.is_true() or other.is_true()).set_context(self.context), None
 
     def notted(self):
-        if self.value is None:
-            return None, TError(
-                self.pos_start,
-                self.pos_end,
-                "Cannot perform logical operation with 'none'",
-                self.context,
-            )
-        return Bool(not bool(self.value)).set_context(self.context), None
+        return Bool(not self.is_true()).set_context(self.context), None
 
     def is_true(self):
-        return bool(self.value) if self.value is not None else False
+        return self.value != 0 if self.value is not None else False
 
     def type(self):
-        return "<decimal>"
+        return "<cfloat>"
 
     def __str__(self):
         return self.__repr__()
@@ -568,12 +533,9 @@ class CFloat(Object):
     def __repr__(self):
         if self.value is None:
             return "none"
-        return (
-            format(self.value, f".{self.precision}f").rstrip("0").rstrip(".")
-            if "." in format(self.value, f".{self.precision}f")
-            else format(self.value, f".0f")
-        )
-
+        if self.value.denominator == 1:
+            return str(self.value.numerator)
+        return str(float(self.value))
 
 class Number(Object):
     __slots__ = ("value", "context", "pos_start", "pos_end", "fields")
@@ -1200,7 +1162,7 @@ class Bytes(Object):
         if not isinstance(index, Number):
             return None, self.illegal_operation(index)
         try:
-            return Bytes(bytes(self.value[index.value])).set_context(self.context), None
+            return Number(self.value[index.value]).set_context(self.context), None
         except IndexError:
             return None, RTError(
                 index.pos_start,
@@ -1216,7 +1178,7 @@ class Bytes(Object):
         return copy
 
     def iter(self):
-        pairs = [Bytes(bytes([i])) for i in self.value]
+        pairs = [Number([i]) for i in self.value]
         return iter(pairs), None
 
     def is_true(self):

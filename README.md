@@ -3,7 +3,7 @@
   <h1 align="center">Zerionyx Programming Language</h1>
   <p align="center">
     <img src="https://img.shields.io/badge/python-3.11%2B-00ffcc?style=for-the-badge&logo=python" alt="Python 3.11+" />
-    <img src="https://img.shields.io/badge/Zerionyx-v5.0.0-00ffcc?style=for-the-badge&logo=lightning" alt="Zerionyx v5.0.0" />
+    <img src="https://img.shields.io/badge/Zerionyx-5.0.1-LTS-00ffcc?style=for-the-badge&logo=lightning" alt="Zerionyx-5.0.1-LTS" />
     <img src="https://img.shields.io/badge/build-passing-00ffcc?style=for-the-badge&logo=githubactions" alt="Build Status" />
     <img src="https://img.shields.io/github/contributors/memecoder12345678/Zerionyx?style=for-the-badge&color=00ffcc">
     <img src="https://img.shields.io/github/stars/memecoder12345678/Zerionyx?style=for-the-badge&color=00ffcc">
@@ -108,7 +108,7 @@ println(add(5, 3))
 
 # Lists
 nums = [1, 2, 3, 4, 5]
-nums$5 = 6
+append(nums, 6)
 println(nums)
 println(nums$0)
 println(nums$5)
@@ -123,7 +123,7 @@ println(users$0$"name")
 println(users$0$"password")
 
 # Bytes
-str_enc = to_bytes(to_hex("Hello, World!"))
+str_enc = to_bytes("Hello, World!")
 println(to_str(str_enc))
 println(str_enc$0)
 println(str_enc$4)
@@ -132,6 +132,15 @@ println(str_enc$4)
 os = pyexec("import os", {})
 println(type(os))
 r = pyexec("os.system('echo Hello, World!')", os)
+
+# CFloat
+to_cfloat as tcf
+lst = [tcf("1/9")] * 9
+x = tcf(0)
+for i in lst do
+    x += i
+done
+println(x == 1)
 
 # Conditional
 if x > y do
