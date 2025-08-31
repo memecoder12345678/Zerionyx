@@ -4,7 +4,7 @@ import string
 DIGITS = string.digits
 LETTERS = string.ascii_letters
 LETTERS_DIGITS = LETTERS + DIGITS
-INFO = "v5.0.0 (2025-08-31 13:24:57)"
+INFO = "v5.0.1 LTS (2025-08-31 13:24:57)"
 LIBS_PATH = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
 TT_INT = "INT"
 TT_FLOAT = "FLOAT"
