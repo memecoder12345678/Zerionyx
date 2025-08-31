@@ -21,10 +21,4 @@ This update focuses on stability by fixing critical issues discovered in 5.0.0, 
 
 ---
 
-## 📦 Distribution Note
-
-This patch release follows the same cleaned packaging policy as **5.0.0**, keeping only runtime essentials for end-users while removing development clutter.
-
----
-
 Zerionyx 5.0.1-LTS brings improved reliability, making it the recommended version for anyone deploying applications built on the asynchronous runtime.
