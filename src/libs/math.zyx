@@ -9,14 +9,14 @@ namespace math
     done
 
     defun check_number(a, b, f)
-        if type(a) != int and type(a) != float do
-            panic("First argument of '" + f + "' must be a number", "T")
+        if type(a) != int and type(a) != float and type(a) != cfloat do
+            panic("First argument of '" + f + "' must be a number or cfloat", "T")
         done
         if b == none do
             pass()
         else do
-            if type(b) != int and type(b) != float do
-                panic("Second argument of '" + f + "' must be a number", "T")
+            if type(b) != int and type(b) != float and type(b) != cfloat do
+                panic("Second argument of '" + f + "' must be a number or cfloat", "T")
             done
         done
     done

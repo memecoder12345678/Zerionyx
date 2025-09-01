@@ -1036,7 +1036,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        if isinstance(value, Number):
+        if isinstance(value, Number | CFloat):
             return RTResult().success(Number(int(value.value)))
         elif isinstance(value, String):
             try:
@@ -1092,7 +1092,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        if isinstance(value, Number):
+        if isinstance(value, Number | CFloat):
             return RTResult().success(Number(float(value.value)))
         elif isinstance(value, String):
             try:
@@ -1831,12 +1831,12 @@ class BuiltInFunction(BaseFunction):
     @set_args(["seconds"])
     def execute_thread_sleep_fp(self, exec_ctx):
         seconds = exec_ctx.symbol_table.get("seconds")
-        if not isinstance(seconds, Number):
+        if not isinstance(seconds, Number | CFloat):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'sleep' must be a number",
+                    "First argument of 'sleep' must be a number or cfloat",
                     exec_ctx,
                 )
             )
@@ -2282,19 +2282,19 @@ class BuiltInFunction(BaseFunction):
     @set_args(["n"])
     def execute_fact_fp(self, exec_ctx):
         n = exec_ctx.symbol_table.get("n")
-        return RTResult().success(Number(math.factorial(n.value)))
+        return RTResult().success(Number(math.factorial(int(n.value))))
 
     @set_args(["a", "b"])
     def execute_gcd_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
         b = exec_ctx.symbol_table.get("b")
-        return RTResult().success(Number(math.gcd(a.value, b.value)))
+        return RTResult().success(Number(math.gcd(int(a.value), int(b.value))))
 
     @set_args(["a", "b"])
     def execute_lcm_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
         b = exec_ctx.symbol_table.get("b")
-        return RTResult().success(Number(math.lcm(a.value, b.value)))
+        return RTResult().success(Number(math.lcm(int(a.value), int(b.value))))
 
     @set_args(["n"])
     def execute_fib_fp(self, exec_ctx):
@@ -2367,6 +2367,8 @@ class BuiltInFunction(BaseFunction):
             return obj.value
         elif isinstance(obj, String):
             return obj.value
+        elif isinstance(obj, CFloat):
+            return obj.value
         elif isinstance(obj, NoneObject):
             return None
         elif isinstance(obj, List):
@@ -2386,7 +2388,7 @@ class BuiltInFunction(BaseFunction):
             return str(obj)
 
     def validate_pyexec_result(self, obj):
-        allowed = (bool, int, float, str)
+        allowed = (bool, int, float, str, Fraction)
         if obj is None:
             return Number.none
         elif isinstance(obj, allowed):
@@ -2401,6 +2403,8 @@ class BuiltInFunction(BaseFunction):
                 return Number(obj)
             elif isinstance(obj, bytes):
                 return Bytes(obj)
+            elif isinstance(obj, Fraction):
+                return CFloat(obj)
             else:
                 return String(obj)
         elif isinstance(obj, list):
