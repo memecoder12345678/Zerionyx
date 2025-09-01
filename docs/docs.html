@@ -455,6 +455,9 @@
             <h3>Language Reference</h3>
             <ul>
                 <li><a href="#ref-data-types">Data Types</a></li>
+                <li><a href="#ref-built-in-constants">Built-in Constants</a></li>
+                <li><a href="#ref-built-in-functions">Built-in Functions</a></li>
+                <li><a href="#ref-namespaces">Namespaces</a></li>
                 <li><a href="#ref-control-flow">Control Flow</a></li>
                 <li><a href="#ref-loops">Loops</a></li>
                 <li><a href="#ref-functions">Functions</a></li>
@@ -466,10 +469,6 @@
                 <li><a href="#ref-hashmaps">HashMaps</a></li>
                 <li><a href="#ref-bytes">Bytes</a></li>
                 <li><a href="#ref-cfloat">CFloat</a></li>
-            </ul>
-            <h3>Reference</h3>
-            <ul>
-                <li><a href="#built-in-functions">Built-in Functions</a></li>
             </ul>
             <h3>Standard Library</h3>
             <ul>
@@ -635,7 +634,7 @@ Freedom in syntax, but not in structure.
 Parentheses are for math, backslashes are for flow.
 The caret (<code>^</code>) means power &mdash; and nothing else.
 Blocks should be explicit: <code>do...done</code> says it all.
-if is a command, not a value.
+<code>if</code> is a command, not a value.
 <code>let</code> or <code>=</code>, pick one &mdash; but be clear.
 Whitespace is free; newlines are not.
 Write like a poet, execute like a machine.
@@ -680,6 +679,165 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </section>
 
+                <section id="ref-built-in-constants">
+                    <h3>Built-in Constants</h3>
+                    <p>Zerionyx provides several global constants for convenience.</p>
+                    <h4>Core Values</h4>
+                    <ul>
+                        <li><b>true</b> &mdash; The boolean value for truth</li>
+                        <li><b>false</b> &mdash; The boolean value for falsehood</li>
+                        <li><b>none</b> &mdash; Represents the absence of a value</li>
+                    </ul>
+                    <h4>Type Representations (Strings)</h4>
+                    <p>These constants are string values that correspond to the output of the <code>type()</code>
+                        function. They are useful for type checking.</p>
+                    <br>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">if</span> <span class="zyx-func">type</span><span class="zyx-types">([</span><span class="zyx-number">1</span>, <span class="zyx-number">2</span><span class="zyx-types">])</span> <span class="zyx-types">==</span> <span class="zyx-var">list</span> <span class="zyx-keyword">do</span>
+    <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"It's a list!"</span><span class="zyx-types">)</span>
+<span class="zyx-keyword">done</span></code></pre>
+                    <br>
+                    <ul>
+                        <li><b>list</b> &rarr; <code>"&lt;list&gt;"</code></li>
+                        <li><b>str</b> &rarr; <code>"&lt;str&gt;"</code></li>
+                        <li><b>int</b> &rarr; <code>"&lt;int&gt;"</code></li>
+                        <li><b>float</b> &rarr; <code>"&lt;float&gt;"</code></li>
+                        <li><b>bool</b> &rarr; <code>"&lt;bool&gt;"</code></li>
+                        <li><b>func</b> &rarr; <code>"&lt;func&gt;"</code></li>
+                        <li><b>coroutine</b> &rarr; <code>"&lt;coroutine&gt;"</code></li>
+                        <li><b>hashmap</b> &rarr; <code>"&lt;hashmap&gt;"</code></li>
+                        <li><b>thread</b> &rarr; <code>"&lt;thread&gt;"</code></li>
+                        <li><b>bytes</b> &rarr; <code>"&lt;bytes&gt;"</code></li>
+                        <li><b>cfloat</b> &rarr; <code>"&lt;cfloat&gt;"</code></li>
+                        <li><b>py_obj</b> &rarr; <code>"&lt;py-obj&gt;"</code></li>
+                        <li><b>channel_type</b> &rarr; <code>"&lt;channel&gt;"</code></li>
+                        <li><b>none_type</b> &rarr; <code>"&lt;none&gt;"</code></li>
+                    </ul>
+                    <h4>Special Numeric Values</h4>
+                    <ul>
+                        <li><b>nan</b> &mdash; Not a Number</li>
+                        <li><b>inf</b> &mdash; Positive infinity</li>
+                        <li><b>neg_inf</b> &mdash; Negative infinity</li>
+                    </ul>
+                </section>
+
+                <section id="ref-built-in-functions">
+                    <h3>Built-in Functions</h3>
+                    <ul>
+                        <li><b>append(obj, val)</b> &rarr; list &mdash; Add <code>val</code> to end of <code>obj</code>
+                            return
+                            <code>val</code>
+                        </li>
+                        <li><b>is_panic(func, args=[], kwargs={})</b> &rarr; list &mdash; Run <code>func</code> with
+                            <code>args</code>
+                            return
+                            <code>[result, none, none]</code> if ok or
+                            <code>[none, err_msg, err_name ("RT": "Runtime Error", "M": "Math Error", "IO": "IO Error" or "T": "Type Error")]</code>
+                            if error
+                        </li>
+                        <li><b>clear()</b> &rarr; none &mdash; Clear terminal</li>
+                        <li><b>extend(a, b)</b> &rarr; none &mdash; Add all in <code>b</code> to <code>a</code> both
+                            must be
+                            list</li>
+                        <li><b>input(prompt="")</b> &rarr; str &mdash; Show <code>prompt</code> get user input</li>
+                        <li><b>get_password(prompt="")</b> &rarr; str &mdash; Show <code>prompt</code> get user password
+                        </li>
+                        <li><b>insert(lst, i, val)</b> &rarr; none &mdash; insert <code>val</code> to <code>lst</code>
+                            at
+                            index
+                            <code>i</code>
+                        </li>
+                        <li><b>is_func(x)</b> &rarr; bool &mdash; Check if <code>x</code> is func</li>
+                        <li><b>is_list(x)</b> &rarr; bool &mdash; Check if <code>x</code> is list</li>
+                        <li><b>is_py_obj(x)</b> &rarr; bool &mdash; Check if <code>x</code> is PyObject</li>
+                        <li><b>is_none(x)</b> &rarr; bool &mdash; Check if <code>x</code> is none</li>
+                        <li><b>is_num(x)</b> &rarr; bool &mdash; Check if <code>x</code> is number</li>
+                        <li><b>is_str(x)</b> &rarr; bool &mdash; Check if <code>x</code> is string</li>
+                        <li><b>is_bool(x)</b> &rarr; bool &mdash; Check if <code>x</code> is boolean</li>
+                        <li><b>is_thread(x)</b> &rarr; bool &mdash; Check if <code>x</code> is thread</li>
+                        <li><b>keys(hm)</b> &rarr; list &mdash; Return list of all keys in <code>hm</code> (a hashmap)
+                        </li>
+                        <li><b>values(hm)</b> &rarr; list &mdash; Return list of all values in <code>hm</code></li>
+                        <li><b>items(hm)</b> &rarr; list &mdash; Return list of <code>[key, value]</code> pairs in
+                            <code>hm</code>
+                        </li>
+                        <li><b>has(hm, key)</b> &rarr; bool &mdash; Return <code>true</code> if <code>key</code> exists
+                            in
+                            <code>hm</code>
+                        </li>
+                        <li><b>get(hmol, koi, default=none)</b> &rarr; any &mdash; Return value for <code>koi</code> or
+                            <code>default</code>
+                            if not found
+                        </li>
+                        <li><b>del(hm, key)</b> &rarr; none &mdash; Delete <code>key</code> and its value from
+                            <code>hm</code>
+                        </li>
+                        <li><b>len(x)</b> &rarr; number &mdash; Get length of <code>x</code></li>
+                        <li><b>panic(msg, type="RT")</b> &mdash; Stop with err <code>msg</code> and
+                            <code>type ("RT": "Runtime Error", "M": "Math Error", "IO": "IO Error" or "T": "Type Error")</code>
+                        </li>
+                        <li><b>pop(lst, i)</b> &rarr; any &mdash; Remove and return item at <code>i</code> in
+                            <code>lst</code>
+                        </li>
+                        <li><b>print(value="")</b> &rarr; none &mdash; Prints <code>text</code> to the standard output
+                            with
+                            no newline</li>
+                        <li><b>println(value="")</b> &rarr; none &mdash; Same as <code>print</code> but adds a newline
+                        </li>
+                        <li><b>to_float(x, supress_error=false)</b> &rarr; number (float)/none &mdash; Convert
+                            <code>x</code> to float return
+                            <code>none</code> if fail and <code>silent</code> true else raise
+                        </li>
+                        <li><b>to_int(x, supress_error=false)</b> &rarr; number (int)/none &mdash; Convert
+                            <code>x</code> to
+                            int return
+                            <code>none</code> if fail and <code>silent</code> true else raise
+                        </li>
+                        <li><b>to_str(x)</b> &rarr; str &mdash; Convert <code>x</code> to string</li>
+                        <li><b>to_cfloat(x, supress_error=false)</b> &rarr; cfloat &mdash; Convert
+                            <code>x</code> to cfloat (correct float)
+                        </li>
+                        <li><b>to_bytes(x, from_hex=false, supress_error=false)</b> &rarr; bytes &mdash; Convert
+                            <code>x</code>
+                            to bytes
+                        </li>
+                        </li>
+                        <li><b>type(x)</b> &rarr; str &mdash; Return type of <code>x</code> as string</li>
+                        <li><b>pyexec(code, args={})</b> &rarr; hashmap &mdash; Executes embedded Python code and
+                            returns
+                            its result (use with caution)</li>
+                        <li><b>slice(l, from=none, to=none, step=none)</b> &rarr; list/string/hashmap/bytes &mdash;
+                            Slice
+                            list/string/hashmap/bytes
+                            <code>l</code> from <code>from</code> to <code>to</code> step <code>step</code> (exclusive)
+                        </li>
+                        <li><b>is_nan(n)</b> &rarr; bool &mdash; Check if <code>n</code> is NaN (Not a Number)</li>
+                        <li><b>is_channel(n)</b> &rarr; bool &mdash; Check if <code>n</code> is channel</li>
+                        <li><b>is_cfloat(n)</b> &rarr; bool &mdash; Check if <code>n</code> is cfloat</li>
+                        <li><b>is_coroutine(n)</b> &rarr; bool &mdash; Check if <code>n</code> is coroutine</li>
+                    </ul>
+                </section>
+                <section id="ref-namespaces">
+                    <h3>Namespaces</h3>
+                    <p>Namespaces are objects that act as containers to group related variables and functions. This is useful for organizing code and preventing name collisions, especially when creating libraries.</p>
+                    <p>You can define a namespace using the <code>namespace ... done</code> block. Members within the namespace are accessed using dot notation (<code>.</code>).</p>
+                    <br>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-comment"># Define a namespace to group math-related utilities</span>
+<span class="zyx-keyword">namespace</span> <span class="zyx-var">math_utils</span>
+    <span class="zyx-keyword">let</span> <span class="zyx-var">pi</span> <span class="zyx-types">=</span> <span class="zyx-number">3.14159</span>
+    
+    <span class="zyx-keyword">defun</span> <span class="zyx-func-def">circle_area</span><span class="zyx-types">(</span><span class="zyx-var">radius</span><span class="zyx-types">)</span> <span class="zyx-keyword">do</span>
+        <span class="zyx-var">pi</span> <span class="zyx-types">*</span> <span class="zyx-var">radius</span> <span class="zyx-types">^</span> <span class="zyx-number">2</span>
+    <span class="zyx-keyword">done</span>
+<span class="zyx-keyword">done</span>
+
+<span class="zyx-comment"># Access members using dot notation</span>
+<span class="zyx-keyword">let</span> <span class="zyx-var">r</span> <span class="zyx-types">=</span> <span class="zyx-number">10</span>
+<span class="zyx-keyword">let</span> <span class="zyx-var">area</span> <span class="zyx-types">=</span> <span class="zyx-var">math_utils</span>.<span class="zyx-func">circle_area</span><span class="zyx-types">(</span><span class="zyx-var">r</span><span class="zyx-types">)</span>
+
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"The area is "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">area</span><span class="zyx-types">))</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Pi value: "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">math_utils</span>.<span class="zyx-var">pi</span><span class="zyx-types">))</span>
+</code></pre>
+                </section>
                 <section id="ref-control-flow">
                     <h3>Control Flow</h3>
                     <p>Conditional logic is handled using <code>if</code>, <code>elif</code>, and <code>else</code>
@@ -839,7 +997,7 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>Concatenation</b>: <code>"a" + "b"</code> results in <code>"ab"</code>.</li>
                         <li><b>Repetition</b>: <code>"a" * 3</code> results in <code>"aaa"</code>.</li>
                         <li><b>Indexing</b>: Use the <code>$</code> operator to get a character at a specific index.
-                            <code>"hello"$1</code> results in <code>"e"</code>.
+                            <code>"hello" $ 1</code> results in <code>"e"</code>.
                         </li>
                     </ul>
                     <p>For more advanced functions like splitting, joining, and replacing, use the <code>string</code>
@@ -851,7 +1009,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>Lists are mutable, ordered collections of items.</p>
                     <ul>
                         <li><b>Creation</b>: <code>let my_list = [1, "a", true]</code></li>
-                        <li><b>Indexing</b>: <code>my_list$0</code> returns <code>1</code>.</li>
+                        <li><b>Indexing</b>: <code>my_list $ 0</code> returns <code>1</code>.</li>
                         <li><b>Appending</b>: <code>my_list + "new"</code> returns <code>[1, "a", true, "new"]</code>.
                         </li>
                         <li><b>Concatenation</b>: <code>[1, 2] * [3, 4]</code> returns <code>[1, 2, 3, 4]</code>.</li>
@@ -867,7 +1025,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>HashMaps store key-value pairs. Keys must be strings.</p>
                     <ul>
                         <li><b>Creation</b>: <code>let person = {"name": "Alex", "age": 30}</code></li>
-                        <li><b>Accessing</b>: <code>person$"name"</code> returns <code>"Alex"</code>.</li>
+                        <li><b>Accessing</b>: <code>person $ "name"</code> returns <code>"Alex"</code>.</li>
                         <li><b>Adding/Updating</b>: <code>person + {"city": "New York"}</code>. Note that this returns a
                             new map.</li>
                     </ul>
@@ -887,7 +1045,6 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>Operations</b>: Supports concatenation (<code>+</code>) and indexing (<code>$</code>).
                         </li>
                     </ul>
-                    <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">load</span> <span class="zyx-string">"libs.hash"</span>
 <span class="zyx-keyword">let</span> <span class="zyx-var">data</span> <span class="zyx-types">=</span> <span class="zyx-func">to_bytes</span><span class="zyx-types">(</span><span class="zyx-string">"my secret data"</span><span class="zyx-types">)</span>
 <span class="zyx-keyword">let</span> <span class="zyx-var">hashed_data</span> <span class="zyx-types">=</span> <span class="zyx-var">hash</span>.<span class="zyx-func">sha256</span><span class="zyx-types">(</span><span class="zyx-var">data</span><span class="zyx-types">)</span>
@@ -911,94 +1068,6 @@ Zerionyx may be magical, but its syntax must be real.
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">result</span><span class="zyx-types">)</span> <span class="zyx-comment"># Output: 0.3</span>
 </code></pre>
                 </section>
-            </section>
-
-            <section id="built-in-functions">
-                <h2>Built-in Functions</h2>
-                <ul>
-                    <li><b>append(obj, val)</b> &rarr; list &mdash; Add <code>val</code> to end of <code>obj</code>
-                        return
-                        <code>val</code>
-                    </li>
-                    <li><b>is_panic(func, args=[], kwargs={})</b> &rarr; list &mdash; Run <code>func</code> with
-                        <code>args</code>
-                        return
-                        <code>[result, none, none]</code> if ok or
-                        <code>[none, err_msg, err_name ("RT": "Runtime Error", "M": "Math Error", "IO": "IO Error" or "T": "Type Error")]</code>
-                        if error
-                    </li>
-                    <li><b>clear()</b> &rarr; none &mdash; Clear terminal</li>
-                    <li><b>extend(a, b)</b> &rarr; none &mdash; Add all in <code>b</code> to <code>a</code> both must be
-                        list</li>
-                    <li><b>input(prompt="")</b> &rarr; str &mdash; Show <code>prompt</code> get user input</li>
-                    <li><b>get_password(prompt="")</b> &rarr; str &mdash; Show <code>prompt</code> get user password
-                    </li>
-                    <li><b>insert(lst, i, val)</b> &rarr; none &mdash; insert <code>val</code> to <code>lst</code> at
-                        index
-                        <code>i</code>
-                    </li>
-                    <li><b>is_func(x)</b> &rarr; bool &mdash; Check if <code>x</code> is func</li>
-                    <li><b>is_list(x)</b> &rarr; bool &mdash; Check if <code>x</code> is list</li>
-                    <li><b>is_py_obj(x)</b> &rarr; bool &mdash; Check if <code>x</code> is PyObject</li>
-                    <li><b>is_none(x)</b> &rarr; bool &mdash; Check if <code>x</code> is none</li>
-                    <li><b>is_num(x)</b> &rarr; bool &mdash; Check if <code>x</code> is number</li>
-                    <li><b>is_str(x)</b> &rarr; bool &mdash; Check if <code>x</code> is string</li>
-                    <li><b>is_bool(x)</b> &rarr; bool &mdash; Check if <code>x</code> is boolean</li>
-                    <li><b>is_thread(x)</b> &rarr; bool &mdash; Check if <code>x</code> is thread</li>
-                    <li><b>keys(hm)</b> &rarr; list &mdash; Return list of all keys in <code>hm</code> (a hashmap)</li>
-                    <li><b>values(hm)</b> &rarr; list &mdash; Return list of all values in <code>hm</code></li>
-                    <li><b>items(hm)</b> &rarr; list &mdash; Return list of <code>[key, value]</code> pairs in
-                        <code>hm</code>
-                    </li>
-                    <li><b>has(hm, key)</b> &rarr; bool &mdash; Return <code>true</code> if <code>key</code> exists in
-                        <code>hm</code>
-                    </li>
-                    <li><b>get(hmol, koi, default=none)</b> &rarr; any &mdash; Return value for <code>koi</code> or
-                        <code>default</code>
-                        if not found
-                    </li>
-                    <li><b>del(hm, key)</b> &rarr; none &mdash; Delete <code>key</code> and its value from
-                        <code>hm</code>
-                    </li>
-                    <li><b>len(x)</b> &rarr; number &mdash; Get length of <code>x</code></li>
-                    <li><b>panic(msg, type="RT")</b> &mdash; Stop with err <code>msg</code> and
-                        <code>type ("RT": "Runtime Error", "M": "Math Error", "IO": "IO Error" or "T": "Type Error")</code>
-                    </li>
-                    <li><b>pop(lst, i)</b> &rarr; any &mdash; Remove and return item at <code>i</code> in
-                        <code>lst</code>
-                    </li>
-                    <li><b>print(value="")</b> &rarr; none &mdash; Prints <code>text</code> to the standard output with
-                        no newline</li>
-                    <li><b>println(value="")</b> &rarr; none &mdash; Same as <code>print</code> but adds a newline</li>
-                    <li><b>to_float(x, supress_error=false)</b> &rarr; number (float)/none &mdash; Convert
-                        <code>x</code> to float return
-                        <code>none</code> if fail and <code>silent</code> true else raise
-                    </li>
-                    <li><b>to_int(x, supress_error=false)</b> &rarr; number (int)/none &mdash; Convert <code>x</code> to
-                        int return
-                        <code>none</code> if fail and <code>silent</code> true else raise
-                    </li>
-                    <li><b>to_str(x)</b> &rarr; str &mdash; Convert <code>x</code> to string</li>
-                    <li><b>to_cfloat(x, supress_error=false)</b> &rarr; cfloat &mdash; Convert
-                        <code>x</code> to cfloat (correct float)
-                    </li>
-                    <li><b>to_bytes(x, from_hex=false, supress_error=false)</b> &rarr; bytes &mdash; Convert
-                        <code>x</code>
-                        to bytes
-                    </li>
-                    </li>
-                    <li><b>type(x)</b> &rarr; str &mdash; Return type of <code>x</code> as string</li>
-                    <li><b>pyexec(code, args={})</b> &rarr; hashmap &mdash; Executes embedded Python code and returns
-                        its result (use with caution)</li>
-                    <li><b>slice(l, from=none, to=none, step=none)</b> &rarr; list/string/hashmap/bytes &mdash; Slice
-                        list/string/hashmap/bytes
-                        <code>l</code> from <code>from</code> to <code>to</code> step <code>step</code> (exclusive)
-                    </li>
-                    <li><b>is_nan(n)</b> &rarr; bool &mdash; Check if <code>n</code> is NaN (Not a Number)</li>
-                    <li><b>is_channel(n)</b> &rarr; bool &mdash; Check if <code>n</code> is channel</li>
-                    <li><b>is_cfloat(n)</b> &rarr; bool &mdash; Check if <code>n</code> is cfloat</li>
-                    <li><b>is_coroutine(n)</b> &rarr; bool &mdash; Check if <code>n</code> is coroutine</li>
-                </ul>
             </section>
 
             <section id="standard-library">
