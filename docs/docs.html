@@ -650,7 +650,7 @@ Weirdness is not a feature.
 Zerionyx may be magical, but its syntax must be real.
 </code></pre>
             </section>
-            
+
             <section id="language-reference">
                 <h2>Language Reference</h2>
 
@@ -658,20 +658,34 @@ Zerionyx may be magical, but its syntax must be real.
                     <h3>Data Types</h3>
                     <p>Zerionyx is dynamically typed. Here are the primary data types:</p>
                     <ul>
-                        <li><b>Number</b>: Can be an integer (e.g., <code>10</code>, <code>-5</code>) or a float (e.g., <code>3.14</code>).</li>
-                        <li><b>String</b>: A sequence of characters, enclosed in double quotes (e.g., <code>"hello"</code>).</li>
+                        <li><b>Number</b>: Can be an integer (e.g., <code>10</code>, <code>-5</code>) or a float (e.g.,
+                            <code>3.14</code>).
+                        </li>
+                        <li><b>String</b>: A sequence of characters, enclosed in double quotes (e.g.,
+                            <code>"hello"</code>).
+                        </li>
                         <li><b>Bool</b>: Represents boolean values, either <code>true</code> or <code>false</code>.</li>
-                        <li><b>List</b>: An ordered collection of items, similar to an array (e.g., <code>[1, "two", true]</code>).</li>
-                        <li><b>HashMap</b>: A collection of key-value pairs (e.g., <code>{"name": "Zyx", "version": 1}</code>). Keys must be strings.</li>
+                        <li><b>List</b>: An ordered collection of items, similar to an array (e.g.,
+                            <code>[1, "two", true]</code>).
+                        </li>
+                        <li><b>HashMap</b>: A collection of key-value pairs (e.g.,
+                            <code>{"name": "Zyx", "version": 1}</code>). Keys must be strings.
+                        </li>
                         <li><b>Bytes</b>: A sequence of raw bytes, useful for binary data and hashing.</li>
-                        <li><b>CFloat</b>: A "correct float" type that uses high-precision decimals to avoid common floating-point errors.</li>
-                        <li><b>None</b>: A special type representing the absence of a value, written as <code>none</code>.</li>
+                        <li><b>CFloat</b>: A "correct float" type that uses high-precision decimals to avoid common
+                            floating-point errors.</li>
+                        <li><b>None</b>: A special type representing the absence of a value, written as
+                            <code>none</code>.
+                        </li>
                     </ul>
                 </section>
 
                 <section id="ref-control-flow">
                     <h3>Control Flow</h3>
-                    <p>Conditional logic is handled using <code>if</code>, <code>elif</code>, and <code>else</code> statements. Each block of code to be executed is introduced by the <code>do</code> keyword and the entire structure is optionally terminated by <code>done</code>.</p>
+                    <p>Conditional logic is handled using <code>if</code>, <code>elif</code>, and <code>else</code>
+                        statements. Each block of code to be executed is introduced by the <code>do</code> keyword and
+                        the entire structure is optionally terminated by <code>done</code>.</p>
+                    <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">score</span> <span class="zyx-types">=</span> <span class="zyx-number">85</span>
 
 <span class="zyx-keyword">if</span> <span class="zyx-var">score</span> <span class="zyx-types">>=</span> <span class="zyx-number">90</span> <span class="zyx-keyword">do</span>
@@ -687,16 +701,20 @@ Zerionyx may be magical, but its syntax must be real.
                 <section id="ref-loops">
                     <h3>Loops</h3>
                     <p>Zerionyx provides three types of loops.</p>
+                    <br>
                     <h4>While Loop</h4>
                     <p>Executes a block of code as long as a condition is true.</p>
+                    <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">count</span> <span class="zyx-types">=</span> <span class="zyx-number">0</span>
 <span class="zyx-keyword">while</span> <span class="zyx-var">count</span> <span class="zyx-types">&lt;</span> <span class="zyx-number">5</span> <span class="zyx-keyword">do</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">count</span><span class="zyx-types">)</span>
     <span class="zyx-var">count</span> <span class="zyx-types">=</span> <span class="zyx-var">count</span> <span class="zyx-types">+</span> <span class="zyx-number">1</span>
 <span class="zyx-keyword">done</span>
 </code></pre>
+                    <br>
                     <h4>For Loop (Numeric Range)</h4>
                     <p>Iterates over a range of numbers.</p>
+                    <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-comment"># Prints numbers from 1 to 10</span>
 <span class="zyx-keyword">for</span> <span class="zyx-var">i</span> <span class="zyx-types">=</span> <span class="zyx-number">1</span> <span class="zyx-keyword">to</span> <span class="zyx-number">11</span> <span class="zyx-keyword">do</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">i</span><span class="zyx-types">)</span>
@@ -707,21 +725,29 @@ Zerionyx may be magical, but its syntax must be real.
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">j</span><span class="zyx-types">)</span>
 <span class="zyx-keyword">done</span>
 </code></pre>
+                    <br>
                     <h4>For-In Loop (Iterator)</h4>
                     <p>Iterates over the elements of an iterable like a list or string.</p>
+                    <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">fruits</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-string">"apple"</span>, <span class="zyx-string">"banana"</span>, <span class="zyx-string">"cherry"</span><span class="zyx-types">]</span>
 <span class="zyx-keyword">for</span> <span class="zyx-var">fruit</span> <span class="zyx-keyword">in</span> <span class="zyx-var">fruits</span> <span class="zyx-keyword">do</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"I like "</span> <span class="zyx-types">+</span> <span class="zyx-var">fruit</span><span class="zyx-types">)</span>
 <span class="zyx-keyword">done</span>
 </code></pre>
-                    <p>The <code>break</code> statement can be used to exit a loop immediately, and <code>continue</code> skips to the next iteration.</p>
+                    <br>
+                    <p>The <code>break</code> statement can be used to exit a loop immediately, and
+                        <code>continue</code> skips to the next iteration.
+                    </p>
                 </section>
 
                 <section id="ref-functions">
                     <h3>Functions</h3>
-                    <p>Functions are defined with the <code>defun</code> keyword. They can accept parameters, have default values, and can be synchronous or asynchronous.</p>
+                    <p>Functions are defined with the <code>defun</code> keyword. They can accept parameters, have
+                        default values, and can be synchronous or asynchronous.</p>
+                    <br>
                     <h4>Synchronous Function</h4>
                     <p>The last expression in a function is automatically returned.</p>
+                    <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">defun</span> <span class="zyx-func-def">greet</span><span class="zyx-types">(</span><span class="zyx-var">name</span><span class="zyx-types">=</span><span class="zyx-string">"World"</span><span class="zyx-types">)</span>
     <span class="zyx-keyword">return</span> <span class="zyx-string">"Hello, "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">name</span><span class="zyx-types">)</span> <span class="zyx-types">+</span> <span class="zyx-string">"!"</span>
 <span class="zyx-keyword">done</span>
@@ -729,8 +755,11 @@ Zerionyx may be magical, but its syntax must be real.
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-func">greet</span><span class="zyx-types">(</span><span class="zyx-string">"Zerionyx"</span><span class="zyx-types">))</span> <span class="zyx-comment"># Output: Hello, Zerionyx!</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-func">greet</span><span class="zyx-types">())</span>           <span class="zyx-comment"># Output: Hello, World!</span>
 </code></pre>
+                    <br>
                     <h4>Asynchronous Function</h4>
-                    <p>Use the <code>async</code> keyword to define an asynchronous function (coroutine). These must be called with <code>await</code>.</p>
+                    <p>Use the <code>async</code> keyword to define an asynchronous function (coroutine). These must be
+                        called with <code>await</code>.</p>
+                    <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">load</span> <span class="zyx-string">"libs.asyncio"</span>
 
 <span class="zyx-keyword">async</span> <span class="zyx-keyword">defun</span> <span class="zyx-func-def">fetch_data</span><span class="zyx-types">()</span>
@@ -752,6 +781,7 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><code>print(value)</code>: Prints the value without a newline.</li>
                         <li><code>input(prompt)</code>: Displays a prompt and returns the user's input as a string.</li>
                     </ul>
+                    <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">name</span> <span class="zyx-types">=</span> <span class="zyx-func">input</span><span class="zyx-types">(</span><span class="zyx-string">"Enter your name: "</span><span class="zyx-types">)</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Hello, "</span> <span class="zyx-types">+</span> <span class="zyx-var">name</span><span class="zyx-types">)</span>
 </code></pre>
@@ -759,7 +789,10 @@ Zerionyx may be magical, but its syntax must be real.
 
                 <section id="ref-error-handling">
                     <h3>Error Handling</h3>
-                    <p>Zerionyx uses a "panic" system for errors. Instead of traditional try-catch blocks, you can safely execute a function using the <code>is_panic</code> built-in. It returns a list indicating success or failure.</p>
+                    <p>Zerionyx uses a "panic" system for errors. Instead of traditional try-catch blocks, you can
+                        safely execute a function using the <code>is_panic</code> built-in. It returns a list indicating
+                        success or failure.</p>
+                    <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">defun</span> <span class="zyx-func-def">divide</span><span class="zyx-types">(</span><span class="zyx-var">a</span>, <span class="zyx-var">b</span><span class="zyx-types">)</span>
     <span class="zyx-keyword">if</span> <span class="zyx-var">b</span> <span class="zyx-types">==</span> <span class="zyx-number">0</span> <span class="zyx-keyword">do</span>
         <span class="zyx-func">panic</span><span class="zyx-types">(</span><span class="zyx-string">"Cannot divide by zero!"</span>, <span class="zyx-string">"M"</span><span class="zyx-types">)</span> <span class="zyx-comment"># "M" for Math Error</span>
@@ -784,6 +817,7 @@ Zerionyx may be magical, but its syntax must be real.
                 <section id="ref-file-handling">
                     <h3>File Handling</h3>
                     <p>File operations are managed through the <code>ffio</code> standard library.</p>
+                    <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">load</span> <span class="zyx-string">"libs.ffio"</span>
 
 <span class="zyx-keyword">let</span> <span class="zyx-var">filename</span> <span class="zyx-types">=</span> <span class="zyx-string">"greetings.txt"</span>
@@ -804,9 +838,12 @@ Zerionyx may be magical, but its syntax must be real.
                     <ul>
                         <li><b>Concatenation</b>: <code>"a" + "b"</code> results in <code>"ab"</code>.</li>
                         <li><b>Repetition</b>: <code>"a" * 3</code> results in <code>"aaa"</code>.</li>
-                        <li><b>Indexing</b>: Use the <code>$</code> operator to get a character at a specific index. <code>"hello"$1</code> results in <code>"e"</code>.</li>
+                        <li><b>Indexing</b>: Use the <code>$</code> operator to get a character at a specific index.
+                            <code>"hello"$1</code> results in <code>"e"</code>.
+                        </li>
                     </ul>
-                    <p>For more advanced functions like splitting, joining, and replacing, use the <code>string</code> library.</p>
+                    <p>For more advanced functions like splitting, joining, and replacing, use the <code>string</code>
+                        library.</p>
                 </section>
 
                 <section id="ref-lists">
@@ -815,44 +852,58 @@ Zerionyx may be magical, but its syntax must be real.
                     <ul>
                         <li><b>Creation</b>: <code>let my_list = [1, "a", true]</code></li>
                         <li><b>Indexing</b>: <code>my_list$0</code> returns <code>1</code>.</li>
-                        <li><b>Appending</b>: <code>my_list + "new"</code> returns <code>[1, "a", true, "new"]</code>.</li>
+                        <li><b>Appending</b>: <code>my_list + "new"</code> returns <code>[1, "a", true, "new"]</code>.
+                        </li>
                         <li><b>Concatenation</b>: <code>[1, 2] * [3, 4]</code> returns <code>[1, 2, 3, 4]</code>.</li>
                         <li><b>Removal by index</b>: <code>[1, 2, 3] - 1</code> returns <code>[1, 3]</code>.</li>
                     </ul>
-                    <p>The <code>mlist</code> library provides functions like <code>map</code>, <code>filter</code>, <code>sort</code>, etc.</p>
+                    <p>The <code>mlist</code> library provides functions like <code>map</code>, <code>filter</code>,
+                        <code>sort</code>, etc.
+                    </p>
                 </section>
 
                 <section id="ref-hashmaps">
                     <h3>HashMaps</h3>
                     <p>HashMaps store key-value pairs. Keys must be strings.</p>
-                     <ul>
+                    <ul>
                         <li><b>Creation</b>: <code>let person = {"name": "Alex", "age": 30}</code></li>
                         <li><b>Accessing</b>: <code>person$"name"</code> returns <code>"Alex"</code>.</li>
-                        <li><b>Adding/Updating</b>: <code>person + {"city": "New York"}</code>. Note that this returns a new map.</li>
+                        <li><b>Adding/Updating</b>: <code>person + {"city": "New York"}</code>. Note that this returns a
+                            new map.</li>
                     </ul>
-                    <p>Use built-in functions like <code>keys(hm)</code>, <code>values(hm)</code>, and <code>has(hm, key)</code> for more operations.</p>
+                    <p>Use built-in functions like <code>keys(hm)</code>, <code>values(hm)</code>, and
+                        <code>has(hm, key)</code> for more operations.
+                    </p>
                 </section>
 
                 <section id="ref-bytes">
                     <h3>Bytes</h3>
-                    <p>The <code>bytes</code> type represents an immutable sequence of bytes. It's essential for working with binary data, file I/O in binary mode, and cryptographic hashing.</p>
+                    <p>The <code>bytes</code> type represents an immutable sequence of bytes. It's essential for working
+                        with binary data, file I/O in binary mode, and cryptographic hashing.</p>
                     <ul>
                         <li><b>Creation</b>: Use the <code>to_bytes(value)</code> function.</li>
                         <li><b>From String</b>: <code>to_bytes("hello")</code></li>
                         <li><b>From Hex</b>: <code>to_bytes("68656c6c6f", from_hex=true)</code></li>
-                        <li><b>Operations</b>: Supports concatenation (<code>+</code>) and indexing (<code>$</code>).</li>
+                        <li><b>Operations</b>: Supports concatenation (<code>+</code>) and indexing (<code>$</code>).
+                        </li>
                     </ul>
+                    <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">load</span> <span class="zyx-string">"libs.hash"</span>
 <span class="zyx-keyword">let</span> <span class="zyx-var">data</span> <span class="zyx-types">=</span> <span class="zyx-func">to_bytes</span><span class="zyx-types">(</span><span class="zyx-string">"my secret data"</span><span class="zyx-types">)</span>
 <span class="zyx-keyword">let</span> <span class="zyx-var">hashed_data</span> <span class="zyx-types">=</span> <span class="zyx-var">hash</span>.<span class="zyx-func">sha256</span><span class="zyx-types">(</span><span class="zyx-var">data</span><span class="zyx-types">)</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">hashed_data</span><span class="zyx-types">)</span>
 </code></pre>
                 </section>
-                
+
                 <section id="ref-cfloat">
                     <h3>CFloat (Correct Float)</h3>
-                    <p>Due to the nature of binary floating-point arithmetic, simple operations like <code>0.1 + 0.2</code> can result in imprecise values (e.g., <code>0.30000000000000004</code>). The <code>cfloat</code> type avoids this by using a high-precision decimal representation.</p>
-                    <p>Use <code>to_cfloat(value)</code> to create a CFloat. They support all standard arithmetic operations.</p>
+                    <p>Due to the nature of binary floating-point arithmetic, simple operations like
+                        <code>0.1 + 0.2</code> can result in imprecise values (e.g., <code>0.30000000000000004</code>).
+                        The <code>cfloat</code> type avoids this by using a high-precision decimal representation.
+                    </p>
+                    <p>Use <code>to_cfloat(value)</code> to create a CFloat. They support all standard arithmetic
+                        operations.</p>
+                    <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">a</span> <span class="zyx-types">=</span> <span class="zyx-func">to_cfloat</span><span class="zyx-types">(</span><span class="zyx-string">"0.1"</span><span class="zyx-types">)</span>
 <span class="zyx-keyword">let</span> <span class="zyx-var">b</span> <span class="zyx-types">=</span> <span class="zyx-func">to_cfloat</span><span class="zyx-types">(</span><span class="zyx-string">"0.2"</span><span class="zyx-types">)</span>
 <span class="zyx-keyword">let</span> <span class="zyx-var">result</span> <span class="zyx-types">=</span> <span class="zyx-var">a</span> <span class="zyx-types">+</span> <span class="zyx-var">b</span>
@@ -1452,4 +1503,5 @@ Zerionyx may be magical, but its syntax must be real.
         </div>
     </footer>
 </body>
+
 </html>
