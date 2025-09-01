@@ -841,10 +841,10 @@ class PyObject(Object):
         return self.__repr__()
 
     def __repr__(self):
-        return f"<py_obj {self.value}>"
+        return f"<py-obj {self.value}>"
 
     def type(self):
-        return "<py_obj>"
+        return "<py-obj>"
 
 
 class List(Object):
