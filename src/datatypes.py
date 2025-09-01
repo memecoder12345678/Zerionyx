@@ -379,9 +379,7 @@ class CFloat(Object):
         return self
 
     def copy(self):
-        return CFloat(
-            self.value, self.context, self.pos_start, self.pos_end
-        )
+        return CFloat(self.value, self.context, self.pos_start, self.pos_end)
 
     def _convert_to_fraction(self, other):
         if isinstance(other, (Number, CFloat)):
@@ -451,7 +449,10 @@ class CFloat(Object):
                 return CFloat(result).set_context(self.context), None
             except ValueError:
                 return None, RTError(
-                    self.pos_start, self.pos_end, "Math domain error (e.g., negative base with fractional exponent)", self.context
+                    self.pos_start,
+                    self.pos_end,
+                    "Math domain error (e.g., negative base with fractional exponent)",
+                    self.context,
                 )
         return None, Object.illegal_operation(
             self, other, f"Can't power cfloat by '{other.type()}'"
@@ -474,7 +475,7 @@ class CFloat(Object):
         other_frac = self._convert_to_fraction(other)
         if other_frac is not None and self.value is not None:
             return Bool(op(self.value, other_frac)).set_context(self.context), None
-        
+
         if self.value is None:
             is_none_other = isinstance(other, NoneObject)
             if op == operator.eq:
@@ -536,6 +537,7 @@ class CFloat(Object):
         if self.value.denominator == 1:
             return str(self.value.numerator)
         return str(float(self.value))
+
 
 class Number(Object):
     __slots__ = ("value", "context", "pos_start", "pos_end", "fields")

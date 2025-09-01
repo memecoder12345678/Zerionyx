@@ -5,6 +5,7 @@ import random
 import math
 import json
 import asyncio
+import platform
 from .parser import *
 from .nodes import *
 from .datatypes import *
@@ -735,7 +736,11 @@ class BuiltInFunction(BaseFunction):
         mode = exec_ctx.symbol_table.get("mode")
         if mode.value == "r":
             try:
-                with open(file.path.__str__(), "r") as f:
+                with open(
+                    file.path.__str__(),
+                    mode.value,
+                    encoding="utf-8" if "b" not in mode.value else None,
+                ) as f:
                     return RTResult().success(String(f.read()))
             except Exception as e:
                 return RTResult().failure(
@@ -766,7 +771,11 @@ class BuiltInFunction(BaseFunction):
         mode = exec_ctx.symbol_table.get("mode")
         text = exec_ctx.symbol_table.get("text")
         try:
-            with open(file.path.__str__(), mode.__str__()) as f:
+            with open(
+                file.path.__str__(),
+                mode.__str__(),
+                encoding="utf-8" if "b" not in mode.value else None,
+            ) as f:
                 f.write(text.value)
             return RTResult().success(Number.none)
         except Exception as e:
@@ -1688,61 +1697,135 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    @set_args(["func", "args"], [None, List([])])
-    def execute_thread_start_fp(self, exec_ctx):
+    def _handle_panic_result(self, res, exec_ctx):
+        if res.error:
+            err = res.error
+            if isinstance(err, RTError):
+                err_str = str(err)
+                err_line = err_str.strip().split('\n')[-1]
+                err_name, err_msg = err_line.split(':', 1)
+                err_name, err_msg = err_name.strip(), err_msg.strip()
+                
+                if "Runtime" in err_name: err_name_short = "RT"
+                elif "Math" in err_name: err_name_short = "M"
+                elif "IO" in err_name: err_name_short = "IO"
+                elif "Type" in err_name: err_name_short = "T"
+                else: err_name_short = "UNKNOWN"
+                
+                return RTResult().success(List([NoneObject(), String(err_msg), String(err_name_short)]))
+            else:
+                return RTResult().failure(err)
+        else:
+            return RTResult().success(List([res.value, NoneObject(), NoneObject()]))
+
+    @set_args(["func", "args", "kwargs"], [None, List([]), HashMap({})])
+    def execute_is_panic(self, exec_ctx):
         func = exec_ctx.symbol_table.get("func")
         args = exec_ctx.symbol_table.get("args")
+        kwargs = exec_ctx.symbol_table.get("kwargs")
+
         if not isinstance(func, BaseFunction):
             return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'start' must be a function",
-                    exec_ctx,
-                )
+                TError(self.pos_start, self.pos_end, "First argument of 'is_panic' must be a function", exec_ctx)
             )
         if not isinstance(args, List):
             return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'thread_start' must be a list",
-                    exec_ctx,
-                )
+                TError(self.pos_start, self.pos_end, "Second argument 'args' must be a list", exec_ctx)
             )
+        if not isinstance(kwargs, HashMap):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "Third argument 'kwargs' must be a hashmap", exec_ctx)
+            )
+
+        try:
+            positional_args = args.value
+            keyword_args = kwargs.value
+            
+            res = func.execute(positional_args, keyword_args)
+            
+            return self._handle_panic_result(res, exec_ctx)
+
+        except Exception as err:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, f"Unexpected Python error in 'is_panic': {err}", exec_ctx)
+            )
+
+    @set_args(["func", "args", "kwargs"], [None, List([]), HashMap({})])
+    async def execute_async_is_panic(self, exec_ctx):
+        func = exec_ctx.symbol_table.get("func")
+        args = exec_ctx.symbol_table.get("args")
+        kwargs = exec_ctx.symbol_table.get("kwargs")
+
+        if not isinstance(func, BaseFunction):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "First argument of 'is_panic' must be a function", exec_ctx)
+            )
+        if not isinstance(args, List):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "Second argument 'args' must be a list", exec_ctx)
+            )
+        if not isinstance(kwargs, HashMap):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "Third argument 'kwargs' must be a hashmap", exec_ctx)
+            )
+
+        try:
+            positional_args = args.value
+            keyword_args = kwargs.value
+            
+            res = await func.execute(positional_args, keyword_args)
+            
+            return self._handle_panic_result(res, exec_ctx)
+
+        except Exception as err:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, f"Unexpected Python error in 'async_is_panic': {err}", exec_ctx)
+            )
+
+    @set_args(["func", "args", "kwargs"], [None, List([]), HashMap({})])
+    def execute_thread_start_fp(self, exec_ctx):
+        func = exec_ctx.symbol_table.get("func")
+        args = exec_ctx.symbol_table.get("args")
+        kwargs = exec_ctx.symbol_table.get("kwargs")
+
+        if not isinstance(func, BaseFunction):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "First argument of 'start' must be a function", exec_ctx)
+            )
+        if not isinstance(args, List):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "Second argument 'args' must be a list", exec_ctx)
+            )
+        if not isinstance(kwargs, HashMap):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "Third argument 'kwargs' must be a hashmap", exec_ctx)
+            )
+        
         try:
             import threading
 
-            new_context = Context("<thread>")
-            new_context.symbol_table = SymbolTable()
-            new_context.private_symbol_table = SymbolTable()
-            new_context.private_symbol_table.set("is_main", Number.false)
-
+            positional_args = args.value
+            keyword_args = kwargs.value
+            
             def thread_wrapper():
-                context = func.generate_new_context()
-                context.private_symbol_table.set("is_main", Number.false)
-                asyncio.run(func.execute(args.value, {}))
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    loop.run_until_complete(func.execute(positional_args, keyword_args))
+                finally:
+                    loop.close()
 
             thread = threading.Thread(target=thread_wrapper, daemon=True)
             thread.start()
             return RTResult().success(ThreadWrapper(thread))
+            
         except ImportError:
             return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "threading module not available",
-                    exec_ctx,
-                )
+                RTError(self.pos_start, self.pos_end, "threading module not available", exec_ctx)
             )
         except Exception as e:
             return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Failed to start thread: {str(e)}",
-                    exec_ctx,
-                )
+                RTError(self.pos_start, self.pos_end, f"Failed to start thread: {str(e)}", exec_ctx)
             )
 
     @set_args(["seconds"])
@@ -1938,26 +2021,25 @@ class BuiltInFunction(BaseFunction):
         host = exec_ctx.symbol_table.get("host")
         if not isinstance(host, String):
             return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'ping' must be a string",
-                    exec_ctx,
-                )
+                TError(self.pos_start, self.pos_end, "Host must be a string", exec_ctx)
             )
+
+        param = "-n" if platform.system().lower() == "windows" else "-c"
+        command = ["ping", param, "1", host.value]
+
         try:
-            t0 = time.time()
-            subprocess.check_output(
-                ["ping", "-n", "1", host.value], stderr=subprocess.DEVNULL
+            subprocess.check_call(
+                command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
             )
-            t1 = time.time()
-            return RTResult().success(String(str(round((t1 - t0) * 1000)) + " ms"))
-        except:
+            return RTResult().success(Bool(True))
+        except subprocess.CalledProcessError:
+            return RTResult().success(Bool(False))
+        except Exception as e:
             return RTResult().failure(
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    f"Failed to ping {host.value}",
+                    f"Error while pinging host: {e}",
                     exec_ctx,
                 )
             )
@@ -2155,85 +2237,6 @@ class BuiltInFunction(BaseFunction):
         if index == -1:
             return RTResult().success(Number.none)
         return RTResult().success(Number(index))
-
-    @set_args(["func", "args"], [None, List([])])
-    async def execute_is_panic(self, exec_ctx):
-        func = exec_ctx.symbol_table.get("func")
-        args = exec_ctx.symbol_table.get("args")
-        if not isinstance(func, BaseFunction):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'is_panic' must be a function",
-                    exec_ctx,
-                )
-            )
-        if not isinstance(args, List):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'is_panic' must be a list",
-                    exec_ctx,
-                )
-            )
-        try:
-            positional_args = args.value
-            keyword_args = {}
-            res = await func.execute(positional_args, keyword_args)
-            if res.error:
-                err = res.error
-                if isinstance(err, Error):
-                    err_str = str(err)
-                    err_line = err_str.strip().split("\n")[-1]
-                    err_name, err_msg = err_line.split(":", 1)
-                    err_name = err_name.strip()
-                    err_msg = err_msg.strip()
-                    if err_name.startswith("R"):
-                        err_name = "RT"
-                    elif err_name.startswith("M"):
-                        err_name = "M"
-                    elif err_name.startswith("I"):
-                        err_name = "IO"
-                    elif err_name.startswith("T"):
-                        err_name = "T"
-                    return RTResult().success(
-                        List([Number.none, String(err_msg), String(err_name)])
-                    )
-                else:
-                    return RTResult().failure(err)
-            else:
-                return RTResult().success(List([res.value, Number.none, Number.none]))
-
-        except Exception as err:
-            if isinstance(err, Error) or (
-                isinstance(err, type) and issubclass(err.__class__, Error)
-            ):
-                err_str = str(err)
-                err_line = err_str.strip().split("\n")[-1]
-                err_name, err_msg = err_line.split(":", 1)
-                err_name = err_name.strip()
-                err_msg = err_msg.strip()
-                if err_name.startswith("R"):
-                    err_name = "RT"
-                elif err_name.startswith("M"):
-                    err_name = "M"
-                elif err_name.startswith("I"):
-                    err_name = "IO"
-                elif err_name.startswith("T"):
-                    err_name = "T"
-                return RTResult().success(
-                    List([Number.none, String(err_msg), String(err_name)])
-                )
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Unexpected error in 'is_panic': {err}",
-                    exec_ctx,
-                )
-            )
 
     @set_args(["path"])
     def execute_is_file_fp(self, exec_ctx):
@@ -4168,6 +4171,497 @@ class BuiltInFunction(BaseFunction):
             final_results.append(res.value)
 
         return RTResult().success(List(final_results))
+
+    @set_args(["coroutine", "ms"])
+    async def execute_timeout_fp(self, exec_ctx):
+        coro_obj = exec_ctx.symbol_table.get("coroutine")
+        ms = exec_ctx.symbol_table.get("ms")
+
+        if not isinstance(coro_obj, Coroutine):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"First argument to 'timeout' must be a coroutine",
+                    exec_ctx,
+                )
+            )
+
+        if not isinstance(ms, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Second argument to 'timeout' must be a number",
+                    exec_ctx,
+                )
+            )
+
+        try:
+            result = await asyncio.wait_for(
+                self._run_interpreter_coro(coro_obj, exec_ctx),
+                timeout=ms.value / 1000.0,
+            )
+            return result
+        except asyncio.TimeoutError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Coroutine timed out after {ms.value}ms",
+                    exec_ctx,
+                )
+            )
+
+    @set_args(["coroutines", "ms"])
+    async def execute_timeouts_fp(self, exec_ctx):
+        coroutines_list = exec_ctx.symbol_table.get("coroutines")
+        ms = exec_ctx.symbol_table.get("ms")
+
+        if not isinstance(coroutines_list, List):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"First argument to 'timeouts' must be a list",
+                    exec_ctx,
+                )
+            )
+
+        if not isinstance(ms, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Second argument to 'timeouts' must be a number",
+                    exec_ctx,
+                )
+            )
+
+        tasks = []
+        for i, coro_obj in enumerate(coroutines_list.value):
+            if not isinstance(coro_obj, Coroutine):
+                return RTResult().failure(
+                    TError(
+                        self.pos_start,
+                        self.pos_end,
+                        f"All items in the list passed to 'timeouts' must be coroutines",
+                        exec_ctx,
+                    )
+                )
+            tasks.append(
+                asyncio.wait_for(
+                    self._run_interpreter_coro(coro_obj, exec_ctx),
+                    timeout=ms.value / 1000.0,
+                )
+            )
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        final_results = []
+        for res in results:
+            if isinstance(res, asyncio.TimeoutError):
+                return RTResult().failure(
+                    RTError(
+                        self.pos_start,
+                        self.pos_end,
+                        f"A coroutine timed out after {ms.value}ms",
+                        exec_ctx,
+                    )
+                )
+            if isinstance(res, BaseException):
+                return RTResult().failure(
+                    RTError(
+                        self.pos_start,
+                        self.pos_end,
+                        f"A concurrent task failed with exception: {res}",
+                        exec_ctx,
+                    )
+                )
+            if res.error:
+                return res
+            final_results.append(res.value)
+
+        return RTResult().success(List(final_results))
+
+    @set_args(["file", "mode", "text"])
+    async def execute_async_write_fp(self, exec_ctx):
+        file, mode, text = (
+            exec_ctx.symbol_table.get(arg) for arg in ["file", "mode", "text"]
+        )
+        try:
+            import aiofiles  # type: ignore
+
+            async with aiofiles.open(
+                file.value,
+                mode=mode.value,
+                encoding="utf-8" if "b" not in mode.value else None,
+            ) as f:
+                await f.write(text.value)
+            return RTResult().success(NoneObject.none)
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "aiofiles module not available",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                IError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to write to file: {e}",
+                    exec_ctx,
+                )
+            )
+
+    @set_args(["file", "mode"])
+    async def execute_async_read_fp(self, exec_ctx):
+        file, mode = (exec_ctx.symbol_table.get(arg) for arg in ["file", "mode"])
+        try:
+            import aiofiles  # type: ignore
+
+            async with aiofiles.open(
+                file.value,
+                mode=mode.value,
+                encoding="utf-8" if "b" not in mode.value else None,
+            ) as f:
+                content = await f.read()
+            return RTResult().success(
+                Bytes(content) if "b" in mode.value else String(content)
+            )
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "aiofiles module not available",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                IError(
+                    self.pos_start, self.pos_end, f"Failed to read file: {e}", exec_ctx
+                )
+            )
+
+    @set_args(["src", "dst"])
+    async def execute_async_copy_fp(self, exec_ctx):
+        src, dst = (exec_ctx.symbol_table.get(arg) for arg in ["src", "dst"])
+        try:
+            await asyncio.to_thread(copy, src.value, dst.value)
+            return RTResult().success(NoneObject.none)
+        except Exception as e:
+            return RTResult().failure(
+                IError(
+                    self.pos_start, self.pos_end, f"Failed to copy file: {e}", exec_ctx
+                )
+            )
+
+    @set_args(["top"])
+    async def execute_async_walk_fp(self, exec_ctx):
+        top_path = exec_ctx.symbol_table.get("top")
+        try:
+            walk_generator = await asyncio.to_thread(os.walk, top_path.value)
+            walk_results = []
+            for root, dirs, files in walk_generator:
+                walk_results.append(
+                    List(
+                        [
+                            String(root),
+                            List([String(d) for d in dirs]),
+                            List([String(f) for f in files]),
+                        ]
+                    )
+                )
+            return RTResult().success(List(walk_results))
+        except Exception as e:
+            return RTResult().failure(
+                IError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed during directory walk: {e}",
+                    exec_ctx,
+                )
+            )
+
+    @set_args(
+        ["url", "method", "headers", "data", "timeout"],
+        [None, String("GET"), HashMap({}), HashMap({}), Number(15)],
+    )
+    async def execute_async_request_fp(self, exec_ctx):
+        url, method, headers, data, timeout = (
+            exec_ctx.symbol_table.get(arg)
+            for arg in ["url", "method", "headers", "data", "timeout"]
+        )
+        try:
+            import aiohttp  # type: ignore
+
+            py_headers = self.convert_zer_to_py(headers)
+            py_data = self.convert_zer_to_py(data)
+            async with aiohttp.ClientSession() as session:
+                async with session.request(
+                    method.value,
+                    url.value,
+                    headers=py_headers,
+                    data=py_data,
+                    timeout=timeout.value,
+                ) as resp:
+                    resp.raise_for_status()
+                    json_response = await resp.json()
+                    return RTResult().success(
+                        self.validate_pyexec_result(json_response)
+                    )
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "aiohttp module not available",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    @set_args(["url", "timeout"], [None, Number(15)])
+    async def execute_async_downl_fp(self, exec_ctx):
+        url, timeout = (exec_ctx.symbol_table.get(arg) for arg in ["url", "timeout"])
+        try:
+            import aiohttp  # type: ignore
+            import aiofiles  # type: ignore
+
+            async with aiohttp.ClientSession(
+                headers={"User-Agent": "Mozilla/5.0"}
+            ) as session:
+                async with session.get(url.value, timeout=timeout.value) as response:
+                    response.raise_for_status()
+                    filename = (
+                        os.path.basename(unquote(response.url.path)) or "download"
+                    )
+                    async with aiofiles.open(filename, mode="wb") as f:
+                        await f.write(await response.read())
+                    return RTResult().success(String(os.path.abspath(filename)))
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "aiofiles or aiohttp module not available",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start, self.pos_end, f"Failed to download: {e}", exec_ctx
+                )
+            )
+
+    @set_args(["command"])
+    async def execute_async_system_fp(self, exec_ctx):
+        cmd = exec_ctx.symbol_table.get("command")
+        proc = await asyncio.create_subprocess_shell(cmd.value)
+        await proc.wait()
+        return RTResult().success(Number(proc.returncode))
+
+    @set_args(["command"])
+    async def execute_async_osystem_fp(self, exec_ctx):
+        cmd = exec_ctx.symbol_table.get("command")
+        proc = await asyncio.create_subprocess_shell(
+            cmd.value, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await proc.communicate()
+        return RTResult().success(
+            List(
+                [
+                    String(stdout.decode(errors="ignore")),
+                    String(stderr.decode(errors="ignore")),
+                    Number(proc.returncode),
+                ]
+            )
+        )
+
+    @set_args(["key"])
+    async def execute_async_keyboard_wait_fp(self, exec_ctx):
+        key = exec_ctx.symbol_table.get("key")
+        try:
+            import keyboard  # type: ignore
+
+            await asyncio.to_thread(keyboard.wait, key.value)
+            return RTResult().success(NoneObject.none)
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "keyboard module not available",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    @set_args(["path"])
+    async def execute_async_screen_capture_fp(self, exec_ctx):
+        path = exec_ctx.symbol_table.get("path")
+        try:
+            import pyautogui  # type: ignore
+
+            await asyncio.to_thread(pyautogui.screenshot, path.value)
+            return RTResult().success(NoneObject.none)
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "pyautogui module not available",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    @set_args(["x", "y", "w", "h", "path"])
+    async def execute_async_screen_capture_area_fp(self, exec_ctx):
+        x, y, w, h, p = (
+            exec_ctx.symbol_table.get(arg) for arg in ["x", "y", "w", "h", "p"]
+        )
+        try:
+            import pyautogui  # type: ignore
+
+            bbox = (int(x.value), int(y.value), int(w.value), int(h.value))
+            await asyncio.to_thread(pyautogui.screenshot, p.value, region=bbox)
+            return RTResult().success(NoneObject.none)
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "pyautogui module not available",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    @set_args([])
+    def execute_channel_new_fp(self, _):
+        return RTResult().success(Channel(asyncio.Queue()))
+
+    @set_args(["channel", "value"])
+    async def execute_async_channel_send_fp(self, exec_ctx):
+        channel, value = (
+            exec_ctx.symbol_table.get(arg) for arg in ["channel", "value"]
+        )
+        if not isinstance(channel.value, asyncio.Queue):
+            return RTResult().failure(
+                TError(
+                    self.pos_start, self.pos_end, "Not a valid async channel", exec_ctx
+                )
+            )
+        await channel.value.put(value)
+        return RTResult().success(NoneObject.none)
+
+    @set_args(["channel"])
+    async def execute_async_channel_receive_fp(self, exec_ctx):
+        channel = exec_ctx.symbol_table.get("channel")
+        if not isinstance(channel.value, asyncio.Queue):
+            return RTResult().failure(
+                TError(
+                    self.pos_start, self.pos_end, "Not a valid async channel", exec_ctx
+                )
+            )
+        value = await channel.value.get()
+        return RTResult().success(value)
+
+    @set_args([])
+    async def execute_async_get_ip_fp(self, exec_ctx):
+        try:
+            import aiohttp # type: ignore
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    "https://api64.ipify.org?format=json", timeout=5
+                ) as response:
+                    response.raise_for_status()
+                    data = await response.json()
+                    return RTResult().success(String(data["ip"]))
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "keyboard module not available",
+                    exec_ctx,
+                )
+            )
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to retrieve public IP address: {e}",
+                    exec_ctx,
+                )
+            )
+
+    @set_args(["host"])
+    async def execute_async_ping_fp(self, exec_ctx):
+        host = exec_ctx.symbol_table.get("host")
+        if not isinstance(host, String):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "Host must be a string", exec_ctx)
+            )
+
+        param = "-n" if platform.system().lower() == "windows" else "-c"
+        command = ["ping", param, "1", host.value]
+
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            )
+            await proc.wait()
+
+            if proc.returncode == 0:
+                return RTResult().success(Bool(True))
+            else:
+                return RTResult().success(Bool(False))
+        except Exception as e:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error while pinging host: {e}",
+                    exec_ctx,
+                )
+            )
+
+    @set_args(["dir_path"], [String(".")])
+    async def execute_async_list_dir_fp(self, exec_ctx):
+        dir_path = exec_ctx.symbol_table.get("dir_path")
+        try:
+            is_dir = await asyncio.to_thread(os.path.isdir, dir_path.value)
+            if not is_dir:
+                raise FileNotFoundError(f"Directory not found: '{dir_path.value}'")
+
+            items = await asyncio.to_thread(os.listdir, dir_path.value)
+            return RTResult().success(List([String(item) for item in items]))
+        except Exception as e:
+            return RTResult().failure(
+                IError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:

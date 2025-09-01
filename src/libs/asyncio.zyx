@@ -4,6 +4,95 @@ namespace asyncio
     done
 
     async defun sleep(duration)
-        return await sleep_async_fp(duration)
+        return await async_sleep_fp(duration)
+    done
+
+    async defun timeout(coroutine, ms)
+        return await async_timeout_fp(coroutine, ms)
+    done
+
+    async defun timeouts(coroutines_list, ms)
+        return await async_timeouts_fp(coroutines_list, ms)
+    done
+
+    async defun write(file_path, mode, content)
+        if mode != "w" and mode != "a" and mode != "wb" do
+            panic("Invalid mode for write operation", "IO")
+        done
+        return await async_write_fp(file_path, mode, content)
+    done
+
+    async defun read(file_path, mode)
+        if mode != "r" and mode != "rb" do
+            panic("Invalid mode for read operation", "IO")
+        done
+        if not exists_fp(f) do
+            panic("File does not exist", "IO")
+        done
+        return await async_read_fp(file_path, mode)
+    done
+
+    async defun copy(source_path, destination_path)
+        return await async_copy_fp(source_path, destination_path)
+    done
+
+    async defun walk(top_directory)
+        return await async_walk_fp(top_directory)
+    done
+    
+    async defun list_dir(dir_path=".")
+        return await async_list_dir_fp(dir_path)
+    done
+
+    async defun get_ip()
+        return await async_get_ip_fp()
+    done
+
+    async defun ping(host)
+        return await async_ping_fp(host)
+    done
+
+    async defun download(url, timeout=15)
+        return await async_downl_fp(url, timeout)
+    done
+
+    async defun request(url, method="GET", headers={}, data={}, timeout=15)
+        return await async_request_fp(url, method, headers, data, timeout)
+    done
+
+    async defun system(command)
+        return await async_system_fp(command)
+    done
+    
+    async defun osystem(command)
+        return await async_osystem_fp(command)
+    done
+    
+    async defun wait_key(key)
+        return await async_keyboard_wait_fp(key)
+    done
+
+    async defun capture_screen(path)
+        return await async_screen_capture_fp(path)
+    done
+
+    async defun capture_area(x, y, width, height, path)
+        return await async_screen_capture_area_fp(x, y, width, height, path)
+    done
+
+    async defun send(channel, value)
+        return await async_channel_send_fp(channel, value)
+    done
+    
+    async defun receive(channel)
+        return await async_channel_receive_fp(channel)
+    done
+    
+    async defun list_dir(dir_path=".")
+        return await async_list_dir_fp(dir_path)
+    done
+
+    async defun is_panic(func, args=[], kwargs={})
+        return await async_is_panic(func, args, )
     done
 done

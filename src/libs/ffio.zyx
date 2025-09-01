@@ -7,9 +7,6 @@ namespace ffio
         if m != "w" and m != "a" and m != "wb" do
             panic("Invalid mode for write operation", "IO")
         done
-        if type(f) != str do
-            panic("First argument of 'write' must be a string", "T")
-        done
         f_ = open_fp(f)
         write_fp(f_, m, t)
     done

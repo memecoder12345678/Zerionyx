@@ -614,7 +614,7 @@ Zerionyx may be magical, but its syntax must be real.
                         return
                         <code>val</code>
                     </li>
-                    <li><b>is_panic(func, args=[])</b> &rarr; list &mdash; Run <code>func</code> with <code>args</code>
+                    <li><b>is_panic(func, args=[], kwargs={})</b> &rarr; list &mdash; Run <code>func</code> with <code>args</code>
                         return
                         <code>[result, none, none]</code> if ok or
                         <code>[none, err_msg, err_name ("RT": "Runtime Error", "M": "Math Error", "IO": "IO Error" or "T": "Type Error")]</code>
@@ -917,7 +917,7 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>downl(url, timeout=15)</b> &rarr; str &mdash; Download file from URL</li>
                         <li><b>get_local_ip()</b> &rarr; str &mdash; Get local IP address</li>
                         <li><b>get_hostname()</b> &rarr; str &mdash; Get hostname</li>
-                        <li><b>request(url, method, headers, data, timeout=15)</b> &rarr; list/hashmap &mdash; Send HTTP
+                        <li><b>request(url, method="GET", headers={}, data={}, timeout=15)</b> &rarr; list/hashmap &mdash; Send HTTP
                             request and
                             return response JSON</li>
                     </ul>
@@ -949,7 +949,7 @@ Zerionyx may be magical, but its syntax must be real.
                 <div id="lib-threading">
                     <h3>threading.zyx</h3>
                     <ul>
-                        <li><b>start(func, args=[])</b> &rarr; thread &mdash; Start a new thread</li>
+                        <li><b>start(func, args=[], kwargs={})</b> &rarr; thread &mdash; Start a new thread</li>
                         <li><b>sleep(seconds)</b> &rarr; none &mdash; Sleep current thread</li>
                         <li><b>join(thread, timeout=15)</b> &rarr; none &mdash; Wait for thread to finish</li>
                         <li><b>is_alive(thread)</b> &rarr; bool &mdash; Is thread alive</li>
@@ -1079,12 +1079,82 @@ Zerionyx may be magical, but its syntax must be real.
                     <h3>asyncio.zyx</h3>
                     <ul>
                         <li>
-                            <b>sleep(duration)</b> &rarr; coroutine &mdash; Creates a coroutine that completes after a
-                            given number of seconds. Non-blocking.
+                            <b>sleep(duration)</b> &rarr; coroutine &mdash; Non-blocking sleep for a given number of
+                            seconds
                         </li>
                         <li>
-                            <b>gather(coroutines_list)</b> &rarr; coroutine &mdash; Creates a coroutine that runs a list
-                            of other coroutines concurrently and returns a list of their results.
+                            <b>gather(coroutines_list)</b> &rarr; coroutine &mdash; Runs a list of coroutines
+                            concurrently and returns a list of their results
+                        </li>
+                        <li>
+                            <b>timeout(coroutine, ms)</b> &rarr; coroutine &mdash; Runs a coroutine with a timeout in
+                            milliseconds. Raises a runtime error if it times out
+                        </li>
+                        <li>
+                            <b>timeouts(coroutines_list, ms)</b> &rarr; coroutine &mdash; Runs a list of coroutines
+                            concurrently, each with the given timeout
+                        </li>
+                        <li>
+                            <b>read(file_path, mode)</b> &rarr; coroutine &mdash; Asynchronously reads the content of a
+                            file
+                        </li>
+                        <li>
+                            <b>write(file_path, mode, content)</b> &rarr; coroutine &mdash; Asynchronously writes
+                            content to a file
+                        </li>
+                        <li>
+                            <b>copy(source, destination)</b> &rarr; coroutine &mdash; Asynchronously copies a file
+                        </li>
+                        <li>
+                            <b>walk(directory)</b> &rarr; coroutine &mdash; Asynchronously walks a directory tree
+                        </li>
+                        <li>
+                            <b>list_dir(directory)</b> &rarr; coroutine &mdash; Asynchronously lists the contents of a
+                            directory
+                        </li>
+                        <li>
+                            <b>get_ip()</b> &rarr; coroutine &mdash; Asynchronously gets the public IP address
+                        </li>
+                        <li>
+                            <b>ping(host)</b> &rarr; coroutine &mdash; Asynchronously pings a host and returns true or
+                            false
+                        </li>
+                        <li>
+                            <b>downl(url, timeout=15)</b> &rarr; coroutine &mdash; Asynchronously downloads a file
+                            from a URL
+                        </li>
+                        <li>
+                            <b>request(url, method="GET", headers={}, data={}, timeout=15)</b> &rarr; coroutine &mdash; Asynchronously
+                            sends an HTTP request
+                        </li>
+                        <li>
+                            <b>system(command)</b> &rarr; coroutine &mdash; Asynchronously executes a system command
+                        </li>
+                        <li>
+                            <b>osystem(command)</b> &rarr; coroutine &mdash; Asynchronously executes a system command
+                            and returns its output
+                        </li>
+                        <li>
+                            <b>wait_key(key)</b> &rarr; coroutine &mdash; Asynchronously waits for a keyboard key press.
+                        </li>
+                        <li>
+                            <b>capture_screen(path)</b> &rarr; coroutine &mdash; Asynchronously captures the screen
+                        </li>
+                        <li>
+                            <b>capture_area(x, y, w, h, path)</b> &rarr; coroutine &mdash; Asynchronously captures a
+                            region of the screen
+                        </li>
+                        <li>
+                            <b>send(channel, value)</b> &rarr; coroutine &mdash; Asynchronously sends a value to a
+                            channel
+                        </li>
+                        <li>
+                            <b>receive(channel)</b> &rarr; coroutine &mdash; Asynchronously receives a value from a
+                            channel
+                        </li>
+                        <li>
+                            <b>is_panic(func, args=[], kwargs={})</b> &rarr; coroutine &mdash; Asynchronously executes a
+                            function and catches potential errors
                         </li>
                     </ul>
                 </div>

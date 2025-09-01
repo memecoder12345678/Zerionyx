@@ -1,8 +1,8 @@
 # libs.threading
 
 namespace threading
-    defun start(f, args=[])
-        return thread_start_fp(f, args)
+    defun start(f, args=[], kwargs={})
+        return thread_start_fp(f, args, kwargs={})
     done
 
     defun sleep(s)
