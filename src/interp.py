@@ -1712,11 +1712,11 @@ class BuiltInFunction(BaseFunction):
                 elif "Type" in err_name: err_name_short = "T"
                 else: err_name_short = "UNKNOWN"
                 
-                return RTResult().success(List([NoneObject(), String(err_msg), String(err_name_short)]))
+                return RTResult().success(List([NoneObject.none, String(err_msg), String(err_name_short)]))
             else:
                 return RTResult().failure(err)
         else:
-            return RTResult().success(List([res.value, NoneObject(), NoneObject()]))
+            return RTResult().success(List([res.value, NoneObject.none, NoneObject.none]))
 
     @set_args(["func", "args", "kwargs"], [None, List([]), HashMap({})])
     def execute_is_panic(self, exec_ctx):
@@ -3932,7 +3932,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'receive' must be a channel",
+                    "First argument of 'recv' must be a channel",
                     exec_ctx,
                 )
             )
@@ -4003,7 +4003,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "Second argument must be a boolean",
+                    "Second argument of 'to_cfloat' must be a boolean",
                     exec_ctx,
                 )
             )
@@ -4133,7 +4133,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    f"Argument passed to 'gather_fp' must be a list, but got {coroutines_list.type()}.",
+                    "First argument of 'gather' must be a list",
                     exec_ctx,
                 )
             )
@@ -4145,7 +4145,7 @@ class BuiltInFunction(BaseFunction):
                     TError(
                         self.pos_start,
                         self.pos_end,
-                        f"All items in the list passed to 'gather_fp' must be coroutines. Item at index {i} is a {coro_obj.type()}.",
+                        f"All items in the list passed to 'gather' must be coroutines. Item at index {i} is a {coro_obj.type()}.",
                         exec_ctx,
                     )
                 )
@@ -4182,7 +4182,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    f"First argument to 'timeout' must be a coroutine",
+                    "First argument of 'timeout' must be a coroutine",
                     exec_ctx,
                 )
             )
@@ -4192,7 +4192,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    f"Second argument to 'timeout' must be a number",
+                    "Second argument of 'timeout' must be a number",
                     exec_ctx,
                 )
             )
@@ -4223,7 +4223,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    f"First argument to 'timeouts' must be a list",
+                    "First argument of 'timeouts' must be a list",
                     exec_ctx,
                 )
             )
@@ -4233,7 +4233,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    f"Second argument to 'timeouts' must be a number",
+                    "Second argument of 'timeouts' must be a number",
                     exec_ctx,
                 )
             )
@@ -4344,9 +4344,7 @@ class BuiltInFunction(BaseFunction):
             )
         except Exception as e:
             return RTResult().failure(
-                IError(
-                    self.pos_start, self.pos_end, f"Failed to read file: {e}", exec_ctx
-                )
+                IError(self.pos_start, self.pos_end, f"Failed to read file: {e}", exec_ctx)
             )
 
     @set_args(["src", "dst"])
@@ -4566,10 +4564,10 @@ class BuiltInFunction(BaseFunction):
         channel, value = (
             exec_ctx.symbol_table.get(arg) for arg in ["channel", "value"]
         )
-        if not isinstance(channel.value, asyncio.Queue):
+        if not isinstance(channel, Channel):
             return RTResult().failure(
                 TError(
-                    self.pos_start, self.pos_end, "Not a valid async channel", exec_ctx
+                    self.pos_start, self.pos_end, "First argument of 'channel_send' must be a channel", exec_ctx
                 )
             )
         await channel.value.put(value)
@@ -4578,10 +4576,10 @@ class BuiltInFunction(BaseFunction):
     @set_args(["channel"])
     async def execute_async_channel_receive_fp(self, exec_ctx):
         channel = exec_ctx.symbol_table.get("channel")
-        if not isinstance(channel.value, asyncio.Queue):
+        if not isinstance(channel, Channel):
             return RTResult().failure(
                 TError(
-                    self.pos_start, self.pos_end, "Not a valid async channel", exec_ctx
+                    self.pos_start, self.pos_end, "First argument of 'channel_receive' must be a channel", exec_ctx
                 )
             )
         value = await channel.value.get()
@@ -4603,7 +4601,7 @@ class BuiltInFunction(BaseFunction):
                 RTError(
                     self.pos_start,
                     self.pos_end,
-                    "keyboard module not available",
+                    "aiohttp module not available",
                     exec_ctx,
                 )
             )
@@ -4622,7 +4620,7 @@ class BuiltInFunction(BaseFunction):
         host = exec_ctx.symbol_table.get("host")
         if not isinstance(host, String):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Host must be a string", exec_ctx)
+                TError(self.pos_start, self.pos_end, "First argument of 'ping' must be a string", exec_ctx)
             )
 
         param = "-n" if platform.system().lower() == "windows" else "-c"
@@ -4662,6 +4660,93 @@ class BuiltInFunction(BaseFunction):
             return RTResult().failure(
                 IError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
+
+
+    @set_args(["value"], [String("")])
+    async def execute_async_println(self, exec_ctx):
+        try:
+            import aioconsole # type: ignore
+            await aioconsole.aprint(repr(exec_ctx.symbol_table.get("value")))
+            return RTResult().success(NoneObject.none)
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "aioconsole module not available",
+                    exec_ctx,
+                )
+            )
+
+
+    @set_args(["value"], [String("")])
+    async def execute_async_print(self, exec_ctx):
+        try:
+            import aioconsole # type: ignore
+            await aioconsole.aprint(repr(exec_ctx.symbol_table.get("value")), end="")
+            return RTResult().success(NoneObject.none)
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "aioconsole module not available",
+                    exec_ctx,
+                )
+            )
+
+    @set_args(["prompt"], [String("")])
+    async def execute_async_input(self, exec_ctx):
+        try:
+            import aioconsole # type: ignore
+            text = await aioconsole.ainput(exec_ctx.symbol_table.get("prompt").value)
+            return RTResult().success(String(text))
+        except ImportError:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "aioconsole module not available",
+                    exec_ctx,
+                )
+            )
+
+    @set_args(["prompt"], [String("")])
+    async def execute_async_get_password(self, exec_ctx):
+        from getpass import getpass
+        prompt = exec_ctx.symbol_table.get("prompt").value
+        password = await asyncio.to_thread(getpass, prompt)
+        return RTResult().success(String(password))
+
+
+    @set_args([])
+    async def execute_async_clear(self, _):
+        command = "cls" if os.name == "nt" else "clear"
+        proc = await asyncio.create_subprocess_shell(command)
+        await proc.wait()
+        return RTResult().success(NoneObject.none)
+
+
+    @set_args(["code", "args"], [None, HashMap({})])
+    async def execute_async_pyexec(self, exec_ctx):
+        code = exec_ctx.symbol_table.get("code")
+        args = exec_ctx.symbol_table.get("args")
+
+        if not isinstance(code, String):
+            return RTResult().failure(TError(self.pos_start, self.pos_end, "First argument of 'pyexec' must be a string", exec_ctx))
+        if not isinstance(args, HashMap):
+            return RTResult().failure(TError(self.pos_start, self.pos_end, "Second argument of 'pyexec' must be a hashmap", exec_ctx))
+
+        try:
+            local_env = self.convert_zer_to_py(args)
+            def run_exec():
+                exec(code.value, {}, local_env)
+                return local_env
+            final_env = await asyncio.to_thread(run_exec)
+            result = self.validate_pyexec_result(final_env)
+            return RTResult().success(result)
+        except Exception as e:
+            return RTResult().failure(RTError(self.pos_start, self.pos_end, f"Error executing Python code: {e}", exec_ctx))
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:

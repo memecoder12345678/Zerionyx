@@ -1,4 +1,5 @@
 namespace asyncio
+
     async defun gather(coroutines_list)
         return await gather_fp(coroutines_list)
     done
@@ -39,7 +40,7 @@ namespace asyncio
     async defun walk(top_directory)
         return await async_walk_fp(top_directory)
     done
-    
+
     async defun list_dir(dir_path=".")
         return await async_list_dir_fp(dir_path)
     done
@@ -63,11 +64,11 @@ namespace asyncio
     async defun system(command)
         return await async_system_fp(command)
     done
-    
+
     async defun osystem(command)
         return await async_osystem_fp(command)
     done
-    
+
     async defun wait_key(key)
         return await async_keyboard_wait_fp(key)
     done
@@ -83,11 +84,11 @@ namespace asyncio
     async defun send(channel, value)
         return await async_channel_send_fp(channel, value)
     done
-    
+
     async defun receive(channel)
         return await async_channel_receive_fp(channel)
     done
-    
+
     async defun list_dir(dir_path=".")
         return await async_list_dir_fp(dir_path)
     done
@@ -95,4 +96,29 @@ namespace asyncio
     async defun is_panic(func, args=[], kwargs={})
         return await async_is_panic(func, args, )
     done
+
+    async defun println(value="")
+        return await async_println_fp(value)
+    done
+
+    async defun print(value="")
+        return await async_print_fp(value)
+    done
+
+    async defun input(prompt="")
+        return await async_input_fp(prompt)
+    done
+
+    async defun get_password(prompt="")
+        return await async_get_password_fp(prompt)
+    done
+
+    async defun clear()
+        return await async_clear_fp()
+    done
+
+    async defun pyexec(code, args={})
+        return await async_pyexec_fp(code, args)
+    done
+
 done

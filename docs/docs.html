@@ -614,7 +614,8 @@ Zerionyx may be magical, but its syntax must be real.
                         return
                         <code>val</code>
                     </li>
-                    <li><b>is_panic(func, args=[], kwargs={})</b> &rarr; list &mdash; Run <code>func</code> with <code>args</code>
+                    <li><b>is_panic(func, args=[], kwargs={})</b> &rarr; list &mdash; Run <code>func</code> with
+                        <code>args</code>
                         return
                         <code>[result, none, none]</code> if ok or
                         <code>[none, err_msg, err_name ("RT": "Runtime Error", "M": "Math Error", "IO": "IO Error" or "T": "Type Error")]</code>
@@ -917,7 +918,8 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>downl(url, timeout=15)</b> &rarr; str &mdash; Download file from URL</li>
                         <li><b>get_local_ip()</b> &rarr; str &mdash; Get local IP address</li>
                         <li><b>get_hostname()</b> &rarr; str &mdash; Get hostname</li>
-                        <li><b>request(url, method="GET", headers={}, data={}, timeout=15)</b> &rarr; list/hashmap &mdash; Send HTTP
+                        <li><b>request(url, method="GET", headers={}, data={}, timeout=15)</b> &rarr; list/hashmap
+                            &mdash; Send HTTP
                             request and
                             return response JSON</li>
                     </ul>
@@ -1087,8 +1089,8 @@ Zerionyx may be magical, but its syntax must be real.
                             concurrently and returns a list of their results
                         </li>
                         <li>
-                            <b>timeout(coroutine, ms)</b> &rarr; coroutine &mdash; Runs a coroutine with a timeout in
-                            milliseconds. Raises a runtime error if it times out
+                            <b>timeout(coroutine, ms)</b> &rarr; coroutine &mdash; Runs a coroutine
+                            concurrently, each with the given timeout
                         </li>
                         <li>
                             <b>timeouts(coroutines_list, ms)</b> &rarr; coroutine &mdash; Runs a list of coroutines
@@ -1124,7 +1126,8 @@ Zerionyx may be magical, but its syntax must be real.
                             from a URL
                         </li>
                         <li>
-                            <b>request(url, method="GET", headers={}, data={}, timeout=15)</b> &rarr; coroutine &mdash; Asynchronously
+                            <b>request(url, method="GET", headers={}, data={}, timeout=15)</b> &rarr; coroutine &mdash;
+                            Asynchronously
                             sends an HTTP request
                         </li>
                         <li>
@@ -1155,6 +1158,29 @@ Zerionyx may be magical, but its syntax must be real.
                         <li>
                             <b>is_panic(func, args=[], kwargs={})</b> &rarr; coroutine &mdash; Asynchronously executes a
                             function and catches potential errors
+                        </li>
+                        <li>
+                            <b>input(prompt="")</b> &rarr; coroutine &mdash; Asynchronously reads a line of text from
+                            the console without blocking the event loop
+                        </li>
+                        <li>
+                            <b>get_password(prompt="")</b> &rarr; coroutine &mdash; Asynchronously and securely reads a
+                            password from the console without echoing the input
+                        </li>
+                        <li>
+                            <b>println(value="")</b> &rarr; coroutine &mdash; Asynchronously prints a value to the
+                            console, followed by a newline
+                        </li>
+                        <li>
+                            <b>print(value="")</b> &rarr; coroutine &mdash; Asynchronously prints a value to the console
+                            without a trailing newline
+                        </li>
+                        <li>
+                            <b>clear()</b> &rarr; coroutine &mdash; Asynchronously clears the console screen
+                        </li>
+                        <li>
+                            <b>pyexec(code, args={})</b> &rarr; coroutine &mdash; Asynchronously executes a block of
+                            Python code in a separate thread and returns the resulting environment
                         </li>
                     </ul>
                 </div>
