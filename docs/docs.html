@@ -460,12 +460,14 @@
                 <li><a href="#ref-control-flow">Control Flow</a></li>
                 <li><a href="#ref-loops">Loops</a></li>
                 <li><a href="#ref-functions">Functions</a></li>
+                <li><a href="#ref-vargs-kwargs">Vargs and Kwargs</a></li>
                 <li><a href="#ref-io">Input/Output</a></li>
                 <li><a href="#ref-error-handling">Error Handling</a></li>
                 <li><a href="#ref-file-handling">File Handling</a></li>
                 <li><a href="#ref-strings">Strings</a></li>
                 <li><a href="#ref-lists">Lists</a></li>
                 <li><a href="#ref-hashmaps">HashMaps</a></li>
+                <li><a href="#ref-assignment">Assignment</a></li>
                 <li><a href="#ref-bytes">Bytes</a></li>
                 <li><a href="#ref-cfloat">CFloat</a></li>
             </ul>
@@ -900,7 +902,6 @@ Zerionyx may be magical, but its syntax must be real.
                     </p>
                 </section>
 
-                <br>
                 <section id="ref-functions">
                     <h3>Functions</h3>
                     <p>Functions are defined with the <code>defun</code> keyword. They can accept parameters, have
@@ -941,6 +942,32 @@ Zerionyx may be magical, but its syntax must be real.
 
 <span class="zyx-comment"># Anonymous function assigned to a variable</span>
 <span class="zyx-keyword">let</span> <span class="zyx-var">a</span> <span class="zyx-types">=</span> <span class="zyx-keyword">defun</span> <span class="zyx-types">(</span><span class="zyx-var">x</span><span class="zyx-types">)</span> <span class="zyx-types">-></span> <span class="zyx-var">x</span> <span class="zyx-types">^</span> <span class="zyx-number">0.5</span>
+</code></pre>
+                </section>
+                
+                <section id="ref-vargs-kwargs">
+                    <h3>Vargs and Kwargs</h3>
+                    <p>Zerionyx supports functions that can accept a variable number of arguments using special syntax in the parameter list.</p>
+                    <br>
+                    <h4>Vargs (<code>*args</code>)</h4>
+                    <p>A parameter prefixed with a single asterisk (<code>*</code>) will collect all extra positional arguments into a list. This is often called "vargs" or "star-args".</p>
+                    <br>
+                    <h4>Kwargs (<code>**kwargs</code>)</h4>
+                    <p>A parameter prefixed with a double asterisk (<code>**</code>) will collect all extra keyword arguments into a HashMap. This is commonly known as "kwargs".</p>
+                    <br>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">defun</span> <span class="zyx-func-def">show_details</span><span class="zyx-types">(</span><span class="zyx-var">name</span>, <span class="zyx-types">*</span><span class="zyx-var">scores</span>, <span class="zyx-types">**</span><span class="zyx-var">details</span><span class="zyx-types">)</span>
+    <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Name: "</span> <span class="zyx-types">+</span> <span class="zyx-var">name</span><span class="zyx-types">)</span>
+    <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Scores (Vargs): "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">scores</span><span class="zyx-types">))</span>
+    <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Details (Kwargs): "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">details</span><span class="zyx-types">))</span>
+<span class="zyx-keyword">done</span>
+
+<span class="zyx-comment"># Call the function with multiple positional and keyword arguments</span>
+<span class="zyx-func">show_details</span><span class="zyx-types">(</span><span class="zyx-string">"Alice"</span>, <span class="zyx-number">95</span>, <span class="zyx-number">88</span>, <span class="zyx-number">100</span>, <span class="zyx-var">age</span><span class="zyx-types">=</span><span class="zyx-number">25</span>, <span class="zyx-var">city</span><span class="zyx-types">=</span><span class="zyx-string">"New York"</span><span class="zyx-types">)</span>
+
+<span class="zyx-comment"># Output:</span>
+<span class="zyx-comment"># Name: Alice</span>
+<span class="zyx-comment"># Scores (Vargs): [95, 88, 100]</span>
+<span class="zyx-comment"># Details (Kwargs): {"age": 25, "city": "New York"}</span>
 </code></pre>
                 </section>
 
@@ -1045,6 +1072,35 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>Use built-in functions like <code>keys(hm)</code>, <code>values(hm)</code>, and
                         <code>has(hm, key)</code> for more operations.
                     </p>
+                </section>
+                
+                <section id="ref-assignment">
+                    <h3>Assignment to Lists and HashMaps</h3>
+                    <p>The <code>$</code> operator is not only used for accessing elements but also for assigning or updating values at a specific index in a list or a key in a HashMap.</p>
+                    <br>
+                    <h4>List Assignment</h4>
+                    <p>You can change the value at a specific index of a list.</p>
+                    <br>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">nums</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-number">1</span>, <span class="zyx-number">2</span>, <span class="zyx-number">3</span>, <span class="zyx-number">4</span>, <span class="zyx-number">5</span><span class="zyx-types">]</span>
+<span class="zyx-var">nums</span><span class="zyx-types">$</span><span class="zyx-number">1</span> <span class="zyx-types">=</span> <span class="zyx-number">99</span> <span class="zyx-comment"># Update the value at index 1</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">)</span> <span class="zyx-comment"># Output: [1, 99, 3, 4, 5]</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">$</span><span class="zyx-number">1</span><span class="zyx-types">)</span> <span class="zyx-comment"># Output: 99</span>
+</code></pre>
+                    <br>
+                    <h4>HashMap Assignment</h4>
+                    <p>You can add a new key-value pair or update an existing one. This is particularly useful when building complex structures like a list of hashmaps.</p>
+                    <br>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">users</span> <span class="zyx-types">=</span> <span class="zyx-types">[]</span>
+<span class="zyx-func">append</span><span class="zyx-types">(</span><span class="zyx-var">users</span>, <span class="zyx-types">{})</span> <span class="zyx-comment"># Add an empty hashmap to the list</span>
+
+<span class="zyx-comment"># Assign values to the hashmap inside the list</span>
+<span class="zyx-var">users</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">$</span><span class="zyx-string">"name"</span> <span class="zyx-types">=</span> <span class="zyx-string">"user-1"</span>
+<span class="zyx-var">users</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">$</span><span class="zyx-string">"password"</span> <span class="zyx-types">=</span> <span class="zyx-string">"123456"</span>
+
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">)</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">$</span><span class="zyx-string">"name"</span><span class="zyx-types">)</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">$</span><span class="zyx-string">"password"</span><span class="zyx-types">)</span>
+</code></pre>
                 </section>
 
                 <section id="ref-bytes">
