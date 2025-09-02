@@ -94,7 +94,7 @@ namespace asyncio
     done
 
     async defun is_panic(func, args=[], kwargs={})
-        return await async_is_panic(func, args, )
+        return await async_is_panic_fp(func, args, kwargs)
     done
 
     async defun println(value="")

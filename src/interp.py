@@ -364,30 +364,12 @@ class BuiltInFunction(BaseFunction):
     @set_args(["prompt"], [String("")])
     def execute_input(self, exec_ctx):
         prompt = exec_ctx.symbol_table.get("prompt")
-        if not isinstance(prompt, String):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'input' must be a string",
-                    exec_ctx,
-                )
-            )
         text = input(prompt.value)
         return RTResult().success(String(text))
 
     @set_args(["prompt"], [String("")])
     def execute_get_password(self, exec_ctx):
         prompt = exec_ctx.symbol_table.get("prompt")
-        if not isinstance(prompt, String):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'input' must be a string",
-                    exec_ctx,
-                )
-            )
         pass_ = getpass(prompt.value)
         return RTResult().success(String(pass_))
 
@@ -1751,7 +1733,7 @@ class BuiltInFunction(BaseFunction):
             )
 
     @set_args(["func", "args", "kwargs"], [None, List([]), HashMap({})])
-    async def execute_async_is_panic(self, exec_ctx):
+    async def execute_async_is_panic_fp(self, exec_ctx):
         func = exec_ctx.symbol_table.get("func")
         args = exec_ctx.symbol_table.get("args")
         kwargs = exec_ctx.symbol_table.get("kwargs")
@@ -4667,10 +4649,13 @@ class BuiltInFunction(BaseFunction):
 
 
     @set_args(["value"], [String("")])
-    async def execute_async_println(self, exec_ctx):
+    async def execute_async_println_fp(self, exec_ctx):
         try:
             import aioconsole # type: ignore
-            await aioconsole.aprint(repr(exec_ctx.symbol_table.get("value")))
+            if isinstance(exec_ctx.symbol_table.get("value"), String):
+                await aioconsole.aprint(exec_ctx.symbol_table.get("value").value, flush=True)
+            else:
+                await aioconsole.aprint(repr(exec_ctx.symbol_table.get("value")), flush=True)
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
@@ -4684,10 +4669,13 @@ class BuiltInFunction(BaseFunction):
 
 
     @set_args(["value"], [String("")])
-    async def execute_async_print(self, exec_ctx):
+    async def execute_async_print_fp(self, exec_ctx):
         try:
             import aioconsole # type: ignore
-            await aioconsole.aprint(repr(exec_ctx.symbol_table.get("value")), end="")
+            if isinstance(exec_ctx.symbol_table.get("value"), String):
+                await aioconsole.aprint(exec_ctx.symbol_table.get("value").value, flush=True, end="")
+            else:
+                await aioconsole.aprint(repr(exec_ctx.symbol_table.get("value")), flush=True, end="")
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
@@ -4700,10 +4688,10 @@ class BuiltInFunction(BaseFunction):
             )
 
     @set_args(["prompt"], [String("")])
-    async def execute_async_input(self, exec_ctx):
+    async def execute_async_input_fp(self, exec_ctx):
         try:
             import aioconsole # type: ignore
-            text = await aioconsole.ainput(exec_ctx.symbol_table.get("prompt").value)
+            text = await aioconsole.aprint(exec_ctx.symbol_table.get("value").value, flush=True)
             return RTResult().success(String(text))
         except ImportError:
             return RTResult().failure(
@@ -4716,7 +4704,7 @@ class BuiltInFunction(BaseFunction):
             )
 
     @set_args(["prompt"], [String("")])
-    async def execute_async_get_password(self, exec_ctx):
+    async def execute_async_get_password_fp(self, exec_ctx):
         from getpass import getpass
         prompt = exec_ctx.symbol_table.get("prompt").value
         password = await asyncio.to_thread(getpass, prompt)
@@ -4724,7 +4712,7 @@ class BuiltInFunction(BaseFunction):
 
 
     @set_args([])
-    async def execute_async_clear(self, _):
+    async def execute_async_clear_fp(self, _):
         command = "cls" if os.name == "nt" else "clear"
         proc = await asyncio.create_subprocess_shell(command)
         await proc.wait()
@@ -4732,7 +4720,7 @@ class BuiltInFunction(BaseFunction):
 
 
     @set_args(["code", "args"], [None, HashMap({})])
-    async def execute_async_pyexec(self, exec_ctx):
+    async def execute_async_pyexec_fp(self, exec_ctx):
         code = exec_ctx.symbol_table.get("code")
         args = exec_ctx.symbol_table.get("args")
 
