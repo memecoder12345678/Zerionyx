@@ -505,7 +505,7 @@
                     <li><b>Run a file</b>: <code>python zerionyx.py yourfile.zyx</code></li>
                     <li><b>Open interactive shell</b>: <code>python zerionyx.py</code></li>
                     <li>See the <a href="https://github.com/memecoder12345678/Zerionyx"
-                            style="color:var(--neon-blue);">github repository</a> for more info.</li>
+                            style="color:var(--neon-blue);">github repository</a> for more info</li>
                 </ul>
             </section>
 
@@ -657,23 +657,23 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>Zerionyx is dynamically typed. Here are the primary data types:</p>
                     <ul>
                         <li><b>Number</b>: Can be an integer (e.g., <code>10</code>, <code>-5</code>) or a float (e.g.,
-                            <code>3.14</code>).
+                            <code>3.14</code>)
                         </li>
                         <li><b>String</b>: A sequence of characters, enclosed in double quotes (e.g.,
-                            <code>"hello"</code>).
+                            <code>"hello"</code>)
                         </li>
-                        <li><b>Bool</b>: Represents boolean values, either <code>true</code> or <code>false</code>.</li>
+                        <li><b>Bool</b>: Represents boolean values, either <code>true</code> or <code>false</code></li>
                         <li><b>List</b>: An ordered collection of items, similar to an array (e.g.,
-                            <code>[1, "two", true]</code>).
+                            <code>[1, "two", true]</code>)
                         </li>
                         <li><b>HashMap</b>: A collection of key-value pairs (e.g.,
-                            <code>{"name": "Zyx", "version": 1}</code>). Keys must be strings.
+                            <code>{"name": "Zyx", "version": 1}</code>), keys must be strings
                         </li>
-                        <li><b>Bytes</b>: A sequence of raw bytes, useful for binary data and hashing.</li>
+                        <li><b>Bytes</b>: A sequence of raw bytes, useful for binary data and hashing</li>
                         <li><b>CFloat</b>: A "correct float" type that uses high-precision decimals to avoid common
-                            floating-point errors.</li>
+                            floating-point errors</li>
                         <li><b>None</b>: A special type representing the absence of a value, written as
-                            <code>none</code>.
+                            <code>none</code>
                         </li>
                     </ul>
                 </section>
@@ -937,9 +937,9 @@ Zerionyx may be magical, but its syntax must be real.
                     <h3>Input/Output</h3>
                     <p>Basic console I/O is handled by built-in functions.</p>
                     <ul>
-                        <li><code>println(value)</code>: Prints the value followed by a newline.</li>
-                        <li><code>print(value)</code>: Prints the value without a newline.</li>
-                        <li><code>input(prompt)</code>: Displays a prompt and returns the user's input as a string.</li>
+                        <li><code>println(value)</code>: Prints the value followed by a newline</li>
+                        <li><code>print(value)</code>: Prints the value without a newline</li>
+                        <li><code>input(prompt)</code>: Displays a prompt and returns the user's input as a string</li>
                     </ul>
                     <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">name</span> <span class="zyx-types">=</span> <span class="zyx-func">input</span><span class="zyx-types">(</span><span class="zyx-string">"Enter your name: "</span><span class="zyx-types">)</span>
@@ -996,14 +996,14 @@ Zerionyx may be magical, but its syntax must be real.
                     <h3>Strings</h3>
                     <p>Strings are immutable sequences of characters.</p>
                     <ul>
-                        <li><b>Concatenation</b>: <code>"a" + "b"</code> results in <code>"ab"</code>.</li>
-                        <li><b>Repetition</b>: <code>"a" * 3</code> results in <code>"aaa"</code>.</li>
-                        <li><b>Indexing</b>: Use the <code>$</code> operator to get a character at a specific index.
-                            <code>"hello" $ 1</code> results in <code>"e"</code>.
+                        <li><b>Concatenation</b>: <code>"a" + "b"</code> results in <code>"ab"</code></li>
+                        <li><b>Repetition</b>: <code>"a" * 3</code> results in <code>"aaa"</code></li>
+                        <li><b>Indexing</b>: Use the <code>$</code> operator to get a character at a specific index
+                            <code>"hello" $ 1</code> results in <code>"e"</code>
                         </li>
                     </ul>
                     <p>For more advanced functions like splitting, joining, and replacing, use the <code>string</code>
-                        library.</p>
+                        library</p>
                 </section>
 
                 <section id="ref-lists">
@@ -1011,11 +1011,11 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>Lists are mutable, ordered collections of items.</p>
                     <ul>
                         <li><b>Creation</b>: <code>let my_list = [1, "a", true]</code></li>
-                        <li><b>Indexing</b>: <code>my_list $ 0</code> returns <code>1</code>.</li>
-                        <li><b>Appending</b>: <code>my_list + "new"</code> returns <code>[1, "a", true, "new"]</code>.
+                        <li><b>Indexing</b>: <code>my_list $ 0</code> returns <code>1</code></li>
+                        <li><b>Appending</b>: <code>my_list + "new"</code> returns <code>[1, "a", true, "new"]</code>
                         </li>
-                        <li><b>Concatenation</b>: <code>[1, 2] * [3, 4]</code> returns <code>[1, 2, 3, 4]</code>.</li>
-                        <li><b>Removal by index</b>: <code>[1, 2, 3] - 1</code> returns <code>[1, 3]</code>.</li>
+                        <li><b>Concatenation</b>: <code>[1, 2] * [3, 4]</code> returns <code>[1, 2, 3, 4]</code></li>
+                        <li><b>Removal by index</b>: <code>[1, 2, 3] - 1</code> returns <code>[1, 3]</code></li>
                     </ul>
                     <p>The <code>mlist</code> library provides functions like <code>map</code>, <code>filter</code>,
                         <code>sort</code>, etc.
@@ -1027,12 +1027,12 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>HashMaps store key-value pairs. Keys must be strings.</p>
                     <ul>
                         <li><b>Creation</b>: <code>let person = {"name": "Alex", "age": 30}</code></li>
-                        <li><b>Accessing</b>: <code>person $ "name"</code> returns <code>"Alex"</code>.</li>
-                        <li><b>Adding/Updating</b>: <code>person + {"city": "New York"}</code>. Note that this returns a
-                            new map.</li>
+                        <li><b>Accessing</b>: <code>person $ "name"</code> returns <code>"Alex"</code></li>
+                        <li><b>Adding/Updating</b>: <code>person + {"city": "New York"}</code>, note that this returns a
+                            new map</li>
                     </ul>
                     <p>Use built-in functions like <code>keys(hm)</code>, <code>values(hm)</code>, and
-                        <code>has(hm, key)</code> for more operations.
+                        <code>has(hm, key)</code> for more operations
                     </p>
                 </section>
 
@@ -1041,10 +1041,10 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>The <code>bytes</code> type represents an immutable sequence of bytes. It's essential for working
                         with binary data, file I/O in binary mode, and cryptographic hashing.</p>
                     <ul>
-                        <li><b>Creation</b>: Use the <code>to_bytes(value)</code> function.</li>
+                        <li><b>Creation</b>: Use the <code>to_bytes(value)</code> function</li>
                         <li><b>From String</b>: <code>to_bytes("hello")</code></li>
                         <li><b>From Hex</b>: <code>to_bytes("68656c6c6f", from_hex=true)</code></li>
-                        <li><b>Operations</b>: Supports concatenation (<code>+</code>) and indexing (<code>$</code>).
+                        <li><b>Operations</b>: Supports concatenation (<code>+</code>) and indexing (<code>$</code>)
                         </li>
                     </ul>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">load</span> <span class="zyx-string">"libs.hash"</span>
@@ -1577,4 +1577,3 @@ Zerionyx may be magical, but its syntax must be real.
 
 
 </html>
-
