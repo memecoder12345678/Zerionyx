@@ -9,15 +9,15 @@ namespace decorators
     defun name(fn) -> slice(to_str(fn), 10, -1)
 
     defun cache(fn)
-        let cache_storage = {}
+        cache_storage = {}
         defun wrapper(*vargs, **kargs)
-            let key = to_str(vargs) + to_str(items(kargs))
+            key = to_str(vargs) + to_str(items(kargs))
             
             if has(cache_storage, key) do
                 return cache_storage$key
             done
             
-            let result = fn(*vargs, **kargs)
+            result = fn(*vargs, **kargs)
             cache_storage$key = result
             return result
         done
@@ -25,8 +25,8 @@ namespace decorators
     done
 
     defun once(fn)
-        let has_run = false
-        let result = none
+        has_run = false
+        result = none
 
         defun wrapper(*vargs, **kargs)
             using parent has_run
@@ -45,9 +45,9 @@ namespace decorators
         defun decorator(fn)
             defun wrapper(*vargs, **kargs)
                 for i = 1 to times + 1 do
-                    let res = await asyncio.is_panic(fn, vargs)
-                    let result = res$0
-                    let err = res$1
+                    res = await asyncio.is_panic(fn, vargs)
+                    result = res$0
+                    err = res$1
                     
                     if is_none(err) do
                         return result
@@ -66,10 +66,10 @@ namespace decorators
     defun timeout(ms)
         defun decorator(fn)
             defun wrapper(*vargs, **kargs)
-                let state = {"result": none, "error": none, "done": false}
+                state = {"result": none, "error": none, "done": false}
 
                 defun target()
-                    let res = await asyncio.is_panic(fn, vargs)
+                    res = await asyncio.is_panic(fn, vargs)
                     if res$1 do
                         state$"error" = res$1
                     else do
@@ -78,7 +78,7 @@ namespace decorators
                     state$"done" = true
                 done
 
-                let t = threading.start(target)
+                t = threading.start(target)
                 threading.join(t, timeout=(ms / 1000.0))
 
                 if not state$"done" do
@@ -100,7 +100,7 @@ namespace decorators
     defun log_call(fn)
         defun wrapper(*vargs, **kargs)
             println("--> Calling function '" + name(fn) + "'...")
-            let result = fn(*vargs, **kargs)
+            result = fn(*vargs, **kargs)
             println("<-- Function '" + name(fn) + "' returned.")
             return result
         done
@@ -109,10 +109,10 @@ namespace decorators
     
     defun measure_time(fn)
         defun wrapper(*vargs, **kargs)
-            let start = time.time()
-            let result = fn(*vargs, **kargs)
-            let end = time.time()
-            let duration = (end - start) * 1000
+            start = time.time()
+            result = fn(*vargs, **kargs)
+            end = time.time()
+            duration = (end - start) * 1000
             println("Execution time for '" + name(fn) + "': " + to_str(duration) + " ms")
             return result
         done
@@ -122,7 +122,7 @@ namespace decorators
     defun repeat(n)
         defun decorator(fn)
             defun wrapper(*vargs, **kargs)
-                let last_result = none
+                last_result = none
                 for i = 1 to n + 1 do
                     last_result = fn(*vargs, **kargs)
                 done
@@ -136,7 +136,7 @@ namespace decorators
     defun ignore_error(default=none)
         defun decorator(fn)
             defun wrapper(*vargs, **kargs)
-                let res = await asyncio.is_panic(fn, vargs)
+                res = await asyncio.is_panic(fn, vargs)
                 if res$1 do
                     return default
                 done
@@ -159,8 +159,8 @@ namespace decorators
     done
     
     defun lazy(fn)
-        let computed = false
-        let value = none
+        computed = false
+        value = none
         
         defun wrapper(*vargs, **kargs)
             using parent computed

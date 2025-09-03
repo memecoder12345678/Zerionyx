@@ -531,10 +531,9 @@ IF_EXPR
 | DEF_FUNC
 
 EXPR ::=
-<code>let</code> IDENTIFIER <code>=</code> EXPR
-| IDENTIFIER <code>=</code> EXPR
-| <code>let</code> IDENTIFIER <code>as</code> EXPR
+IDENTIFIER <code>=</code> EXPR
 | IDENTIFIER <code>as</code> EXPR
+| IDENTIFIER (<code>,</code> IDENTIFIER)* <code>=</code> <code>[</code>? EXPR (<code>,</code> EXPR)* <code>]</code>?
 | IDENTIFIER (<code>+=</code> | <code>-=</code> | <code>*=</code> | <code>/=</code> | <code>//=</code> | <code>%=</code> | <code>^=</code>) EXPR
 | COMP_EXPR ((<code>and</code> | <code>or</code>) COMP_EXPR)*
 
@@ -608,7 +607,7 @@ WHILE_EXPR ::=
 PARAM_LIST ::= (PARAMS (<code>,</code> VAR_PARAMS)? | VAR_PARAMS)?
 
 PARAMS ::= PARAM (<code>,</code> PARAM)*
-PARAM ::= (<code>let</code>)? IDENTIFIER (<code>=</code> EXPR)?
+PARAM ::= IDENTIFIER (<code>=</code> EXPR)?
 
 VAR_PARAMS ::= VARARGS_PARAM (<code>,</code> KWARGS_PARAM)? | KWARGS_PARAM
 VARARGS_PARAM ::= <code>*</code> IDENTIFIER
@@ -636,7 +635,6 @@ Parentheses are for math, backslashes are for flow.
 The caret (<code>^</code>) means power &mdash; and nothing else.
 Blocks should be explicit: <code>do...done</code> says it all.
 <code>if</code> is a command, not a value.
-<code>let</code> or <code>=</code>, pick one &mdash; but be clear.
 Whitespace is free; newlines are not.
 Write like a poet, execute like a machine.
 Code is for humans first, machines second.
@@ -827,7 +825,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-comment"># Define a namespace to group math-related utilities</span>
 <span class="zyx-keyword">namespace</span> <span class="zyx-var">math_utils</span>
-    <span class="zyx-keyword">let</span> <span class="zyx-var">pi</span> <span class="zyx-types">=</span> <span class="zyx-number">3.14159</span>
+    <span class="zyx-var">pi</span> <span class="zyx-types">=</span> <span class="zyx-number">3.14159</span>
     
     <span class="zyx-keyword">defun</span> <span class="zyx-func-def">circle_area</span><span class="zyx-types">(</span><span class="zyx-var">radius</span><span class="zyx-types">)</span>
         <span class="zyx-keyword">return</span> <span class="zyx-var">pi</span> <span class="zyx-types">*</span> <span class="zyx-var">radius</span> <span class="zyx-types">^</span> <span class="zyx-number">2</span>
@@ -835,8 +833,8 @@ Zerionyx may be magical, but its syntax must be real.
 <span class="zyx-keyword">done</span>
 
 <span class="zyx-comment"># Access members using dot notation</span>
-<span class="zyx-keyword">let</span> <span class="zyx-var">r</span> <span class="zyx-types">=</span> <span class="zyx-number">10</span>
-<span class="zyx-keyword">let</span> <span class="zyx-var">area</span> <span class="zyx-types">=</span> <span class="zyx-var">math_utils</span>.<span class="zyx-func">circle_area</span><span class="zyx-types">(</span><span class="zyx-var">r</span><span class="zyx-types">)</span>
+<span class="zyx-var">r</span> <span class="zyx-types">=</span> <span class="zyx-number">10</span>
+<span class="zyx-var">area</span> <span class="zyx-types">=</span> <span class="zyx-var">math_utils</span>.<span class="zyx-func">circle_area</span><span class="zyx-types">(</span><span class="zyx-var">r</span><span class="zyx-types">)</span>
 
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"The area is "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">area</span><span class="zyx-types">))</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Pi value: "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">math_utils</span>.<span class="zyx-var">pi</span><span class="zyx-types">))</span>
@@ -848,7 +846,7 @@ Zerionyx may be magical, but its syntax must be real.
                         statements. Each block of code to be executed is introduced by the <code>do</code> keyword and
                         the entire structure is optionally terminated by <code>done</code>.</p>
                     <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">score</span> <span class="zyx-types">=</span> <span class="zyx-number">85</span>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-var">score</span> <span class="zyx-types">=</span> <span class="zyx-number">85</span>
 
 <span class="zyx-keyword">if</span> <span class="zyx-var">score</span> <span class="zyx-types">>=</span> <span class="zyx-number">90</span> <span class="zyx-keyword">do</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Grade: A"</span><span class="zyx-types">)</span>
@@ -867,7 +865,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <h4>While Loop</h4>
                     <p>Executes a code block if a condition is true.</p>
                     <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">count</span> <span class="zyx-types">=</span> <span class="zyx-number">0</span>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-var">count</span> <span class="zyx-types">=</span> <span class="zyx-number">0</span>
 <span class="zyx-keyword">while</span> <span class="zyx-var">count</span> <span class="zyx-types">&lt;</span> <span class="zyx-number">5</span> <span class="zyx-keyword">do</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">count</span><span class="zyx-types">)</span>
     <span class="zyx-var">count</span> <span class="zyx-types">=</span> <span class="zyx-var">count</span> <span class="zyx-types">+</span> <span class="zyx-number">1</span>
@@ -891,7 +889,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <h4>For-In Loop (Iterator)</h4>
                     <p>Iterates over the elements of an iterable like a list or string.</p>
                     <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">fruits</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-string">"apple"</span>, <span class="zyx-string">"banana"</span>, <span class="zyx-string">"cherry"</span><span class="zyx-types">]</span>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-var">fruits</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-string">"apple"</span>, <span class="zyx-string">"banana"</span>, <span class="zyx-string">"cherry"</span><span class="zyx-types">]</span>
 <span class="zyx-keyword">for</span> <span class="zyx-var">fruit</span> <span class="zyx-keyword">in</span> <span class="zyx-var">fruits</span> <span class="zyx-keyword">do</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"I like "</span> <span class="zyx-types">+</span> <span class="zyx-var">fruit</span><span class="zyx-types">)</span>
 <span class="zyx-keyword">done</span>
@@ -930,7 +928,7 @@ Zerionyx may be magical, but its syntax must be real.
     <span class="zyx-keyword">return</span> <span class="zyx-string">"Data fetched."</span>
 <span class="zyx-keyword">done</span>
 
-<span class="zyx-keyword">let</span> <span class="zyx-var">result</span> <span class="zyx-types">=</span> <span class="zyx-keyword">await</span> <span class="zyx-func">fetch_data</span><span class="zyx-types">()</span>
+<span class="zyx-var">result</span> <span class="zyx-types">=</span> <span class="zyx-keyword">await</span> <span class="zyx-func">fetch_data</span><span class="zyx-types">()</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">result</span><span class="zyx-types">)</span>
 </code></pre>
                     <br>
@@ -941,7 +939,7 @@ Zerionyx may be magical, but its syntax must be real.
 <span class="zyx-keyword">defun</span> <span class="zyx-func-def">sqrt</span><span class="zyx-types">(</span><span class="zyx-var">x</span><span class="zyx-types">)</span> <span class="zyx-types">-></span> <span class="zyx-var">x</span> <span class="zyx-types">^</span> <span class="zyx-number">0.5</span>
 
 <span class="zyx-comment"># Anonymous function assigned to a variable</span>
-<span class="zyx-keyword">let</span> <span class="zyx-var">a</span> <span class="zyx-types">=</span> <span class="zyx-keyword">defun</span> <span class="zyx-types">(</span><span class="zyx-var">x</span><span class="zyx-types">)</span> <span class="zyx-types">-></span> <span class="zyx-var">x</span> <span class="zyx-types">^</span> <span class="zyx-number">0.5</span>
+<span class="zyx-var">a</span> <span class="zyx-types">=</span> <span class="zyx-keyword">defun</span> <span class="zyx-types">(</span><span class="zyx-var">x</span><span class="zyx-types">)</span> <span class="zyx-types">-></span> <span class="zyx-var">x</span> <span class="zyx-types">^</span> <span class="zyx-number">0.5</span>
 </code></pre>
                 </section>
                 
@@ -980,7 +978,7 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><code>input(prompt)</code>: Displays a prompt and returns the user's input as a string</li>
                     </ul>
                     <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">name</span> <span class="zyx-types">=</span> <span class="zyx-func">input</span><span class="zyx-types">(</span><span class="zyx-string">"Enter your name: "</span><span class="zyx-types">)</span>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-var">name</span> <span class="zyx-types">=</span> <span class="zyx-func">input</span><span class="zyx-types">(</span><span class="zyx-string">"Enter your name: "</span><span class="zyx-types">)</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Hello, "</span> <span class="zyx-types">+</span> <span class="zyx-var">name</span><span class="zyx-types">)</span>
 </code></pre>
                 </section>
@@ -998,10 +996,10 @@ Zerionyx may be magical, but its syntax must be real.
     <span class="zyx-keyword">return</span> <span class="zyx-var">a</span> <span class="zyx-types">/</span> <span class="zyx-var">b</span>
 <span class="zyx-keyword">done</span>
 
-<span class="zyx-keyword">let</span> <span class="zyx-var">result</span> <span class="zyx-types">=</span> <span class="zyx-func">is_panic</span><span class="zyx-types">(</span><span class="zyx-var">divide</span>, <span class="zyx-types">[</span><span class="zyx-number">10</span>, <span class="zyx-number">0</span><span class="zyx-types">])</span>
-<span class="zyx-keyword">let</span> <span class="zyx-var">value</span> <span class="zyx-types">=</span> <span class="zyx-var">result</span><span class="zyx-types">$</span><span class="zyx-number">0</span>      <span class="zyx-comment"># The result if successful</span>
-<span class="zyx-keyword">let</span> <span class="zyx-var">error_msg</span> <span class="zyx-types">=</span> <span class="zyx-var">result</span><span class="zyx-types">$</span><span class="zyx-number">1</span>  <span class="zyx-comment"># The error message if it failed</span>
-<span class="zyx-keyword">let</span> <span class="zyx-var">error_type</span> <span class="zyx-types">=</span> <span class="zyx-var">result</span><span class="zyx-types">$</span><span class="zyx-number">2</span> <span class="zyx-comment"># The error type (e.g., "M")</span>
+<span class="zyx-var">result</span> <span class="zyx-types">=</span> <span class="zyx-func">is_panic</span><span class="zyx-types">(</span><span class="zyx-var">divide</span>, <span class="zyx-types">[</span><span class="zyx-number">10</span>, <span class="zyx-number">0</span><span class="zyx-types">])</span>
+<span class="zyx-var">value</span> <span class="zyx-types">=</span> <span class="zyx-var">result</span><span class="zyx-types">$</span><span class="zyx-number">0</span>      <span class="zyx-comment"># The result if successful</span>
+<span class="zyx-var">error_msg</span> <span class="zyx-types">=</span> <span class="zyx-var">result</span><span class="zyx-types">$</span><span class="zyx-number">1</span>  <span class="zyx-comment"># The error message if it failed</span>
+<span class="zyx-var">error_type</span> <span class="zyx-types">=</span> <span class="zyx-var">result</span><span class="zyx-types">$</span><span class="zyx-number">2</span> <span class="zyx-comment"># The error type (e.g., "M")</span>
 
 <span class="zyx-keyword">if</span> <span class="zyx-var">error_msg</span> <span class="zyx-types">!=</span> <span class="zyx-var">none</span> <span class="zyx-keyword">do</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Error: "</span> <span class="zyx-types">+</span> <span class="zyx-var">error_msg</span><span class="zyx-types">)</span>
@@ -1018,14 +1016,14 @@ Zerionyx may be magical, but its syntax must be real.
                     <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">load</span> <span class="zyx-string">"libs.ffio"</span>
 
-<span class="zyx-keyword">let</span> <span class="zyx-var">filename</span> <span class="zyx-types">=</span> <span class="zyx-string">"greetings.txt"</span>
-<span class="zyx-keyword">let</span> <span class="zyx-var">content</span> <span class="zyx-types">=</span> <span class="zyx-string">"Hello from Zerionyx!"</span>
+<span class="zyx-var">filename</span> <span class="zyx-types">=</span> <span class="zyx-string">"greetings.txt"</span>
+<span class="zyx-var">content</span> <span class="zyx-types">=</span> <span class="zyx-string">"Hello from Zerionyx!"</span>
 
 <span class="zyx-comment"># Write to a file</span>
 <span class="zyx-var">ffio</span>.<span class="zyx-func">write</span><span class="zyx-types">(</span><span class="zyx-var">ffio</span>.<span class="zyx-func">open</span><span class="zyx-types">(</span><span class="zyx-var">filename</span><span class="zyx-types">)</span>, <span class="zyx-string">"w"</span>, <span class="zyx-var">content</span><span class="zyx-types">)</span>
 
 <span class="zyx-comment"># Read from a file</span>
-<span class="zyx-keyword">let</span> <span class="zyx-var">read_content</span> <span class="zyx-types">=</span> <span class="zyx-var">ffio</span>.<span class="zyx-func">read</span><span class="zyx-types">(</span><span class="zyx-var">filename</span>, <span class="zyx-string">"r"</span><span class="zyx-types">)</span>
+<span class="zyx-var">read_content</span> <span class="zyx-types">=</span> <span class="zyx-var">ffio</span>.<span class="zyx-func">read</span><span class="zyx-types">(</span><span class="zyx-var">filename</span>, <span class="zyx-string">"r"</span><span class="zyx-types">)</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">read_content</span><span class="zyx-types">)</span> <span class="zyx-comment"># Output: Hello from Zerionyx!</span>
 </code></pre>
                 </section>
@@ -1048,7 +1046,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <h3>Lists</h3>
                     <p>Lists are mutable, ordered collections of items.</p>
                     <ul>
-                        <li><b>Creation</b>: <code>let my_list = [1, "a", true]</code></li>
+                        <li><b>Creation</b>: <code>my_list = [1, "a", true]</code></li>
                         <li><b>Indexing</b>: <code>my_list $ 0</code> returns <code>1</code></li>
                         <li><b>Appending</b>: <code>my_list + "new"</code> returns <code>[1, "a", true, "new"]</code>
                         </li>
@@ -1064,7 +1062,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <h3>HashMaps</h3>
                     <p>HashMaps store key-value pairs. Keys must be strings.</p>
                     <ul>
-                        <li><b>Creation</b>: <code>let person = {"name": "Alex", "age": 30}</code></li>
+                        <li><b>Creation</b>: <code>person = {"name": "Alex", "age": 30}</code></li>
                         <li><b>Accessing</b>: <code>person $ "name"</code> returns <code>"Alex"</code></li>
                         <li><b>Adding/Updating</b>: <code>person + {"city": "New York"}</code>, note that this returns a
                             new map</li>
@@ -1081,7 +1079,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <h4>List Assignment</h4>
                     <p>You can change the value at a specific index of a list.</p>
                     <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">nums</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-number">1</span>, <span class="zyx-number">2</span>, <span class="zyx-number">3</span>, <span class="zyx-number">4</span>, <span class="zyx-number">5</span><span class="zyx-types">]</span>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-var">nums</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-number">1</span>, <span class="zyx-number">2</span>, <span class="zyx-number">3</span>, <span class="zyx-number">4</span>, <span class="zyx-number">5</span><span class="zyx-types">]</span>
 <span class="zyx-var">nums</span><span class="zyx-types">$</span><span class="zyx-number">1</span> <span class="zyx-types">=</span> <span class="zyx-number">99</span> <span class="zyx-comment"># Update the value at index 1</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">)</span> <span class="zyx-comment"># Output: [1, 99, 3, 4, 5]</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">$</span><span class="zyx-number">1</span><span class="zyx-types">)</span> <span class="zyx-comment"># Output: 99</span>
@@ -1090,7 +1088,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <h4>HashMap Assignment</h4>
                     <p>You can add a new key-value pair or update an existing one. This is particularly useful when building complex structures like a list of hashmaps.</p>
                     <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">users</span> <span class="zyx-types">=</span> <span class="zyx-types">[]</span>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-var">users</span> <span class="zyx-types">=</span> <span class="zyx-types">[]</span>
 <span class="zyx-func">append</span><span class="zyx-types">(</span><span class="zyx-var">users</span>, <span class="zyx-types">{})</span> <span class="zyx-comment"># Add an empty hashmap to the list</span>
 
 <span class="zyx-comment"># Assign values to the hashmap inside the list</span>
@@ -1115,8 +1113,8 @@ Zerionyx may be magical, but its syntax must be real.
                         </li>
                     </ul>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">load</span> <span class="zyx-string">"libs.hash"</span>
-<span class="zyx-keyword">let</span> <span class="zyx-var">data</span> <span class="zyx-types">=</span> <span class="zyx-func">to_bytes</span><span class="zyx-types">(</span><span class="zyx-string">"my secret data"</span><span class="zyx-types">)</span>
-<span class="zyx-keyword">let</span> <span class="zyx-var">hashed_data</span> <span class="zyx-types">=</span> <span class="zyx-var">hash</span>.<span class="zyx-func">sha256</span><span class="zyx-types">(</span><span class="zyx-var">data</span><span class="zyx-types">)</span>
+<span class="zyx-var">data</span> <span class="zyx-types">=</span> <span class="zyx-func">to_bytes</span><span class="zyx-types">(</span><span class="zyx-string">"my secret data"</span><span class="zyx-types">)</span>
+<span class="zyx-var">hashed_data</span> <span class="zyx-types">=</span> <span class="zyx-var">hash</span>.<span class="zyx-func">sha256</span><span class="zyx-types">(</span><span class="zyx-var">data</span><span class="zyx-types">)</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">hashed_data</span><span class="zyx-types">)</span>
 </code></pre>
                 </section>
@@ -1130,9 +1128,9 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>Use <code>to_cfloat(value)</code> to create a CFloat. They support all standard arithmetic
                         operations.</p>
                     <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">let</span> <span class="zyx-var">a</span> <span class="zyx-types">=</span> <span class="zyx-func">to_cfloat</span><span class="zyx-types">(</span><span class="zyx-string">"0.1"</span><span class="zyx-types">)</span>
-<span class="zyx-keyword">let</span> <span class="zyx-var">b</span> <span class="zyx-types">=</span> <span class="zyx-func">to_cfloat</span><span class="zyx-types">(</span><span class="zyx-string">"0.2"</span><span class="zyx-types">)</span>
-<span class="zyx-keyword">let</span> <span class="zyx-var">result</span> <span class="zyx-types">=</span> <span class="zyx-var">a</span> <span class="zyx-types">+</span> <span class="zyx-var">b</span>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-var">a</span> <span class="zyx-types">=</span> <span class="zyx-func">to_cfloat</span><span class="zyx-types">(</span><span class="zyx-string">"0.1"</span><span class="zyx-types">)</span>
+<span class="zyx-var">b</span> <span class="zyx-types">=</span> <span class="zyx-func">to_cfloat</span><span class="zyx-types">(</span><span class="zyx-string">"0.2"</span><span class="zyx-types">)</span>
+<span class="zyx-var">result</span> <span class="zyx-types">=</span> <span class="zyx-var">a</span> <span class="zyx-types">+</span> <span class="zyx-var">b</span>
 
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">result</span><span class="zyx-types">)</span> <span class="zyx-comment"># Output: 0.3</span>
 </code></pre>

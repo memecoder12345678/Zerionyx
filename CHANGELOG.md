@@ -1,40 +1,37 @@
-# Changelog: Version 5.0.3-LTS — Async Console & Python Interop
+# Changelog: Version 5.0.4 — Multiple Assignment
 
-**Date:** September 1, 2025
+**Date:** September 3, 2025
 
-Zerionyx 5.0.3-LTS is the third Long-Term Support (LTS) release in the 5.0.x series.
-This update focuses on **asynchronous console utilities** and **Python interoperability**, making interactive programs and scripting even more seamless in async workflows.
+Zerionyx 5.0.4 is the first stable release after the 5.0.x LTS line.
+This update introduces **multiple assignment syntax**, removes the legacy **`let` keyword**, and expands async console utilities for more fluid interactive scripting.
 
 ---
 
 ## ✨ New Features
 
-* **`libs.asyncio` Console Expansion**
-  Added powerful new coroutine-based console and execution utilities:
+* **Multiple Assignment**
 
-  * **input(prompt="")** → Asynchronously reads a line of text from the console without blocking the event loop
-  * **get\_password(prompt="")** → Asynchronously and securely reads a password from the console without echoing input
-  * **println(value="")** → Asynchronously prints a value to the console, followed by a newline
-  * **print(value="")** → Asynchronously prints a value to the console without a trailing newline
-  * **clear()** → Asynchronously clears the console screen
+  You can now assign multiple variables from **lists or values** in a single line:
 
-* **Python Interop**
+  ```zyx
+  a, b, c = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+  x, y, z = 1, 2, 3
+  ```
 
-  * **pyexec(code, args={})** → Asynchronously executes a block of Python code in a separate thread and returns the resulting environment
+* **Unified Variable Declaration**
 
----
+  The **`let` keyword has been removed**.
+  Variables are now declared and assigned directly with `=` for a **cleaner, more Pythonic experience**:
 
-## 🛠 Bug Fixes
+  ```zyx
+  # Before
+  let x = 10  
 
-* **Async File I/O**
-
-  * Fixed rare race condition when two coroutines attempted to write to the same file concurrently.
-  * Improved error messages for missing file permissions in `asyncio.read()` and `asyncio.write()`.
-
-* **Networking**
-
-  * Fixed `asyncio.downl()` incorrectly timing out on slow but active connections.
+  # Now
+  x = 10  
+  ```
 
 ---
 
-Zerionyx 5.0.3-LTS strengthens async support for **interactive apps, secure console input, and embedded Python execution**, expanding the possibilities for developers building modern async-first applications.
+Zerionyx 5.0.4 enhances **developer ergonomics** with **multiple assignment** and a **simplified variable model**.
+

@@ -4,7 +4,7 @@ load "libs.time"
 
 println("--- Channel Demo ---")
 
-let messages = channel.new()
+messages = channel.new()
 
 defun worker()
     println("  (Worker thread started)")
@@ -19,14 +19,14 @@ defun worker()
 done
 
 println("Main: Starting worker thread...")
-let t = threading.start(worker)
+t = threading.start(worker)
 
 println("Main: Waiting to receive a message...")
-let msg1 = channel.recv(messages)
+msg1 = channel.recv(messages)
 println("Main: Received -> " + to_str(msg1))
 
 println("Main: Waiting for the next message...")
-let msg2 = channel.recv(messages)
+msg2 = channel.recv(messages)
 println("Main: Received -> " + to_str(msg2))
 
 threading.join(t)

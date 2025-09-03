@@ -15,9 +15,9 @@ for r = 1 to repeats + 1 do
     append(times, end - start)
 done
 
-let sum = 0
-let fastest = (times$0)
-let slowest = (times$0)
+sum = 0
+fastest = (times$0)
+slowest = (times$0)
 
 for t in times do
     sum += t

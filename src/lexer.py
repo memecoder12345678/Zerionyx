@@ -420,61 +420,6 @@ class Lexer:
         peek_idx = self.pos.idx
         while peek_idx < len(self.text) and self.text[peek_idx] in " \t":
             peek_idx += 1
-        should_insert_let = False
-        if peek_idx < len(self.text):
-            if (
-                peek_idx + 1 < len(self.text)
-                and self.text[peek_idx : peek_idx + 2] == "as"
-                and (
-                    peek_idx + 2 >= len(self.text)
-                    or self.text[peek_idx + 2] not in LETTERS_DIGITS + "_"
-                )
-            ):
-                should_insert_let = True
-            if not should_insert_let:
-                op_char1 = self.text[peek_idx]
-                op_char2 = (
-                    self.text[peek_idx + 1] if peek_idx + 1 < len(self.text) else None
-                )
-                op_char3 = (
-                    self.text[peek_idx + 2] if peek_idx + 2 < len(self.text) else None
-                )
-                if op_char1 == "=" and op_char2 != "=":
-                    should_insert_let = True
-                elif op_char1 in ["+", "-", "*", "^", "%"] and op_char2 == "=":
-                    should_insert_let = True
-                elif op_char1 == "/" and (
-                    op_char2 == "=" or (op_char2 == "/" and op_char3 == "=")
-                ):
-                    should_insert_let = True
-        if should_insert_let and id_str not in KEYWORDS:
-            pt: Token | None = self.previous_token()
-            allowed_preceding_keywords_for_let = {"do", "else", "as"}
-            insert_let = False
-            if (
-                pt is None
-                or pt.type == TT_NEWLINE
-                or (
-                    pt.type == TT_KEYWORD
-                    and pt.value in allowed_preceding_keywords_for_let
-                )
-                or pt.type == TT_ARROW
-                or pt.type == TT_COMMA
-                or pt.type == TT_COLON
-                or pt.type == TT_LPAREN
-                or pt.type == TT_LSQUARE
-                or pt.type == TT_LBRACE
-            ):
-                insert_let = True
-            if insert_let:
-                self.tokens.append(
-                    Token(
-                        TT_KEYWORD,
-                        value="let",
-                        pos_start=pos_start_identifier.copy(),
-                        pos_end=pos_end_identifier.copy(),
-                    )
-                )
         tok_type = TT_KEYWORD if id_str in KEYWORDS else TT_IDENTIFIER
         return Token(tok_type, id_str, pos_start_identifier, pos_end_identifier)
 

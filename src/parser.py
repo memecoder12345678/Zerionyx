@@ -219,7 +219,7 @@ class Parser:
                 InvalidSyntaxError(
                     self.current_tok.pos_start,
                     self.current_tok.pos_end,
-                    "Expected 'return', 'continue', 'break', 'let', 'if', 'for', 'while', 'defun', int, float, identifier, '+', '-', '(', '[', '{' or 'not'",
+                    "Expected 'return', 'continue', 'break', 'if', 'for', 'while', 'defun', int, float, identifier, '+', '-', '(', '[', '{' or 'not'",
                 )
             )
         return res.success(expr)
@@ -237,28 +237,57 @@ class Parser:
     def expr(self):
         res = ParseResult()
 
-        if self.current_tok.matches(TT_KEYWORD, "let"):
-            res.register_advancement()
-            self.advance()
-            if self.current_tok.type != TT_IDENTIFIER:
-                return res.failure(
-                    InvalidSyntaxError(
-                        self.current_tok.pos_start,
-                        self.current_tok.pos_end,
-                        "Expected identifier",
-                    )
+        node = res.register(self.bin_op(self.assignment_expr, (TT_COMMA,)))
+
+        if res.error:
+            return res.failure(
+                InvalidSyntaxError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "Expected 'if', 'for', 'while', 'defun', int, float, identifier, '+', '-', '(', '[', '{' or 'not'",
                 )
-            var_name = self.current_tok
+            )
+
+        return res.success(node)
+
+    def assignment_expr(self):
+        res = ParseResult()
+
+        if self.current_tok.type == TT_IDENTIFIER:
+            var_name_toks = [self.current_tok]
             res.register_advancement()
             self.advance()
+
+            is_multi_assign = False
+            while self.current_tok.type == TT_COMMA:
+                is_multi_assign = True
+                res.register_advancement()
+                self.advance()
+                if self.current_tok.type != TT_IDENTIFIER:
+                    return res.failure(
+                        InvalidSyntaxError(
+                            self.current_tok.pos_start,
+                            self.current_tok.pos_end,
+                            "Expected identifier after ','",
+                        )
+                    )
+                var_name_toks.append(self.current_tok)
+                res.register_advancement()
+                self.advance()
+            
             if self.current_tok.type == TT_EQ:
                 res.register_advancement()
                 self.advance()
-                expr = res.register(self.expr())
+                expr_to_assign = res.register(self.expr())
                 if res.error:
                     return res
-                return res.success(VarAssignNode(var_name, expr))
-            elif self.current_tok.matches(TT_KEYWORD, "as"):
+
+                if is_multi_assign:
+                    return res.success(MultiAssignNode(var_name_toks, expr_to_assign))
+                else:
+                    return res.success(VarAssignNode(var_name_toks[0], expr_to_assign))
+            
+            if not is_multi_assign and self.current_tok.matches(TT_KEYWORD, "as"):
                 res.register_advancement()
                 self.advance()
                 if self.current_tok.type != TT_IDENTIFIER:
@@ -272,15 +301,10 @@ class Parser:
                 alias_name = self.current_tok
                 res.register_advancement()
                 self.advance()
-                return res.success(VarAssignAsNode(var_name, alias_name))
-            else:
-                return res.failure(
-                    InvalidSyntaxError(
-                        self.current_tok.pos_start,
-                        self.current_tok.pos_end,
-                        "Expected '=' or 'as'",
-                    )
-                )
+                return res.success(VarAssignAsNode(var_name_toks[0], alias_name))
+            
+            self.reverse(res.advance_count)
+
 
         if self.current_tok.matches(TT_KEYWORD, "load"):
             res.register_advancement()
@@ -335,13 +359,7 @@ class Parser:
         )
 
         if res.error:
-            return res.failure(
-                InvalidSyntaxError(
-                    self.current_tok.pos_start,
-                    self.current_tok.pos_end,
-                    "Expected 'let', 'if', 'for', 'while', 'defun', int, float, identifier, '+', '-', '(', '[', '{' or 'not'",
-                )
-            )
+            return res
 
         if isinstance(node, BinOpNode) and node.op_tok.type == TT_DOLLAR:
             if self.current_tok.type == TT_EQ:
@@ -469,30 +487,14 @@ class Parser:
             else:
                 while True:
                     self.skip_newlines()
-                    if self.current_tok.matches(TT_KEYWORD, "let"):
-                        res.register_advancement()
-                        self.advance()
-                        if self.current_tok.type != TT_IDENTIFIER:
-                            return res.failure(
-                                InvalidSyntaxError(
-                                    self.current_tok.pos_start,
-                                    self.current_tok.pos_end,
-                                    "Expected identifier after 'let'",
-                                )
-                            )
+                    if self.current_tok.type == TT_IDENTIFIER and self.peek_tok() and self.peek_tok().type == TT_EQ:
                         var_name_tok = self.current_tok
                         res.register_advancement()
                         self.advance()
-                        if self.current_tok.type != TT_EQ:
-                            return res.failure(
-                                InvalidSyntaxError(
-                                    self.current_tok.pos_start,
-                                    self.current_tok.pos_end,
-                                    "Expected '='",
-                                )
-                            )
+                        
                         res.register_advancement()
                         self.advance()
+                        
                         value_node = res.register(self.expr())
                         if res.error:
                             return res
@@ -504,7 +506,7 @@ class Parser:
                                 InvalidSyntaxError(
                                     self.current_tok.pos_start,
                                     self.current_tok.pos_end,
-                                    "Expected ')', 'let', 'if', 'for', 'while', 'defun', int, float, identifier, '+', '-', '(', '[', '{' or 'not'",
+                                    "Expected ')', 'if', 'for', 'while', 'defun', int, float, identifier, '+', '-', '(', '[', '{' or 'not'",
                                 )
                             )
                     self.skip_newlines()
@@ -851,7 +853,7 @@ class Parser:
                     InvalidSyntaxError(
                         self.current_tok.pos_start,
                         self.current_tok.pos_end,
-                        "Expected ']', 'let', 'if', 'for', 'while', 'defun', int, float, identifier, '+', '-', '(', '[', '{'"
+                        "Expected ']', 'if', 'for', 'while', 'defun', int, float, identifier, '+', '-', '(', '[', '{'"
                         " or 'not'",
                     )
                 )
@@ -1029,10 +1031,6 @@ class Parser:
             )
         res.register_advancement()
         self.advance()
-
-        if self.current_tok.value == "let":
-            res.register_advancement()
-            self.advance()
 
         if self.current_tok.type != TT_IDENTIFIER:
             return res.failure(
@@ -1318,30 +1316,13 @@ class Parser:
                 res.register_advancement()
                 self.advance()
 
-            elif self.current_tok.type == TT_IDENTIFIER or self.current_tok.matches(
-                TT_KEYWORD, "let"
-            ):
+            elif self.current_tok.type == TT_IDENTIFIER:
                 if parsing_stage in ("vargs", "kargs"):
                     return res.failure(
                         InvalidSyntaxError(
                             self.current_tok.pos_start,
                             self.current_tok.pos_end,
                             "Positional argument cannot follow *vargs or **kargs",
-                        )
-                    )
-
-                has_let = False
-                if self.current_tok.matches(TT_KEYWORD, "let"):
-                    has_let = True
-                    res.register_advancement()
-                    self.advance()
-
-                if self.current_tok.type != TT_IDENTIFIER:
-                    return res.failure(
-                        InvalidSyntaxError(
-                            self.current_tok.pos_start,
-                            self.current_tok.pos_end,
-                            "Expected identifier",
                         )
                     )
 
@@ -1356,14 +1337,6 @@ class Parser:
                     if res.error:
                         return res
                 else:
-                    if has_let:
-                        return res.failure(
-                            InvalidSyntaxError(
-                                self.current_tok.pos_start,
-                                self.current_tok.pos_end,
-                                "Expected '=' after identifier in parameter with default value",
-                            )
-                        )
                     defaults.append(None)
 
             else:
@@ -1371,7 +1344,7 @@ class Parser:
                     InvalidSyntaxError(
                         self.current_tok.pos_start,
                         self.current_tok.pos_end,
-                        "Expected identifier, '*', '**', or 'let'",
+                        "Expected identifier, '*', or '**'",
                     )
                 )
 

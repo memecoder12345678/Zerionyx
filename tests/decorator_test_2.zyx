@@ -5,10 +5,10 @@ defun fib(n)
     if n < 2 do
         return n
     done
-    let a = 0
-    let b = 1
+    a = 0
+    b = 1
     for i = 1 to n do
-        let temp = b
+        temp = b
         b = a + b
         a = temp
     done
@@ -20,7 +20,7 @@ defun cached_fib() -> fib(40)
 println(cached_fib())
 println(cached_fib())
 
-let counter = 0
+counter = 0
 @decorators.retry(3)
 defun might_fail()
     using counter

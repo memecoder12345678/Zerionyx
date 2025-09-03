@@ -433,3 +433,18 @@ class IndexAssignNode:
         return (
             f"IndexAssignNode({self.obj_node} [{self.index_node}] = {self.value_node})"
         )
+
+
+class MultiAssignNode:
+    __slots__ = ["var_name_toks", "value_node", "pos_start", "pos_end"]
+
+    def __init__(self, var_name_toks, value_node):
+        self.var_name_toks = var_name_toks
+        self.value_node = value_node
+
+        self.pos_start = self.var_name_toks[0].pos_start
+        self.pos_end = self.value_node.pos_end
+
+    def __str__(self):
+        var_names = ", ".join(str(tok.value) for tok in self.var_name_toks)
+        return f"MultiAssignNode(({var_names}) = {self.value_node})"

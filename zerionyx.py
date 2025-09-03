@@ -26,10 +26,9 @@ IF_EXPR
 | DEF_FUNC
 
 EXPR ::=
-"let" IDENTIFIER "=" EXPR
-| IDENTIFIER "=" EXPR
-| "let" IDENTIFIER "as" EXPR
+IDENTIFIER "=" EXPR
 | IDENTIFIER "as" EXPR
+| IDENTIFIER ("," IDENTIFIER)* "=" "["? EXPR ("," EXPR)* "]"?
 | IDENTIFIER ("+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^=") EXPR
 | COMP_EXPR (("and" | "or") COMP_EXPR)*
 
@@ -103,7 +102,7 @@ WHILE_EXPR ::=
 PARAM_LIST ::= (PARAMS ("," VAR_PARAMS)? | VAR_PARAMS)?
 
 PARAMS ::= PARAM ("," PARAM)*
-PARAM ::= ("let")? IDENTIFIER ("=" EXPR)?
+PARAM ::= IDENTIFIER ("=" EXPR)?
 
 VAR_PARAMS ::= VARARGS_PARAM ("," KWARGS_PARAM)? | KWARGS_PARAM
 VARARGS_PARAM ::= "*" IDENTIFIER

@@ -41,7 +41,6 @@ TT_DOLLAR = "DOLLAR"
 TT_AT = "AT"
 TT_DOUBLE_STAR = "DSTAR"
 KEYWORDS = [
-    "let",
     "and",
     "or",
     "not",

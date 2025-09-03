@@ -8,15 +8,15 @@ async defun task(name, duration)
 done
 
 async defun run_concurrently()
-    let start = time.time()
+    start = time.time()
     
-    let results = await asyncio.gather([
+    results = await asyncio.gather([
         task("A", 2),
         task("B", 1),
         task("C", 3)
     ])
     
-    let duration = time.time() - start
+    duration = time.time() - start
     
     println("All tasks completed in ~" + to_str(math.round(duration)) + "s")
     println(results)

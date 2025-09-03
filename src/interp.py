@@ -1684,21 +1684,30 @@ class BuiltInFunction(BaseFunction):
             err = res.error
             if isinstance(err, RTError):
                 err_str = str(err)
-                err_line = err_str.strip().split('\n')[-1]
-                err_name, err_msg = err_line.split(':', 1)
+                err_line = err_str.strip().split("\n")[-1]
+                err_name, err_msg = err_line.split(":", 1)
                 err_name, err_msg = err_name.strip(), err_msg.strip()
-                
-                if "Runtime" in err_name: err_name_short = "RT"
-                elif "Math" in err_name: err_name_short = "M"
-                elif "IO" in err_name: err_name_short = "IO"
-                elif "Type" in err_name: err_name_short = "T"
-                else: err_name_short = "UNKNOWN"
-                
-                return RTResult().success(List([NoneObject.none, String(err_msg), String(err_name_short)]))
+
+                if "Runtime" in err_name:
+                    err_name_short = "RT"
+                elif "Math" in err_name:
+                    err_name_short = "M"
+                elif "IO" in err_name:
+                    err_name_short = "IO"
+                elif "Type" in err_name:
+                    err_name_short = "T"
+                else:
+                    err_name_short = "UNKNOWN"
+
+                return RTResult().success(
+                    List([NoneObject.none, String(err_msg), String(err_name_short)])
+                )
             else:
                 return RTResult().failure(err)
         else:
-            return RTResult().success(List([res.value, NoneObject.none, NoneObject.none]))
+            return RTResult().success(
+                List([res.value, NoneObject.none, NoneObject.none])
+            )
 
     @set_args(["func", "args", "kwargs"], [None, List([]), HashMap({})])
     def execute_is_panic(self, exec_ctx):
@@ -1708,28 +1717,48 @@ class BuiltInFunction(BaseFunction):
 
         if not isinstance(func, BaseFunction):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "First argument of 'is_panic' must be a function", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'is_panic' must be a function",
+                    exec_ctx,
+                )
             )
         if not isinstance(args, List):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Second argument 'args' must be a list", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument 'args' must be a list",
+                    exec_ctx,
+                )
             )
         if not isinstance(kwargs, HashMap):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Third argument 'kwargs' must be a hashmap", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Third argument 'kwargs' must be a hashmap",
+                    exec_ctx,
+                )
             )
 
         try:
             positional_args = args.value
             keyword_args = kwargs.value
-            
+
             res = func.execute(positional_args, keyword_args)
-            
+
             return self._handle_panic_result(res, exec_ctx)
 
         except Exception as err:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, f"Unexpected Python error in 'is_panic': {err}", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Unexpected Python error in 'is_panic': {err}",
+                    exec_ctx,
+                )
             )
 
     @set_args(["func", "args", "kwargs"], [None, List([]), HashMap({})])
@@ -1740,28 +1769,48 @@ class BuiltInFunction(BaseFunction):
 
         if not isinstance(func, BaseFunction):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "First argument of 'is_panic' must be a function", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'is_panic' must be a function",
+                    exec_ctx,
+                )
             )
         if not isinstance(args, List):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Second argument 'args' must be a list", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument 'args' must be a list",
+                    exec_ctx,
+                )
             )
         if not isinstance(kwargs, HashMap):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Third argument 'kwargs' must be a hashmap", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Third argument 'kwargs' must be a hashmap",
+                    exec_ctx,
+                )
             )
 
         try:
             positional_args = args.value
             keyword_args = kwargs.value
-            
+
             res = await func.execute(positional_args, keyword_args)
-            
+
             return self._handle_panic_result(res, exec_ctx)
 
         except Exception as err:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, f"Unexpected Python error in 'async_is_panic': {err}", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Unexpected Python error in 'async_is_panic': {err}",
+                    exec_ctx,
+                )
             )
 
     @set_args(["func", "args", "kwargs"], [None, List([]), HashMap({})])
@@ -1772,23 +1821,38 @@ class BuiltInFunction(BaseFunction):
 
         if not isinstance(func, BaseFunction):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "First argument of 'start' must be a function", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'start' must be a function",
+                    exec_ctx,
+                )
             )
         if not isinstance(args, List):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Second argument 'args' must be a list", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument 'args' must be a list",
+                    exec_ctx,
+                )
             )
         if not isinstance(kwargs, HashMap):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Third argument 'kwargs' must be a hashmap", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Third argument 'kwargs' must be a hashmap",
+                    exec_ctx,
+                )
             )
-        
+
         try:
             import threading
 
             positional_args = args.value
             keyword_args = kwargs.value
-            
+
             def thread_wrapper():
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
@@ -1800,14 +1864,24 @@ class BuiltInFunction(BaseFunction):
             thread = threading.Thread(target=thread_wrapper, daemon=True)
             thread.start()
             return RTResult().success(ThreadWrapper(thread))
-            
+
         except ImportError:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, "threading module not available", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "threading module not available",
+                    exec_ctx,
+                )
             )
         except Exception as e:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, f"Failed to start thread: {str(e)}", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Failed to start thread: {str(e)}",
+                    exec_ctx,
+                )
             )
 
     @set_args(["seconds"])
@@ -4330,7 +4404,9 @@ class BuiltInFunction(BaseFunction):
             )
         except Exception as e:
             return RTResult().failure(
-                IError(self.pos_start, self.pos_end, f"Failed to read file: {e}", exec_ctx)
+                IError(
+                    self.pos_start, self.pos_end, f"Failed to read file: {e}", exec_ctx
+                )
             )
 
     @set_args(["src", "dst"])
@@ -4553,7 +4629,10 @@ class BuiltInFunction(BaseFunction):
         if not isinstance(channel, Channel):
             return RTResult().failure(
                 TError(
-                    self.pos_start, self.pos_end, "First argument of 'channel_send' must be a channel", exec_ctx
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'channel_send' must be a channel",
+                    exec_ctx,
                 )
             )
         await channel.value.put(value)
@@ -4565,7 +4644,10 @@ class BuiltInFunction(BaseFunction):
         if not isinstance(channel, Channel):
             return RTResult().failure(
                 TError(
-                    self.pos_start, self.pos_end, "First argument of 'channel_receive' must be a channel", exec_ctx
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'channel_receive' must be a channel",
+                    exec_ctx,
                 )
             )
         value = await channel.value.get()
@@ -4574,7 +4656,8 @@ class BuiltInFunction(BaseFunction):
     @set_args([])
     async def execute_async_get_ip_fp(self, exec_ctx):
         try:
-            import aiohttp # type: ignore
+            import aiohttp  # type: ignore
+
             async with aiohttp.ClientSession() as session:
                 async with session.get(
                     "https://api64.ipify.org?format=json", timeout=5
@@ -4606,7 +4689,12 @@ class BuiltInFunction(BaseFunction):
         host = exec_ctx.symbol_table.get("host")
         if not isinstance(host, String):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "First argument of 'ping' must be a string", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'ping' must be a string",
+                    exec_ctx,
+                )
             )
 
         param = "-n" if platform.system().lower() == "windows" else "-c"
@@ -4647,15 +4735,19 @@ class BuiltInFunction(BaseFunction):
                 IError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
 
-
     @set_args(["value"], [String("")])
     async def execute_async_println_fp(self, exec_ctx):
         try:
-            import aioconsole # type: ignore
+            import aioconsole  # type: ignore
+
             if isinstance(exec_ctx.symbol_table.get("value"), String):
-                await aioconsole.aprint(exec_ctx.symbol_table.get("value").value, flush=True)
+                await aioconsole.aprint(
+                    exec_ctx.symbol_table.get("value").value, flush=True
+                )
             else:
-                await aioconsole.aprint(repr(exec_ctx.symbol_table.get("value")), flush=True)
+                await aioconsole.aprint(
+                    repr(exec_ctx.symbol_table.get("value")), flush=True
+                )
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
@@ -4667,15 +4759,19 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-
     @set_args(["value"], [String("")])
     async def execute_async_print_fp(self, exec_ctx):
         try:
-            import aioconsole # type: ignore
+            import aioconsole  # type: ignore
+
             if isinstance(exec_ctx.symbol_table.get("value"), String):
-                await aioconsole.aprint(exec_ctx.symbol_table.get("value").value, flush=True, end="")
+                await aioconsole.aprint(
+                    exec_ctx.symbol_table.get("value").value, flush=True, end=""
+                )
             else:
-                await aioconsole.aprint(repr(exec_ctx.symbol_table.get("value")), flush=True, end="")
+                await aioconsole.aprint(
+                    repr(exec_ctx.symbol_table.get("value")), flush=True, end=""
+                )
             return RTResult().success(NoneObject.none)
         except ImportError:
             return RTResult().failure(
@@ -4690,8 +4786,11 @@ class BuiltInFunction(BaseFunction):
     @set_args(["prompt"], [String("")])
     async def execute_async_input_fp(self, exec_ctx):
         try:
-            import aioconsole # type: ignore
-            text = await aioconsole.aprint(exec_ctx.symbol_table.get("value").value, flush=True)
+            import aioconsole  # type: ignore
+
+            text = await aioconsole.aprint(
+                exec_ctx.symbol_table.get("value").value, flush=True
+            )
             return RTResult().success(String(text))
         except ImportError:
             return RTResult().failure(
@@ -4706,10 +4805,10 @@ class BuiltInFunction(BaseFunction):
     @set_args(["prompt"], [String("")])
     async def execute_async_get_password_fp(self, exec_ctx):
         from getpass import getpass
+
         prompt = exec_ctx.symbol_table.get("prompt").value
         password = await asyncio.to_thread(getpass, prompt)
         return RTResult().success(String(password))
-
 
     @set_args([])
     async def execute_async_clear_fp(self, _):
@@ -4718,27 +4817,49 @@ class BuiltInFunction(BaseFunction):
         await proc.wait()
         return RTResult().success(NoneObject.none)
 
-
     @set_args(["code", "args"], [None, HashMap({})])
     async def execute_async_pyexec_fp(self, exec_ctx):
         code = exec_ctx.symbol_table.get("code")
         args = exec_ctx.symbol_table.get("args")
 
         if not isinstance(code, String):
-            return RTResult().failure(TError(self.pos_start, self.pos_end, "First argument of 'pyexec' must be a string", exec_ctx))
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'pyexec' must be a string",
+                    exec_ctx,
+                )
+            )
         if not isinstance(args, HashMap):
-            return RTResult().failure(TError(self.pos_start, self.pos_end, "Second argument of 'pyexec' must be a hashmap", exec_ctx))
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'pyexec' must be a hashmap",
+                    exec_ctx,
+                )
+            )
 
         try:
             local_env = self.convert_zer_to_py(args)
+
             def run_exec():
                 exec(code.value, {}, local_env)
                 return local_env
+
             final_env = await asyncio.to_thread(run_exec)
             result = self.validate_pyexec_result(final_env)
             return RTResult().success(result)
         except Exception as e:
-            return RTResult().failure(RTError(self.pos_start, self.pos_end, f"Error executing Python code: {e}", exec_ctx))
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error executing Python code: {e}",
+                    exec_ctx,
+                )
+            )
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -5025,7 +5146,23 @@ class Interpreter:
         right = res.register(await self.visit(node.right_node, context))
         if res.should_return():
             return res
+
         op_type = node.op_tok.type
+
+        if op_type == TT_COMMA:
+            if isinstance(left, List):
+                if isinstance(right, List):
+                    left.value.extend(right.value)
+                else:
+                    left.value.append(right)
+                result = left
+            elif isinstance(right, List):
+                right.value.insert(0, left)
+                result = right
+            else:
+                result = List([left, right])
+            return res.success(result.set_pos(node.pos_start, node.pos_end))
+
         if isinstance(left, Number) and isinstance(right, Number):
             if op_type == TT_PLUS:
                 result = Number(left.value + right.value)
@@ -5074,6 +5211,56 @@ class Interpreter:
                 if error:
                     return res.failure(error)
             return res.success(result.set_pos(node.pos_start, node.pos_end))
+
+        if isinstance(left, CFloat) and isinstance(right, CFloat):
+            if op_type == TT_PLUS:
+                result = CFloat(left.value + right.value)
+            elif op_type == TT_MINUS:
+                result = CFloat(left.value - right.value)
+            elif op_type == TT_MUL:
+                result = CFloat(left.value * right.value)
+            elif op_type == TT_DIV:
+                if right.value == 0:
+                    return res.failure(
+                        MError(
+                            right.pos_start, right.pos_end, "Division by zero", context
+                        )
+                    )
+                result = CFloat(left.value / right.value)
+            elif op_type == TT_MOD:
+                if right.value == 0:
+                    return res.failure(
+                        MError(
+                            right.pos_start, right.pos_end, "Division by zero", context
+                        )
+                    )
+                result = CFloat(left.value % right.value)
+            elif op_type == TT_FLOORDIV:
+                if right.value == 0:
+                    return res.failure(
+                        MError(
+                            right.pos_start, right.pos_end, "Division by zero", context
+                        )
+                    )
+                result = CFloat(left.value // right.value)
+            elif op_type == TT_POW:
+                result = CFloat(left.value**right.value)
+            else:
+                result, error = getattr(
+                    left,
+                    {
+                        TT_EE: "get_comparison_eq",
+                        TT_NE: "get_comparison_ne",
+                        TT_LT: "get_comparison_lt",
+                        TT_GT: "get_comparison_gt",
+                        TT_LTE: "get_comparison_lte",
+                        TT_GTE: "get_comparison_gte",
+                    }.get(op_type),
+                )(right)
+                if error:
+                    return res.failure(error)
+            return res.success(result.set_pos(node.pos_start, node.pos_end))
+
         ops = {
             TT_PLUS: "added_to",
             TT_MINUS: "subbed_by",
@@ -5090,6 +5277,7 @@ class Interpreter:
             TT_FLOORDIV: "floordived_by",
             TT_DOLLAR: "dollared_by",
         }
+
         if op_type in ops:
             method = getattr(left, ops[op_type])
             result, error = method(right)
@@ -5106,6 +5294,7 @@ class Interpreter:
                     context,
                 )
             )
+
         if error:
             return res.failure(error)
         return res.success(result.set_pos(node.pos_start, node.pos_end))
@@ -5636,6 +5825,43 @@ class Interpreter:
             )
         )
 
+    async def visit_MultiAssignNode(self, node, context: Context):
+        res = RTResult()
+        var_names = [tok.value for tok in node.var_name_toks]
+
+        value = res.register(await self.visit(node.value_node, context))
+        if res.should_return():
+            return res
+
+        if not isinstance(value, List):
+            return res.failure(
+                TError(
+                    node.value_node.pos_start,
+                    node.value_node.pos_end,
+                    "Value to unpack must be a list",
+                    context,
+                )
+            )
+        values_to_unpack = value.value
+        if len(values_to_unpack) == 1 and isinstance(values_to_unpack[0], List):
+            values_to_unpack = values_to_unpack[0].value
+
+        if len(var_names) != len(values_to_unpack):
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"ValueError: not enough values to unpack (expected {len(var_names)}, got {len(values_to_unpack)})",
+                    context,
+                )
+            )
+
+        for i, var_name in enumerate(var_names):
+            val_to_assign = values_to_unpack[i]
+            context.symbol_table.set(var_name, val_to_assign)
+
+        return res.success(Number.none)
+
 
 global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv[1:]]))
 global_symbol_table.set("os_sep_fp", String(os.sep))
@@ -5706,6 +5932,9 @@ def run(fn, text):
         tokens, error = lexer.make_tokens()
         if error:
             return None, error
+        
+        for i in tokens:
+            print(i)
 
         parser = Parser(tokens)
         ast = parser.parse()

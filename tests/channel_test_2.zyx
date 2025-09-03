@@ -4,7 +4,7 @@ load "libs.time"
 
 println("--- Producer/Consumer Demo ---")
 
-let messages = channel.new()
+messages = channel.new()
 
 defun producer()
     for i = 1 to 5 do
@@ -17,14 +17,14 @@ done
 
 defun consumer()
     for i = 1 to 5 do
-        let msg = channel.recv(messages)
+        msg = channel.recv(messages)
         println("Consumer: received -> " + to_str(msg))
     done
     println("Consumer: finished receiving")
 done
 
-let t1 = threading.start(producer)
-let t2 = threading.start(consumer)
+t1 = threading.start(producer)
+t2 = threading.start(consumer)
 
 threading.join(t1)
 threading.join(t2)
