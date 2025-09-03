@@ -2,6 +2,7 @@ import os
 import platform
 import sys
 from threading import Thread
+import concurrent.futures
 import time
 import random
 import math
@@ -698,7 +699,11 @@ class BuiltInFunction(BaseFunction):
         mode = exec_ctx.symbol_table.get("mode")
         text = exec_ctx.symbol_table.get("text")
         try:
-            with open(file.path.__str__(), mode.__str__(), encoding="utf-8" if mode.value == "w" or mode.value == "a" else None) as f:
+            with open(
+                file.path.__str__(),
+                mode.__str__(),
+                encoding="utf-8" if mode.value == "w" or mode.value == "a" else None,
+            ) as f:
                 f.write(text.value)
             return RTResult().success(Number.none)
         except Exception as e:
@@ -1655,25 +1660,35 @@ class BuiltInFunction(BaseFunction):
             )
 
         positional_args = args.value
-        keyword_args = {k.value: v for k, v in kwargs.value.items() if hasattr(k, 'value')}
-
+        keyword_args = {
+            k.value: v for k, v in kwargs.value.items() if hasattr(k, "value")
+        }
 
         def thread_wrapper():
             try:
                 result = func.execute(positional_args, keyword_args)
                 if result and result.error:
-                    error_header = f"\n--- Unhandled Error in Thread (Function: {func.name}) ---\n"
+                    error_header = (
+                        f"\n--- Unhandled Error in Thread (Function: {func.name}) ---\n"
+                    )
                     sys.stderr.write(error_header)
-                    sys.stderr.write(result.error.as_string() + "\n")
-                    sys.stderr.write("---------------------------------------------------\n")
+                    sys.stderr.write(str(result.error) + "\n")
+                    sys.stderr.write(
+                        "---------------------------------------------------\n"
+                    )
                     sys.stderr.flush()
 
             except Exception:
-                error_header = f"\n--- Python Exception in Thread (Function: {func.name}) ---\n"
+                error_header = (
+                    f"\n--- Python Exception in Thread (Function: {func.name}) ---\n"
+                )
                 sys.stderr.write(error_header)
                 import traceback
+
                 sys.stderr.write(traceback.format_exc())
-                sys.stderr.write("-----------------------------------------------------\n")
+                sys.stderr.write(
+                    "-----------------------------------------------------\n"
+                )
                 sys.stderr.flush()
 
         try:
@@ -1883,7 +1898,12 @@ class BuiltInFunction(BaseFunction):
         host = exec_ctx.symbol_table.get("host")
         if not isinstance(host, String):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "First argument of 'ping' must be a string", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'ping' must be a string",
+                    exec_ctx,
+                )
             )
 
         param = "-n" if platform.system().lower() == "windows" else "-c"
@@ -1905,7 +1925,6 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-
 
     @set_args(["url", "timeout"], [None, Number(15)])
     def execute_downl_fp(self, exec_ctx):
@@ -2115,21 +2134,28 @@ class BuiltInFunction(BaseFunction):
             err = res.error
             if isinstance(err, RTError):
                 err_str = str(err)
-                err_line = err_str.strip().split('\n')[-1]
-                err_name, err_msg = err_line.split(':', 1)
+                err_line = err_str.strip().split("\n")[-1]
+                err_name, err_msg = err_line.split(":", 1)
                 err_name, err_msg = err_name.strip(), err_msg.strip()
-                
-                if "Runtime" in err_name: err_name_short = "RT"
-                elif "Math" in err_name: err_name_short = "M"
-                elif "IO" in err_name: err_name_short = "IO"
-                elif "Type" in err_name: err_name_short = "T"
-                else: err_name_short = "UNKNOWN"
-                
-                return RTResult().success(List([NoneObject(), String(err_msg), String(err_name_short)]))
+
+                if "Runtime" in err_name:
+                    err_name_short = "RT"
+                elif "Math" in err_name:
+                    err_name_short = "M"
+                elif "IO" in err_name:
+                    err_name_short = "IO"
+                elif "Type" in err_name:
+                    err_name_short = "T"
+                else:
+                    err_name_short = "UNKNOWN"
+
+                return RTResult().success(
+                    List([Number.none, String(err_msg), String(err_name_short)])
+                )
             else:
                 return RTResult().failure(err)
         else:
-            return RTResult().success(List([res.value, NoneObject(), NoneObject()]))
+            return RTResult().success(List([res.value, Number.none, Number.none]))
 
     @set_args(["func", "args", "kwargs"], [None, List([]), HashMap({})])
     def execute_is_panic(self, exec_ctx):
@@ -2139,28 +2165,48 @@ class BuiltInFunction(BaseFunction):
 
         if not isinstance(func, BaseFunction):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "First argument of 'is_panic' must be a function", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'is_panic' must be a function",
+                    exec_ctx,
+                )
             )
         if not isinstance(args, List):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Second argument of 'is_panic' must be a list", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'is_panic' must be a list",
+                    exec_ctx,
+                )
             )
         if not isinstance(kwargs, HashMap):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Third argument of 'is_panic' must be a hashmap", exec_ctx)
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Third argument of 'is_panic' must be a hashmap",
+                    exec_ctx,
+                )
             )
 
         try:
             positional_args = args.value
             keyword_args = kwargs.value
-            
+
             res = func.execute(positional_args, keyword_args)
-            
+
             return self._handle_panic_result(res, exec_ctx)
 
         except Exception as err:
             return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, f"Unexpected Python error in 'is_panic': {err}", exec_ctx)
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Unexpected Python error in 'is_panic': {err}",
+                    exec_ctx,
+                )
             )
 
     @set_args(["path"])
@@ -3912,7 +3958,7 @@ class BuiltInFunction(BaseFunction):
     def execute_is_channel(self, exec_ctx):
         is_channel = isinstance(exec_ctx.symbol_table.get("value"), Channel)
         return RTResult().success(Number.true if is_channel else Number.false)
-    
+
     @set_args(["value"])
     def execute_is_cfloat(self, exec_ctx):
         is_cfloat = isinstance(exec_ctx.symbol_table.get("value"), CFloat)
@@ -3976,7 +4022,183 @@ class BuiltInFunction(BaseFunction):
                         f"Failed to convert to decimal: {str(e)}",
                         exec_ctx,
                     )
-                ) 
+                )
+
+    @set_args(["max_workers"], [Number(5)])
+    def execute_thread_pool_new_fp(self, exec_ctx):
+        max_workers = exec_ctx.symbol_table.get("max_workers")
+        if not isinstance(max_workers, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'new' must be a number",
+                    exec_ctx,
+                )
+            )
+        return RTResult().success(ThreadPool(max_workers.value))
+
+    @set_args(["pool", "func", "args", "kwargs"], [None, None, List([]), HashMap({})])
+    def execute_thread_pool_submit_fp(self, exec_ctx):
+        pool = exec_ctx.symbol_table.get("pool")
+        func = exec_ctx.symbol_table.get("func")
+        args = exec_ctx.symbol_table.get("args")
+        kwargs = exec_ctx.symbol_table.get("kwargs")
+
+        if not isinstance(pool, ThreadPool):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'submit' must be a thread pool",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(func, BaseFunction):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'submit' must be a function",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(args, List):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Third argument of 'submit' must be a list",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(kwargs, HashMap):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Fourth argument of 'submit' must be a hashmap",
+                    exec_ctx,
+                )
+            )
+
+        positional_args = args.value
+        keyword_args = {
+            k.value: v for k, v in kwargs.value.items() if hasattr(k, "value")
+        }
+
+        def task_wrapper():
+            # Chạy hàm và lấy kết quả (res)
+            res = func.execute(positional_args, keyword_args)
+
+            # Gói kết quả vào tuple (value, error)
+            if res.error:
+                # Không cần in ra ở đây nữa nếu không muốn log thừa
+                # sys.stderr.write(f"Error captured in thread pool: {res.error.as_string()}\n")
+                return (None, res.error)
+            return (res.value, None)
+
+        future = pool.executor.submit(task_wrapper)
+        return RTResult().success(Future(future))
+
+    @set_args(["pool", "wait"], [None, Bool.true])
+    def execute_thread_pool_shutdown_fp(self, exec_ctx):
+        pool = exec_ctx.symbol_table.get("pool")
+        wait = exec_ctx.symbol_table.get("wait")
+
+        if not isinstance(pool, ThreadPool):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'shutdown' must be a thread pool",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(wait, Bool):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'shutdown' must be a boolean",
+                    exec_ctx,
+                )
+            )
+
+        pool.executor.shutdown(wait=wait.value)
+        return RTResult().success(Number.none)
+
+    @set_args(["future"])
+    def execute_future_result_fp(self, exec_ctx):
+        future_obj = exec_ctx.symbol_table.get("future")
+        if not isinstance(future_obj, Future):
+            return RTResult().failure(
+                TError(
+                    self.pos_start, self.pos_end, "Argument must be a future", exec_ctx
+                )
+            )
+
+        try:
+            result_tuple = future_obj.future.result()
+            value, error = result_tuple
+
+            if error:
+                err = error
+                if isinstance(err, RTError):
+                    err_str = str(err)
+                    err_line = err_str.strip().split("\n")[-1]
+
+                    try:
+                        err_name, err_msg = err_line.split(":", 1)
+                        err_name, err_msg = err_name.strip(), err_msg.strip()
+                    except ValueError:
+                        err_name = "UnknownError"
+                        err_msg = err_line
+
+                    if "RuntimeError" in err_name:
+                        err_name_short = "RT"
+                    elif "MathError" in err_name:
+                        err_name_short = "M"
+                    elif "IOError" in err_name:
+                        err_name_short = "IO"
+                    elif "TypeError" in err_name:
+                        err_name_short = "T"
+                    else:
+                        err_name_short = "UNKNOWN"
+
+                    return RTResult().success(
+                        List(
+                            [Number.none, String(err_msg[5:-4]), String(err_name_short)]
+                        )
+                    )
+                else:
+                    return RTResult().failure(err)
+            else:
+                return RTResult().success(List([value, Number.none, Number.none]))
+
+        except Exception as err:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Unexpected Python error in 'result': {err}",
+                    exec_ctx,
+                )
+            )
+
+    @set_args(["future"])
+    def execute_future_done_fp(self, exec_ctx):
+        future_obj = exec_ctx.symbol_table.get("future")
+        if not isinstance(future_obj, Future):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'is_done' must be a future",
+                    exec_ctx,
+                )
+            )
+        return RTResult().success(Bool(future_obj.future.done()))
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -4861,6 +5083,43 @@ class Interpreter:
             )
         )
 
+    def visit_MultiAssignNode(self, node, context: Context):
+        res = RTResult()
+        var_names = [tok.value for tok in node.var_name_toks]
+
+        value = res.register(self.visit(node.value_node, context))
+        if res.should_return():
+            return res
+
+        if not isinstance(value, List):
+            return res.failure(
+                TError(
+                    node.value_node.pos_start,
+                    node.value_node.pos_end,
+                    "Value to unpack must be a list",
+                    context,
+                )
+            )
+        values_to_unpack = value.value
+        if len(values_to_unpack) == 1 and isinstance(values_to_unpack[0], List):
+            values_to_unpack = values_to_unpack[0].value
+
+        if len(var_names) != len(values_to_unpack):
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    f"ValueError: not enough values to unpack (expected {len(var_names)}, got {len(values_to_unpack)})",
+                    context,
+                )
+            )
+
+        for i, var_name in enumerate(var_names):
+            val_to_assign = values_to_unpack[i]
+            context.symbol_table.set(var_name, val_to_assign)
+
+        return res.success(Number.none)
+
 
 global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv[1:]]))
 global_symbol_table.set("os_sep_fp", String(os.sep))
@@ -4886,6 +5145,8 @@ global_symbol_table.set("nan", Number(float("nan")))
 global_symbol_table.set("inf", Number(float("inf")))
 global_symbol_table.set("neg_inf", Number(float("-inf")))
 global_symbol_table.set("channel_type", String("<channel>"))
+global_symbol_table.set("thread_pool_type", String("<thread-pool>"))
+global_symbol_table.set("future_type", String("<future>"))
 
 for func in BUILTIN_FUNCTIONS:
     global_symbol_table.set(func, getattr(BuiltInFunction, func))

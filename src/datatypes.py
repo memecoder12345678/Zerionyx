@@ -1171,3 +1171,43 @@ class Bytes(Object):
 
     def __repr__(self):
         return self.value.hex()
+
+
+from concurrent.futures import ThreadPoolExecutor, Future as PyFuture
+
+# ... (sau lớp Bytes)
+
+
+class ThreadPool(Object):
+    __slots__ = ("executor",)
+
+    def __init__(self, max_workers):
+        super().__init__()
+        self.executor = ThreadPoolExecutor(max_workers=max_workers)
+
+    def copy(self):
+        # Thread pools không nên được sao chép
+        return self
+
+    def type(self):
+        return "<thread-pool>"
+
+    def __repr__(self):
+        return f"<thread-pool max_workers={self.executor._max_workers}>"
+
+
+class Future(Object):
+    __slots__ = ("future",)
+
+    def __init__(self, future: PyFuture):
+        super().__init__()
+        self.future = future
+
+    def copy(self):
+        return self
+
+    def type(self):
+        return "<future>"
+
+    def __repr__(self):
+        return f"<future state={self.future._state}>"

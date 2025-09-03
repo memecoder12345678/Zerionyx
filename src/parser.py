@@ -245,27 +245,50 @@ class Parser:
                     is_multi_assign = True
                     res.register_advancement()
                     self.advance()
-                    
+
                     if self.current_tok.type != TT_IDENTIFIER:
                         self.reverse(res.advance_count)
-                        return self.bin_op(self.comp_expr, ((TT_KEYWORD, "and"), (TT_KEYWORD, "or")))
+                        return self.bin_op(
+                            self.comp_expr, ((TT_KEYWORD, "and"), (TT_KEYWORD, "or"))
+                        )
 
                     var_name_toks.append(self.current_tok)
                     res.register_advancement()
                     self.advance()
-                
+
                 if self.current_tok.type == TT_EQ:
                     res.register_advancement()
                     self.advance()
-                    expr_to_assign = res.register(self.expr())
+
+                    first_expr = res.register(self.expr())
                     if res.error:
                         return res
 
+                    rhs_node = first_expr
+
+                    if self.current_tok.type == TT_COMMA:
+                        value_nodes = [first_expr]
+
+                        while self.current_tok.type == TT_COMMA:
+                            res.register_advancement()
+                            self.advance()
+
+                            next_expr = res.register(self.expr())
+                            if res.error:
+                                return res
+                            value_nodes.append(next_expr)
+
+                        rhs_node = ListNode(
+                            value_nodes,
+                            first_expr.pos_start,
+                            self.current_tok.pos_start.copy(),
+                        )
+
                     if is_multi_assign:
-                        return res.success(MultiAssignNode(var_name_toks, expr_to_assign))
+                        return res.success(MultiAssignNode(var_name_toks, rhs_node))
                     else:
-                        return res.success(VarAssignNode(var_name_toks[0], expr_to_assign))
-                
+                        return res.success(VarAssignNode(var_name_toks[0], rhs_node))
+
                 if not is_multi_assign and self.current_tok.matches(TT_KEYWORD, "as"):
                     res.register_advancement()
                     self.advance()
@@ -281,7 +304,7 @@ class Parser:
                     res.register_advancement()
                     self.advance()
                     return res.success(VarAssignAsNode(var_name_toks[0], alias_name))
-                
+
                 self.reverse(res.advance_count)
 
         if self.current_tok.matches(TT_KEYWORD, "load"):
@@ -465,20 +488,26 @@ class Parser:
             else:
                 while True:
                     self.skip_newlines()
-                    if self.current_tok.type == TT_IDENTIFIER and self.peek_tok() and self.peek_tok().type == TT_EQ:
+                    if (
+                        self.current_tok.type == TT_IDENTIFIER
+                        and self.peek_tok()
+                        and self.peek_tok().type == TT_EQ
+                    ):
                         var_name_tok = self.current_tok
                         res.register_advancement()
                         self.advance()
-                        
+
                         res.register_advancement()
                         self.advance()
-                        
+
                         value_node = res.register(self.expr(allow_assignment=False))
                         if res.error:
                             return res
                         arg_nodes.append(VarAssignNode(var_name_tok, value_node))
                     else:
-                        arg_nodes.append(res.register(self.expr(allow_assignment=False)))
+                        arg_nodes.append(
+                            res.register(self.expr(allow_assignment=False))
+                        )
                         if res.error:
                             return res.failure(
                                 InvalidSyntaxError(
@@ -1195,7 +1224,9 @@ class Parser:
 
         if not self.current_tok.matches(TT_KEYWORD, "defun"):
             return res.failure(
-                InvalidSyntaxError(pos_start, self.current_tok.pos_end, "Expected 'defun'")
+                InvalidSyntaxError(
+                    pos_start, self.current_tok.pos_end, "Expected 'defun'"
+                )
             )
         res.register_advancement()
         self.advance()
@@ -1208,7 +1239,9 @@ class Parser:
 
         if self.current_tok.type != TT_LPAREN:
             return res.failure(
-                InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected '('")
+                InvalidSyntaxError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, "Expected '('"
+                )
             )
         res.register_advancement()
         self.advance()
@@ -1222,11 +1255,23 @@ class Parser:
         while self.current_tok.type != TT_RPAREN:
             if self.current_tok.type == TT_MUL:
                 if parsing_stage != "args":
-                    return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Unexpected '*'"))
+                    return res.failure(
+                        InvalidSyntaxError(
+                            self.current_tok.pos_start,
+                            self.current_tok.pos_end,
+                            "Unexpected '*'",
+                        )
+                    )
                 res.register_advancement()
                 self.advance()
                 if self.current_tok.type != TT_IDENTIFIER:
-                    return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected identifier after '*'"))
+                    return res.failure(
+                        InvalidSyntaxError(
+                            self.current_tok.pos_start,
+                            self.current_tok.pos_end,
+                            "Expected identifier after '*'",
+                        )
+                    )
                 vargs_name_tok = self.current_tok
                 parsing_stage = "vargs"
                 res.register_advancement()
@@ -1234,11 +1279,23 @@ class Parser:
 
             elif self.current_tok.type == TT_DOUBLE_STAR:
                 if parsing_stage == "kargs":
-                    return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Unexpected '**'"))
+                    return res.failure(
+                        InvalidSyntaxError(
+                            self.current_tok.pos_start,
+                            self.current_tok.pos_end,
+                            "Unexpected '**'",
+                        )
+                    )
                 res.register_advancement()
                 self.advance()
                 if self.current_tok.type != TT_IDENTIFIER:
-                    return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected identifier after '**'"))
+                    return res.failure(
+                        InvalidSyntaxError(
+                            self.current_tok.pos_start,
+                            self.current_tok.pos_end,
+                            "Expected identifier after '**'",
+                        )
+                    )
                 kargs_name_tok = self.current_tok
                 parsing_stage = "kargs"
                 res.register_advancement()
@@ -1246,8 +1303,14 @@ class Parser:
 
             elif self.current_tok.type == TT_IDENTIFIER:
                 if parsing_stage in ("vargs", "kargs"):
-                    return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Positional argument cannot follow *vargs or **kargs"))
-                
+                    return res.failure(
+                        InvalidSyntaxError(
+                            self.current_tok.pos_start,
+                            self.current_tok.pos_end,
+                            "Positional argument cannot follow *vargs or **kargs",
+                        )
+                    )
+
                 arg_name_toks.append(self.current_tok)
                 res.register_advancement()
                 self.advance()
@@ -1255,22 +1318,34 @@ class Parser:
                 if self.current_tok.type == TT_EQ:
                     res.register_advancement()
                     self.advance()
-                    
+
                     default_value = res.register(self.expr(allow_assignment=False))
                     if res.error:
                         return res
                     defaults.append(default_value)
                 else:
                     defaults.append(None)
-            
+
             else:
-                return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected identifier, '*' or '**'"))
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected identifier, '*' or '**'",
+                    )
+                )
 
             if self.current_tok.type == TT_COMMA:
                 res.register_advancement()
                 self.advance()
             elif self.current_tok.type != TT_RPAREN:
-                return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected ',' or ')'"))
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected ',' or ')'",
+                    )
+                )
 
         res.register_advancement()
         self.advance()
@@ -1279,31 +1354,57 @@ class Parser:
             res.register_advancement()
             self.advance()
             body = res.register(self.expr())
-            if res.error: return res
+            if res.error:
+                return res
             return res.success(
-                FuncDefNode(var_name_tok, arg_name_toks, defaults, vargs_name_tok, kargs_name_tok, body, True, [])
+                FuncDefNode(
+                    var_name_tok,
+                    arg_name_toks,
+                    defaults,
+                    vargs_name_tok,
+                    kargs_name_tok,
+                    body,
+                    True,
+                    [],
+                )
             )
         elif self.current_tok.type == TT_NEWLINE:
             res.register_advancement()
             self.advance()
             body = res.register(self.statements())
-            if res.error: return res
+            if res.error:
+                return res
             if not self.current_tok.matches(TT_KEYWORD, "done"):
-                return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected 'done' after function body"))
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected 'done' after function body",
+                    )
+                )
             res.register_advancement()
             self.advance()
             return res.success(
-                FuncDefNode(var_name_tok, arg_name_toks, defaults, vargs_name_tok, kargs_name_tok, body, False, [])
+                FuncDefNode(
+                    var_name_tok,
+                    arg_name_toks,
+                    defaults,
+                    vargs_name_tok,
+                    kargs_name_tok,
+                    body,
+                    False,
+                    [],
+                )
             )
         else:
             return res.failure(
                 InvalidSyntaxError(
                     self.current_tok.pos_start,
                     self.current_tok.pos_end,
-                    "Expected '->' or newline after function parameters"
+                    "Expected '->' or newline after function parameters",
                 )
             )
-        
+
     def bin_op(self, func_a, ops, func_b=None):
         if func_b is None:
             func_b = func_a

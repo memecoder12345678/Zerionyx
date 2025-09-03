@@ -1380,12 +1380,25 @@ Zerionyx may be magical, but its syntax must be real.
                 </div>
                 <div id="lib-threading">
                     <h3>threading.zyx</h3>
+                    <p>This library provides tools for concurrent execution using threads and thread pools.</p>
+
+                    <h4>Single Thread Management</h4>
                     <ul>
-                        <li><b>start(func, args=[], kwargs={})</b> &rarr; thread &mdash; Start a new thread</li>
-                        <li><b>sleep(seconds)</b> &rarr; none &mdash; Sleep current thread</li>
-                        <li><b>join(thread, timeout=15)</b> &rarr; none &mdash; Wait for thread to finish</li>
-                        <li><b>is_alive(thread)</b> &rarr; bool &mdash; Is thread alive</li>
-                        <li><b>cancel(thread)</b> &rarr; none &mdash; Cancel thread</li>
+                        <li><b>start(func, args=[], kwargs={})</b> &rarr; thread &mdash; Starts a new thread to execute <code>func</code>.</li>
+                        <li><b>sleep(seconds)</b> &rarr; none &mdash; Pauses the current thread for a specified duration.</li>
+                        <li><b>join(thread, timeout=15)</b> &rarr; none &mdash; Waits for a specific thread to complete its execution.</li>
+                        <li><b>is_alive(thread)</b> &rarr; bool &mdash; Checks if a thread is still running.</li>
+                        <li><b>cancel(thread)</b> &rarr; none &mdash; Attempts to terminate a running thread.</li>
+                    </ul>
+
+                    <h4>Pool Namespace (<code>threading.pool</code>)</h4>
+                    <p>Provides a high-level interface for managing a pool of worker threads to execute tasks asynchronously.</p>
+                    <ul>
+                        <li><b>new(max_workers=5)</b> &rarr; thread-pool &mdash; Creates a new thread pool with a specified number of worker threads.</li>
+                        <li><b>submit(pool, func, args=[], kwargs={})</b> &rarr; future &mdash; Submits a task (<code>func</code> with its arguments) to the thread pool for execution and returns a <code>future</code> object immediately.</li>
+                        <li><b>shutdown(pool, wait=true)</b> &rarr; none &mdash; Shuts down the thread pool, releasing all resources. If <code>wait</code> is true, it will wait for all submitted tasks to complete.</li>
+                        <li><b>result(future)</b> &rarr; list &mdash; Retrieves the result from a <code>future</code> object. This call is blocking (it will wait if the task is not yet finished). Returns a list in the format <code>[value, error_msg, error_type]</code>, mirroring the behavior of <code>is_panic</code>.</li>
+                        <li><b>is_done(future)</b> &rarr; bool &mdash; Checks if the task associated with the <code>future</code> has completed, either successfully or with an error.</li>
                     </ul>
                 </div>
                 <div id="lib-time">

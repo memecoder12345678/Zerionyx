@@ -1,0 +1,14 @@
+load "libs.threading"
+
+defun my_func(name) -> "Hello, " + name
+handle = threading.start(my_func, ["World"])
+threading.join(handle)
+
+pool = threading.pool.new(3)
+for i in ["ThreadPool1", "ThreadPool2", "ThreadPool3", "ThreadPool4"] do
+    future = threading.pool.submit(pool, my_func, [i])
+    result = threading.pool.result(future)
+    println(result$0)
+done
+threading.pool.shutdown(pool)
+println(threading.pool.is_done(future))

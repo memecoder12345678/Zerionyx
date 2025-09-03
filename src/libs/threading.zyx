@@ -2,17 +2,15 @@
 
 namespace threading
     defun start(f, args=[], kwargs={})
-        return thread_start_fp(f, args, kwargs={})
+        return thread_start_fp(f, args, kwargs)
     done
 
     defun sleep(s)
         thread_sleep_fp(s)
-        return none
     done
 
     defun join(h, timeout=15)
         thread_join_fp(h, timeout)
-        return none
     done
 
     defun is_alive(t)
@@ -21,6 +19,27 @@ namespace threading
 
     defun cancel(t)
         thread_cancel_fp(t)
-        return none
+    done
+    
+    namespace pool
+        defun new(max_workers=5)
+            return thread_pool_new_fp(max_workers)
+        done
+
+        defun submit(pool, func, args=[], kwargs={})
+            return thread_pool_submit_fp(pool, func, args, kwargs)
+        done
+
+        defun shutdown(pool, wait=true)
+            thread_pool_shutdown_fp(pool, wait)
+        done
+
+        defun result(future)
+            return future_result_fp(future)
+        done
+
+        defun is_done(future)
+            return future_done_fp(future)
+        done
     done
 done
