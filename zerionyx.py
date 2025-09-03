@@ -55,7 +55,6 @@ ARG ::= EXPR
 ATOM ::=
 INT | FLOAT | STRING | IDENTIFIER
 | "(" EXPR ")"
-| "await" CALL
 | LIST_EXPR
 | IF_EXPR
 | FOR_EXPR
@@ -111,8 +110,8 @@ KWARGS_PARAM ::= "**" IDENTIFIER
 DECORATOR ::= "@" EXPR NEWLINE*
 
 DEF_FUNC ::=
-DECORATOR* ("async")? "defun" IDENTIFIER? "(" PARAM_LIST? ")" <span class="comment">-- SỬA ĐỔI: Thêm 'async' tùy chọn</span>
-("-&gt;" EXPR)?
+DECORATOR* "defun" IDENTIFIER? "(" PARAM_LIST? ")"
+("->" EXPR)?
 (NEWLINE STATEMENT NEWLINE "done")?
 
 COMMENT ::= "#" /[^\n]*/

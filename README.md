@@ -57,7 +57,7 @@ It offers:
 ## Interactive Shell Demo
 
 <p align="center">
-  <img src="imgs/demo.svg" alt="Zerionyx Interactive Shell Demo" />
+  <img src="imgs/demo.gif" alt="Zerionyx Interactive Shell Demo" />
 </p>
 
 ---

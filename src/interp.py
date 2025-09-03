@@ -1,11 +1,11 @@
 import os
+import platform
 import sys
+from threading import Thread
 import time
 import random
 import math
 import json
-import asyncio
-import platform
 from .parser import *
 from .nodes import *
 from .datatypes import *
@@ -36,7 +36,7 @@ BUILTIN_FUNCTIONS = []
 global_symbol_table = SymbolTable()
 
 
-async def load_module(fn, interpreter, context):
+def load_module(fn, interpreter, context):
     result = None
     with open(fn, "r", encoding="utf-8") as f:
         text = f.read()
@@ -56,7 +56,7 @@ async def load_module(fn, interpreter, context):
         context.symbol_table = global_symbol_table
         context.private_symbol_table = SymbolTable()
         context.private_symbol_table.set("is_main", Number.false)
-        result = await interpreter.visit(ast.node, context)
+        result = interpreter.visit(ast.node, context)
         result.value = "" if str(result.value) == "none" else result.value
         return result.value, result.error
     except KeyboardInterrupt:
@@ -70,17 +70,6 @@ async def load_module(fn, interpreter, context):
             f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}InterruptError{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}User Terminated{Fore.RESET}{Style.RESET_ALL}"
         )
         sys.exit(2)
-    except OverflowError:
-        print(
-            "\n---------------------------------------------------------------------------"
-        )
-        print(
-            "MemoryOverflowError                         Traceback (most recent call last)\n"
-        )
-        print(
-            f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}MemoryOverflowError{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}Memory Overflow{Fore.RESET}{Style.RESET_ALL}"
-        )
-        sys.exit(2)
 
 
 class BaseFunction(Object):
@@ -88,7 +77,7 @@ class BaseFunction(Object):
 
     def __init__(self, name):
         super().__init__()
-        self.name = name or "<anonymous>"
+        self.name = name or "!anonymous!"
 
     def set_context(self, context=None):
         if hasattr(self, "context") and self.context:
@@ -103,7 +92,7 @@ class BaseFunction(Object):
         )
         return new_context
 
-    async def handle_arguments(
+    def handle_arguments(
         self,
         param_names,
         defaults,
@@ -147,7 +136,7 @@ class BaseFunction(Object):
                 is_node = not isinstance(default_value, Object)
                 if is_node:
                     evaluated_default = res.register(
-                        await interpreter.visit(default_value, exec_ctx)
+                        interpreter.visit(default_value, exec_ctx)
                     )
                     if res.should_return():
                         return res
@@ -190,7 +179,6 @@ class Function(BaseFunction):
         vargs_name_tok,
         kargs_name_tok,
         should_auto_return,
-        is_async=False,
     ):
         super().__init__(name)
         self.body_node = body_node
@@ -199,22 +187,13 @@ class Function(BaseFunction):
         self.vargs_name = vargs_name_tok.value if vargs_name_tok else None
         self.kargs_name = kargs_name_tok.value if kargs_name_tok else None
         self.should_auto_return = should_auto_return
-        self.is_async = is_async
 
-    async def execute(self, positional_args, keyword_args):
+    def execute(self, positional_args, keyword_args):
         res = RTResult()
-        interpreter = Interpreter()
         exec_ctx = self.generate_new_context()
 
-        if self.is_async:
-            return res.success(
-                Coroutine(self, positional_args, keyword_args)
-                .set_context(exec_ctx)
-                .set_pos(self.pos_start, self.pos_end)
-            )
-
         res.register(
-            await self.handle_arguments(
+            self.handle_arguments(
                 self.arg_names,
                 self.defaults,
                 self.vargs_name,
@@ -227,10 +206,10 @@ class Function(BaseFunction):
         if res.should_return():
             return res
 
-        value = res.register(await interpreter.visit(self.body_node, exec_ctx))
+        interpreter = Interpreter()
+        value = res.register(interpreter.visit(self.body_node, exec_ctx))
         if res.should_return() and res.func_return_value is None:
             return res
-
         ret_value = (
             (value if self.should_auto_return else None)
             or res.func_return_value
@@ -247,21 +226,16 @@ class Function(BaseFunction):
             Token(TT_IDENTIFIER, self.vargs_name) if self.vargs_name else None,
             Token(TT_IDENTIFIER, self.kargs_name) if self.kargs_name else None,
             self.should_auto_return,
-            self.is_async,
         )
         copy.set_context(self.context)
         copy.set_pos(self.pos_start, self.pos_end)
         return copy
 
     def __repr__(self):
-        return (
-            f"<async function {self.name}>"
-            if self.is_async
-            else f"<function {self.name}>"
-        )
+        return f"<function {self.name}>"
 
     def type(self):
-        return "<async_func>" if self.is_async else "<func>"
+        return "<func>"
 
 
 class BuiltInFunction(BaseFunction):
@@ -270,21 +244,13 @@ class BuiltInFunction(BaseFunction):
     def __init__(self, name):
         super().__init__(name)
 
-    async def execute(self, positional_args, keyword_args):
+    def execute(self, positional_args, keyword_args):
         res = RTResult()
         exec_ctx = self.generate_new_context()
         method_name = f"execute_{self.name}"
         method = getattr(self, method_name, self.no_execute_method)
-
-        if asyncio.iscoroutinefunction(method):
-            return res.success(
-                Coroutine(self, positional_args, keyword_args)
-                .set_context(exec_ctx)
-                .set_pos(self.pos_start, self.pos_end)
-            )
-
         res.register(
-            await self.handle_arguments(
+            self.handle_arguments(
                 param_names=method.arg_names,
                 defaults=method.defaults,
                 vargs_name=None,
@@ -296,9 +262,7 @@ class BuiltInFunction(BaseFunction):
         )
         if res.should_return():
             return res
-
         return_value = res.register(method(exec_ctx))
-
         if res.should_return():
             return res
 
@@ -327,21 +291,6 @@ class BuiltInFunction(BaseFunction):
             return f
 
         return _args
-
-    @set_args(["seconds"])
-    async def execute_sleep_async_fp(self, exec_ctx):
-        seconds = exec_ctx.symbol_table.get("seconds")
-        if not isinstance(seconds, Number):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'sleep' must be a number",
-                    exec_ctx,
-                )
-            )
-        await asyncio.sleep(seconds.value)
-        return RTResult().success(Number.none)
 
     @set_args(["value"], [String("")])
     def execute_println(self, exec_ctx):
@@ -718,11 +667,7 @@ class BuiltInFunction(BaseFunction):
         mode = exec_ctx.symbol_table.get("mode")
         if mode.value == "r":
             try:
-                with open(
-                    file.path.__str__(),
-                    mode.value,
-                    encoding="utf-8" if "b" not in mode.value else None,
-                ) as f:
+                with open(file.path.__str__(), "r", encoding="utf-8") as f:
                     return RTResult().success(String(f.read()))
             except Exception as e:
                 return RTResult().failure(
@@ -753,11 +698,7 @@ class BuiltInFunction(BaseFunction):
         mode = exec_ctx.symbol_table.get("mode")
         text = exec_ctx.symbol_table.get("text")
         try:
-            with open(
-                file.path.__str__(),
-                mode.__str__(),
-                encoding="utf-8" if "b" not in mode.value else None,
-            ) as f:
+            with open(file.path.__str__(), mode.__str__(), encoding="utf-8" if mode.value == "w" or mode.value == "a" else None) as f:
                 f.write(text.value)
             return RTResult().success(Number.none)
         except Exception as e:
@@ -1018,7 +959,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        if isinstance(value, Number | CFloat):
+        if isinstance(value, Number):
             return RTResult().success(Number(int(value.value)))
         elif isinstance(value, String):
             try:
@@ -1074,7 +1015,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        if isinstance(value, Number | CFloat):
+        if isinstance(value, Number):
             return RTResult().success(Number(float(value.value)))
         elif isinstance(value, String):
             try:
@@ -1679,140 +1620,6 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
-    def _handle_panic_result(self, res, exec_ctx):
-        if res.error:
-            err = res.error
-            if isinstance(err, RTError):
-                err_str = str(err)
-                err_line = err_str.strip().split("\n")[-1]
-                err_name, err_msg = err_line.split(":", 1)
-                err_name, err_msg = err_name.strip(), err_msg.strip()
-
-                if "Runtime" in err_name:
-                    err_name_short = "RT"
-                elif "Math" in err_name:
-                    err_name_short = "M"
-                elif "IO" in err_name:
-                    err_name_short = "IO"
-                elif "Type" in err_name:
-                    err_name_short = "T"
-                else:
-                    err_name_short = "UNKNOWN"
-
-                return RTResult().success(
-                    List([NoneObject.none, String(err_msg), String(err_name_short)])
-                )
-            else:
-                return RTResult().failure(err)
-        else:
-            return RTResult().success(
-                List([res.value, NoneObject.none, NoneObject.none])
-            )
-
-    @set_args(["func", "args", "kwargs"], [None, List([]), HashMap({})])
-    def execute_is_panic(self, exec_ctx):
-        func = exec_ctx.symbol_table.get("func")
-        args = exec_ctx.symbol_table.get("args")
-        kwargs = exec_ctx.symbol_table.get("kwargs")
-
-        if not isinstance(func, BaseFunction):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'is_panic' must be a function",
-                    exec_ctx,
-                )
-            )
-        if not isinstance(args, List):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument 'args' must be a list",
-                    exec_ctx,
-                )
-            )
-        if not isinstance(kwargs, HashMap):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Third argument 'kwargs' must be a hashmap",
-                    exec_ctx,
-                )
-            )
-
-        try:
-            positional_args = args.value
-            keyword_args = kwargs.value
-
-            res = func.execute(positional_args, keyword_args)
-
-            return self._handle_panic_result(res, exec_ctx)
-
-        except Exception as err:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Unexpected Python error in 'is_panic': {err}",
-                    exec_ctx,
-                )
-            )
-
-    @set_args(["func", "args", "kwargs"], [None, List([]), HashMap({})])
-    async def execute_async_is_panic_fp(self, exec_ctx):
-        func = exec_ctx.symbol_table.get("func")
-        args = exec_ctx.symbol_table.get("args")
-        kwargs = exec_ctx.symbol_table.get("kwargs")
-
-        if not isinstance(func, BaseFunction):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'is_panic' must be a function",
-                    exec_ctx,
-                )
-            )
-        if not isinstance(args, List):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument 'args' must be a list",
-                    exec_ctx,
-                )
-            )
-        if not isinstance(kwargs, HashMap):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Third argument 'kwargs' must be a hashmap",
-                    exec_ctx,
-                )
-            )
-
-        try:
-            positional_args = args.value
-            keyword_args = kwargs.value
-
-            res = await func.execute(positional_args, keyword_args)
-
-            return self._handle_panic_result(res, exec_ctx)
-
-        except Exception as err:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Unexpected Python error in 'async_is_panic': {err}",
-                    exec_ctx,
-                )
-            )
-
     @set_args(["func", "args", "kwargs"], [None, List([]), HashMap({})])
     def execute_thread_start_fp(self, exec_ctx):
         func = exec_ctx.symbol_table.get("func")
@@ -1833,7 +1640,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "Second argument 'args' must be a list",
+                    "Second argument of 'start' must be a list",
                     exec_ctx,
                 )
             )
@@ -1842,38 +1649,37 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "Third argument 'kwargs' must be a hashmap",
+                    "Third argument of 'start' must be a hashmap",
                     exec_ctx,
                 )
             )
+
+        positional_args = args.value
+        keyword_args = {k.value: v for k, v in kwargs.value.items() if hasattr(k, 'value')}
+
+
+        def thread_wrapper():
+            try:
+                result = func.execute(positional_args, keyword_args)
+                if result and result.error:
+                    error_header = f"\n--- Unhandled Error in Thread (Function: {func.name}) ---\n"
+                    sys.stderr.write(error_header)
+                    sys.stderr.write(result.error.as_string() + "\n")
+                    sys.stderr.write("---------------------------------------------------\n")
+                    sys.stderr.flush()
+
+            except Exception:
+                error_header = f"\n--- Python Exception in Thread (Function: {func.name}) ---\n"
+                sys.stderr.write(error_header)
+                import traceback
+                sys.stderr.write(traceback.format_exc())
+                sys.stderr.write("-----------------------------------------------------\n")
+                sys.stderr.flush()
 
         try:
-            import threading
-
-            positional_args = args.value
-            keyword_args = kwargs.value
-
-            def thread_wrapper():
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                try:
-                    loop.run_until_complete(func.execute(positional_args, keyword_args))
-                finally:
-                    loop.close()
-
-            thread = threading.Thread(target=thread_wrapper, daemon=True)
+            thread = Thread(target=thread_wrapper, daemon=True)
             thread.start()
             return RTResult().success(ThreadWrapper(thread))
-
-        except ImportError:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "threading module not available",
-                    exec_ctx,
-                )
-            )
         except Exception as e:
             return RTResult().failure(
                 RTError(
@@ -1887,12 +1693,12 @@ class BuiltInFunction(BaseFunction):
     @set_args(["seconds"])
     def execute_thread_sleep_fp(self, exec_ctx):
         seconds = exec_ctx.symbol_table.get("seconds")
-        if not isinstance(seconds, Number | CFloat):
+        if not isinstance(seconds, Number):
             return RTResult().failure(
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'sleep' must be a number or cfloat",
+                    "First argument of 'sleep' must be a number",
                     exec_ctx,
                 )
             )
@@ -2077,7 +1883,7 @@ class BuiltInFunction(BaseFunction):
         host = exec_ctx.symbol_table.get("host")
         if not isinstance(host, String):
             return RTResult().failure(
-                TError(self.pos_start, self.pos_end, "Host must be a string", exec_ctx)
+                TError(self.pos_start, self.pos_end, "First argument of 'ping' must be a string", exec_ctx)
             )
 
         param = "-n" if platform.system().lower() == "windows" else "-c"
@@ -2100,6 +1906,7 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
+
     @set_args(["url", "timeout"], [None, Number(15)])
     def execute_downl_fp(self, exec_ctx):
         def sanitize_filename(filename):
@@ -2114,7 +1921,16 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'downl' must be a string",
+                    "First argument of 'download' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(timeout, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'download' must be a number",
                     exec_ctx,
                 )
             )
@@ -2136,7 +1952,7 @@ class BuiltInFunction(BaseFunction):
                     name = url.value.split("/")[-1]
                 name = sanitize_filename(name)
                 if not name:
-                    name = "downl_" + hex(time.time_ns())[2:]
+                    name = "download_" + hex(time.time_ns())[2:]
                 with open(name, "wb") as out_file:
                     out_file.write(response.read())
             return RTResult().success(String(os.path.abspath(name)))
@@ -2294,6 +2110,59 @@ class BuiltInFunction(BaseFunction):
             return RTResult().success(Number.none)
         return RTResult().success(Number(index))
 
+    def _handle_panic_result(self, res, exec_ctx):
+        if res.error:
+            err = res.error
+            if isinstance(err, RTError):
+                err_str = str(err)
+                err_line = err_str.strip().split('\n')[-1]
+                err_name, err_msg = err_line.split(':', 1)
+                err_name, err_msg = err_name.strip(), err_msg.strip()
+                
+                if "Runtime" in err_name: err_name_short = "RT"
+                elif "Math" in err_name: err_name_short = "M"
+                elif "IO" in err_name: err_name_short = "IO"
+                elif "Type" in err_name: err_name_short = "T"
+                else: err_name_short = "UNKNOWN"
+                
+                return RTResult().success(List([NoneObject(), String(err_msg), String(err_name_short)]))
+            else:
+                return RTResult().failure(err)
+        else:
+            return RTResult().success(List([res.value, NoneObject(), NoneObject()]))
+
+    @set_args(["func", "args", "kwargs"], [None, List([]), HashMap({})])
+    def execute_is_panic(self, exec_ctx):
+        func = exec_ctx.symbol_table.get("func")
+        args = exec_ctx.symbol_table.get("args")
+        kwargs = exec_ctx.symbol_table.get("kwargs")
+
+        if not isinstance(func, BaseFunction):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "First argument of 'is_panic' must be a function", exec_ctx)
+            )
+        if not isinstance(args, List):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "Second argument of 'is_panic' must be a list", exec_ctx)
+            )
+        if not isinstance(kwargs, HashMap):
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, "Third argument of 'is_panic' must be a hashmap", exec_ctx)
+            )
+
+        try:
+            positional_args = args.value
+            keyword_args = kwargs.value
+            
+            res = func.execute(positional_args, keyword_args)
+            
+            return self._handle_panic_result(res, exec_ctx)
+
+        except Exception as err:
+            return RTResult().failure(
+                RTError(self.pos_start, self.pos_end, f"Unexpected Python error in 'is_panic': {err}", exec_ctx)
+            )
+
     @set_args(["path"])
     def execute_is_file_fp(self, exec_ctx):
         path = exec_ctx.symbol_table.get("path")
@@ -2338,19 +2207,19 @@ class BuiltInFunction(BaseFunction):
     @set_args(["n"])
     def execute_fact_fp(self, exec_ctx):
         n = exec_ctx.symbol_table.get("n")
-        return RTResult().success(Number(math.factorial(int(n.value))))
+        return RTResult().success(Number(math.factorial(n.value)))
 
     @set_args(["a", "b"])
     def execute_gcd_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
         b = exec_ctx.symbol_table.get("b")
-        return RTResult().success(Number(math.gcd(int(a.value), int(b.value))))
+        return RTResult().success(Number(math.gcd(a.value, b.value)))
 
     @set_args(["a", "b"])
     def execute_lcm_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
         b = exec_ctx.symbol_table.get("b")
-        return RTResult().success(Number(math.lcm(int(a.value), int(b.value))))
+        return RTResult().success(Number(math.lcm(a.value, b.value)))
 
     @set_args(["n"])
     def execute_fib_fp(self, exec_ctx):
@@ -2423,8 +2292,6 @@ class BuiltInFunction(BaseFunction):
             return obj.value
         elif isinstance(obj, String):
             return obj.value
-        elif isinstance(obj, CFloat):
-            return obj.value
         elif isinstance(obj, NoneObject):
             return None
         elif isinstance(obj, List):
@@ -2444,7 +2311,7 @@ class BuiltInFunction(BaseFunction):
             return str(obj)
 
     def validate_pyexec_result(self, obj):
-        allowed = (bool, int, float, str, Fraction)
+        allowed = (bool, int, float, str)
         if obj is None:
             return Number.none
         elif isinstance(obj, allowed):
@@ -2459,8 +2326,6 @@ class BuiltInFunction(BaseFunction):
                 return Number(obj)
             elif isinstance(obj, bytes):
                 return Bytes(obj)
-            elif isinstance(obj, Fraction):
-                return CFloat(obj)
             else:
                 return String(obj)
         elif isinstance(obj, list):
@@ -3992,7 +3857,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'recv' must be a channel",
+                    "First argument of 'receive' must be a channel",
                     exec_ctx,
                 )
             )
@@ -4047,7 +3912,7 @@ class BuiltInFunction(BaseFunction):
     def execute_is_channel(self, exec_ctx):
         is_channel = isinstance(exec_ctx.symbol_table.get("value"), Channel)
         return RTResult().success(Number.true if is_channel else Number.false)
-
+    
     @set_args(["value"])
     def execute_is_cfloat(self, exec_ctx):
         is_cfloat = isinstance(exec_ctx.symbol_table.get("value"), CFloat)
@@ -4111,755 +3976,7 @@ class BuiltInFunction(BaseFunction):
                         f"Failed to convert to decimal: {str(e)}",
                         exec_ctx,
                     )
-                )
-
-    @set_args(["value"])
-    def execute_is_coroutine(self, exec_ctx):
-        is_coroutine = isinstance(exec_ctx.symbol_table.get("value"), Coroutine)
-        return RTResult().success(Number.true if is_coroutine else Number.false)
-
-    async def _run_interpreter_coro(self, coro_obj, context):
-        res = RTResult()
-        interpreter = Interpreter()
-
-        func = coro_obj.func
-        exec_ctx = func.generate_new_context()
-
-        if isinstance(func, Function):
-            res.register(
-                await func.handle_arguments(
-                    func.arg_names,
-                    func.defaults,
-                    func.vargs_name,
-                    func.kargs_name,
-                    coro_obj.positional_args,
-                    coro_obj.keyword_args,
-                    exec_ctx,
-                )
-            )
-            if res.should_return():
-                return res
-
-            value = res.register(await interpreter.visit(func.body_node, exec_ctx))
-            if res.should_return() and res.func_return_value is None:
-                return res
-
-            ret_value = (
-                (value if func.should_auto_return else None)
-                or res.func_return_value
-                or Number.none
-            )
-            return res.success(ret_value)
-
-        elif isinstance(func, BuiltInFunction):
-            method_name = f"execute_{func.name}"
-            method = getattr(func, method_name, func.no_execute_method)
-
-            res.register(
-                await func.handle_arguments(
-                    param_names=method.arg_names,
-                    defaults=method.defaults,
-                    vargs_name=None,
-                    kargs_name=None,
-                    positional_args=coro_obj.positional_args,
-                    keyword_args=coro_obj.keyword_args,
-                    exec_ctx=exec_ctx,
-                )
-            )
-            if res.should_return():
-                return res
-
-            return_value = res.register(await method(exec_ctx))
-            if res.should_return():
-                return res
-
-            return res.success(return_value)
-
-        return RTResult().failure(
-            TError(
-                coro_obj.pos_start,
-                coro_obj.pos_end,
-                "Object is not a valid coroutine function",
-                context,
-            )
-        )
-
-    @set_args(["coroutines"])
-    async def execute_gather_fp(self, exec_ctx):
-        coroutines_list = exec_ctx.symbol_table.get("coroutines")
-
-        if not isinstance(coroutines_list, List):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'gather' must be a list",
-                    exec_ctx,
-                )
-            )
-
-        tasks = []
-        for i, coro_obj in enumerate(coroutines_list.value):
-            if not isinstance(coro_obj, Coroutine):
-                return RTResult().failure(
-                    TError(
-                        self.pos_start,
-                        self.pos_end,
-                        f"All items in the list passed to 'gather' must be coroutines. Item at index {i} is a {coro_obj.type()}.",
-                        exec_ctx,
-                    )
-                )
-            tasks.append(self._run_interpreter_coro(coro_obj, exec_ctx))
-
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        final_results = []
-        for res in results:
-            if isinstance(res, BaseException):
-                return RTResult().failure(
-                    RTError(
-                        self.pos_start,
-                        self.pos_end,
-                        f"A concurrent task failed with a Python exception: {res}",
-                        exec_ctx,
-                    )
-                )
-
-            if res.error:
-                return res
-
-            final_results.append(res.value)
-
-        return RTResult().success(List(final_results))
-
-    @set_args(["coroutine", "ms"])
-    async def execute_timeout_fp(self, exec_ctx):
-        coro_obj = exec_ctx.symbol_table.get("coroutine")
-        ms = exec_ctx.symbol_table.get("ms")
-
-        if not isinstance(coro_obj, Coroutine):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'timeout' must be a coroutine",
-                    exec_ctx,
-                )
-            )
-
-        if not isinstance(ms, Number):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'timeout' must be a number",
-                    exec_ctx,
-                )
-            )
-
-        try:
-            result = await asyncio.wait_for(
-                self._run_interpreter_coro(coro_obj, exec_ctx),
-                timeout=ms.value / 1000.0,
-            )
-            return result
-        except asyncio.TimeoutError:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Coroutine timed out after {ms.value}ms",
-                    exec_ctx,
-                )
-            )
-
-    @set_args(["coroutines", "ms"])
-    async def execute_timeouts_fp(self, exec_ctx):
-        coroutines_list = exec_ctx.symbol_table.get("coroutines")
-        ms = exec_ctx.symbol_table.get("ms")
-
-        if not isinstance(coroutines_list, List):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'timeouts' must be a list",
-                    exec_ctx,
-                )
-            )
-
-        if not isinstance(ms, Number):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'timeouts' must be a number",
-                    exec_ctx,
-                )
-            )
-
-        tasks = []
-        for i, coro_obj in enumerate(coroutines_list.value):
-            if not isinstance(coro_obj, Coroutine):
-                return RTResult().failure(
-                    TError(
-                        self.pos_start,
-                        self.pos_end,
-                        f"All items in the list passed to 'timeouts' must be coroutines",
-                        exec_ctx,
-                    )
-                )
-            tasks.append(
-                asyncio.wait_for(
-                    self._run_interpreter_coro(coro_obj, exec_ctx),
-                    timeout=ms.value / 1000.0,
-                )
-            )
-
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        final_results = []
-        for res in results:
-            if isinstance(res, asyncio.TimeoutError):
-                return RTResult().failure(
-                    RTError(
-                        self.pos_start,
-                        self.pos_end,
-                        f"A coroutine timed out after {ms.value}ms",
-                        exec_ctx,
-                    )
-                )
-            if isinstance(res, BaseException):
-                return RTResult().failure(
-                    RTError(
-                        self.pos_start,
-                        self.pos_end,
-                        f"A concurrent task failed with exception: {res}",
-                        exec_ctx,
-                    )
-                )
-            if res.error:
-                return res
-            final_results.append(res.value)
-
-        return RTResult().success(List(final_results))
-
-    @set_args(["file", "mode", "text"])
-    async def execute_async_write_fp(self, exec_ctx):
-        file, mode, text = (
-            exec_ctx.symbol_table.get(arg) for arg in ["file", "mode", "text"]
-        )
-        try:
-            import aiofiles  # type: ignore
-
-            async with aiofiles.open(
-                file.value,
-                mode=mode.value,
-                encoding="utf-8" if "b" not in mode.value else None,
-            ) as f:
-                await f.write(text.value)
-            return RTResult().success(NoneObject.none)
-        except ImportError:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "aiofiles module not available",
-                    exec_ctx,
-                )
-            )
-        except Exception as e:
-            return RTResult().failure(
-                IError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Failed to write to file: {e}",
-                    exec_ctx,
-                )
-            )
-
-    @set_args(["file", "mode"])
-    async def execute_async_read_fp(self, exec_ctx):
-        file, mode = (exec_ctx.symbol_table.get(arg) for arg in ["file", "mode"])
-        try:
-            import aiofiles  # type: ignore
-
-            async with aiofiles.open(
-                file.value,
-                mode=mode.value,
-                encoding="utf-8" if "b" not in mode.value else None,
-            ) as f:
-                content = await f.read()
-            return RTResult().success(
-                Bytes(content) if "b" in mode.value else String(content)
-            )
-        except ImportError:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "aiofiles module not available",
-                    exec_ctx,
-                )
-            )
-        except Exception as e:
-            return RTResult().failure(
-                IError(
-                    self.pos_start, self.pos_end, f"Failed to read file: {e}", exec_ctx
-                )
-            )
-
-    @set_args(["src", "dst"])
-    async def execute_async_copy_fp(self, exec_ctx):
-        src, dst = (exec_ctx.symbol_table.get(arg) for arg in ["src", "dst"])
-        try:
-            await asyncio.to_thread(copy, src.value, dst.value)
-            return RTResult().success(NoneObject.none)
-        except Exception as e:
-            return RTResult().failure(
-                IError(
-                    self.pos_start, self.pos_end, f"Failed to copy file: {e}", exec_ctx
-                )
-            )
-
-    @set_args(["top"])
-    async def execute_async_walk_fp(self, exec_ctx):
-        top_path = exec_ctx.symbol_table.get("top")
-        try:
-            walk_generator = await asyncio.to_thread(os.walk, top_path.value)
-            walk_results = []
-            for root, dirs, files in walk_generator:
-                walk_results.append(
-                    List(
-                        [
-                            String(root),
-                            List([String(d) for d in dirs]),
-                            List([String(f) for f in files]),
-                        ]
-                    )
-                )
-            return RTResult().success(List(walk_results))
-        except Exception as e:
-            return RTResult().failure(
-                IError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Failed during directory walk: {e}",
-                    exec_ctx,
-                )
-            )
-
-    @set_args(
-        ["url", "method", "headers", "data", "timeout"],
-        [None, String("GET"), HashMap({}), HashMap({}), Number(15)],
-    )
-    async def execute_async_request_fp(self, exec_ctx):
-        url, method, headers, data, timeout = (
-            exec_ctx.symbol_table.get(arg)
-            for arg in ["url", "method", "headers", "data", "timeout"]
-        )
-        try:
-            import aiohttp  # type: ignore
-
-            py_headers = self.convert_zer_to_py(headers)
-            py_data = self.convert_zer_to_py(data)
-            async with aiohttp.ClientSession() as session:
-                async with session.request(
-                    method.value,
-                    url.value,
-                    headers=py_headers,
-                    data=py_data,
-                    timeout=timeout.value,
-                ) as resp:
-                    resp.raise_for_status()
-                    json_response = await resp.json()
-                    return RTResult().success(
-                        self.validate_pyexec_result(json_response)
-                    )
-        except ImportError:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "aiohttp module not available",
-                    exec_ctx,
-                )
-            )
-        except Exception as e:
-            return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
-            )
-
-    @set_args(["url", "timeout"], [None, Number(15)])
-    async def execute_async_downl_fp(self, exec_ctx):
-        url, timeout = (exec_ctx.symbol_table.get(arg) for arg in ["url", "timeout"])
-        try:
-            import aiohttp  # type: ignore
-            import aiofiles  # type: ignore
-
-            async with aiohttp.ClientSession(
-                headers={"User-Agent": "Mozilla/5.0"}
-            ) as session:
-                async with session.get(url.value, timeout=timeout.value) as response:
-                    response.raise_for_status()
-                    filename = (
-                        os.path.basename(unquote(response.url.path)) or "download"
-                    )
-                    async with aiofiles.open(filename, mode="wb") as f:
-                        await f.write(await response.read())
-                    return RTResult().success(String(os.path.abspath(filename)))
-        except ImportError:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "aiofiles or aiohttp module not available",
-                    exec_ctx,
-                )
-            )
-        except Exception as e:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start, self.pos_end, f"Failed to download: {e}", exec_ctx
-                )
-            )
-
-    @set_args(["command"])
-    async def execute_async_system_fp(self, exec_ctx):
-        cmd = exec_ctx.symbol_table.get("command")
-        proc = await asyncio.create_subprocess_shell(cmd.value)
-        await proc.wait()
-        return RTResult().success(Number(proc.returncode))
-
-    @set_args(["command"])
-    async def execute_async_osystem_fp(self, exec_ctx):
-        cmd = exec_ctx.symbol_table.get("command")
-        proc = await asyncio.create_subprocess_shell(
-            cmd.value, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await proc.communicate()
-        return RTResult().success(
-            List(
-                [
-                    String(stdout.decode(errors="ignore")),
-                    String(stderr.decode(errors="ignore")),
-                    Number(proc.returncode),
-                ]
-            )
-        )
-
-    @set_args(["key"])
-    async def execute_async_keyboard_wait_fp(self, exec_ctx):
-        key = exec_ctx.symbol_table.get("key")
-        try:
-            import keyboard  # type: ignore
-
-            await asyncio.to_thread(keyboard.wait, key.value)
-            return RTResult().success(NoneObject.none)
-        except ImportError:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "keyboard module not available",
-                    exec_ctx,
-                )
-            )
-        except Exception as e:
-            return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
-            )
-
-    @set_args(["path"])
-    async def execute_async_screen_capture_fp(self, exec_ctx):
-        path = exec_ctx.symbol_table.get("path")
-        try:
-            import pyautogui  # type: ignore
-
-            await asyncio.to_thread(pyautogui.screenshot, path.value)
-            return RTResult().success(NoneObject.none)
-        except ImportError:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "pyautogui module not available",
-                    exec_ctx,
-                )
-            )
-        except Exception as e:
-            return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
-            )
-
-    @set_args(["x", "y", "w", "h", "path"])
-    async def execute_async_screen_capture_area_fp(self, exec_ctx):
-        x, y, w, h, p = (
-            exec_ctx.symbol_table.get(arg) for arg in ["x", "y", "w", "h", "p"]
-        )
-        try:
-            import pyautogui  # type: ignore
-
-            bbox = (int(x.value), int(y.value), int(w.value), int(h.value))
-            await asyncio.to_thread(pyautogui.screenshot, p.value, region=bbox)
-            return RTResult().success(NoneObject.none)
-        except ImportError:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "pyautogui module not available",
-                    exec_ctx,
-                )
-            )
-        except Exception as e:
-            return RTResult().failure(
-                RTError(self.pos_start, self.pos_end, str(e), exec_ctx)
-            )
-
-    @set_args([])
-    def execute_channel_new_fp(self, _):
-        return RTResult().success(Channel(asyncio.Queue()))
-
-    @set_args(["channel", "value"])
-    async def execute_async_channel_send_fp(self, exec_ctx):
-        channel, value = (
-            exec_ctx.symbol_table.get(arg) for arg in ["channel", "value"]
-        )
-        if not isinstance(channel, Channel):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'channel_send' must be a channel",
-                    exec_ctx,
-                )
-            )
-        await channel.value.put(value)
-        return RTResult().success(NoneObject.none)
-
-    @set_args(["channel"])
-    async def execute_async_channel_receive_fp(self, exec_ctx):
-        channel = exec_ctx.symbol_table.get("channel")
-        if not isinstance(channel, Channel):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'channel_receive' must be a channel",
-                    exec_ctx,
-                )
-            )
-        value = await channel.value.get()
-        return RTResult().success(value)
-
-    @set_args([])
-    async def execute_async_get_ip_fp(self, exec_ctx):
-        try:
-            import aiohttp  # type: ignore
-
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    "https://api64.ipify.org?format=json", timeout=5
-                ) as response:
-                    response.raise_for_status()
-                    data = await response.json()
-                    return RTResult().success(String(data["ip"]))
-        except ImportError:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "aiohttp module not available",
-                    exec_ctx,
-                )
-            )
-        except Exception as e:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Failed to retrieve public IP address: {e}",
-                    exec_ctx,
-                )
-            )
-
-    @set_args(["host"])
-    async def execute_async_ping_fp(self, exec_ctx):
-        host = exec_ctx.symbol_table.get("host")
-        if not isinstance(host, String):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'ping' must be a string",
-                    exec_ctx,
-                )
-            )
-
-        param = "-n" if platform.system().lower() == "windows" else "-c"
-        command = ["ping", param, "1", host.value]
-
-        try:
-            proc = await asyncio.create_subprocess_exec(
-                *command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-            )
-            await proc.wait()
-
-            if proc.returncode == 0:
-                return RTResult().success(Bool(True))
-            else:
-                return RTResult().success(Bool(False))
-        except Exception as e:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Error while pinging host: {e}",
-                    exec_ctx,
-                )
-            )
-
-    @set_args(["dir_path"], [String(".")])
-    async def execute_async_list_dir_fp(self, exec_ctx):
-        dir_path = exec_ctx.symbol_table.get("dir_path")
-        try:
-            is_dir = await asyncio.to_thread(os.path.isdir, dir_path.value)
-            if not is_dir:
-                raise FileNotFoundError(f"Directory not found: '{dir_path.value}'")
-
-            items = await asyncio.to_thread(os.listdir, dir_path.value)
-            return RTResult().success(List([String(item) for item in items]))
-        except Exception as e:
-            return RTResult().failure(
-                IError(self.pos_start, self.pos_end, str(e), exec_ctx)
-            )
-
-    @set_args(["value"], [String("")])
-    async def execute_async_println_fp(self, exec_ctx):
-        try:
-            import aioconsole  # type: ignore
-
-            if isinstance(exec_ctx.symbol_table.get("value"), String):
-                await aioconsole.aprint(
-                    exec_ctx.symbol_table.get("value").value, flush=True
-                )
-            else:
-                await aioconsole.aprint(
-                    repr(exec_ctx.symbol_table.get("value")), flush=True
-                )
-            return RTResult().success(NoneObject.none)
-        except ImportError:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "aioconsole module not available",
-                    exec_ctx,
-                )
-            )
-
-    @set_args(["value"], [String("")])
-    async def execute_async_print_fp(self, exec_ctx):
-        try:
-            import aioconsole  # type: ignore
-
-            if isinstance(exec_ctx.symbol_table.get("value"), String):
-                await aioconsole.aprint(
-                    exec_ctx.symbol_table.get("value").value, flush=True, end=""
-                )
-            else:
-                await aioconsole.aprint(
-                    repr(exec_ctx.symbol_table.get("value")), flush=True, end=""
-                )
-            return RTResult().success(NoneObject.none)
-        except ImportError:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "aioconsole module not available",
-                    exec_ctx,
-                )
-            )
-
-    @set_args(["prompt"], [String("")])
-    async def execute_async_input_fp(self, exec_ctx):
-        try:
-            import aioconsole  # type: ignore
-
-            text = await aioconsole.aprint(
-                exec_ctx.symbol_table.get("value").value, flush=True
-            )
-            return RTResult().success(String(text))
-        except ImportError:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "aioconsole module not available",
-                    exec_ctx,
-                )
-            )
-
-    @set_args(["prompt"], [String("")])
-    async def execute_async_get_password_fp(self, exec_ctx):
-        from getpass import getpass
-
-        prompt = exec_ctx.symbol_table.get("prompt").value
-        password = await asyncio.to_thread(getpass, prompt)
-        return RTResult().success(String(password))
-
-    @set_args([])
-    async def execute_async_clear_fp(self, _):
-        command = "cls" if os.name == "nt" else "clear"
-        proc = await asyncio.create_subprocess_shell(command)
-        await proc.wait()
-        return RTResult().success(NoneObject.none)
-
-    @set_args(["code", "args"], [None, HashMap({})])
-    async def execute_async_pyexec_fp(self, exec_ctx):
-        code = exec_ctx.symbol_table.get("code")
-        args = exec_ctx.symbol_table.get("args")
-
-        if not isinstance(code, String):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'pyexec' must be a string",
-                    exec_ctx,
-                )
-            )
-        if not isinstance(args, HashMap):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'pyexec' must be a hashmap",
-                    exec_ctx,
-                )
-            )
-
-        try:
-            local_env = self.convert_zer_to_py(args)
-
-            def run_exec():
-                exec(code.value, {}, local_env)
-                return local_env
-
-            final_env = await asyncio.to_thread(run_exec)
-            result = self.validate_pyexec_result(final_env)
-            return RTResult().success(result)
-        except Exception as e:
-            return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"Error executing Python code: {e}",
-                    exec_ctx,
-                )
-            )
+                ) 
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -4880,115 +3997,39 @@ class Interpreter:
                     node_type = attr_name[len("visit_") :]
                     self.visit_table[node_type] = method
 
-    async def visit(self, node, context):
+    def visit(self, node, context):
         node_type = type(node).__name__
         method = self.visit_table.get(node_type)
         if method is None:
             raise Exception(f"No visit method defined for {node_type}")
-        return await method(node, context)
+        return method(node, context)
 
-    async def visit_AwaitNode(self, node, context):
-        res = RTResult()
-        value_to_await = res.register(await self.visit(node.node_to_await, context))
-        if res.should_return():
-            return res
-
-        if not isinstance(value_to_await, Coroutine):
-            return res.failure(
-                RTError(
-                    node.pos_start,
-                    node.pos_end,
-                    "Object is not awaitable",
-                    context,
-                )
-            )
-
-        coro = value_to_await
-        func = coro.func
-        exec_ctx = func.generate_new_context()
-
-        if isinstance(func, Function):
-            interpreter = Interpreter()
-            res.register(
-                await func.handle_arguments(
-                    func.arg_names,
-                    func.defaults,
-                    func.vargs_name,
-                    func.kargs_name,
-                    coro.positional_args,
-                    coro.keyword_args,
-                    exec_ctx,
-                )
-            )
-            if res.should_return():
-                return res
-
-            value = res.register(await interpreter.visit(func.body_node, exec_ctx))
-            if res.should_return() and res.func_return_value is None:
-                return res
-
-            ret_value = (
-                (value if func.should_auto_return else None)
-                or res.func_return_value
-                or Number.none
-            )
-            return res.success(ret_value)
-
-        elif isinstance(func, BuiltInFunction):
-            method_name = f"execute_{func.name}"
-            method = getattr(func, method_name, func.no_execute_method)
-
-            res.register(
-                await func.handle_arguments(
-                    param_names=method.arg_names,
-                    defaults=method.defaults,
-                    vargs_name=None,
-                    kargs_name=None,
-                    positional_args=coro.positional_args,
-                    keyword_args=coro.keyword_args,
-                    exec_ctx=exec_ctx,
-                )
-            )
-            if res.should_return():
-                return res
-
-            return_value = None
-            if asyncio.iscoroutinefunction(method):
-                return_value = res.register(await method(exec_ctx))
-            else:
-                return_value = res.register(method(exec_ctx))
-
-            if res.should_return():
-                return res
-
-            return res.success(return_value)
-
-    async def visit_NumberNode(self, node, context: Context):
+    def visit_NumberNode(self, node, context: Context):
         return RTResult().success(
             Number(node.tok.value)
             .set_context(context)
             .set_pos(node.pos_start, node.pos_end)
         )
 
-    async def visit_StringNode(self, node, context: Context):
+    def visit_StringNode(self, node, context: Context):
         return RTResult().success(
             String(node.tok.value)
             .set_context(context)
             .set_pos(node.pos_start, node.pos_end)
         )
 
-    async def visit_ListNode(self, node, context: Context):
+    def visit_ListNode(self, node, context: Context):
         res = RTResult()
         value = []
         for element_node in node.element_nodes:
-            value.append(res.register(await self.visit(element_node, context)))
+            value.append(res.register(self.visit(element_node, context)))
             if res.should_return():
                 return res
         return res.success(
             List(value).set_context(context).set_pos(node.pos_start, node.pos_end)
         )
 
-    async def visit_VarAccessNode(self, node, context: Context):
+    def visit_VarAccessNode(self, node, context: Context):
         res = RTResult()
         var_name = node.var_name_tok.value
         value = None
@@ -5025,10 +4066,10 @@ class Interpreter:
         )
         return res.success(copied_value)
 
-    async def visit_VarAssignNode(self, node, context: Context):
+    def visit_VarAssignNode(self, node, context: Context):
         res = RTResult()
         var_name = node.var_name_tok.value
-        value = res.register(await self.visit(node.value_node, context))
+        value = res.register(self.visit(node.value_node, context))
         if res.should_return():
             return res
 
@@ -5048,7 +4089,7 @@ class Interpreter:
 
         return res.success(value)
 
-    async def visit_VarAssignAsNode(self, node, context: Context):
+    def visit_VarAssignAsNode(self, node, context: Context):
         res = RTResult()
         orig_name = node.var_name_tok.value
         alias_name = node.var_name_tok2.value
@@ -5075,20 +4116,20 @@ class Interpreter:
 
         return res.success(value)
 
-    async def initialize_namespace(self, namespace_obj):
+    def initialize_namespace(self, namespace_obj):
         if namespace_obj.get("initialized_", checked=True).value:
             return
         stmts = namespace_obj.get("statements_", checked=True)
         ns_context = namespace_obj.get("context_", checked=True)
         for stmt in stmts:
-            _ = await self.visit(stmt, ns_context)
+            _ = self.visit(stmt, ns_context)
         for k, v in ns_context.symbol_table.symbols.items():
             namespace_obj.set(k, v)
         for k, v in ns_context.private_symbol_table.symbols.items():
             namespace_obj.set(k, v)
         namespace_obj.set("initialized_", Number.true, checked=True)
 
-    async def visit_NameSpaceNode(self, node, context):
+    def visit_NameSpaceNode(self, node, context):
         res = RTResult()
         namespace = NameSpace(node.namespace_name)
         namespace.set_pos(node.pos_start, node.pos_end)
@@ -5105,9 +4146,9 @@ class Interpreter:
         context.private_symbol_table.set(node.namespace_name, namespace)
         return res.success(namespace)
 
-    async def visit_MemberAccessNode(self, node, context):
+    def visit_MemberAccessNode(self, node, context):
         res = RTResult()
-        obj = res.register(await self.visit(node.object_node, context))
+        obj = res.register(self.visit(node.object_node, context))
         if res.should_return():
             return res
         if not isinstance(obj, NameSpace):
@@ -5123,7 +4164,7 @@ class Interpreter:
             isinstance(obj, NameSpace)
             and not obj.get("initialized_", checked=True).value
         ):
-            await self.initialize_namespace(obj)
+            self.initialize_namespace(obj)
         member = obj.get(node.member_name)
         if member is None:
             return res.failure(
@@ -5138,12 +4179,12 @@ class Interpreter:
             return res.failure(member)
         return res.success(member)
 
-    async def visit_BinOpNode(self, node, context):
+    def visit_BinOpNode(self, node, context):
         res = RTResult()
-        left = res.register(await self.visit(node.left_node, context))
+        left = res.register(self.visit(node.left_node, context))
         if res.should_return():
             return res
-        right = res.register(await self.visit(node.right_node, context))
+        right = res.register(self.visit(node.right_node, context))
         if res.should_return():
             return res
 
@@ -5299,9 +4340,9 @@ class Interpreter:
             return res.failure(error)
         return res.success(result.set_pos(node.pos_start, node.pos_end))
 
-    async def visit_UnaryOpNode(self, node, context):
+    def visit_UnaryOpNode(self, node, context):
         res = RTResult()
-        value = res.register(await self.visit(node.node, context))
+        value = res.register(self.visit(node.node, context))
         if res.should_return():
             return res
         if isinstance(value, Number) and value.value is None:
@@ -5337,35 +4378,35 @@ class Interpreter:
             return res.failure(error)
         return res.success(result.set_pos(node.pos_start, node.pos_end))
 
-    async def visit_IfNode(self, node, context):
+    def visit_IfNode(self, node, context):
         res = RTResult()
         for condition, expr, should_return_none in node.cases:
-            condition_value = res.register(await self.visit(condition, context))
+            condition_value = res.register(self.visit(condition, context))
             if res.should_return():
                 return res
             if condition_value.is_true():
-                expr_value = res.register(await self.visit(expr, context))
+                expr_value = res.register(self.visit(expr, context))
                 if res.should_return():
                     return res
                 return res.success(Number.none if should_return_none else expr_value)
         if node.else_case:
             expr, should_return_none = node.else_case
-            expr_value = res.register(await self.visit(expr, context))
+            expr_value = res.register(self.visit(expr, context))
             if res.should_return():
                 return res
             return res.success(Number.none if should_return_none else expr_value)
         return res.success(Number.none)
 
-    async def visit_ForNode(self, node, context):
+    def visit_ForNode(self, node, context):
         res = RTResult()
-        start_value = res.register(await self.visit(node.start_value_node, context))
+        start_value = res.register(self.visit(node.start_value_node, context))
         if res.should_return():
             return res
-        end_value = res.register(await self.visit(node.end_value_node, context))
+        end_value = res.register(self.visit(node.end_value_node, context))
         if res.should_return():
             return res
         if node.step_value_node:
-            step_value = res.register(await self.visit(node.step_value_node, context))
+            step_value = res.register(self.visit(node.step_value_node, context))
             if res.should_return():
                 return res
         else:
@@ -5380,7 +4421,7 @@ class Interpreter:
         context.symbol_table.set(var_name, loop_var)
         for i in range(start_int, end_int, step_int):
             loop_var.value = i
-            value = res.register(await self.visit(body_node, context))
+            value = res.register(self.visit(body_node, context))
             if (
                 res.should_return()
                 and not res.loop_should_continue
@@ -5399,7 +4440,7 @@ class Interpreter:
             else Number.none
         )
 
-    async def visit_WhileNode(self, node, context):
+    def visit_WhileNode(self, node, context):
         res = RTResult()
 
         condition_node = node.condition_node
@@ -5411,14 +4452,14 @@ class Interpreter:
             elements = []
 
         while True:
-            condition = res.register(await self.visit(condition_node, context))
+            condition = res.register(self.visit(condition_node, context))
             if res.should_return():
                 return res
 
             if not condition.is_true():
                 break
 
-            value = res.register(await self.visit(body_node, context))
+            value = res.register(self.visit(body_node, context))
 
             if res.should_return():
                 if res.loop_should_continue:
@@ -5441,7 +4482,7 @@ class Interpreter:
                 .set_pos(node.pos_start, node.pos_end)
             )
 
-    async def visit_FuncDefNode(self, node, context):
+    def visit_FuncDefNode(self, node, context):
         res = RTResult()
         func_name = node.var_name_tok.value if node.var_name_tok else None
         body_node = node.body_node
@@ -5456,7 +4497,6 @@ class Interpreter:
                 node.vargs_name_tok,
                 node.kargs_name_tok,
                 node.should_auto_return,
-                node.is_async,
             )
             .set_context(context)
             .set_pos(node.pos_start, node.pos_end)
@@ -5464,10 +4504,10 @@ class Interpreter:
 
         if node.decorator_nodes:
             for deco_node in reversed(node.decorator_nodes):
-                decorator = res.register(await self.visit(deco_node, context))
+                decorator = res.register(self.visit(deco_node, context))
                 if res.should_return():
                     return res
-                wrapped_func = res.register(await decorator.execute([func_value], {}))
+                wrapped_func = res.register(decorator.execute([func_value], {}))
                 if res.should_return():
                     return res
                 func_value = wrapped_func
@@ -5477,10 +4517,10 @@ class Interpreter:
 
         return res.success(func_value)
 
-    async def visit_CallNode(self, node, context):
+    def visit_CallNode(self, node, context):
         try:
             res = RTResult()
-            value_to_call = res.register(await self.visit(node.node_to_call, context))
+            value_to_call = res.register(self.visit(node.node_to_call, context))
             if res.should_return():
                 return res
             value_to_call = value_to_call.copy().set_pos(node.pos_start, node.pos_end)
@@ -5490,7 +4530,7 @@ class Interpreter:
             for arg_node in node.arg_nodes:
                 if isinstance(arg_node, VargsUnpackNode):
                     list_to_unpack = res.register(
-                        await self.visit(arg_node.node_to_unpack, context)
+                        self.visit(arg_node.node_to_unpack, context)
                     )
                     if res.should_return():
                         return res
@@ -5506,7 +4546,7 @@ class Interpreter:
                     positional_args.extend(list_to_unpack.value)
                 elif isinstance(arg_node, KargsUnpackNode):
                     map_to_unpack = res.register(
-                        await self.visit(arg_node.node_to_unpack, context)
+                        self.visit(arg_node.node_to_unpack, context)
                     )
                     if res.should_return():
                         return res
@@ -5533,22 +4573,18 @@ class Interpreter:
 
                 elif isinstance(arg_node, VarAssignNode):
                     arg_name = arg_node.var_name_tok.value
-                    arg_value = res.register(
-                        await self.visit(arg_node.value_node, context)
-                    )
+                    arg_value = res.register(self.visit(arg_node.value_node, context))
                     if res.should_return():
                         return res
                     keyword_args[arg_name] = arg_value
 
                 else:
-                    positional_args.append(
-                        res.register(await self.visit(arg_node, context))
-                    )
+                    positional_args.append(res.register(self.visit(arg_node, context)))
                     if res.should_return():
                         return res
 
             return_value = res.register(
-                await value_to_call.execute(positional_args, keyword_args)
+                value_to_call.execute(positional_args, keyword_args)
             )
             if res.should_return():
                 return res
@@ -5572,23 +4608,23 @@ class Interpreter:
                 )
             )
 
-    async def visit_ReturnNode(self, node, context):
+    def visit_ReturnNode(self, node, context):
         res = RTResult()
         if node.node_to_return:
-            value = res.register(await self.visit(node.node_to_return, context))
+            value = res.register(self.visit(node.node_to_return, context))
             if res.should_return():
                 return res
         else:
             value = Number.none
         return res.success_return(value)
 
-    async def visit_ContinueNode(self, _, __):
+    def visit_ContinueNode(self, _, __):
         return RTResult().success_continue()
 
-    async def visit_BreakNode(self, _, __):
+    def visit_BreakNode(self, _, __):
         return RTResult().success_break()
 
-    async def visit_LoadNode(self, node: LoadNode, context: Context):
+    def visit_LoadNode(self, node: LoadNode, context: Context):
         res = RTResult()
         path = node.file_path
         if not os.path.isfile(path):
@@ -5605,7 +4641,7 @@ class Interpreter:
                         context,
                     )
                 )
-        result, err = await load_module(path, self, context)
+        result, err = load_module(path, self, context)
         if err:
             if isinstance(err, Error):
                 return res.failure(err)
@@ -5619,11 +4655,11 @@ class Interpreter:
             )
         return res.success(result)
 
-    async def visit_HashMapNode(self, node, context):
+    def visit_HashMapNode(self, node, context):
         res = RTResult()
         result = {}
         for key_node, value_node in node.pairs:
-            key = res.register(await self.visit(key_node, context))
+            key = res.register(self.visit(key_node, context))
             if res.should_return():
                 return res
 
@@ -5636,18 +4672,18 @@ class Interpreter:
                         context,
                     )
                 )
-            val = res.register(await self.visit(value_node, context))
+            val = res.register(self.visit(value_node, context))
             if res.should_return():
                 return res
             result[key.value] = val
         return res.success(HashMap(result))
 
-    async def visit_ForInNode(self, node: ForInNode, context: Context) -> RTResult:
+    def visit_ForInNode(self, node: ForInNode, context: Context) -> RTResult:
         res = RTResult()
         var_name = node.var_name_tok.value
         body = node.body_node
         should_return_none = node.should_return_none
-        iterable = res.register(await self.visit(node.iterable_node, context))
+        iterable = res.register(self.visit(node.iterable_node, context))
         if res.should_return():
             return res
         iterator, error = iterable.iter()
@@ -5658,7 +4694,7 @@ class Interpreter:
             while True:
                 current = next(iterator)
                 context.symbol_table.set(var_name, current)
-                value = res.register(await self.visit(body, context))
+                value = res.register(self.visit(body, context))
                 if (
                     res.should_return()
                     and not res.loop_should_continue
@@ -5680,7 +4716,7 @@ class Interpreter:
                 List(value).set_context(context).set_pos(node.pos_start, node.pos_end)
             )
 
-    async def visit_UsingNode(self, node, context: Context):
+    def visit_UsingNode(self, node, context: Context):
         res = RTResult()
 
         if not context.parent:
@@ -5712,7 +4748,7 @@ class Interpreter:
 
         return res.success(Number.none)
 
-    async def visit_UsingParentNode(self, node, context: Context):
+    def visit_UsingParentNode(self, node, context: Context):
         res = RTResult()
 
         if not context.parent:
@@ -5740,18 +4776,18 @@ class Interpreter:
 
         return res.success(Number.none)
 
-    async def visit_IndexAssignNode(self, node, context):
+    def visit_IndexAssignNode(self, node, context):
         res = RTResult()
 
-        collection_obj = res.register(await self.visit(node.obj_node, context))
+        collection_obj = res.register(self.visit(node.obj_node, context))
         if res.should_return():
             return res
 
-        index_obj = res.register(await self.visit(node.index_node, context))
+        index_obj = res.register(self.visit(node.index_node, context))
         if res.should_return():
             return res
 
-        value_to_set = res.register(await self.visit(node.value_node, context))
+        value_to_set = res.register(self.visit(node.value_node, context))
         if res.should_return():
             return res
 
@@ -5805,7 +4841,7 @@ class Interpreter:
 
         return res.success(value_to_set)
 
-    async def visit_VargsUnpackNode(self, node, context):
+    def visit_VargsUnpackNode(self, node, context):
         return RTResult().failure(
             RTError(
                 node.pos_start,
@@ -5815,7 +4851,7 @@ class Interpreter:
             )
         )
 
-    async def visit_KargsUnpackNode(self, node, context):
+    def visit_KargsUnpackNode(self, node, context):
         return RTResult().failure(
             RTError(
                 node.pos_start,
@@ -5824,43 +4860,6 @@ class Interpreter:
                 context,
             )
         )
-
-    async def visit_MultiAssignNode(self, node, context: Context):
-        res = RTResult()
-        var_names = [tok.value for tok in node.var_name_toks]
-
-        value = res.register(await self.visit(node.value_node, context))
-        if res.should_return():
-            return res
-
-        if not isinstance(value, List):
-            return res.failure(
-                TError(
-                    node.value_node.pos_start,
-                    node.value_node.pos_end,
-                    "Value to unpack must be a list",
-                    context,
-                )
-            )
-        values_to_unpack = value.value
-        if len(values_to_unpack) == 1 and isinstance(values_to_unpack[0], List):
-            values_to_unpack = values_to_unpack[0].value
-
-        if len(var_names) != len(values_to_unpack):
-            return res.failure(
-                RTError(
-                    node.pos_start,
-                    node.pos_end,
-                    f"ValueError: not enough values to unpack (expected {len(var_names)}, got {len(values_to_unpack)})",
-                    context,
-                )
-            )
-
-        for i, var_name in enumerate(var_names):
-            val_to_assign = values_to_unpack[i]
-            context.symbol_table.set(var_name, val_to_assign)
-
-        return res.success(Number.none)
 
 
 global_symbol_table.set("argv_fp", List([String(e) for e in sys.argv[1:]]))
@@ -5871,7 +4870,6 @@ global_symbol_table.set("true", Number.true)
 global_symbol_table.set("list", String("<list>"))
 global_symbol_table.set("str", String("<str>"))
 global_symbol_table.set("int", String("<int>"))
-global_symbol_table.set("coroutine", String("<coroutine>"))
 global_symbol_table.set("float", String("<float>"))
 global_symbol_table.set("func", String("<func>"))
 global_symbol_table.set("bool", String("<bool>"))
@@ -5927,40 +4925,29 @@ def clean_value(value):
 
 
 def run(fn, text):
-    async def async_run():
-        lexer = Lexer(fn, text)
-        tokens, error = lexer.make_tokens()
-        if error:
-            return None, error
-        
-        for i in tokens:
-            print(i)
-
+    lexer = Lexer(fn, text)
+    tokens, error = lexer.make_tokens()
+    if error:
+        return None, error
+    result = None
+    context = None
+    try:
         parser = Parser(tokens)
         ast = parser.parse()
         if ast.error:
             return None, ast.error
-
         interpreter = Interpreter()
         context = Context("<program>")
         context.symbol_table = global_symbol_table
         context.private_symbol_table = private_symbol_table
         context.private_symbol_table.set("is_main", Number.true)
-
-        result = await interpreter.visit(ast.node, context)
-
+        result = interpreter.visit(ast.node, context)
         if fn == "<stdin>":
             value = result.value
             result.value = clean_value(value)
         else:
             result.value = ""
-
         return result.value, result.error
-
-    try:
-        loop = asyncio.get_event_loop()
-        value, error = loop.run_until_complete(async_run())
-        return value, error
     except (KeyboardInterrupt, EOFError):
         print(
             "\n---------------------------------------------------------------------------"
@@ -5970,16 +4957,5 @@ def run(fn, text):
         )
         print(
             f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}InterruptError{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}User Terminated{Fore.RESET}{Style.RESET_ALL}"
-        )
-        sys.exit(2)
-    except OverflowError:
-        print(
-            "\n---------------------------------------------------------------------------"
-        )
-        print(
-            "MemoryOverflowError                         Traceback (most recent call last)\n"
-        )
-        print(
-            f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}MemoryOverflowError{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}Memory Overflow{Fore.RESET}{Style.RESET_ALL}"
         )
         sys.exit(2)

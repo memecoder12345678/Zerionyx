@@ -491,7 +491,6 @@
                 <li><a href="#lib-json">json</a></li>
                 <li><a href="#lib-decorators">decorators</a></li>
                 <li><a href="#lib-channel">channel</a></li>
-                <li><a href="#lib-asyncio">asyncio</a></li>
             </ul>
 
         </aside>
@@ -560,7 +559,6 @@ ARG ::= EXPR
 ATOM ::=
 INT | FLOAT | STRING | IDENTIFIER
 | <code>(</code> EXPR <code>)</code>
-| <code>await</code> CALL
 | LIST_EXPR
 | IF_EXPR
 | FOR_EXPR
@@ -616,7 +614,7 @@ KWARGS_PARAM ::= <code>**</code> IDENTIFIER
 DECORATOR ::= <code>@</code> EXPR NEWLINE*
 
 DEF_FUNC ::=
-DECORATOR* (<code>async</code>)? <code>defun</code> IDENTIFIER? <code>(</code> PARAM_LIST? <code>)</code>
+DECORATOR* <code>defun</code> IDENTIFIER? <code>(</code> PARAM_LIST? <code>)</code>
 (<code>-&gt;</code> EXPR)?
 (NEWLINE STATEMENT NEWLINE <code>done</code>)?
 
@@ -702,7 +700,6 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>float</b> &rarr; <code>"&lt;float&gt;"</code></li>
                         <li><b>bool</b> &rarr; <code>"&lt;bool&gt;"</code></li>
                         <li><b>func</b> &rarr; <code>"&lt;func&gt;"</code></li>
-                        <li><b>coroutine</b> &rarr; <code>"&lt;coroutine&gt;"</code></li>
                         <li><b>hashmap</b> &rarr; <code>"&lt;hashmap&gt;"</code></li>
                         <li><b>thread</b> &rarr; <code>"&lt;thread&gt;"</code></li>
                         <li><b>bytes</b> &rarr; <code>"&lt;bytes&gt;"</code></li>
@@ -812,7 +809,6 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>is_nan(n)</b> &rarr; bool &mdash; Check if <code>n</code> is NaN (Not a Number)</li>
                         <li><b>is_channel(n)</b> &rarr; bool &mdash; Check if <code>n</code> is channel</li>
                         <li><b>is_cfloat(n)</b> &rarr; bool &mdash; Check if <code>n</code> is cfloat</li>
-                        <li><b>is_coroutine(n)</b> &rarr; bool &mdash; Check if <code>n</code> is coroutine</li>
                     </ul>
                 </section>
                 <section id="ref-namespaces">
@@ -902,11 +898,14 @@ Zerionyx may be magical, but its syntax must be real.
 
                 <section id="ref-functions">
                     <h3>Functions</h3>
-                    <p>Functions are defined with the <code>defun</code> keyword. They can accept parameters, have
-                        default values, and can be synchronous or asynchronous.</p>
+                    <p>Functions are defined with the <code>defun</code> keyword. They can accept parameters and also
+                        support default values.</p>
                     <br>
-                    <h4>Synchronous Function</h4>
-                    <p>The last expression in a function is automatically returned.</p>
+                    <h4>Function</h4>
+                    <p>
+                        A function is a reusable block of code that can be called with arguments to perform
+                        specific operations.
+                    </p>
                     <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">defun</span> <span class="zyx-func-def">greet</span><span class="zyx-types">(</span><span class="zyx-var">name</span><span class="zyx-types">=</span><span class="zyx-string">"World"</span><span class="zyx-types">)</span>
     <span class="zyx-keyword">return</span> <span class="zyx-string">"Hello, "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">name</span><span class="zyx-types">)</span> <span class="zyx-types">+</span> <span class="zyx-string">"!"</span>
@@ -914,22 +913,6 @@ Zerionyx may be magical, but its syntax must be real.
 
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-func">greet</span><span class="zyx-types">(</span><span class="zyx-string">"Zerionyx"</span><span class="zyx-types">))</span> <span class="zyx-comment"># Output: Hello, Zerionyx!</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-func">greet</span><span class="zyx-types">())</span>           <span class="zyx-comment"># Output: Hello, World!</span>
-</code></pre>
-                    <br>
-                    <h4>Asynchronous Function</h4>
-                    <p>Use the <code>async</code> keyword to define an asynchronous function (coroutine). These must be
-                        called with <code>await</code>.</p>
-                    <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">load</span> <span class="zyx-string">"libs.asyncio"</span>
-
-<span class="zyx-keyword">async</span> <span class="zyx-keyword">defun</span> <span class="zyx-func-def">fetch_data</span><span class="zyx-types">()</span>
-    <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Fetching..."</span><span class="zyx-types">)</span>
-    <span class="zyx-var">asyncio</span>.<span class="zyx-func">sleep</span><span class="zyx-types">(</span><span class="zyx-number">1</span><span class="zyx-types">)</span> <span class="zyx-comment"># Non-blocking sleep</span>
-    <span class="zyx-keyword">return</span> <span class="zyx-string">"Data fetched."</span>
-<span class="zyx-keyword">done</span>
-
-<span class="zyx-var">result</span> <span class="zyx-types">=</span> <span class="zyx-keyword">await</span> <span class="zyx-func">fetch_data</span><span class="zyx-types">()</span>
-<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">result</span><span class="zyx-types">)</span>
 </code></pre>
                     <br>
                     <h4>Anonymous and One-Line Functions</h4>
@@ -942,16 +925,19 @@ Zerionyx may be magical, but its syntax must be real.
 <span class="zyx-var">a</span> <span class="zyx-types">=</span> <span class="zyx-keyword">defun</span> <span class="zyx-types">(</span><span class="zyx-var">x</span><span class="zyx-types">)</span> <span class="zyx-types">-></span> <span class="zyx-var">x</span> <span class="zyx-types">^</span> <span class="zyx-number">0.5</span>
 </code></pre>
                 </section>
-                
+
                 <section id="ref-vargs-kwargs">
                     <h3>Vargs and Kwargs</h3>
-                    <p>Zerionyx supports functions that can accept a variable number of arguments using special syntax in the parameter list.</p>
+                    <p>Zerionyx supports functions that can accept a variable number of arguments using special syntax
+                        in the parameter list.</p>
                     <br>
                     <h4>Vargs (<code>*args</code>)</h4>
-                    <p>A parameter prefixed with a single asterisk (<code>*</code>) will collect all extra positional arguments into a list. This is often called "vargs" or "star-args".</p>
+                    <p>A parameter prefixed with a single asterisk (<code>*</code>) will collect all extra positional
+                        arguments into a list. This is often called "vargs" or "star-args".</p>
                     <br>
                     <h4>Kwargs (<code>**kwargs</code>)</h4>
-                    <p>A parameter prefixed with a double asterisk (<code>**</code>) will collect all extra keyword arguments into a HashMap. This is commonly known as "kwargs".</p>
+                    <p>A parameter prefixed with a double asterisk (<code>**</code>) will collect all extra keyword
+                        arguments into a HashMap. This is commonly known as "kwargs".</p>
                     <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">defun</span> <span class="zyx-func-def">show_details</span><span class="zyx-types">(</span><span class="zyx-var">name</span>, <span class="zyx-types">*</span><span class="zyx-var">scores</span>, <span class="zyx-types">**</span><span class="zyx-var">details</span><span class="zyx-types">)</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Name: "</span> <span class="zyx-types">+</span> <span class="zyx-var">name</span><span class="zyx-types">)</span>
@@ -1071,10 +1057,11 @@ Zerionyx may be magical, but its syntax must be real.
                         <code>has(hm, key)</code> for more operations.
                     </p>
                 </section>
-                
+
                 <section id="ref-assignment">
                     <h3>Assignment to Lists and HashMaps</h3>
-                    <p>The <code>$</code> operator is not only used for accessing elements but also for assigning or updating values at a specific index in a list or a key in a HashMap.</p>
+                    <p>The <code>$</code> operator is not only used for accessing elements but also for assigning or
+                        updating values at a specific index in a list or a key in a HashMap.</p>
                     <br>
                     <h4>List Assignment</h4>
                     <p>You can change the value at a specific index of a list.</p>
@@ -1086,7 +1073,8 @@ Zerionyx may be magical, but its syntax must be real.
 </code></pre>
                     <br>
                     <h4>HashMap Assignment</h4>
-                    <p>You can add a new key-value pair or update an existing one. This is particularly useful when building complex structures like a list of hashmaps.</p>
+                    <p>You can add a new key-value pair or update an existing one. This is particularly useful when
+                        building complex structures like a list of hashmaps.</p>
                     <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-var">users</span> <span class="zyx-types">=</span> <span class="zyx-types">[]</span>
 <span class="zyx-func">append</span><span class="zyx-types">(</span><span class="zyx-var">users</span>, <span class="zyx-types">{})</span> <span class="zyx-comment"># Add an empty hashmap to the list</span>
@@ -1519,113 +1507,6 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
 
-                <div id="lib-asyncio">
-                    <h3>asyncio.zyx</h3>
-                    <ul>
-                        <li>
-                            <b>sleep(duration)</b> &rarr; coroutine &mdash; Non-blocking sleep for a given number of
-                            seconds
-                        </li>
-                        <li>
-                            <b>gather(coroutines_list)</b> &rarr; coroutine &mdash; Runs a list of coroutines
-                            concurrently and returns a list of their results
-                        </li>
-                        <li>
-                            <b>timeout(coroutine, ms)</b> &rarr; coroutine &mdash; Runs a coroutine
-                            concurrently, each with the given timeout
-                        </li>
-                        <li>
-                            <b>timeouts(coroutines_list, ms)</b> &rarr; coroutine &mdash; Runs a list of coroutines
-                            concurrently, each with the given timeout
-                        </li>
-                        <li>
-                            <b>read(file_path, mode)</b> &rarr; coroutine &mdash; Asynchronously reads the content of a
-                            file
-                        </li>
-                        <li>
-                            <b>write(file_path, mode, content)</b> &rarr; coroutine &mdash; Asynchronously writes
-                            content to a file
-                        </li>
-                        <li>
-                            <b>copy(source, destination)</b> &rarr; coroutine &mdash; Asynchronously copies a file
-                        </li>
-                        <li>
-                            <b>walk(directory)</b> &rarr; coroutine &mdash; Asynchronously walks a directory tree
-                        </li>
-                        <li>
-                            <b>list_dir(directory)</b> &rarr; coroutine &mdash; Asynchronously lists the contents of a
-                            directory
-                        </li>
-                        <li>
-                            <b>get_ip()</b> &rarr; coroutine &mdash; Asynchronously gets the public IP address
-                        </li>
-                        <li>
-                            <b>ping(host)</b> &rarr; coroutine &mdash; Asynchronously pings a host and returns true or
-                            false
-                        </li>
-                        <li>
-                            <b>downl(url, timeout=15)</b> &rarr; coroutine &mdash; Asynchronously downloads a file
-                            from a URL
-                        </li>
-                        <li>
-                            <b>request(url, method="GET", headers={}, data={}, timeout=15)</b> &rarr; coroutine &mdash;
-                            Asynchronously
-                            sends an HTTP request
-                        </li>
-                        <li>
-                            <b>system(command)</b> &rarr; coroutine &mdash; Asynchronously executes a system command
-                        </li>
-                        <li>
-                            <b>osystem(command)</b> &rarr; coroutine &mdash; Asynchronously executes a system command
-                            and returns its output
-                        </li>
-                        <li>
-                            <b>wait_key(key)</b> &rarr; coroutine &mdash; Asynchronously waits for a keyboard key press.
-                        </li>
-                        <li>
-                            <b>capture_screen(path)</b> &rarr; coroutine &mdash; Asynchronously captures the screen
-                        </li>
-                        <li>
-                            <b>capture_area(x, y, w, h, path)</b> &rarr; coroutine &mdash; Asynchronously captures a
-                            region of the screen
-                        </li>
-                        <li>
-                            <b>send(channel, value)</b> &rarr; coroutine &mdash; Asynchronously sends a value to a
-                            channel
-                        </li>
-                        <li>
-                            <b>receive(channel)</b> &rarr; coroutine &mdash; Asynchronously receives a value from a
-                            channel
-                        </li>
-                        <li>
-                            <b>is_panic(func, args=[], kwargs={})</b> &rarr; coroutine &mdash; Asynchronously executes a
-                            function and catches potential errors
-                        </li>
-                        <li>
-                            <b>input(prompt="")</b> &rarr; coroutine &mdash; Asynchronously reads a line of text from
-                            the console without blocking the event loop
-                        </li>
-                        <li>
-                            <b>get_password(prompt="")</b> &rarr; coroutine &mdash; Asynchronously and securely reads a
-                            password from the console without echoing the input
-                        </li>
-                        <li>
-                            <b>println(value="")</b> &rarr; coroutine &mdash; Asynchronously prints a value to the
-                            console, followed by a newline
-                        </li>
-                        <li>
-                            <b>print(value="")</b> &rarr; coroutine &mdash; Asynchronously prints a value to the console
-                            without a trailing newline
-                        </li>
-                        <li>
-                            <b>clear()</b> &rarr; coroutine &mdash; Asynchronously clears the console screen
-                        </li>
-                        <li>
-                            <b>pyexec(code, args={})</b> &rarr; coroutine &mdash; Asynchronously executes a block of
-                            Python code in a separate thread and returns the resulting environment
-                        </li>
-                    </ul>
-                </div>
 
             </section>
         </main>

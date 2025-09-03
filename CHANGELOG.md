@@ -3,7 +3,7 @@
 **Date:** September 3, 2025
 
 Zerionyx 5.0.4 is the first stable release after the 5.0.x LTS line.
-This update introduces **multiple assignment syntax**, removes the legacy **`let` keyword**, and expands async console utilities for more fluid interactive scripting.
+This update introduces **multiple assignment syntax** and removes the legacy **`let` keyword**.
 
 ---
 

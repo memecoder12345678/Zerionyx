@@ -131,7 +131,7 @@ class Object:
     def notted(self):
         return None, self.illegal_operation()
 
-    async def execute(self, _):
+    def execute(self, _, __):
         return RTResult().failure(
             self.illegal_operation(error_str="Cannot call non-function")
         )
@@ -162,29 +162,6 @@ class Object:
             f'Illegal operation -> {error_str or "unknown"}',
             self.context,
         )
-
-
-class Coroutine(Object):
-    __slots__ = ("func", "positional_args", "keyword_args")
-
-    def __init__(self, func, positional_args, keyword_args):
-        super().__init__()
-        self.func = func
-        self.positional_args = positional_args
-        self.keyword_args = keyword_args
-
-    def copy(self):
-        return (
-            Coroutine(self.func, self.positional_args, self.keyword_args)
-            .set_pos(self.pos_start, self.pos_end)
-            .set_context(self.context)
-        )
-
-    def __repr__(self):
-        return f"<coroutine {self.func.name}>"
-
-    def type(self):
-        return "<coroutine>"
 
 
 class Channel(Object):

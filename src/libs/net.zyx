@@ -13,7 +13,7 @@ namespace net
         return ping_fp(h)
     done
 
-    defun downl(u, timeout=15)
+    defun download(u, timeout=15)
         return downl_fp(u, timeout)
     done
 

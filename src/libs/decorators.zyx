@@ -1,7 +1,6 @@
 # libs.decorators
 
 load "libs.time"
-load "libs.asyncio"
 load "libs.threading"
 
 namespace decorators
@@ -45,7 +44,7 @@ namespace decorators
         defun decorator(fn)
             defun wrapper(*vargs, **kargs)
                 for i = 1 to times + 1 do
-                    res = await asyncio.is_panic(fn, vargs)
+                    res = is_panic(fn, vargs)
                     result = res$0
                     err = res$1
                     
@@ -69,7 +68,7 @@ namespace decorators
                 state = {"result": none, "error": none, "done": false}
 
                 defun target()
-                    res = await asyncio.is_panic(fn, vargs)
+                    res = is_panic(fn, vargs)
                     if res$1 do
                         state$"error" = res$1
                     else do
@@ -136,7 +135,7 @@ namespace decorators
     defun ignore_error(default=none)
         defun decorator(fn)
             defun wrapper(*vargs, **kargs)
-                res = await asyncio.is_panic(fn, vargs)
+                res = is_panic(fn, vargs)
                 if res$1 do
                     return default
                 done

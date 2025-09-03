@@ -62,6 +62,4 @@ KEYWORDS = [
     "as",
     "namespace",
     "using",
-    "async",
-    "await",
 ]
