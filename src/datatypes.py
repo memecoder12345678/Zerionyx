@@ -1,6 +1,7 @@
 from .lexer import RTResult
 from fractions import Fraction
 from queue import Queue as PyQueue
+from concurrent.futures import ThreadPoolExecutor, Future as PyFuture
 import operator
 import reprlib
 from .errors import (
@@ -1173,10 +1174,6 @@ class Bytes(Object):
         return self.value.hex()
 
 
-from concurrent.futures import ThreadPoolExecutor, Future as PyFuture
-
-# ... (sau lớp Bytes)
-
 
 class ThreadPool(Object):
     __slots__ = ("executor",)
@@ -1186,7 +1183,6 @@ class ThreadPool(Object):
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
 
     def copy(self):
-        # Thread pools không nên được sao chép
         return self
 
     def type(self):
