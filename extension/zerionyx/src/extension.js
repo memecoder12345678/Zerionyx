@@ -46,7 +46,7 @@ const libraryConstants = {
 function activate(context) {
   const provider = vscode.languages.registerCompletionItemProvider('zerionyx', {
     provideCompletionItems(document, position) {
-        const linePrefix = document.lineAt(position).text.substr(0, position.character);
+        const linePrefix = document.lineAt(position).text.slice(0, position.character);
 
         for (const lib in libraryFunctions) {
             if (linePrefix.endsWith(`${lib}.`)) {
