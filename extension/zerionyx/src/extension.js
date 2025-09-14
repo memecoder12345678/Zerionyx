@@ -44,38 +44,52 @@ const libraryConstants = {
 };
 
 function activate(context) {
-  const provider = vscode.languages.registerCompletionItemProvider('zerionyx', {
-    provideCompletionItems(document, position) {
-        const linePrefix = document.lineAt(position).text.slice(0, position.character);
+    const provider = vscode.languages.registerCompletionItemProvider('zerionyx', {
+        provideCompletionItems(document, position) {
+            const linePrefix = document.lineAt(position).text.slice(0, position.character);
+            const fullText = document.getText();
 
-        for (const lib in libraryFunctions) {
-            if (linePrefix.endsWith(`${lib}.`)) {
-                const funcs = libraryFunctions[lib].map(func => {
-                    const item = new vscode.CompletionItem(func, vscode.CompletionItemKind.Method);
-                    item.insertText = func;
-                    return item;
-                });
-
-                const consts = (libraryConstants[lib] || []).map(c => {
-                    const item = new vscode.CompletionItem(c, vscode.CompletionItemKind.Field);
-                    item.insertText = c;
-                    return item;
-                });
-
-                return [...funcs, ...consts];
+            for (const lib in libraryFunctions) {
+                if (linePrefix.endsWith(`${lib}.`)) {
+                    const funcs = libraryFunctions[lib].map(func => new vscode.CompletionItem(func, vscode.CompletionItemKind.Method));
+                    const consts = (libraryConstants[lib] || []).map(c => new vscode.CompletionItem(c, vscode.CompletionItemKind.Field));
+                    return [...funcs, ...consts];
+                }
             }
-        }
 
-        const allKeywords = [
-            ...zerionyxKeywords.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Keyword)),
-            ...zerionyxControlFlow.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Keyword)),
-            ...zerionyxOperators.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Operator)),
-            ...zerionyxConstants.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Constant)),
-            ...zerionyxTypeConstants.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.TypeParameter)),
-            ...zerionyxBuiltins.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Function)),
-        ];
+            const userDefinedCompletions = [];
+            const variableRegex = /([a-zA-Z_]\w*)\s*=/g;
+            const functionRegex = /defun\s+([a-zA-Z_]\w*)/g;
+            const namespaceRegex = /namespace\s+([a-zA-Z_]\w*)/g;
 
-        return allKeywords;
+            let match;
+            while ((match = variableRegex.exec(fullText)) !== null) {
+                userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Variable));
+            }
+            while ((match = functionRegex.exec(fullText)) !== null) {
+                userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Function));
+            }
+            while ((match = namespaceRegex.exec(fullText)) !== null) {
+                userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Module));
+            }
+
+            const allKeywords = [
+                ...zerionyxKeywords.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Keyword)),
+                ...zerionyxControlFlow.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Keyword)),
+                ...zerionyxOperators.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Operator)),
+                ...zerionyxConstants.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Constant)),
+                ...zerionyxTypeConstants.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.TypeParameter)),
+                ...zerionyxBuiltins.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Function)),
+            ];
+
+            const allCompletions = [...allKeywords, ...userDefinedCompletions];
+            const uniqueCompletions = Array.from(new Set(allCompletions.map(item => item.label)))
+                .map(label => {
+                    return allCompletions.find(item => item.label === label);
+                });
+
+
+            return uniqueCompletions;
         }
     }, '.');
 
