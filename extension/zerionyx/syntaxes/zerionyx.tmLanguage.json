@@ -2,22 +2,23 @@
     "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
     "name": "Zerionyx",
     "patterns": [
-        { "include": "#builtins" },
         { "include": "#comments" },
+        { "include": "#strings" },
+        { "include": "#namespace" },
+        { "include": "#function-definition" },
         { "include": "#for-in-loop" },
         { "include": "#control-flow" },
-        { "include": "#decorators" },
-        { "include": "#function-call" },
-        { "include": "#function-definition" },
         { "include": "#hashmap" },
-        { "include": "#keywords" },
-        { "include": "#member-access" },
         { "include": "#list" },
+        { "include": "#function-call" },
+        { "include": "#decorators" },
+        { "include": "#member-access" },
+        { "include": "#keywords" },
+        { "include": "#builtins" },
         { "include": "#literals" },
-        { "include": "#namespace" },
         { "include": "#numbers" },
-        { "include": "#operators" },
-        { "include": "#strings" }
+        { "include": "#operators" }
+
     ],
     "repository": {
         "builtins": {
@@ -87,12 +88,8 @@
         "decorators": {
             "patterns": [
                 {
-                    "name": "meta.decorator.zerionyx",
-                    "match": "(&)([a-zA-Z_][a-zA-Z0-9_]*)",
-                    "captures": {
-                        "1": { "name": "punctuation.decorator.zerionyx" },
-                        "2": { "name": "entity.name.function.decorator.zerionyx" }
-                    }
+                    "name": "entity.name.function.decorator.zerionyx",
+                    "match": "(&)([a-zA-Z_][a-zA-Z0-9_]*)"
                 }
             ]
         },
@@ -120,7 +117,7 @@
             "patterns": [
                 {
                     "match": "->",
-                    "name": "keyword.operator.return-type.zerionyx"
+                    "name": "keyword.operator"
                 },
                 { "include": "$self" }
             ]
@@ -130,7 +127,6 @@
             "end": "\\b(done)\\b",
             "beginCaptures": {
                 "1": { "name": "keyword.control.zerionyx" },
-                "2": { "name": "variable.parameter.zerionyx" },
                 "3": { "name": "keyword.control.zerionyx" }
             },
             "endCaptures": {
@@ -145,7 +141,7 @@
             "patterns": [
                 {
                     "match": ":",
-                    "name": "keyword.operator.assignment.zerionyx"
+                    "name": "keyword.operator"
                 },
                 { "include": "$self" }
             ]
@@ -154,7 +150,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.zerionyx",
-                    "match": "\\b(if|elif|for|while|in|to|step|do|done|return|break|continue|defun|namespace|load|as|else|and|or|not)\\b"
+                    "match": "\\b(if|elif|for|while|in|to|step|do|done|return|break|continue|defun|load|as|else|and|or|not|namespace)\\b"
                 }
             ]
         },
@@ -184,12 +180,18 @@
             "end": "\\b(done)\\b",
             "beginCaptures": {
                 "1": { "name": "keyword.control.zerionyx" },
-                "2": { "name": "entity.name.namespace.zerionyx" }
+                "2": { "name": "entity.name.class.zerionyx" }
             },
             "endCaptures": {
                 "1": { "name": "keyword.control.zerionyx" }
             },
-            "patterns": [ { "include": "$self" } ]
+            "patterns": [
+                {
+                    "match": "(?<=\\bnamespace\\s+)([a-zA-Z_][a-zA-Z0-9_]*)",
+                    "name": "entity.name.class.zerionyx"
+                },
+                { "include": "$self" }
+            ]
         },
         "numbers": {
             "patterns": [
