@@ -41,6 +41,7 @@ defun main()
         termcolor.cprintln("Usage: bakme.zyx <folder_to_backup>", "yellow", none, none)
         sys.exit(1)
     done
+    sys.
     fp = sys.argv$1
     if not ffio.exists(fp) do 
         termcolor.cprintln("Error: Folder does not exist: " + fp, "red", none, none) 

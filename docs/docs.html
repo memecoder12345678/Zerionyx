@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         :root {
+            --neon-blue-dark: #069ec4;
             --neon-blue: #1ad1ff;
             --neon-green-accent: #1affb3;
 
@@ -181,7 +182,7 @@
         .sidebar li a {
             display: block;
             padding: 0.4rem 0.5rem;
-            color: var(--neon-blue);
+            color: var(--neon-blue-dark);
             text-decoration: none;
             border-radius: 4px;
             transition: all 0.2s;
@@ -190,7 +191,7 @@
 
         .sidebar li a:hover {
             background-color: #e0e0e0;
-            text-shadow: 0 0 4px var(--neon-blue);
+            text-shadow: 0 0 4px var(--neon-blue-dark);
         }
 
         .main-content {
@@ -212,15 +213,15 @@
             margin-top: 3rem;
             border-bottom: 1px solid #e0e0e0;
             padding-bottom: 0.5rem;
-            color: var(--neon-blue);
-            text-shadow: 0 0 3px var(--neon-blue);
+            color: var(--neon-blue-dark);
+            text-shadow: 0 0 3px var(--neon-blue-dark);
         }
 
         .main-content h3 {
             font-size: 1.4rem;
             font-weight: 400;
             margin-top: 2.5rem;
-            color: var(--neon-blue);
+            color: var(--neon-blue-dark);
         }
 
         pre {
@@ -1028,7 +1029,7 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>Concatenation</b>: <code>"a" + "b"</code> results in <code>"ab"</code></li>
                         <li><b>Repetition</b>: <code>"a" * 3</code> results in <code>"aaa"</code></li>
                         <li><b>Indexing</b>: Use the <code>$</code> operator to get a character at a specific index
-                            <code>"hello" $ 1</code> results in <code>"e"</code>
+                            <code>"hello"$1</code> results in <code>"e"</code>
                         </li>
                     </ul>
                     <p>For more advanced functions like splitting, joining, and replacing, use the <code>string</code>
@@ -1040,7 +1041,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>Lists are mutable, ordered collections of items.</p>
                     <ul>
                         <li><b>Creation</b>: <code>my_list = [1, "a", true]</code></li>
-                        <li><b>Indexing</b>: <code>my_list $ 0</code> returns <code>1</code></li>
+                        <li><b>Indexing</b>: <code>my_list$0</code> returns <code>1</code></li>
                         <li><b>Appending</b>: <code>my_list + "new"</code> returns <code>[1, "a", true, "new"]</code>
                         </li>
                         <li><b>Concatenation</b>: <code>[1, 2] * [3, 4]</code> returns <code>[1, 2, 3, 4]</code></li>
@@ -1056,7 +1057,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>HashMaps store key-value pairs. Keys must be strings.</p>
                     <ul>
                         <li><b>Creation</b>: <code>person = {"name": "Alex", "age": 30}</code></li>
-                        <li><b>Accessing</b>: <code>person $ "name"</code> returns <code>"Alex"</code></li>
+                        <li><b>Accessing</b>: <code>person$"name"</code> returns <code>"Alex"</code></li>
                         <li><b>Adding/Updating</b>: <code>person + {"city": "New York"}</code>, note that this returns a
                             new map</li>
                     </ul>
@@ -1514,7 +1515,7 @@ Zerionyx may be magical, but its syntax must be real.
                 <div id="lib-channel">
                     <h3>channel.zyx</h3>
                     <ul>
-                        <li><b>new()</b> &rarr; channel_type &mdash; Create a new channel</li>
+                        <li><b>new()</b> &rarr; channel &mdash; Create a new channel</li>
                         <li><b>send(ch, value)</b> &rarr; none &mdash; Send <code>value</code> into channel
                             <code>ch</code>
                         </li>

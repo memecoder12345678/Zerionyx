@@ -2,6 +2,7 @@
 **/backup/
 **/extension/node_modules/
 **/pypy*/
+**/.venv/
 **/Zerionyx-*/
 **/*.zip
 **/*.tar.gz
