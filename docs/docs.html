@@ -461,6 +461,7 @@
                 <li><a href="#ref-control-flow">Control Flow</a></li>
                 <li><a href="#ref-loops">Loops</a></li>
                 <li><a href="#ref-functions">Functions</a></li>
+                <li><a href="#ref-using">Using Statements</a></li>
                 <li><a href="#ref-vargs-kwargs">Vargs and Kwargs</a></li>
                 <li><a href="#ref-io">Input/Output</a></li>
                 <li><a href="#ref-error-handling">Error Handling</a></li>
@@ -682,7 +683,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>Zerionyx provides several global constants for convenience.</p>
                     <h4>Core Values</h4>
                     <ul>
-                        
+
                         <li><b>true</b> &mdash; The boolean value for truth</li>
                         <li><b>false</b> &mdash; The boolean value for falsehood</li>
                         <li><b>none</b> &mdash; Represents the absence of a value</li>
@@ -933,7 +934,63 @@ Zerionyx may be magical, but its syntax must be real.
 <span class="zyx-var">a</span> <span class="zyx-types">=</span> <span class="zyx-keyword">defun</span> <span class="zyx-types">(</span><span class="zyx-var">x</span><span class="zyx-types">)</span> <span class="zyx-types">-></span> <span class="zyx-var">x</span> <span class="zyx-types">^</span> <span class="zyx-number">0.5</span>
 </code></pre>
                 </section>
+                <section id="ref-using">
+                    <h3>The <code>using</code> Statement: Accessing Global Scope</h3>
+                    <p>
+                        The <code>using</code> statement is used to explicitly bind a variable reference to the
+                        <strong>global scope</strong> rather than creating a new local variable. This allows a function
+                        to <strong>read from and modify</strong> a global variable directly.
+                    </p>
+                    <br>
 
+                    <h4><code>using <variable></code>: The <code>global</code> Analogy</h4>
+                    <p>
+                        When you need a function to modify a variable that exists in the global scope (or a specific
+                        top-level namespace), <code>using</code> creates a direct, writable link to that original
+                        variable. This brings the name into the local scope for easy access.
+                    </p>
+                    <br>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-var">is_running</span> <span class="zyx-types">=</span> <span class="zyx-var">true</span>
+
+<span class="zyx-keyword">defun</span> <span class="zyx-func-def">stop_application</span><span class="zyx-types">()</span>
+    <span class="zyx-keyword">using</span> <span class="zyx-var">config</span>.<span class="zyx-var">is_running</span>
+    <span class="zyx-var">is_running</span> <span class="zyx-types">=</span> <span class="zyx-var">false</span>
+<span class="zyx-keyword">done</span>
+
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"App is running: "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">is_running</span><span class="zyx-types">))</span> <span class="zyx-comment"># Output: App is running: true</span>
+
+<span class="zyx-func">stop_application</span><span class="zyx-types">()</span>
+
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"App is running: "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">is_running</span><span class="zyx-types">))</span> <span class="zyx-comment"># Output: App is running: false</span>
+</code></pre>
+                    <br>
+                    <h4><code>using parent</code> Statement: The <code>nonlocal</code> Analogy</h3>
+                        <p>
+                            The <code>using parent</code> statement is used inside nested functions.
+                            It binds a variable reference to the <strong>immediate parent function&rsquo;s
+                                scope</strong>,
+                            similar to Python&rsquo;s <code>nonlocal</code> keyword.
+                        </p>
+                        <br>
+                        <pre><code class="highlight-Zerionyx"><span class="zyx-var">x</span> <span class="zyx-types">=</span> <span class="zyx-number">2</span> <span class="zyx-comment"># Global variable</span>
+
+<span class="zyx-keyword">defun</span> <span class="zyx-func-def">outer</span><span class="zyx-types">()</span>
+    <span class="zyx-var">x</span> <span class="zyx-types">=</span> <span class="zyx-number">0</span> <span class="zyx-comment"># Local variable, shadows the global 'x'</span>
+
+    <span class="zyx-keyword">defun</span> <span class="zyx-func-def">inner</span><span class="zyx-types">()</span>
+        <span class="zyx-keyword">using</span> <span class="zyx-keyword">parent</span> <span class="zyx-var">x</span>
+        <span class="zyx-var">x</span> <span class="zyx-types">+=</span> <span class="zyx-number">1</span>
+    <span class="zyx-keyword">done</span>
+
+    <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"outer's x before: "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">x</span><span class="zyx-types">))</span> <span class="zyx-comment"># Output: outer's x before: 0</span>
+    <span class="zyx-func">inner</span><span class="zyx-types">()</span>
+    <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"outer's x after: "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">x</span><span class="zyx-types">))</span> <span class="zyx-comment"># Output: outer's x after: 1</span>
+<span class="zyx-keyword">done</span>
+
+<span class="zyx-func">outer</span><span class="zyx-types">()</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"global x: "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">x</span><span class="zyx-types">))</span> <span class="zyx-comment"># Output: global x: 2</span>
+</code></pre>
+                </section>
                 <section id="ref-vargs-kwargs">
                     <h3>Vargs and Kwargs</h3>
                     <p>Zerionyx supports functions that can accept a variable number of arguments using special syntax
@@ -1390,21 +1447,32 @@ Zerionyx may be magical, but its syntax must be real.
                     <h3>threading.zyx</h3>
                     <h4>Single Thread Management</h4>
                     <ul>
-                        <li><b>start(func, args=[], kwargs={})</b> &rarr; thread &mdash; Starts a new thread to execute <code>func</code></li>
-                        <li><b>sleep(seconds)</b> &rarr; none &mdash; Pauses the current thread for a specified duration</li>
-                        <li><b>join(thread, timeout=15)</b> &rarr; none &mdash; Waits for a specific thread to complete its execution</li>
+                        <li><b>start(func, args=[], kwargs={})</b> &rarr; thread &mdash; Starts a new thread to execute
+                            <code>func</code></li>
+                        <li><b>sleep(seconds)</b> &rarr; none &mdash; Pauses the current thread for a specified duration
+                        </li>
+                        <li><b>join(thread, timeout=15)</b> &rarr; none &mdash; Waits for a specific thread to complete
+                            its execution</li>
                         <li><b>is_alive(thread)</b> &rarr; bool &mdash; Checks if a thread is still running</li>
                         <li><b>cancel(thread)</b> &rarr; none &mdash; Attempts to terminate a running thread</li>
                     </ul>
 
                     <h4>Pool Namespace (<code>threading.pool</code>)</h4>
-                    <p>Provides a high-level interface for managing a pool of worker threads to execute tasks asynchronously.</p>
+                    <p>Provides a high-level interface for managing a pool of worker threads to execute tasks
+                        asynchronously.</p>
                     <ul>
-                        <li><b>new(max_workers=5)</b> &rarr; thread-pool &mdash; Creates a new thread pool with a specified number of worker threads</li>
-                        <li><b>submit(pool, func, args=[], kwargs={})</b> &rarr; future &mdash; Submits a task (<code>func</code> with its arguments) to the thread pool for execution and returns a <code>future</code> object immediately</li>
-                        <li><b>shutdown(pool, wait=true)</b> &rarr; none &mdash; Shuts down the thread pool, releasing all resources, if <code>wait</code> is true, it will wait for all submitted tasks to complete</li>
-                        <li><b>result(future)</b> &rarr; any &mdash; Retrieves the result from a <code>future</code> object</li>
-                        <li><b>is_done(future)</b> &rarr; bool &mdash; Checks if the task associated with the <code>future</code> has completed, either successfully or with an error</li>
+                        <li><b>new(max_workers=5)</b> &rarr; thread-pool &mdash; Creates a new thread pool with a
+                            specified number of worker threads</li>
+                        <li><b>submit(pool, func, args=[], kwargs={})</b> &rarr; future &mdash; Submits a task
+                            (<code>func</code> with its arguments) to the thread pool for execution and returns a
+                            <code>future</code> object immediately</li>
+                        <li><b>shutdown(pool, wait=true)</b> &rarr; none &mdash; Shuts down the thread pool, releasing
+                            all resources, if <code>wait</code> is true, it will wait for all submitted tasks to
+                            complete</li>
+                        <li><b>result(future)</b> &rarr; any &mdash; Retrieves the result from a <code>future</code>
+                            object</li>
+                        <li><b>is_done(future)</b> &rarr; bool &mdash; Checks if the task associated with the
+                            <code>future</code> has completed, either successfully or with an error</li>
                     </ul>
                 </div>
                 <div id="lib-time">

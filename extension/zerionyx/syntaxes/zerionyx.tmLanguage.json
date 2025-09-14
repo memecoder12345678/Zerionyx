@@ -4,6 +4,8 @@
     "patterns": [
         { "include": "#comments" },
         { "include": "#strings" },
+        { "include": "#call-member-access" },
+        { "include": "#member-access" },
         { "include": "#namespace" },
         { "include": "#function-definition" },
         { "include": "#for-in-loop" },
@@ -12,7 +14,6 @@
         { "include": "#list" },
         { "include": "#function-call" },
         { "include": "#decorators" },
-        { "include": "#member-access" },
         { "include": "#keywords" },
         { "include": "#builtins" },
         { "include": "#literals" },
@@ -149,8 +150,12 @@
         "keywords": {
             "patterns": [
                 {
+                    "name": "keyword.control.using.parent.zerionyx",
+                    "match": "\\b(using parent)\\b"
+                },
+                {
                     "name": "keyword.control.zerionyx",
-                    "match": "\\b(if|elif|for|while|in|to|step|do|done|return|break|continue|defun|load|as|else|and|or|not|namespace)\\b"
+                    "match": "\\b(if|elif|for|while|in|to|step|do|done|return|break|continue|defun|load|as|else|and|or|not|namespace|using)\\b"
                 }
             ]
         },
@@ -168,11 +173,17 @@
                 }
             ]
         },
-		"member-access": {
+		"call-member-access": {
 			"match": "([a-zA-Z_][a-zA-Z0-9_]*)\\.([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
 			"captures": {
 				"1": { "name": "support.class.zerionyx" },
 				"2": { "name": "entity.name.function.zerionyx" }
+			}
+		},
+		"member-access": {
+			"match": "([a-zA-Z_][a-zA-Z0-9_]*)\\.([a-zA-Z_][a-zA-Z0-9_]*)",
+			"captures": {
+				"1": { "name": "support.class.zerionyx" }
 			}
 		},
         "namespace": {
