@@ -68,8 +68,8 @@ class Lexer:
                 self.handle_mul_or_dstar_or_augmented()
             elif self.current_char == "/":
                 self.div_or_floordiv_or_augmented()
-            elif self.current_char == "@":
-                self.tokens.append(Token(TT_AT, pos_start=self.pos))
+            elif self.current_char == "&":
+                self.tokens.append(Token(TT_AND, pos_start=self.pos))
                 self.advance()
             elif self.current_char == "\\":
                 if self.peek_foward_steps(1) == "\n":

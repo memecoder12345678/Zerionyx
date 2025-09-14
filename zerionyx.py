@@ -33,7 +33,7 @@ IDENTIFIER "=" EXPR
 | COMP_EXPR (("and" | "or") COMP_EXPR)*
 
 COMP_EXPR ::=
-ARITH_EXPR (("==" | "&lt;" | "&gt;" | "&lt;=" | "&gt;=" | "!=") ARITH_EXPR)*
+ARITH_EXPR (("==" | "<" | ">" | "<=" | ">=" | "!=") ARITH_EXPR)*
 | "not" COMP_EXPR
 
 ARITH_EXPR ::= TERM (("+" | "-") TERM)*
@@ -107,7 +107,7 @@ VAR_PARAMS ::= VARARGS_PARAM ("," KWARGS_PARAM)? | KWARGS_PARAM
 VARARGS_PARAM ::= "*" IDENTIFIER
 KWARGS_PARAM ::= "**" IDENTIFIER
 
-DECORATOR ::= "@" EXPR NEWLINE*
+DECORATOR ::= "&" EXPR NEWLINE*
 
 DEF_FUNC ::=
 DECORATOR* "defun" IDENTIFIER? "(" PARAM_LIST? ")"

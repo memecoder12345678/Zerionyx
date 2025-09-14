@@ -1,5 +1,6 @@
 **/__pycache__/
 **/backup/
+**/extension/node_modules/
 **/pypy*/
 **/Zerionyx-*/
 **/*.zip

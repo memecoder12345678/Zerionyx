@@ -133,9 +133,9 @@ class Parser:
         res = ParseResult()
         pos_start = self.current_tok.pos_start.copy()
 
-        if self.current_tok.type == TT_AT:
+        if self.current_tok.type == TT_AND:
             decorator_nodes = []
-            while self.current_tok.type == TT_AT:
+            while self.current_tok.type == TT_AND:
                 res.register_advancement()
                 self.advance()
                 decorator_nodes.append(res.register(self.expr(allow_assignment=False)))

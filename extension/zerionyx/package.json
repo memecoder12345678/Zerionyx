@@ -1,0 +1,31 @@
+{
+  "name": "zerionyx-language-support",
+  "displayName": "Zerionyx Language Support",
+  "description": "Syntax highlighting and autocompletion for the Zerionyx language.",
+  "version": "2.0.0",
+  "publisher": "MemeCoder",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./src/extension.js",
+"contributes": {
+  "languages": [
+    {
+      "id": "zerionyx",
+      "aliases": ["Zerionyx", "zerionyx"],
+      "extensions": [".zyx"],
+      "configuration": "./language-configuration.json"
+    }
+  ],
+  "grammars": [
+    {
+      "language": "zerionyx",
+      "scopeName": "source.zerionyx",
+      "path": "./syntaxes/zerionyx.tmLanguage.json"
+    }
+  ]
+}
+}

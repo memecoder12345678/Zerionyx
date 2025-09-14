@@ -1,58 +1,78 @@
-# Changelog: Version 5.0.4 — Multiple Assignment & New Concurrency Model
+# Changelog: Version 5.0.5 — Bug Fixes, Type Checks & Decorator Overhaul
 
-**Date:** September 3, 2025
+**Date:** September 7, 2025
 
-Zerionyx 5.0.4 is the first stable release after the 5.0.x LTS line. This update introduces a **simplified variable model**, powerful **multiple assignment syntax**, and revamps concurrency by replacing `async` with a robust **thread pool system**.
+Zerionyx 5.0.5 introduces critical **bug fixes**, new **runtime type-check utilities**, and a **revamped decorator syntax**. This release focuses on **stability** and **developer ergonomics**.
+
+---
+
+## 🐞 Bug Fixes
+
+* Fixed an issue in **`threading.pool.result()`** where completed futures sometimes returned `None`.
+  Now consistently return `value`.
 
 ---
 
 ## ✨ New Features
 
-*   **Multiple Assignment**
+* **New Type Check Functions**
+  Added built-in helpers for runtime validation:
 
-    You can now assign multiple variables from **lists or values** in a single line:
+  ```zyx
+  is_thread_pool(x)   -> bool   # Check if x is a thread pool
+  is_future(x)        -> bool   # Check if x is a future
+  is_namespace(x)     -> bool   # Check if x is a namespace
+  ```
 
-    ```zyx
-    a, b, c = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-    x, y, z = 1, 2, 3
-    ```
+  **Example:**
 
-*   **Introduction of Thread Pools**
-
-    Concurrency in Zerionyx has been supercharged with the introduction of a built-in thread pool, accessible via the `threading` library. This provides an efficient way to manage and execute multiple tasks in parallel without the overhead of creating new threads for each task.
-
-    ```zyx
-    threading = load("libs.threading")
-
-    pool = threading.pool.new(4) # Create a pool of 4 worker threads
-    future = threading.pool.submit(pool, my_long_running_task, [arg1, arg2])
-
-    # Continue other work...
-
-    # Get the result later (this will wait if the task isn't done)
-    value, err_msg, err_type = threading.pool.result(future)
-    ```
+  ```zyx
+  pool = threading.pool.new(2)
+  println(is_thread_pool(pool))  # true
+  ```
 
 ---
 
-## 💥 Breaking Changes & Removals
+## 💥 Breaking Changes
 
-*   **Unified Variable Declaration**
+* **Decorator Syntax Change**
+  The decorator symbol has been changed from `@` to `&` for a cleaner and more consistent style.
 
-    The **`let` keyword has been removed**. Variables are now declared and assigned directly with `=` for a **cleaner, more Pythonic experience**:
+  ```zyx
+  load "libs.decorators"
 
-    ```zyx
-    # Before
-    let x = 10  
+  &decorators.cache
+  defun fib(n)
+      if n < 2 do
+          return n
+      done
+      a = 0
+      b = 1
+      for i = 1 to n do
+          temp = b
+          b = a + b
+          a = temp
+      done
+      return b
+  done
 
-    # Now
-    x = 10  
-    ```
+  println("Fib(40) with cache...")
 
-*   **Removal of `async` Keyword**
-
-    The `async` keyword and its related functionality have been removed. This change simplifies Zerionyx's concurrency model, consolidating all asynchronous and parallel operations under the new, more powerful `threading` library. All asynchronous tasks should now be implemented using the thread pool for better performance and control.
+  &decorators.measure_time
+  defun cached_fib() -> fib(40)
+  println(cached_fib())
+  println(cached_fib())
+  ```
 
 ---
 
-Zerionyx 5.0.4 enhances **developer ergonomics** with **multiple assignment**, a **simplified variable model**, and a unified, powerful **new concurrency model** built around threads.
+## 📌 Summary
+
+Zerionyx 5.0.5 brings:
+
+* Stability improvements with **bug fixes**
+* Handy **type-check helpers** (`is_thread_pool`, `is_future`, `is_namespace`)
+* A **new decorator syntax** with `&`
+
+This release smooths out rough edges and makes the language more **consistent** and **developer-friendly**.
+

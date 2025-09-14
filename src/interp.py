@@ -1668,14 +1668,7 @@ class BuiltInFunction(BaseFunction):
             try:
                 result = func.execute(positional_args, keyword_args)
                 if result and result.error:
-                    error_header = (
-                        f"\n--- Unhandled Error in Thread (Function: {func.name}) ---\n"
-                    )
-                    sys.stderr.write(error_header)
                     sys.stderr.write(str(result.error) + "\n")
-                    sys.stderr.write(
-                        "---------------------------------------------------\n"
-                    )
                     sys.stderr.flush()
 
             except Exception:
@@ -1685,10 +1678,7 @@ class BuiltInFunction(BaseFunction):
                 sys.stderr.write(error_header)
                 import traceback
 
-                sys.stderr.write(traceback.format_exc())
-                sys.stderr.write(
-                    "-----------------------------------------------------\n"
-                )
+                sys.stderr.write(traceback.format_exc() + "\n")
                 sys.stderr.flush()
 
         try:
@@ -3826,6 +3816,21 @@ class BuiltInFunction(BaseFunction):
     def execute_is_py_obj(self, exec_ctx):
         is_py_obj = isinstance(exec_ctx.symbol_table.get("value"), PyObject)
         return RTResult().success(Number.true if is_py_obj else Number.false)
+    
+    @set_args(["value"])
+    def execute_is_namespace(self, exec_ctx):
+        is_namespace = isinstance(exec_ctx.symbol_table.get("value"), NameSpace)
+        return RTResult().success(Number.true if is_namespace else Number.false)  
+  
+    @set_args(["value"])
+    def execute_is_thread_pool(self, exec_ctx):
+        is_thread_pool = isinstance(exec_ctx.symbol_table.get("value"), ThreadPool)
+        return RTResult().success(Number.true if is_thread_pool else Number.false)
+
+    @set_args(["value"])
+    def execute_is_future(self, exec_ctx):
+        is_future = isinstance(exec_ctx.symbol_table.get("value"), Future)
+        return RTResult().success(Number.true if is_future else Number.false)
 
     @set_args(["value"])
     def execute_is_nan(self, exec_ctx):
@@ -4088,15 +4093,11 @@ class BuiltInFunction(BaseFunction):
         }
 
         def task_wrapper():
-            # Chạy hàm và lấy kết quả (res)
             res = func.execute(positional_args, keyword_args)
 
-            # Gói kết quả vào tuple (value, error)
             if res.error:
-                # Không cần in ra ở đây nữa nếu không muốn log thừa
-                # sys.stderr.write(f"Error captured in thread pool: {res.error.as_string()}\n")
-                return (None, res.error)
-            return (res.value, None)
+                raise ZyxErrThreadPool(res.error)
+            return res.value
 
         future = pool.executor.submit(task_wrapper)
         return RTResult().success(Future(future))
@@ -4139,43 +4140,10 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
-            result_tuple = future_obj.future.result()
-            value, error = result_tuple
-
-            if error:
-                err = error
-                if isinstance(err, RTError):
-                    err_str = str(err)
-                    err_line = err_str.strip().split("\n")[-1]
-
-                    try:
-                        err_name, err_msg = err_line.split(":", 1)
-                        err_name, err_msg = err_name.strip(), err_msg.strip()
-                    except ValueError:
-                        err_name = "UnknownError"
-                        err_msg = err_line
-
-                    if "RuntimeError" in err_name:
-                        err_name_short = "RT"
-                    elif "MathError" in err_name:
-                        err_name_short = "M"
-                    elif "IOError" in err_name:
-                        err_name_short = "IO"
-                    elif "TypeError" in err_name:
-                        err_name_short = "T"
-                    else:
-                        err_name_short = "UNKNOWN"
-
-                    return RTResult().success(
-                        List(
-                            [Number.none, String(err_msg[5:-4]), String(err_name_short)]
-                        )
-                    )
-                else:
-                    return RTResult().failure(err)
-            else:
-                return RTResult().success(List([value, Number.none, Number.none]))
-
+            result = future_obj.future.result()
+            return RTResult().success(result)
+        except ZyxErrThreadPool as e:
+            return RTResult().failure(e.err)
         except Exception as err:
             return RTResult().failure(
                 RTError(

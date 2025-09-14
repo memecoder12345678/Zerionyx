@@ -11,6 +11,11 @@ from .errors import (
 )
 
 
+class ZyxErrThreadPool(EOFError):
+    def __init__(self, err):
+        self.err = err
+        super().__init__(err)
+
 class Context:
 
     __slots__ = (

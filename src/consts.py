@@ -4,7 +4,7 @@ import string
 DIGITS = string.digits
 LETTERS = string.ascii_letters
 LETTERS_DIGITS = LETTERS + DIGITS
-INFO = "v5.0.4 (2025-09-01 14:43:38)"
+INFO = "v5.0.5 (2025-09-14 10:50:25)"
 LIBS_PATH = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
 TT_INT = "INT"
 TT_FLOAT = "FLOAT"
@@ -38,7 +38,7 @@ TT_RBRACE = "RBRACE"
 TT_EOF = "EOF"
 TT_COLON = "COLON"
 TT_DOLLAR = "DOLLAR"
-TT_AT = "AT"
+TT_AND = "&"
 TT_DOUBLE_STAR = "DSTAR"
 KEYWORDS = [
     "and",

@@ -44,7 +44,7 @@ defun main()
     fp = sys.argv$1
     if not ffio.exists(fp) do 
         termcolor.cprintln("Error: Folder does not exist: " + fp, "red", none, none) 
-        sys.exit(1) 
+        sys.exit(1)
     done
     if ffio.is_file(fp) do 
         termcolor.cprintln("Error: Path provided is not a folder: " + fp, "red", none, none)

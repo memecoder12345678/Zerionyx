@@ -3,7 +3,7 @@
   <h1 align="center">Zerionyx Programming Language</h1>
   <p align="center">
     <img src="https://img.shields.io/badge/python-3.11%2B-00ffcc?style=for-the-badge&logo=python" alt="Python 3.11+" />
-    <img src="https://img.shields.io/badge/Zerionyx-5.0.4-00ffcc?style=for-the-badge&logo=lightning" alt="Zerionyx-5.0.4" />
+    <img src="https://img.shields.io/badge/Zerionyx-5.0.5-00ffcc?style=for-the-badge&logo=lightning" alt="Zerionyx-5.0.5" />
     <img src="https://img.shields.io/badge/build-passing-00ffcc?style=for-the-badge&logo=githubactions" alt="Build Status" />
     <img src="https://img.shields.io/github/contributors/memecoder12345678/Zerionyx?style=for-the-badge&color=00ffcc">
     <img src="https://img.shields.io/github/stars/memecoder12345678/Zerionyx?style=for-the-badge&color=00ffcc">
@@ -33,7 +33,7 @@
 
 ## Overview
 
-**Zerionyx** is an educational programming language built in Python, designed for **learning** and **lightweight task automation**.  
+**Zerionyx** is an educational programming language built in Python, designed for **learning** and **task automation**.  
 Designed to be minimal yet powerful &mdash; **Zerionyx bridges the gap between learning and real-world scripting.**
 
 It offers:
@@ -42,7 +42,6 @@ It offers:
 * Immediate visual feedback and clear error diagnostics  
 * Built-in libraries (math, algorithms, data structures)  
 * File handling and scripting support  
-* Lightweight yet expressive &mdash; ideal for teaching and prototyping
 
 ---
 
@@ -227,7 +226,7 @@ Use commands such as `grammar`, `license`, etc., for more details.
 * [x] Add algorithms & data structure libraries
 * [X] Integrate debugger support
 * [X] Improving interpreter performance 
-* [X] Creating **VS Code plugin** (syntax highlighting only)
+* [X] Creating **VS Code plugin**
 ---
 
 ## Contributing

@@ -611,7 +611,7 @@ VAR_PARAMS ::= VARARGS_PARAM (<code>,</code> KWARGS_PARAM)? | KWARGS_PARAM
 VARARGS_PARAM ::= <code>*</code> IDENTIFIER
 KWARGS_PARAM ::= <code>**</code> IDENTIFIER
 
-DECORATOR ::= <code>@</code> EXPR NEWLINE*
+DECORATOR ::= <code>&</code> EXPR NEWLINE*
 
 DEF_FUNC ::=
 DECORATOR* <code>defun</code> IDENTIFIER? <code>(</code> PARAM_LIST? <code>)</code>
@@ -631,7 +631,7 @@ Consistency is better than chaos.
 Freedom in syntax, but not in structure.
 Parentheses are for math, backslashes are for flow.
 The caret (<code>^</code>) means power &mdash; and nothing else.
-Blocks should be explicit: <code>do...done</code> says it all.
+Blocks should be explicit: <code>done</code> says it all.
 <code>if</code> is a command, not a value.
 Whitespace is free; newlines are not.
 Write like a poet, execute like a machine.
@@ -681,9 +681,11 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>Zerionyx provides several global constants for convenience.</p>
                     <h4>Core Values</h4>
                     <ul>
+                        
                         <li><b>true</b> &mdash; The boolean value for truth</li>
                         <li><b>false</b> &mdash; The boolean value for falsehood</li>
                         <li><b>none</b> &mdash; Represents the absence of a value</li>
+                        <li><b>is_main</b> &mdash; Check if the current file is the one being executed</li>
                     </ul>
                     <h4>Type Representations (Strings)</h4>
                     <p>These constants are string values that correspond to the output of the <code>type()</code>
@@ -707,6 +709,8 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>py_obj</b> &rarr; <code>"&lt;py-obj&gt;"</code></li>
                         <li><b>channel_type</b> &rarr; <code>"&lt;channel&gt;"</code></li>
                         <li><b>none_type</b> &rarr; <code>"&lt;none&gt;"</code></li>
+                        <li><b>thread_pool_type</b> &rarr; <code>"&lt;thread-pool&gt;"</code></li>
+                        <li><b>future_type</b> &rarr; <code>"&lt;future&gt;"</code></li>
                     </ul>
                     <h4>Special Numeric Values</h4>
                     <ul>
@@ -750,6 +754,9 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>is_str(x)</b> &rarr; bool &mdash; Check if <code>x</code> is string</li>
                         <li><b>is_bool(x)</b> &rarr; bool &mdash; Check if <code>x</code> is boolean</li>
                         <li><b>is_thread(x)</b> &rarr; bool &mdash; Check if <code>x</code> is thread</li>
+                        <li><b>is_thread_pool(x)</b> &rarr; bool &mdash; Check if <code>x</code> is thread pool</li>
+                        <li><b>is_future(x)</b> &rarr; bool &mdash; Check if <code>x</code> is future</li>
+                        <li><b>is_namespace(x)</b> &rarr; bool &mdash; Check if <code>x</code> is namespace</li>
                         <li><b>keys(hm)</b> &rarr; list &mdash; Return list of all keys in <code>hm</code> (a hashmap)
                         </li>
                         <li><b>values(hm)</b> &rarr; list &mdash; Return list of all values in <code>hm</code></li>
@@ -1380,25 +1387,23 @@ Zerionyx may be magical, but its syntax must be real.
                 </div>
                 <div id="lib-threading">
                     <h3>threading.zyx</h3>
-                    <p>This library provides tools for concurrent execution using threads and thread pools.</p>
-
                     <h4>Single Thread Management</h4>
                     <ul>
-                        <li><b>start(func, args=[], kwargs={})</b> &rarr; thread &mdash; Starts a new thread to execute <code>func</code>.</li>
-                        <li><b>sleep(seconds)</b> &rarr; none &mdash; Pauses the current thread for a specified duration.</li>
-                        <li><b>join(thread, timeout=15)</b> &rarr; none &mdash; Waits for a specific thread to complete its execution.</li>
-                        <li><b>is_alive(thread)</b> &rarr; bool &mdash; Checks if a thread is still running.</li>
-                        <li><b>cancel(thread)</b> &rarr; none &mdash; Attempts to terminate a running thread.</li>
+                        <li><b>start(func, args=[], kwargs={})</b> &rarr; thread &mdash; Starts a new thread to execute <code>func</code></li>
+                        <li><b>sleep(seconds)</b> &rarr; none &mdash; Pauses the current thread for a specified duration</li>
+                        <li><b>join(thread, timeout=15)</b> &rarr; none &mdash; Waits for a specific thread to complete its execution</li>
+                        <li><b>is_alive(thread)</b> &rarr; bool &mdash; Checks if a thread is still running</li>
+                        <li><b>cancel(thread)</b> &rarr; none &mdash; Attempts to terminate a running thread</li>
                     </ul>
 
                     <h4>Pool Namespace (<code>threading.pool</code>)</h4>
                     <p>Provides a high-level interface for managing a pool of worker threads to execute tasks asynchronously.</p>
                     <ul>
-                        <li><b>new(max_workers=5)</b> &rarr; thread-pool &mdash; Creates a new thread pool with a specified number of worker threads.</li>
-                        <li><b>submit(pool, func, args=[], kwargs={})</b> &rarr; future &mdash; Submits a task (<code>func</code> with its arguments) to the thread pool for execution and returns a <code>future</code> object immediately.</li>
-                        <li><b>shutdown(pool, wait=true)</b> &rarr; none &mdash; Shuts down the thread pool, releasing all resources. If <code>wait</code> is true, it will wait for all submitted tasks to complete.</li>
-                        <li><b>result(future)</b> &rarr; list &mdash; Retrieves the result from a <code>future</code> object. This call is blocking (it will wait if the task is not yet finished). Returns a list in the format <code>[value, error_msg, error_type]</code>, mirroring the behavior of <code>is_panic</code>.</li>
-                        <li><b>is_done(future)</b> &rarr; bool &mdash; Checks if the task associated with the <code>future</code> has completed, either successfully or with an error.</li>
+                        <li><b>new(max_workers=5)</b> &rarr; thread-pool &mdash; Creates a new thread pool with a specified number of worker threads</li>
+                        <li><b>submit(pool, func, args=[], kwargs={})</b> &rarr; future &mdash; Submits a task (<code>func</code> with its arguments) to the thread pool for execution and returns a <code>future</code> object immediately</li>
+                        <li><b>shutdown(pool, wait=true)</b> &rarr; none &mdash; Shuts down the thread pool, releasing all resources, if <code>wait</code> is true, it will wait for all submitted tasks to complete</li>
+                        <li><b>result(future)</b> &rarr; any &mdash; Retrieves the result from a <code>future</code> object</li>
+                        <li><b>is_done(future)</b> &rarr; bool &mdash; Checks if the task associated with the <code>future</code> has completed, either successfully or with an error</li>
                     </ul>
                 </div>
                 <div id="lib-time">
