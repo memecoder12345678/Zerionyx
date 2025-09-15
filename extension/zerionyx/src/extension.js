@@ -59,6 +59,7 @@ function activate(context) {
 
             const userDefinedCompletions = [];
             const variableRegex = /([a-zA-Z_]\w*)\s*=/g;
+            const asVariableRegex = /(?<=\bas\b\s+)([a-zA-Z_]\w*)/g;
             const functionRegex = /defun\s+([a-zA-Z_]\w*)/g;
             const namespaceRegex = /namespace\s+([a-zA-Z_]\w*)/g;
             const forInVarRegex = /\bfor\s+([a-zA-Z_]\w*)\s+in\b/g;
@@ -68,21 +69,21 @@ function activate(context) {
             while ((match = variableRegex.exec(fullText)) !== null) {
                 userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Variable));
             }
+            while ((match = asVariableRegex.exec(fullText)) !== null) {
+                userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Variable));
+            }
             while ((match = functionRegex.exec(fullText)) !== null) {
                 userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Function));
             }
             while ((match = namespaceRegex.exec(fullText)) !== null) {
                 userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Module));
             }
-
             while ((match = forInVarRegex.exec(fullText)) !== null) {
                 userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Variable));
             }
-
             while ((match = forToVarRegex.exec(fullText)) !== null) {
                 userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Variable));
             }
-
 
             const allKeywords = [
                 ...zerionyxKeywords.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Keyword)),
@@ -99,7 +100,6 @@ function activate(context) {
                 .map(label => {
                     return allCompletions.find(item => item.label === label);
                 });
-
 
             return uniqueCompletions;
         }
