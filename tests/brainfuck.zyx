@@ -14,7 +14,7 @@ defun brainfuck(nput)
     output = ""
     i = 0
     while i < len(nput) do
-        # println("i: " + to_str(i) + ", " + "nput$i: " + to_str(nput$i) + ", " + "memory: [" + to_str(memory) + "], " + "pointer: " + to_str(pointer))
+        # println("i: " + to_str(i) + ", " + "nput$i: " + to_str(nput$i) + ", " + "memory: " + to_str(memory) + ", " + "pointer: " + to_str(pointer))
         if (nput$i) == ">" do
             if pointer+1 > 30000 do
                 println("Memory Error")

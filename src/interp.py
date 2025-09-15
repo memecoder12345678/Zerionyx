@@ -3816,12 +3816,12 @@ class BuiltInFunction(BaseFunction):
     def execute_is_py_obj(self, exec_ctx):
         is_py_obj = isinstance(exec_ctx.symbol_table.get("value"), PyObject)
         return RTResult().success(Number.true if is_py_obj else Number.false)
-    
+
     @set_args(["value"])
     def execute_is_namespace(self, exec_ctx):
         is_namespace = isinstance(exec_ctx.symbol_table.get("value"), NameSpace)
-        return RTResult().success(Number.true if is_namespace else Number.false)  
-  
+        return RTResult().success(Number.true if is_namespace else Number.false)
+
     @set_args(["value"])
     def execute_is_thread_pool(self, exec_ctx):
         is_thread_pool = isinstance(exec_ctx.symbol_table.get("value"), ThreadPool)
@@ -4870,7 +4870,7 @@ class Interpreter:
 
     def visit_ForInNode(self, node: ForInNode, context: Context) -> RTResult:
         res = RTResult()
-        var_name = node.var_name_tok.value
+        var_names = [tok.value for tok in node.var_name_toks]
         body = node.body_node
         should_return_none = node.should_return_none
         iterable = res.register(self.visit(node.iterable_node, context))
@@ -4879,11 +4879,34 @@ class Interpreter:
         iterator, error = iterable.iter()
         if error:
             return res.failure(error)
-        e = []
+        elements = [] if not should_return_none else None
         try:
             while True:
                 current = next(iterator)
-                context.symbol_table.set(var_name, current)
+                if len(var_names) == 1:
+                    context.symbol_table.set(var_names[0], current)
+                else:
+                    if not isinstance(current, List):
+                        return res.failure(
+                            RTError(
+                                node.iterable_node.pos_start,
+                                node.iterable_node.pos_end,
+                                "Value to unpack must be a list",
+                                context,
+                            )
+                        )
+                    values_to_unpack = current.value
+                    if len(var_names) != len(values_to_unpack):
+                        return res.failure(
+                            RTError(
+                                node.iterable_node.pos_start,
+                                node.iterable_node.pos_end,
+                                f"ValueError: not enough values to unpack (expected {len(var_names)}, got {len(values_to_unpack)})",
+                                context,
+                            )
+                        )
+                    for i, var_name in enumerate(var_names):
+                        context.symbol_table.set(var_name, values_to_unpack[i])
                 value = res.register(self.visit(body, context))
                 if (
                     res.should_return()
@@ -4895,15 +4918,17 @@ class Interpreter:
                     break
                 if res.loop_should_continue:
                     continue
-                if not should_return_none:
-                    e.append(value)
+                if elements is not None:
+                    elements.append(value)
         except StopIteration:
             pass
         if should_return_none:
             return res.success(Number.none)
         else:
             return res.success(
-                List(value).set_context(context).set_pos(node.pos_start, node.pos_end)
+                List(elements)
+                .set_context(context)
+                .set_pos(node.pos_start, node.pos_end)
             )
 
     def visit_UsingNode(self, node, context: Context):

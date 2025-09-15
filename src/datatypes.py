@@ -16,6 +16,7 @@ class ZyxErrThreadPool(EOFError):
         self.err = err
         super().__init__(err)
 
+
 class Context:
 
     __slots__ = (
@@ -1177,7 +1178,6 @@ class Bytes(Object):
 
     def __repr__(self):
         return self.value.hex()
-
 
 
 class ThreadPool(Object):

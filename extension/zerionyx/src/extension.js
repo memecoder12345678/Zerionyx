@@ -61,6 +61,8 @@ function activate(context) {
             const variableRegex = /([a-zA-Z_]\w*)\s*=/g;
             const functionRegex = /defun\s+([a-zA-Z_]\w*)/g;
             const namespaceRegex = /namespace\s+([a-zA-Z_]\w*)/g;
+            const forInVarRegex = /\bfor\s+([a-zA-Z_]\w*)\s+in\b/g;
+            const forToVarRegex = /\bfor\s+([a-zA-Z_]\w*)\s*=/g;
 
             let match;
             while ((match = variableRegex.exec(fullText)) !== null) {
@@ -73,6 +75,15 @@ function activate(context) {
                 userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Module));
             }
 
+            while ((match = forInVarRegex.exec(fullText)) !== null) {
+                userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Variable));
+            }
+
+            while ((match = forToVarRegex.exec(fullText)) !== null) {
+                userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Variable));
+            }
+
+
             const allKeywords = [
                 ...zerionyxKeywords.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Keyword)),
                 ...zerionyxControlFlow.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Keyword)),
@@ -83,6 +94,7 @@ function activate(context) {
             ];
 
             const allCompletions = [...allKeywords, ...userDefinedCompletions];
+
             const uniqueCompletions = Array.from(new Set(allCompletions.map(item => item.label)))
                 .map(label => {
                     return allCompletions.find(item => item.label === label);

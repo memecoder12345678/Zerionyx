@@ -1005,7 +1005,6 @@ class Parser:
 
     def for_expr(self):
         res = ParseResult()
-
         if not self.current_tok.matches(TT_KEYWORD, "for"):
             return res.failure(
                 InvalidSyntaxError(
@@ -1016,7 +1015,6 @@ class Parser:
             )
         res.register_advancement()
         self.advance()
-
         if self.current_tok.type != TT_IDENTIFIER:
             return res.failure(
                 InvalidSyntaxError(
@@ -1025,18 +1023,30 @@ class Parser:
                     "Expected identifier",
                 )
             )
-        var_name = self.current_tok
+        var_name_toks = [self.current_tok]
+        pos_start = self.current_tok.pos_start.copy()
         res.register_advancement()
         self.advance()
-
+        while self.current_tok.type == TT_COMMA:
+            res.register_advancement()
+            self.advance()
+            if self.current_tok.type != TT_IDENTIFIER:
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected identifier",
+                    )
+                )
+            var_name_toks.append(self.current_tok)
+            res.register_advancement()
+            self.advance()
         if self.current_tok.matches(TT_KEYWORD, "in"):
             res.register_advancement()
             self.advance()
-
             iterable_node = res.register(self.expr(allow_assignment=False))
             if res.error:
                 return res
-
             if not self.current_tok.matches(TT_KEYWORD, "do"):
                 return res.failure(
                     InvalidSyntaxError(
@@ -1047,7 +1057,6 @@ class Parser:
                 )
             res.register_advancement()
             self.advance()
-
             if self.current_tok.type == TT_NEWLINE:
                 res.register_advancement()
                 self.advance()
@@ -1066,29 +1075,27 @@ class Parser:
                 self.advance()
                 return res.success(
                     ForInNode(
-                        var_name,
+                        var_name_toks,
                         iterable_node,
                         body,
                         True,
-                        var_name.pos_start,
+                        pos_start,
                         body.pos_end,
                     )
                 )
-
             body = res.register(self.statement())
             if res.error:
                 return res
             return res.success(
                 ForInNode(
-                    var_name,
+                    var_name_toks,
                     iterable_node,
                     body,
                     False,
-                    var_name.pos_start,
+                    pos_start,
                     body.pos_end,
                 )
             )
-
         if self.current_tok.type != TT_EQ:
             return res.failure(
                 InvalidSyntaxError(
@@ -1097,14 +1104,20 @@ class Parser:
                     "Expected '=' or 'in'",
                 )
             )
-
+        if len(var_name_toks) > 1:
+            return res.failure(
+                InvalidSyntaxError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "Too many variables for this type of for loop",
+                )
+            )
+        var_name = var_name_toks[0]
         res.register_advancement()
         self.advance()
-
         start_value = res.register(self.expr(allow_assignment=False))
         if res.error:
             return res
-
         if not self.current_tok.matches(TT_KEYWORD, "to"):
             return res.failure(
                 InvalidSyntaxError(
@@ -1115,11 +1128,9 @@ class Parser:
             )
         res.register_advancement()
         self.advance()
-
         end_value = res.register(self.expr(allow_assignment=False))
         if res.error:
             return res
-
         step_value = None
         if self.current_tok.matches(TT_KEYWORD, "step"):
             res.register_advancement()
@@ -1127,7 +1138,6 @@ class Parser:
             step_value = res.register(self.expr(allow_assignment=False))
             if res.error:
                 return res
-
         if not self.current_tok.matches(TT_KEYWORD, "do"):
             return res.failure(
                 InvalidSyntaxError(
@@ -1138,7 +1148,6 @@ class Parser:
             )
         res.register_advancement()
         self.advance()
-
         if self.current_tok.type == TT_NEWLINE:
             res.register_advancement()
             self.advance()
@@ -1158,7 +1167,6 @@ class Parser:
             return res.success(
                 ForNode(var_name, start_value, end_value, step_value, body, True)
             )
-
         body = res.register(self.statement())
         if res.error:
             return res

@@ -304,7 +304,7 @@ class HashMapNode:
 
 class ForInNode:
     __slots__ = [
-        "var_name_tok",
+        "var_name_toks",
         "iterable_node",
         "body_node",
         "pos_start",
@@ -314,14 +314,14 @@ class ForInNode:
 
     def __init__(
         self,
-        var_name_tok,
+        var_name_toks,
         iterable_node,
         body_node,
         should_return_none,
         pos_start=None,
         pos_end=None,
     ):
-        self.var_name_tok = var_name_tok
+        self.var_name_toks = var_name_toks
         self.iterable_node = iterable_node
         self.body_node = body_node
         self.should_return_none = should_return_none
@@ -329,7 +329,8 @@ class ForInNode:
         self.pos_end = pos_end
 
     def __str__(self):
-        return f"ForInNode({self.var_name_tok.value} in {self.iterable_node} do {self.body_node})"
+        var_names = ", ".join(tok.value for tok in self.var_name_toks)
+        return f"ForInNode({var_names} in {self.iterable_node} do {self.body_node})"
 
 
 class VarAssignAsNode:

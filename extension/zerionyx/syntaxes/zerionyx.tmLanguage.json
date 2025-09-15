@@ -4,21 +4,23 @@
     "patterns": [
         { "include": "#comments" },
         { "include": "#strings" },
-        { "include": "#call-member-access" },
-        { "include": "#member-access" },
         { "include": "#namespace" },
         { "include": "#function-definition" },
         { "include": "#for-in-loop" },
+        { "include": "#for-to-loop" },
         { "include": "#control-flow" },
         { "include": "#hashmap" },
         { "include": "#list" },
-        { "include": "#function-call" },
         { "include": "#decorators" },
+        { "include": "#call-member-access" },
+        { "include": "#member-access" },
         { "include": "#keywords" },
+        { "include": "#function-call" },
         { "include": "#builtins" },
         { "include": "#literals" },
         { "include": "#numbers" },
-        { "include": "#operators" }
+        { "include": "#operators" },
+        { "include": "#identifiers" }
 
     ],
     "repository": {
@@ -29,7 +31,7 @@
                     "match": "\\b(list|str|int|float|bool|func|hashmap|thread|bytes|cfloat|py_obj|channel_type|none_type|thread_pool_type|future_type)\\b"
                 },
                 {
-                    "name": "storage.constant.zerionyx",
+                    "name": "constant.language.zerionyx",
                     "match": "\\b(is_main)\\b"
                 },
                 {
@@ -46,10 +48,37 @@
                 }
             ]
         },
+        "identifiers": {
+            "patterns": [
+                {
+                    "name": "variable.other.zerionyx",
+                    "match": "[a-zA-Z_][a-zA-Z0-9_]*"
+                }
+            ]
+        },
+        "for-to-loop": {
+            "patterns": [
+                {
+                    "name": "meta.block.zerionyx",
+                    "begin": "\\b(for)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*=\\s*([^\\s]+)\\s+(to)\\s+([^\\s]+)(?:\\s+(step)\\s+([^\\s]+))?\\s+(do)\\b",
+                    "end": "\\b(done)\\b",
+                    "beginCaptures": {
+                        "1": { "name": "keyword.control.zerionyx" },
+                        "4": { "name": "keyword.control.zerionyx" },
+                        "6": { "name": "keyword.control.zerionyx" },
+                        "8": { "name": "keyword.control.zerionyx" }
+                    },
+                    "endCaptures": {
+                        "1": { "name": "keyword.control.zerionyx" }
+                    },
+                    "patterns": [ { "include": "$self" } ]
+                }
+            ]
+        },
         "control-flow": {
             "patterns": [
                 {
-                    "name": "meta.control.if.zerionyx",
+                    "name": "meta.block.zerionyx",
                     "begin": "\\b(if)\\b",
                     "end": "\\b(done)\\b",
                     "beginCaptures": {
@@ -61,7 +90,7 @@
                     "patterns": [ { "include": "$self" } ]
                 },
                 {
-                    "name": "meta.loop.for.zerionyx",
+                    "name": "meta.block.zerionyx",
                     "begin": "\\b(for)\\b",
                     "end": "\\b(done)\\b",
                     "beginCaptures": {
@@ -73,7 +102,7 @@
                     "patterns": [ { "include": "$self" } ]
                 },
                 {
-                    "name": "meta.loop.while.zerionyx",
+                    "name": "meta.block.zerionyx",
                     "begin": "\\b(while)\\b",
                     "end": "\\b(done)\\b",
                     "beginCaptures": {
@@ -89,7 +118,7 @@
         "decorators": {
             "patterns": [
                 {
-                    "name": "entity.name.function.decorator.zerionyx",
+                    "name": "meta.annotation.decorator.zerionyx",
                     "match": "(&)([a-zA-Z_][a-zA-Z0-9_]*)"
                 }
             ]
@@ -138,7 +167,7 @@
         "hashmap": {
             "begin": "\\{",
             "end": "\\}",
-            "name": "meta.hashmap.zerionyx",
+            "name": "meta.collection.hashmap.zerionyx",
             "patterns": [
                 {
                     "match": ":",
@@ -155,14 +184,14 @@
                 },
                 {
                     "name": "keyword.control.zerionyx",
-                    "match": "\\b(if|elif|for|while|in|to|step|do|done|return|break|continue|defun|load|as|else|and|or|not|namespace|using)\\b"
+                    "match": "\\b(if|elif|for|while|in|to|step|do|done|return|break|continue|defun|load|as|else|namespace|using|and|or|not)\\b"
                 }
             ]
         },
         "list": {
             "begin": "\\[",
             "end": "\\]",
-            "name": "meta.list.zerionyx",
+            "name": "meta.collection.list.zerionyx",
             "patterns": [ { "include": "$self" } ]
         },
         "literals": {
@@ -191,7 +220,7 @@
             "end": "\\b(done)\\b",
             "beginCaptures": {
                 "1": { "name": "keyword.control.zerionyx" },
-                "2": { "name": "entity.name.class.zerionyx" }
+                "2": { "name": "entity.name.namespace.zerionyx" }
             },
             "endCaptures": {
                 "1": { "name": "keyword.control.zerionyx" }
@@ -199,7 +228,7 @@
             "patterns": [
                 {
                     "match": "(?<=\\bnamespace\\s+)([a-zA-Z_][a-zA-Z0-9_]*)",
-                    "name": "entity.name.class.zerionyx"
+                    "name": "entity.name.namespace.zerionyx"
                 },
                 { "include": "$self" }
             ]
@@ -231,7 +260,7 @@
                     "match": "(\\+|\\-|\\*|/|//|%|\\^)"
                 },
                 {
-                    "name": "keyword.operator.logical.zerionyx",
+                    "name": "keyword.operator.word.zerionyx",
                     "match": "\\b(and|or|not)\\b"
                 },
                 {
