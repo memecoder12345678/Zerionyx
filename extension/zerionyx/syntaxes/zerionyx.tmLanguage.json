@@ -20,7 +20,8 @@
         { "include": "#operators" },
         { "include": "#hashmap" },
         { "include": "#list" },
-        { "include": "#identifiers" }
+        { "include": "#identifiers" },
+        { "include": "#errors" }
     ],
     "repository": {
         "builtins": {
@@ -266,6 +267,30 @@
                 {
                     "name": "keyword.operator.zerionyx",
                     "match": "\\."
+                }
+            ]
+        },
+        "errors": {
+            "patterns": [
+                {
+                    "name": "invalid.illegal.zerionyx",
+                    "match": "[?~`@|]"
+                },
+                {
+                    "name": "invalid.illegal.zerionyx",
+                    "match": "(?<![\\w\\d\\]\\)])(\\+|\\-|\\*|/|%|\\^|==|!=|<=|>=|<|>)\\s*$"
+                },
+                {
+                    "name": "invalid.illegal.zerionyx",
+                    "match": "\\b\\d*\\.\\d+\\.\\d[\\d.]*\\b"
+                },
+                {
+                    "name": "invalid.illegal.zerionyx",
+                    "match": "\\b[0-9]+[a-zA-Z_][a-zA-Z0-9_]*\\b"
+                },
+                {
+                    "name": "invalid.illegal.zerionyx",
+                    "match": "^\\s*[\\)\\]\\}]"
                 }
             ]
         },
