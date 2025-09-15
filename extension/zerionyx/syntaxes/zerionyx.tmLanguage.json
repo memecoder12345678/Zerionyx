@@ -63,7 +63,6 @@
                     "end": "\\b(done)\\b",
                     "beginCaptures": {
                         "1": { "name": "keyword.control.zerionyx" },
-                        "2": { "name": "variable.other.zerionyx" },
                         "3": { "name": "keyword.operator.zerionyx" },
                         "5": { "name": "keyword.control.zerionyx" },
                         "7": { "name": "keyword.control.zerionyx" },
@@ -124,7 +123,6 @@
         "function-call": {
             "patterns": [
                 {
-                    "name": "meta.function-call.zerionyx",
                     "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(\\()",
                     "captures": {
                         "1": { "name": "entity.name.function.zerionyx" }
@@ -156,7 +154,6 @@
             "end": "\\b(done)\\b",
             "beginCaptures": {
                 "1": { "name": "keyword.control.zerionyx" },
-                "2": { "name": "variable.other.zerionyx" },
                 "3": { "name": "keyword.control.zerionyx" }
             },
             "endCaptures": {
