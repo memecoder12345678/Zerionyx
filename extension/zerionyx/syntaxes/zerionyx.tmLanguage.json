@@ -58,7 +58,6 @@
         "for-to-loop": {
             "patterns": [
                 {
-                    "name": "meta.block.zerionyx",
                     "begin": "\\b(for)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=)\\s*([^\\s]+)\\s+(to)\\s+([^\\s]+)(?:\\s+(step)\\s+([^\\s]+))?\\s+(do)\\b",
                     "end": "\\b(done)\\b",
                     "beginCaptures": {
@@ -79,7 +78,6 @@
         "control-flow": {
             "patterns": [
                 {
-                    "name": "meta.block.zerionyx",
                     "begin": "\\b(if)\\b",
                     "end": "\\b(done)\\b",
                     "beginCaptures": {
@@ -91,7 +89,6 @@
                     "patterns": [ { "include": "$self" } ]
                 },
                 {
-                    "name": "meta.block.zerionyx",
                     "begin": "\\b(for)\\b",
                     "end": "\\b(done)\\b",
                     "beginCaptures": {
@@ -103,7 +100,6 @@
                     "patterns": [ { "include": "$self" } ]
                 },
                 {
-                    "name": "meta.block.zerionyx",
                     "begin": "\\b(while)\\b",
                     "end": "\\b(done)\\b",
                     "beginCaptures": {
@@ -119,7 +115,7 @@
         "decorators": {
             "patterns": [
                 {
-                    "name": "meta.annotation.decorator.zerionyx",
+                    "name": "entity.name.function.zerionyx",
                     "match": "(&)([a-zA-Z_][a-zA-Z0-9_]*)"
                 }
             ]
@@ -149,7 +145,7 @@
             "patterns": [
                 {
                     "match": "->",
-                    "name": "keyword.operator"
+                    "name": "keyword.operator.zerionyx"
                 },
                 { "include": "$self" }
             ]
@@ -170,11 +166,11 @@
         "hashmap": {
             "begin": "\\{",
             "end": "\\}",
-            "name": "meta.collection.hashmap.zerionyx",
+            "name": "meta.structure.dictionary.key.python",
             "patterns": [
                 {
                     "match": ":",
-                    "name": "keyword.operator"
+                    "name": "keyword.operator.zerionyx"
                 },
                 { "include": "$self" }
             ]
@@ -194,7 +190,7 @@
         "list": {
             "begin": "\\[",
             "end": "\\]",
-            "name": "meta.collection.list.zerionyx",
+            "name": "markup.list",
             "patterns": [ { "include": "$self" } ]
         },
         "literals": {
@@ -224,7 +220,7 @@
             "end": "\\b(done)\\b",
             "beginCaptures": {
                 "1": { "name": "keyword.control.zerionyx" },
-                "2": { "name": "entity.name.namespace.zerionyx" }
+                "2": { "name": "entity.name.class.zerionyx" }
             },
             "endCaptures": {
                 "1": { "name": "keyword.control.zerionyx" }
@@ -232,7 +228,7 @@
             "patterns": [
                 {
                     "match": "(?<=\\bnamespace\\s+)([a-zA-Z_][a-zA-Z0-9_]*)",
-                    "name": "entity.name.namespace.zerionyx"
+                    "name": "entity.name.class.zerionyx"
                 },
                 { "include": "$self" }
             ]
@@ -240,11 +236,11 @@
         "numbers": {
             "patterns": [
                 {
-                    "name": "constant.numeric.float.zerionyx",
+                    "name": "constant.numeric.zerionyx",
                     "match": "\\b\\d+\\.\\d+\\b"
                 },
                 {
-                    "name": "constant.numeric.integer.zerionyx",
+                    "name": "constant.numeric.zerionyx",
                     "match": "\\b\\d+\\b"
                 }
             ]
@@ -252,23 +248,23 @@
         "operators": {
             "patterns": [
                 {
-                    "name": "keyword.operator.assignment.zerionyx",
+                    "name": "keyword.operator.zerionyx",
                     "match": "(=|\\+=|-=|\\*=|/=|//=|%=|\\^=|:|->|\\$)"
                 },
                 {
-                    "name": "keyword.operator.comparison.zerionyx",
+                    "name": "keyword.operator.zerionyx",
                     "match": "(==|<|>|<=|>=|!=)"
                 },
                 {
-                    "name": "keyword.operator.arithmetic.zerionyx",
+                    "name": "keyword.operator.zerionyx",
                     "match": "(\\+|\\-|\\*|/|//|%|\\^)"
                 },
                 {
-                    "name": "keyword.operator.word.zerionyx",
+                    "name": "keyword.operator.zerionyx",
                     "match": "\\b(and|or|not)\\b"
                 },
                 {
-                    "name": "keyword.operator.member.zerionyx",
+                    "name": "keyword.operator.zerionyx",
                     "match": "\\."
                 }
             ]
@@ -280,10 +276,10 @@
                     "begin": "\"",
                     "end": "\"",
                     "beginCaptures": {
-                        "0": { "name": "punctuation.definition.string.begin.zerionyx" }
+                        "0": { "name": "markup.punctuation.quote.beginning.zerionyx" }
                     },
                     "endCaptures": {
-                        "0": { "name": "punctuation.definition.string.end.zerionyx" }
+                        "0": { "name": "markup.punctuation.quote.beginning.zerionyx" }
                     },
                     "patterns": [
                         {
@@ -297,10 +293,10 @@
                     "begin": "'",
                     "end": "'",
                     "beginCaptures": {
-                        "0": { "name": "punctuation.definition.string.begin.zerionyx" }
+                        "0": { "name": "markup.punctuation.quote.beginning.zerionyx" }
                     },
                     "endCaptures": {
-                        "0": { "name": "punctuation.definition.string.end.zerionyx" }
+                        "0": { "name": "markup.punctuation.quote.beginning.zerionyx" }
                     },
                     "patterns": [
                         {
