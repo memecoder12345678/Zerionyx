@@ -167,7 +167,7 @@
         "hashmap": {
             "begin": "\\{",
             "end": "\\}",
-            "name": "meta.structure.dictionary.key.python",
+            "name": "meta.structure.dictionary.key.zerionyx",
             "patterns": [
                 {
                     "match": ":",
@@ -179,7 +179,7 @@
         "keywords": {
             "patterns": [
                 {
-                    "name": "keyword.control.using.parent.zerionyx",
+                    "name": "keyword.control.zerionyx",
                     "match": "\\b(using parent)\\b"
                 },
                 {
@@ -205,14 +205,14 @@
 		"call-member-access": {
 			"match": "([a-zA-Z_][a-zA-Z0-9_]*)\\.([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
 			"captures": {
-				"1": { "name": "support.class.zerionyx" },
+				"1": { "name": "entity.name.class.zerionyx" },
 				"2": { "name": "entity.name.function.zerionyx" }
 			}
 		},
 		"member-access": {
 			"match": "([a-zA-Z_][a-zA-Z0-9_]*)\\.([a-zA-Z_][a-zA-Z0-9_]*)",
 			"captures": {
-				"1": { "name": "support.class.zerionyx" },
+				"1": { "name": "entity.name.class.zerionyx" },
                 "2": { "name": "variable.other.zerionyx" }
 			}
 		},
