@@ -1,0 +1,19 @@
+namespace msgbox
+
+    defun alert(message, title)
+        return msgbox_alert_fp(message, title)
+    done
+
+    defun confirm(message, title, buttons=["OK", "Cancel"])
+        return msgbox_confirm_fp(message, title, buttons)
+    done
+
+    defun prompt(message, title)
+        return msgbox_prompt_fp(message, title)
+    done
+
+    defun password(message, title)
+        return msgbox_password_fp(message, title)
+    done
+
+done

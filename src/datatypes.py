@@ -3,7 +3,6 @@ from fractions import Fraction
 from queue import Queue as PyQueue
 from concurrent.futures import ThreadPoolExecutor, Future as PyFuture
 import operator
-import reprlib
 from .errors import (
     TError,
     RTError,
@@ -929,7 +928,7 @@ class List(Object):
         return self.__repr__()
 
     def __repr__(self) -> str:
-        return reprlib.repr(self.value)
+        return str(self.value)
 
 
 class HashMap(Object):
@@ -1038,7 +1037,7 @@ class HashMap(Object):
         return self.__repr__()
 
     def __repr__(self) -> str:
-        return reprlib.repr(self.value)
+        return str(self.value)
 
 
 class File(Object):

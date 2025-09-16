@@ -2,7 +2,7 @@ import os
 import platform
 import sys
 from threading import Thread
-import concurrent.futures
+from datetime import datetime, date, timedelta
 import time
 import random
 import math
@@ -4169,6 +4169,278 @@ class BuiltInFunction(BaseFunction):
         return RTResult().success(Bool(future_obj.future.done()))
 
 
+    @set_args(["message", "title"])
+    def execute_msgbox_alert_fp(self, exec_ctx):
+        msg = exec_ctx.symbol_table.get("message")
+        title = exec_ctx.symbol_table.get("title")
+
+        if not isinstance(msg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'alert' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(title, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'alert' must be a string",
+                    exec_ctx,
+                )
+            )
+
+        try:
+            import pyautogui  # type: ignore
+            result = pyautogui.alert(str(msg.value), str(title.value))
+            return RTResult().success(String(result if result else ""))
+        except Exception as e:
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    @set_args(
+        ["message", "title", "buttons"],
+        [None, None, List([String("Ok"), String("Cancel")])]
+    )
+    def execute_msgbox_confirm_fp(self, exec_ctx):
+        msg = exec_ctx.symbol_table.get("message")
+        title = exec_ctx.symbol_table.get("title")
+        buttons = exec_ctx.symbol_table.get("buttons")
+
+        if not isinstance(msg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'confirm' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(title, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'confirm' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(buttons, List):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Third argument of 'confirm' must be a list",
+                    exec_ctx,
+                )
+            )
+
+        try:
+            import pyautogui  # type: ignore
+            result = pyautogui.confirm(
+                str(msg.value), str(title.value),
+                [str(b.value) for b in buttons.elements if isinstance(b, String)]
+            )
+            return RTResult().success(String(result if result else ""))
+        except Exception as e:
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    @set_args(["message", "title"])
+    def execute_msgbox_prompt_fp(self, exec_ctx):
+        msg = exec_ctx.symbol_table.get("message")
+        title = exec_ctx.symbol_table.get("title")
+
+        if not isinstance(msg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'prompt' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(title, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'prompt' must be a string",
+                    exec_ctx,
+                )
+            )
+
+        try:
+            import pyautogui  # type: ignore
+            result = pyautogui.prompt(str(msg.value), str(title.value))
+            return RTResult().success(String(result if result else ""))
+        except Exception as e:
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    @set_args(["message", "title"])
+    def execute_msgbox_password_fp(self, exec_ctx):
+        msg = exec_ctx.symbol_table.get("message")
+        title = exec_ctx.symbol_table.get("title")
+
+        if not isinstance(msg, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'password' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(title, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'password' must be a string",
+                    exec_ctx,
+                )
+            )
+
+        try:
+            import pyautogui  # type: ignore
+            result = pyautogui.password(str(msg.value), str(title.value))
+            return RTResult().success(String(result if result else ""))
+        except Exception as e:
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+
+    @set_args([])
+    def execute_datetime_now_fp(self, exec_ctx):
+        try:
+            result = datetime.now().isoformat(" ")
+            return RTResult().success(String(result))
+        except Exception as e:
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    @set_args([])
+    def execute_date_today_fp(self, exec_ctx):
+        try:
+            result = date.today().isoformat()
+            return RTResult().success(String(result))
+        except Exception as e:
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    @set_args(["fmt"])
+    def execute_datetime_format_fp(self, exec_ctx):
+        fmt = exec_ctx.symbol_table.get("fmt")
+        if not isinstance(fmt, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'format' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            result = datetime.now().strftime(fmt.value)
+            return RTResult().success(String(result))
+        except Exception as e:
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    @set_args(["s", "fmt"])
+    def execute_datetime_parse_fp(self, exec_ctx):
+        s = exec_ctx.symbol_table.get("s")
+        fmt = exec_ctx.symbol_table.get("fmt")
+        if not isinstance(s, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'parse' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(fmt, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'parse' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            dt = datetime.strptime(s.value, fmt.value)
+            return RTResult().success(String(dt.isoformat(" ")))
+        except Exception as e:
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    @set_args(["days"])
+    def execute_datetime_add_days_fp(self, exec_ctx):
+        days = exec_ctx.symbol_table.get("days")
+        if not isinstance(days, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'add_days' must be a number",
+                    exec_ctx,
+                )
+            )
+        try:
+            new_dt = datetime.now() + timedelta(days=int(days.value))
+            return RTResult().success(String(new_dt.isoformat(" ")))
+        except Exception as e:
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+    @set_args(["dt1", "dt2"])
+    def execute_datetime_diff_fp(self, exec_ctx):
+        dt1 = exec_ctx.symbol_table.get("dt1")
+        dt2 = exec_ctx.symbol_table.get("dt2")
+        if not isinstance(dt1, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'diff' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(dt2, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'diff' must be a string",
+                    exec_ctx,
+                )
+            )
+        try:
+            d1 = datetime.fromisoformat(dt1.value)
+            d2 = datetime.fromisoformat(dt2.value)
+            delta = d1 - d2
+            return RTResult().success(Number(delta.days))
+        except Exception as e:
+            return RTResult().failure(
+                TError(self.pos_start, self.pos_end, str(e), exec_ctx)
+            )
+
+
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
     func_name = method_name[8:]
     method = getattr(BuiltInFunction, method_name)
@@ -4624,6 +4896,7 @@ class Interpreter:
                 break
             if elements is not None:
                 elements.append(value)
+        context.symbol_table.remove(var_name)
         return res.success(
             List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
             if elements is not None
@@ -4901,7 +5174,7 @@ class Interpreter:
                             RTError(
                                 node.iterable_node.pos_start,
                                 node.iterable_node.pos_end,
-                                f"ValueError: not enough values to unpack (expected {len(var_names)}, got {len(values_to_unpack)})",
+                                f"Not enough values to unpack (expected {len(var_names)}, got {len(values_to_unpack)})",
                                 context,
                             )
                         )
@@ -4920,6 +5193,7 @@ class Interpreter:
                     continue
                 if elements is not None:
                     elements.append(value)
+            context.symbol_table.remove(var_name)
         except StopIteration:
             pass
         if should_return_none:
@@ -5102,7 +5376,7 @@ class Interpreter:
                 RTError(
                     node.pos_start,
                     node.pos_end,
-                    f"ValueError: not enough values to unpack (expected {len(var_names)}, got {len(values_to_unpack)})",
+                    f"Not enough values to unpack (expected {len(var_names)}, got {len(values_to_unpack)})",
                     context,
                 )
             )
