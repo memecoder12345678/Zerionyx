@@ -172,4 +172,8 @@ namespace string
     defun decode(s, e, e_)
         return decode_fp(s, e, e_)
     done
+
+    defun format(s, l)
+        return string_format_fp(s, l)
+    done
 done

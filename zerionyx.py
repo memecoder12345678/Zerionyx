@@ -69,7 +69,9 @@ INT | FLOAT | STRING | IDENTIFIER
 
 USING_STATEMENT ::= "using" ("parent")? IDENTIFIER ("," IDENTIFIER)*
 
-LIST_EXPR ::= "[" (EXPR ("," EXPR)*)? "]"
+LIST_EXPR ::=
+"[" (EXPR ("," EXPR)*)? "]"
+| "[" EXPR FOR_CLAUSES "]"
 
 HASHMAP_EXPR ::= "{" (STRING ":" EXPR ("," STRING ":" EXPR)*)? "}"
 
@@ -83,11 +85,16 @@ IF_EXPR ::=
 (NEWLINE "else" "do" STATEMENT)?
 (NEWLINE "done")?
 
+FOR_CLAUSES ::= "for" FOR_CLAUSE ("," FOR_CLAUSE)*
+
+FOR_CLAUSE ::= IDENTIFIER ("=" EXPR)? "to" EXPR ("step" EXPR)?
+
+FOR_IN_CLAUSE ::= IDENTIFIER ("," IDENTIFIER)* "in" EXPR
+
 FOR_EXPR ::=
-"for" IDENTIFIER "=" EXPR "to" EXPR
-("step" EXPR)?
+(FOR_CLAUSES | "for" FOR_IN_CLAUSE)
 "do" STATEMENT
-(NEWLINE "done")?
+("done")?
 
 FOR_IN_EXPR ::=
 "for" IDENTIFIER "in" EXPR

@@ -4437,6 +4437,34 @@ class BuiltInFunction(BaseFunction):
             return RTResult().failure(
                 TError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
+    
+    @set_args(["str", "lst"])
+    def execute_string_format_fp(self, exec_ctx):
+        _str = exec_ctx.symbol_table.get("str")
+        lst = exec_ctx.symbol_table.get("lst")
+
+        if not isinstance(_str, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'format' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(lst, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'format' must be a list",
+                    exec_ctx,
+                )
+            )
+        r = _str.value.format(*lst.value)
+        return RTResult().success(String(r))
+
+
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:

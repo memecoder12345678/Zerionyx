@@ -577,7 +577,9 @@ INT | FLOAT | STRING | IDENTIFIER
 
 USING_STATEMENT ::= <code>using</code> (<code>parent</code>)? IDENTIFIER (<code>,</code> IDENTIFIER)*
 
-LIST_EXPR ::= <code>[</code> (EXPR (<code>,</code> EXPR)*)? <code>]</code>
+LIST_EXPR ::=
+<code>[</code> (EXPR (<code>,</code> EXPR)*)? <code>]</code>
+| <code>[</code> EXPR FOR_CLAUSES <code>]</code>
 
 HASHMAP_EXPR ::= <code>{</code> (STRING <code>:</code> EXPR (<code>,</code> STRING <code>:</code> EXPR)*)? <code>}</code>
 
@@ -1320,6 +1322,8 @@ Zerionyx may be magical, but its syntax must be real.
                             Decode <code>b</code> using
                             <code>encoding</code>
                         </li>
+                        <li><b>format(s, l)</b> &rarr; str &mdash; Creates a new formatted string by substituting
+                            placeholders like {} within a template with the provided list values</li>
                     </ul>
                 </div>
                 <div id="lib-math">
