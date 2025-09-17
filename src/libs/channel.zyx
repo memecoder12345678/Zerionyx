@@ -1,7 +1,6 @@
 # libs.channel
 
 namespace channel
-
     defun new()
         return channel_new_fp()
     done
@@ -18,5 +17,4 @@ namespace channel
     defun recv(ch)
         return channel_receive_fp(ch)
     done
-
 done

@@ -461,6 +461,7 @@
                 <li><a href="#ref-control-flow">Control Flow</a></li>
                 <li><a href="#ref-loops">Loops</a></li>
                 <li><a href="#ref-functions">Functions</a></li>
+                <li><a href="#ref-decorators">Functions</a></li>
                 <li><a href="#ref-using">Using Statements</a></li>
                 <li><a href="#ref-vargs-kwargs">Vargs and Kwargs</a></li>
                 <li><a href="#ref-io">Input/Output</a></li>
@@ -493,6 +494,7 @@
                 <li><a href="#lib-json">json</a></li>
                 <li><a href="#lib-decorators">decorators</a></li>
                 <li><a href="#lib-channel">channel</a></li>
+                <li><a href="#lib-msgbox">msgbox</a></li>
             </ul>
 
         </aside>
@@ -807,7 +809,7 @@ Zerionyx may be magical, but its syntax must be real.
                         </li>
                         </li>
                         <li><b>type(x)</b> &rarr; str &mdash; Return type of <code>x</code> as string</li>
-                        <li><b>pyexec(code, args={})</b> &rarr; hashmap &mdash; Executes embedded Python code and
+                        <li><b>pyexec(code, env={})</b> &rarr; hashmap &mdash; Executes embedded Python code and
                             returns
                             its result (use with caution)</li>
                         <li><b>slice(l, from=none, to=none, step=none)</b> &rarr; list/string/hashmap/bytes &mdash;
@@ -932,6 +934,24 @@ Zerionyx may be magical, but its syntax must be real.
 
 <span class="zyx-comment"># Anonymous function assigned to a variable</span>
 <span class="zyx-var">a</span> <span class="zyx-types">=</span> <span class="zyx-keyword">defun</span> <span class="zyx-types">(</span><span class="zyx-var">x</span><span class="zyx-types">)</span> <span class="zyx-types">-></span> <span class="zyx-var">x</span> <span class="zyx-types">^</span> <span class="zyx-number">0.5</span>
+</code></pre>
+                </section>
+                <section id="ref-decorators">
+                    <h3>Decorators</h3>
+                    <p>Decorators modify or enhance functions using the <code>&</code> symbol before the function
+                        definition. A decorator is a function that takes another function and returns a new, modified
+                        function.</p>
+                    <br>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">load</span> <span class="zyx-string">"libs.decorators"</span>
+
+<span class="zyx-comment"># &decorators.once ensures this function only runs its body the first time it's called</span>
+<span class="zyx-keyword">&</span><span class="zyx-var">decorators</span>.<span class="zyx-func">once</span>
+<span class="zyx-keyword">defun</span> <span class="zyx-func-def">initialize_settings</span><span class="zyx-types">()</span>
+    <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Settings initialized"</span><span class="zyx-types">)</span>
+<span class="zyx-keyword">done</span>
+
+<span class="zyx-func">initialize_settings</span><span class="zyx-types">()</span> <span class="zyx-comment"># Output: Settings initialized</span>
+<span class="zyx-func">initialize_settings</span><span class="zyx-types">()</span> <span class="zyx-comment"># Does nothing</span>
 </code></pre>
                 </section>
                 <section id="ref-using">
@@ -1445,7 +1465,6 @@ Zerionyx may be magical, but its syntax must be real.
                 </div>
                 <div id="lib-threading">
                     <h3>threading.zyx</h3>
-                    <h4>Single Thread Management</h4>
                     <ul>
                         <li><b>start(func, args=[], kwargs={})</b> &rarr; thread &mdash; Starts a new thread to execute
                             <code>func</code>
@@ -1481,9 +1500,24 @@ Zerionyx may be magical, but its syntax must be real.
                 <div id="lib-time">
                     <h3>time.zyx</h3>
                     <ul>
-                        <li><b>sleep(seconds)</b> &rarr; none &mdash; Sleep for <code>seconds</code></li>
+                        <li><b>sleep(seconds)</b> &rarr; none &mdash; Pauses execution for <code>seconds</code></li>
                         <li><b>time()</b> &rarr; number (float) &mdash; Current time (seconds since epoch)</li>
-                        <li><b>ctime(time)</b> &rarr; str &mdash; Human-readable time</li>
+                        <li><b>ctime(time)</b> &rarr; str &mdash; Human-readable time string</li>
+                    </ul>
+                    <h4>datetime Namespace</h4>
+                    <p>A namespace for working with date and time objects.</p>
+                    <ul>
+                        <li><b>now()</b> &rarr; datetime &mdash; Returns the current local date and time</li>
+                        <li><b>today()</b> &rarr; date &mdash; Returns the current local date</li>
+                        <li><b>format(dt, fmt)</b> &rarr; str &mdash; Formats a datetime object <code>dt</code> into a
+                            string using <code>fmt</code></li>
+                        <li><b>parse(s, fmt)</b> &rarr; datetime &mdash; Parses a string <code>s</code> into a datetime
+                            object using format <code>fmt</code></li>
+                        <li><b>add_days(dt, days)</b> &rarr; datetime &mdash; Returns a new datetime object with
+                            <code>days</code> added
+                        </li>
+                        <li><b>diff(dt1, dt2)</b> &rarr; timedelta &mdash; Returns the difference between two datetime
+                            objects</li>
                     </ul>
                 </div>
                 <div id="lib-keyboard">
@@ -1596,7 +1630,18 @@ Zerionyx may be magical, but its syntax must be real.
                             values</li>
                     </ul>
                 </div>
-
+                <div id="lib-msgbox">
+                    <h3>msgbox.zyx</h3>
+                    <ul>
+                        <li><b>alert(message, title)</b> &rarr; none &mdash; Displays a simple alert box</li>
+                        <li><b>confirm(message, title, buttons=["OK", "Cancel"])</b> &rarr; bool &mdash; Displays a
+                            confirmation dialog and returns <code>true</code> if the primary button is clicked</li>
+                        <li><b>prompt(message, title)</b> &rarr; str/none &mdash; Prompts for text input and returns the
+                            entered string or <code>none</code> if canceled</li>
+                        <li><b>password(message, title)</b> &rarr; str/none &mdash; Prompts for a masked password and
+                            returns the entered string or <code>none</code> if canceled</li>
+                    </ul>
+                </div>
 
             </section>
         </main>
@@ -1614,6 +1659,4 @@ Zerionyx may be magical, but its syntax must be real.
 
 </html>
 
-<!-- decorator -->
-<!-- libs.msgbox -->
-<!-- libs.time -->
+<!-- TODO: cập nhật cú pháp -->

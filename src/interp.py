@@ -78,7 +78,7 @@ class BaseFunction(Object):
 
     def __init__(self, name):
         super().__init__()
-        self.name = name or "!anonymous!"
+        self.name = name or "?"
 
     def set_context(self, context=None):
         if hasattr(self, "context") and self.context:
@@ -105,7 +105,6 @@ class BaseFunction(Object):
     ):
         res = RTResult()
         interpreter = Interpreter()
-
         if not vargs_name and len(positional_args) > len(param_names):
             return res.failure(
                 RTError(
@@ -121,18 +120,17 @@ class BaseFunction(Object):
                 exec_ctx.symbol_table.set(param_name, positional_args[i])
             elif param_name in keyword_args:
                 exec_ctx.symbol_table.set(param_name, keyword_args.pop(param_name))
-            elif i < len(param_names) - len(defaults):
-                return res.failure(
-                    RTError(
-                        self.pos_start,
-                        self.pos_end,
-                        f"Missing required argument '{param_name}'",
-                        exec_ctx,
-                    )
-                )
             else:
-                default_index = i - (len(param_names) - len(defaults))
-                default_value = defaults[default_index]
+                default_value = defaults[i]
+                if default_value is None:
+                    return res.failure(
+                        RTError(
+                            self.pos_start,
+                            self.pos_end,
+                            f"Missing required argument '{param_name}'",
+                            exec_ctx,
+                        )
+                    )
 
                 is_node = not isinstance(default_value, Object)
                 if is_node:
@@ -143,10 +141,7 @@ class BaseFunction(Object):
                         return res
                     exec_ctx.symbol_table.set(param_name, evaluated_default)
                 else:
-                    final_default = (
-                        default_value if default_value is not None else Number.none
-                    )
-                    exec_ctx.symbol_table.set(param_name, final_default)
+                    exec_ctx.symbol_table.set(param_name, default_value)
 
         if vargs_name:
             remaining_pos_args = positional_args[len(param_names) :]
@@ -2399,10 +2394,10 @@ class BuiltInFunction(BaseFunction):
         else:
             return PyObject(obj)
 
-    @set_args(["code", "args"], [None, HashMap({})])
+    @set_args(["code", "env"], [None, HashMap({})])
     def execute_pyexec(self, exec_ctx):
         code = exec_ctx.symbol_table.get("code")
-        args = exec_ctx.symbol_table.get("args")
+        args = exec_ctx.symbol_table.get("env")
         if not isinstance(code, String):
             return RTResult().failure(
                 TError(
@@ -4168,7 +4163,6 @@ class BuiltInFunction(BaseFunction):
             )
         return RTResult().success(Bool(future_obj.future.done()))
 
-
     @set_args(["message", "title"])
     def execute_msgbox_alert_fp(self, exec_ctx):
         msg = exec_ctx.symbol_table.get("message")
@@ -4195,6 +4189,7 @@ class BuiltInFunction(BaseFunction):
 
         try:
             import pyautogui  # type: ignore
+
             result = pyautogui.alert(str(msg.value), str(title.value))
             return RTResult().success(String(result if result else ""))
         except Exception as e:
@@ -4204,7 +4199,7 @@ class BuiltInFunction(BaseFunction):
 
     @set_args(
         ["message", "title", "buttons"],
-        [None, None, List([String("Ok"), String("Cancel")])]
+        [None, None, List([String("Ok"), String("Cancel")])],
     )
     def execute_msgbox_confirm_fp(self, exec_ctx):
         msg = exec_ctx.symbol_table.get("message")
@@ -4241,9 +4236,11 @@ class BuiltInFunction(BaseFunction):
 
         try:
             import pyautogui  # type: ignore
+
             result = pyautogui.confirm(
-                str(msg.value), str(title.value),
-                [str(b.value) for b in buttons.elements if isinstance(b, String)]
+                str(msg.value),
+                str(title.value),
+                [str(b.value) for b in buttons.elements if isinstance(b, String)],
             )
             return RTResult().success(String(result if result else ""))
         except Exception as e:
@@ -4277,6 +4274,7 @@ class BuiltInFunction(BaseFunction):
 
         try:
             import pyautogui  # type: ignore
+
             result = pyautogui.prompt(str(msg.value), str(title.value))
             return RTResult().success(String(result if result else ""))
         except Exception as e:
@@ -4310,13 +4308,13 @@ class BuiltInFunction(BaseFunction):
 
         try:
             import pyautogui  # type: ignore
+
             result = pyautogui.password(str(msg.value), str(title.value))
             return RTResult().success(String(result if result else ""))
         except Exception as e:
             return RTResult().failure(
                 TError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
-
 
     @set_args([])
     def execute_datetime_now_fp(self, exec_ctx):
@@ -4859,49 +4857,128 @@ class Interpreter:
             return res.success(Number.none if should_return_none else expr_value)
         return res.success(Number.none)
 
-    def visit_ForNode(self, node, context):
+    def visit_ListComprehensionNode(self, node, context):
         res = RTResult()
-        start_value = res.register(self.visit(node.start_value_node, context))
-        if res.should_return():
-            return res
-        end_value = res.register(self.visit(node.end_value_node, context))
-        if res.should_return():
-            return res
-        if node.step_value_node:
-            step_value = res.register(self.visit(node.step_value_node, context))
-            if res.should_return():
-                return res
-        else:
-            step_value = Number(1)
-        start_int = start_value.value
-        end_int = end_value.value
-        step_int = step_value.value
-        var_name = node.var_name_tok.value
-        body_node = node.body_node
-        elements = [] if not node.should_return_none else None
-        loop_var = Number(0)
-        context.symbol_table.set(var_name, loop_var)
-        for i in range(start_int, end_int, step_int):
-            loop_var.value = i
-            value = res.register(self.visit(body_node, context))
-            if (
-                res.should_return()
-                and not res.loop_should_continue
-                and not res.loop_should_break
-            ):
-                return res
-            if res.loop_should_continue:
-                continue
-            if res.loop_should_break:
-                break
-            if elements is not None:
-                elements.append(value)
-        context.symbol_table.remove(var_name)
+        elements = []
+
+        def process_loop(current_loop_node):
+            if isinstance(current_loop_node, ForNode):
+                start_value = res.register(self.visit(current_loop_node.start_value_node, context))
+                if res.should_return(): return
+                end_value = res.register(self.visit(current_loop_node.end_value_node, context))
+                if res.should_return(): return
+                step_value = Number(1)
+                if current_loop_node.step_value_node:
+                    step_value = res.register(self.visit(current_loop_node.step_value_node, context))
+                    if res.should_return(): return
+                
+                var_name = current_loop_node.var_name_tok.value
+                start = int(start_value.value)
+                end = int(end_value.value)
+                step = int(step_value.value)
+
+                for i in range(start, end, step):
+                    context.symbol_table.set(var_name, Number(i))
+                    
+                    if isinstance(current_loop_node.body_node, (ForNode, ForInNode)):
+                        res.register(process_loop(current_loop_node.body_node))
+                        if res.should_return(): return
+                    else:
+                        element_value = res.register(self.visit(node.element_node, context))
+                        if res.should_return(): return
+                        elements.append(element_value)
+
+            else:
+                iterable = res.register(self.visit(current_loop_node.iterable_node, context))
+                if res.should_return(): return
+                iterator, error = iterable.iter()
+                if error:
+                    res.failure(error)
+                    return
+                
+                var_names = [tok.value for tok in current_loop_node.var_name_toks]
+
+                try:
+                    while True:
+                        current_item = next(iterator)
+                        if len(var_names) == 1:
+                            context.symbol_table.set(var_names[0], current_item)
+                        else:
+                            if not isinstance(current_item, List) or len(current_item.value) != len(var_names):
+                                pass
+                            for i, var_name in enumerate(var_names):
+                                context.symbol_table.set(var_name, current_item.value[i])
+                        
+                        if isinstance(current_loop_node.body_node, (ForNode, ForInNode)):
+                            res.register(process_loop(current_loop_node.body_node))
+                            if res.should_return(): return
+                        else:
+                            element_value = res.register(self.visit(node.element_node, context))
+                            if res.should_return(): return
+                            elements.append(element_value)
+                except StopIteration:
+                    pass
+
+        res.register(process_loop(node.loop_node))
+        if res.should_return(): return res
+        
         return res.success(
             List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
-            if elements is not None
-            else Number.none
         )
+
+    def visit_ForNode(self, node, context):
+        res = RTResult()
+        elements = [] if not node.should_return_none else None
+
+        start_value = res.register(self.visit(node.start_value_node, context))
+        if res.should_return(): return res
+        end_value = res.register(self.visit(node.end_value_node, context))
+        if res.should_return(): return res
+        step_value = Number(1)
+        if node.step_value_node:
+            step_value = res.register(self.visit(node.step_value_node, context))
+            if res.should_return(): return res
+        
+        var_name = node.var_name_tok.value
+        
+        try:
+            start = int(start_value.value)
+            end = int(end_value.value)
+            step = int(step_value.value)
+        except (ValueError, TypeError):
+            return res.failure(RTError(
+                node.pos_start, node.pos_end,
+                "Start, end, and step values for a 'for' loop must be integers",
+                context
+            ))
+
+        if step == 0:
+            pos = node.step_value_node.pos_start if node.step_value_node else node.end_value_node.pos_start
+            return res.failure(RTError(
+                pos, pos, "Step value for a 'for' loop cannot be zero", context
+            ))
+
+        for i in range(start, end, step):
+            context.symbol_table.set(var_name, Number(i))
+            value = res.register(self.visit(node.body_node, context))
+
+            if res.should_return() and not res.loop_should_continue and not res.loop_should_break:
+                return res
+            if res.loop_should_continue: continue
+            if res.loop_should_break: break
+
+            if elements is not None:
+                if isinstance(value, List) and isinstance(node.body_node, (ForNode, ForInNode)):
+                    elements.extend(value.value)
+                else:
+                    elements.append(value)
+        
+        if node.should_return_none:
+            return res.success(Number.none)
+        else:
+            return res.success(
+                List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
+            )
 
     def visit_WhileNode(self, node, context):
         res = RTResult()
@@ -5146,13 +5223,17 @@ class Interpreter:
         var_names = [tok.value for tok in node.var_name_toks]
         body = node.body_node
         should_return_none = node.should_return_none
+        
         iterable = res.register(self.visit(node.iterable_node, context))
         if res.should_return():
             return res
+            
         iterator, error = iterable.iter()
         if error:
             return res.failure(error)
+            
         elements = [] if not should_return_none else None
+        
         try:
             while True:
                 current = next(iterator)
@@ -5160,49 +5241,41 @@ class Interpreter:
                     context.symbol_table.set(var_names[0], current)
                 else:
                     if not isinstance(current, List):
-                        return res.failure(
-                            RTError(
-                                node.iterable_node.pos_start,
-                                node.iterable_node.pos_end,
-                                "Value to unpack must be a list",
-                                context,
-                            )
-                        )
+                        return res.failure(RTError(
+                            node.iterable_node.pos_start, node.iterable_node.pos_end,
+                            "Value to unpack must be a list", context
+                        ))
                     values_to_unpack = current.value
                     if len(var_names) != len(values_to_unpack):
-                        return res.failure(
-                            RTError(
-                                node.iterable_node.pos_start,
-                                node.iterable_node.pos_end,
-                                f"Not enough values to unpack (expected {len(var_names)}, got {len(values_to_unpack)})",
-                                context,
-                            )
-                        )
+                        return res.failure(RTError(
+                            node.iterable_node.pos_start, node.iterable_node.pos_end,
+                            f"Not enough values to unpack (expected {len(var_names)}, got {len(values_to_unpack)})",
+                            context
+                        ))
                     for i, var_name in enumerate(var_names):
                         context.symbol_table.set(var_name, values_to_unpack[i])
+
                 value = res.register(self.visit(body, context))
-                if (
-                    res.should_return()
-                    and not res.loop_should_continue
-                    and not res.loop_should_break
-                ):
+                
+                if (res.should_return() and not res.loop_should_continue and not res.loop_should_break):
                     return res
-                if res.loop_should_break:
-                    break
-                if res.loop_should_continue:
-                    continue
+                if res.loop_should_break: break
+                if res.loop_should_continue: continue
+                    
                 if elements is not None:
-                    elements.append(value)
-            context.symbol_table.remove(var_name)
+                    if isinstance(value, List) and isinstance(node.body_node, (ForNode, ForInNode)):
+                        elements.extend(value.value)
+                    else:
+                        elements.append(value)
+
         except StopIteration:
             pass
+            
         if should_return_none:
             return res.success(Number.none)
         else:
             return res.success(
-                List(elements)
-                .set_context(context)
-                .set_pos(node.pos_start, node.pos_end)
+                List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
             )
 
     def visit_UsingNode(self, node, context: Context):

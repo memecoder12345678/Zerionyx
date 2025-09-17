@@ -13,4 +13,30 @@ namespace time
     defun ctime(t)
         return ctime_fp(t)
     done
+
+    namespace datetime
+        defun now()
+            return datetime_now_fp()
+        done
+
+        defun today()
+            return date_today_fp()
+        done
+
+        defun format(fmt)
+            return datetime_format_fp(fmt)
+        done
+
+        defun parse(s, fmt)
+            return datetime_parse_fp(s, fmt)
+        done
+
+        defun add_days(days)
+            return datetime_add_days_fp(days)
+        done
+
+        defun diff(dt1, dt2)
+            return datetime_diff_fp(dt1, dt2)
+        done
+    done
 done

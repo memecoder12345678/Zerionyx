@@ -1,5 +1,6 @@
-namespace msgbox
+# libs.msgbox
 
+namespace msgbox
     defun alert(message, title)
         return msgbox_alert_fp(message, title)
     done
@@ -15,5 +16,4 @@ namespace msgbox
     defun password(message, title)
         return msgbox_password_fp(message, title)
     done
-
 done

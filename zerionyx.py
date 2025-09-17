@@ -117,6 +117,7 @@ DECORATOR* "defun" IDENTIFIER? "(" PARAM_LIST? ")"
 COMMENT ::= "#" /[^\n]*/
 
 """
+# TODO: cập nhật cú pháp
 
 
 def check_file_comments_or_empty(file_path):

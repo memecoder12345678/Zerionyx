@@ -1,9 +1,8 @@
 # libs.decorators
 
-load "libs.time"
-load "libs.threading"
-
 namespace decorators
+    load "libs.time"
+    load "libs.threading"
 
     defun name(fn) -> slice(to_str(fn), 10, -1)
 
@@ -174,5 +173,4 @@ namespace decorators
         done
         return wrapper
     done
-
 done

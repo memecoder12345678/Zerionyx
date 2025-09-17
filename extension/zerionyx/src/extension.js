@@ -111,3 +111,4 @@ function activate(context) {
 module.exports = {
     activate
 };
+// TODO: cập nhật tự hoàn thành cú pháp và tô màu

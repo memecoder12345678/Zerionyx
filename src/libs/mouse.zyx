@@ -1,3 +1,5 @@
+# libs.mouse
+
 namespace mouse
     defun move(x, y)
         mouse_move_fp(x, y)
