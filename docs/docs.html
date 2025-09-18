@@ -566,7 +566,6 @@ INT | FLOAT | STRING | IDENTIFIER
 | LIST_EXPR
 | IF_EXPR
 | FOR_EXPR
-| FOR_IN_EXPR
 | HASHMAP_EXPR
 | NAMESPACE_EXPR
 | WHILE_EXPR
@@ -593,14 +592,14 @@ IF_EXPR ::=
 (NEWLINE <code>else</code> <code>do</code> STATEMENT)?
 (NEWLINE <code>done</code>)?
 
-FOR_EXPR ::=
-<code>for</code> IDENTIFIER <code>=</code> EXPR <code>to</code> EXPR
-(<code>step</code> EXPR)?
-<code>do</code> STATEMENT
-(NEWLINE <code>done</code>)?
+FOR_CLAUSES ::= <code>for</code> FOR_CLAUSE (<code>,</code> FOR_CLAUSE)*
 
-FOR_IN_EXPR ::=
-<code>for</code> IDENTIFIER <code>in</code> EXPR
+FOR_CLAUSE ::= IDENTIFIER (<code>=</code> EXPR)? <code>to</code> EXPR (<code>step</code> EXPR)?
+
+FOR_IN_CLAUSE ::= <code>for</code> IDENTIFIER (<code>,</code> IDENTIFIER)* <code>,</code> EXPR
+
+FOR_EXPR ::=
+(FOR_CLAUSES | FOR_IN_CLAUSE)
 <code>do</code> STATEMENT
 (NEWLINE <code>done</code>)?
 

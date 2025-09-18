@@ -60,6 +60,7 @@ KEYWORDS = [
     "load",
     "in",
     "as",
+    "del",
     "namespace",
     "using",
 ]

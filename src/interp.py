@@ -4554,6 +4554,25 @@ class Interpreter:
         )
         return res.success(copied_value)
 
+    def visit_DelNode(self, node, context: Context):
+        res = RTResult()
+        for var_tok in node.var_name_toks:
+            var_name = var_tok.value
+            if context.symbol_table.get(var_name) is None:
+                return res.failure(
+                    RTError(
+                        var_tok.pos_start,
+                        var_tok.pos_end,
+                        f"'{var_name}' is not defined",
+                        context,
+                    )
+                )
+            
+            context.symbol_table.remove(var_name)
+            context.private_symbol_table.remove(var_name)
+
+        return res.success(Number.none)
+
     def visit_VarAssignNode(self, node, context: Context):
         res = RTResult()
         var_name = node.var_name_tok.value
@@ -4579,28 +4598,22 @@ class Interpreter:
 
     def visit_VarAssignAsNode(self, node, context: Context):
         res = RTResult()
-        orig_name = node.var_name_tok.value
-        alias_name = node.var_name_tok2.value
+        ref_name = node.var_name_tok.value
+        referenced_name = node.var_name_tok2.value
 
-        value = context.symbol_table.get(orig_name)
+        value = context.symbol_table.get(referenced_name)
         if value is None:
             return res.failure(
                 RTError(
                     node.pos_start,
                     node.pos_end,
-                    f"Variable '{orig_name}' is not defined",
+                    f"'{referenced_name}' is not defined",
                     context,
                 )
             )
 
-        context.symbol_table.set(alias_name, value)
-        context.private_symbol_table.set(alias_name, value)
-
-        try:
-            context.symbol_table.remove(orig_name)
-            context.private_symbol_table.remove(orig_name)
-        except KeyError:
-            pass
+        context.symbol_table.set(ref_name, value)
+        context.private_symbol_table.set(ref_name, value)
 
         return res.success(value)
 
