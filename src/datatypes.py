@@ -39,28 +39,56 @@ class Context:
 
 
 class SymbolTable:
-
-    __slots__ = ("symbols", "parent")
+    __slots__ = ("symbols", "parent", "aliases")
 
     def __init__(self, parent=None):
         self.symbols = {}
         self.parent = parent
+        self.aliases = {}
+
+    def resolve(self, name):
+        seen = set()
+        cur = name
+        while cur in self.aliases:
+            if cur in seen:
+                break
+            seen.add(cur)
+            cur = self.aliases[cur]
+        return cur
 
     def get(self, name):
-        value = self.symbols.get(name, None)
-        if value == None and self.parent:
-            return self.parent.get(name)
-        return value
+        root = self.resolve(name)
+        if root in self.symbols:
+            return self.symbols[root]
+        if self.parent:
+            return self.parent.get(root)
+        return None
 
     def set(self, name, value):
-        self.symbols[name] = value
+        root = self.resolve(name)
+        self.symbols[root] = value
+
+    def set_ref(self, name, ref_name):
+        root_ref = self.resolve(ref_name)
+        if self.get(root_ref) is None:
+            raise NameError(f"'{ref_name}' is not defined")
+        if name in self.symbols:
+            del self.symbols[name]
+        self.aliases[name] = root_ref
+
+    def remove(self, name):
+        root = self.resolve(name)
+        if root in self.symbols:
+            del self.symbols[root]
+        to_del = [k for k, v in self.aliases.items() if v == root or k == name]
+        for k in to_del:
+            del self.aliases[k]
 
     def change(self, other):
         self.symbols = other.symbols
         self.parent = other.parent
-
-    def remove(self, name):
-        del self.symbols[name]
+        self.aliases = dict(other.aliases)
+        return self
 
     def exists(self, value):
         return True if value in self.symbols.values() else False

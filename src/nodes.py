@@ -407,6 +407,16 @@ class UsingParentNode:
         return f"UsingParentNode({self.var_name_toks})"
 
 
+class DelNode:
+    def __init__(self, var_name_toks, pos_start, pos_end):
+        self.var_name_toks = var_name_toks
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+
+    def __repr__(self):
+        return f"DelNode({self.var_name_toks})"
+
+
 class IndexAssignNode:
     def __init__(self, obj_node, index_node, value_node):
         self.obj_node = obj_node
@@ -435,6 +445,7 @@ class MultiAssignNode:
     def __str__(self):
         var_names = ", ".join(str(tok.value) for tok in self.var_name_toks)
         return f"MultiAssignNode(({var_names}) = {self.value_node})"
+
 
 class ListComprehensionNode:
     __slots__ = ["element_node", "loop_node", "pos_start", "pos_end"]

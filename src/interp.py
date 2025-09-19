@@ -10,6 +10,7 @@ import json
 from .parser import *
 from .nodes import *
 from .datatypes import *
+from copy import deepcopy 
 
 from .consts import *
 from .errors import TError, IError, MError, Error, RTError
@@ -3351,7 +3352,7 @@ class BuiltInFunction(BaseFunction):
         return RTResult().success(default)
 
     @set_args(["hm", "key"])
-    def execute_del(self, exec_ctx):
+    def execute_del_key(self, exec_ctx):
         hm = exec_ctx.symbol_table.get("hm")
         key = exec_ctx.symbol_table.get("key")
         if not isinstance(hm, HashMap):
@@ -3359,7 +3360,7 @@ class BuiltInFunction(BaseFunction):
                 TError(
                     self.pos_start,
                     self.pos_end,
-                    "First argument of 'del' must be a hashmap",
+                    "First argument of 'del_key' must be a hashmap",
                     exec_ctx,
                 )
             )
@@ -3372,6 +3373,22 @@ class BuiltInFunction(BaseFunction):
             del hm.value[key_to_del]
             return RTResult().success(hm)
         return RTResult().success(Number.none)
+    
+
+    @set_args(["space", "member", "default"], [None, None, Number.none])
+    def execute_get_member(self, exec_ctx):
+        hm = exec_ctx.symbol_table.get("space")
+        key = exec_ctx.symbol_table.get("member")
+        default = exec_ctx.symbol_table.get("default")
+        if not isinstance(hm, NameSpace):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'get_member' must be a namespace",
+                    exec_ctx,
+                )
+            )
 
     @set_args(["x", "y"])
     def execute_mouse_move_fp(self, exec_ctx):
@@ -4437,7 +4454,7 @@ class BuiltInFunction(BaseFunction):
             return RTResult().failure(
                 TError(self.pos_start, self.pos_end, str(e), exec_ctx)
             )
-    
+
     @set_args(["str", "lst"])
     def execute_string_format_fp(self, exec_ctx):
         _str = exec_ctx.symbol_table.get("str")
@@ -4452,7 +4469,7 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        if not isinstance(lst, String):
+        if not isinstance(lst, List):
             return RTResult().failure(
                 TError(
                     self.pos_start,
@@ -4463,8 +4480,11 @@ class BuiltInFunction(BaseFunction):
             )
         r = _str.value.format(*lst.value)
         return RTResult().success(String(r))
-
-
+    
+    @set_args(["value"])
+    def execute_clone(self, exec_ctx): # This may cause lag if overused, and should only be used for functions or namespaces when truly needed.
+        value = exec_ctx.symbol_table.get("value")
+        return RTResult().success(deepcopy(value))
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
@@ -4567,7 +4587,7 @@ class Interpreter:
                         context,
                     )
                 )
-            
+
             context.symbol_table.remove(var_name)
             context.private_symbol_table.remove(var_name)
 
@@ -4612,8 +4632,11 @@ class Interpreter:
                 )
             )
 
-        context.symbol_table.set(ref_name, value)
-        context.private_symbol_table.set(ref_name, value)
+        try:
+            context.symbol_table.set_ref(ref_name, referenced_name)
+            context.private_symbol_table.set_ref(ref_name, referenced_name)
+        except NameError as e:
+            return res.failure(RTError(node.pos_start, node.pos_end, str(e), context))
 
         return res.success(value)
 
@@ -4904,15 +4927,24 @@ class Interpreter:
 
         def process_loop(current_loop_node):
             if isinstance(current_loop_node, ForNode):
-                start_value = res.register(self.visit(current_loop_node.start_value_node, context))
-                if res.should_return(): return
-                end_value = res.register(self.visit(current_loop_node.end_value_node, context))
-                if res.should_return(): return
+                start_value = res.register(
+                    self.visit(current_loop_node.start_value_node, context)
+                )
+                if res.should_return():
+                    return
+                end_value = res.register(
+                    self.visit(current_loop_node.end_value_node, context)
+                )
+                if res.should_return():
+                    return
                 step_value = Number(1)
                 if current_loop_node.step_value_node:
-                    step_value = res.register(self.visit(current_loop_node.step_value_node, context))
-                    if res.should_return(): return
-                
+                    step_value = res.register(
+                        self.visit(current_loop_node.step_value_node, context)
+                    )
+                    if res.should_return():
+                        return
+
                 var_name = current_loop_node.var_name_tok.value
                 start = int(start_value.value)
                 end = int(end_value.value)
@@ -4920,23 +4952,30 @@ class Interpreter:
 
                 for i in range(start, end, step):
                     context.symbol_table.set(var_name, Number(i))
-                    
+
                     if isinstance(current_loop_node.body_node, (ForNode, ForInNode)):
                         res.register(process_loop(current_loop_node.body_node))
-                        if res.should_return(): return
+                        if res.should_return():
+                            return
                     else:
-                        element_value = res.register(self.visit(node.element_node, context))
-                        if res.should_return(): return
+                        element_value = res.register(
+                            self.visit(node.element_node, context)
+                        )
+                        if res.should_return():
+                            return
                         elements.append(element_value)
 
             else:
-                iterable = res.register(self.visit(current_loop_node.iterable_node, context))
-                if res.should_return(): return
+                iterable = res.register(
+                    self.visit(current_loop_node.iterable_node, context)
+                )
+                if res.should_return():
+                    return
                 iterator, error = iterable.iter()
                 if error:
                     res.failure(error)
                     return
-                
+
                 var_names = [tok.value for tok in current_loop_node.var_name_toks]
 
                 try:
@@ -4945,24 +4984,35 @@ class Interpreter:
                         if len(var_names) == 1:
                             context.symbol_table.set(var_names[0], current_item)
                         else:
-                            if not isinstance(current_item, List) or len(current_item.value) != len(var_names):
+                            if not isinstance(current_item, List) or len(
+                                current_item.value
+                            ) != len(var_names):
                                 pass
                             for i, var_name in enumerate(var_names):
-                                context.symbol_table.set(var_name, current_item.value[i])
-                        
-                        if isinstance(current_loop_node.body_node, (ForNode, ForInNode)):
+                                context.symbol_table.set(
+                                    var_name, current_item.value[i]
+                                )
+
+                        if isinstance(
+                            current_loop_node.body_node, (ForNode, ForInNode)
+                        ):
                             res.register(process_loop(current_loop_node.body_node))
-                            if res.should_return(): return
+                            if res.should_return():
+                                return
                         else:
-                            element_value = res.register(self.visit(node.element_node, context))
-                            if res.should_return(): return
+                            element_value = res.register(
+                                self.visit(node.element_node, context)
+                            )
+                            if res.should_return():
+                                return
                             elements.append(element_value)
                 except StopIteration:
                     pass
 
         res.register(process_loop(node.loop_node))
-        if res.should_return(): return res
-        
+        if res.should_return():
+            return res
+
         return res.success(
             List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
         )
@@ -4972,53 +5022,73 @@ class Interpreter:
         elements = [] if not node.should_return_none else None
 
         start_value = res.register(self.visit(node.start_value_node, context))
-        if res.should_return(): return res
+        if res.should_return():
+            return res
         end_value = res.register(self.visit(node.end_value_node, context))
-        if res.should_return(): return res
+        if res.should_return():
+            return res
         step_value = Number(1)
         if node.step_value_node:
             step_value = res.register(self.visit(node.step_value_node, context))
-            if res.should_return(): return res
-        
+            if res.should_return():
+                return res
+
         var_name = node.var_name_tok.value
-        
+
         try:
             start = int(start_value.value)
             end = int(end_value.value)
             step = int(step_value.value)
         except (ValueError, TypeError):
-            return res.failure(RTError(
-                node.pos_start, node.pos_end,
-                "Start, end, and step values for a 'for' loop must be integers",
-                context
-            ))
+            return res.failure(
+                RTError(
+                    node.pos_start,
+                    node.pos_end,
+                    "Start, end, and step values for a 'for' loop must be integers",
+                    context,
+                )
+            )
 
         if step == 0:
-            pos = node.step_value_node.pos_start if node.step_value_node else node.end_value_node.pos_start
-            return res.failure(RTError(
-                pos, pos, "Step value for a 'for' loop cannot be zero", context
-            ))
+            pos = (
+                node.step_value_node.pos_start
+                if node.step_value_node
+                else node.end_value_node.pos_start
+            )
+            return res.failure(
+                RTError(pos, pos, "Step value for a 'for' loop cannot be zero", context)
+            )
 
         for i in range(start, end, step):
             context.symbol_table.set(var_name, Number(i))
             value = res.register(self.visit(node.body_node, context))
 
-            if res.should_return() and not res.loop_should_continue and not res.loop_should_break:
+            if (
+                res.should_return()
+                and not res.loop_should_continue
+                and not res.loop_should_break
+            ):
                 return res
-            if res.loop_should_continue: continue
-            if res.loop_should_break: break
+            if res.loop_should_continue:
+                continue
+            if res.loop_should_break:
+                break
 
             if elements is not None:
-                if isinstance(value, List) and isinstance(node.body_node, (ForNode, ForInNode)):
+                if isinstance(value, List) and isinstance(
+                    node.body_node, (ForNode, ForInNode)
+                ):
                     elements.extend(value.value)
                 else:
                     elements.append(value)
-        
+
         if node.should_return_none:
             return res.success(Number.none)
         else:
             return res.success(
-                List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
+                List(elements)
+                .set_context(context)
+                .set_pos(node.pos_start, node.pos_end)
             )
 
     def visit_WhileNode(self, node, context):
@@ -5264,17 +5334,17 @@ class Interpreter:
         var_names = [tok.value for tok in node.var_name_toks]
         body = node.body_node
         should_return_none = node.should_return_none
-        
+
         iterable = res.register(self.visit(node.iterable_node, context))
         if res.should_return():
             return res
-            
+
         iterator, error = iterable.iter()
         if error:
             return res.failure(error)
-            
+
         elements = [] if not should_return_none else None
-        
+
         try:
             while True:
                 current = next(iterator)
@@ -5282,41 +5352,58 @@ class Interpreter:
                     context.symbol_table.set(var_names[0], current)
                 else:
                     if not isinstance(current, List):
-                        return res.failure(RTError(
-                            node.iterable_node.pos_start, node.iterable_node.pos_end,
-                            "Value to unpack must be a list", context
-                        ))
+                        return res.failure(
+                            RTError(
+                                node.iterable_node.pos_start,
+                                node.iterable_node.pos_end,
+                                "Value to unpack must be a list",
+                                context,
+                            )
+                        )
                     values_to_unpack = current.value
                     if len(var_names) != len(values_to_unpack):
-                        return res.failure(RTError(
-                            node.iterable_node.pos_start, node.iterable_node.pos_end,
-                            f"Not enough values to unpack (expected {len(var_names)}, got {len(values_to_unpack)})",
-                            context
-                        ))
+                        return res.failure(
+                            RTError(
+                                node.iterable_node.pos_start,
+                                node.iterable_node.pos_end,
+                                f"Not enough values to unpack (expected {len(var_names)}, got {len(values_to_unpack)})",
+                                context,
+                            )
+                        )
                     for i, var_name in enumerate(var_names):
                         context.symbol_table.set(var_name, values_to_unpack[i])
 
                 value = res.register(self.visit(body, context))
-                
-                if (res.should_return() and not res.loop_should_continue and not res.loop_should_break):
+
+                if (
+                    res.should_return()
+                    and not res.loop_should_continue
+                    and not res.loop_should_break
+                ):
                     return res
-                if res.loop_should_break: break
-                if res.loop_should_continue: continue
-                    
+                if res.loop_should_break:
+                    break
+                if res.loop_should_continue:
+                    continue
+
                 if elements is not None:
-                    if isinstance(value, List) and isinstance(node.body_node, (ForNode, ForInNode)):
+                    if isinstance(value, List) and isinstance(
+                        node.body_node, (ForNode, ForInNode)
+                    ):
                         elements.extend(value.value)
                     else:
                         elements.append(value)
 
         except StopIteration:
             pass
-            
+
         if should_return_none:
             return res.success(Number.none)
         else:
             return res.success(
-                List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
+                List(elements)
+                .set_context(context)
+                .set_pos(node.pos_start, node.pos_end)
             )
 
     def visit_UsingNode(self, node, context: Context):
