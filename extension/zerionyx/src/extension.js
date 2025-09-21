@@ -8,6 +8,7 @@ const zerionyxControlFlow = ['return', 'continue', 'break'];
 const zerionyxOperators = ['and', 'or', 'not'];
 const zerionyxConstants = ['true', 'false', 'none', 'nan', 'inf', 'neg_inf', 'is_main'];
 const zerionyxTypeConstants = ['list', 'str', 'int', 'float', 'bool', 'func', 'hashmap', 'thread', 'bytes', 'cfloat', 'py_obj', 'channel_type', 'none_type', 'thread_pool_type', 'future_type'];
+
 const zerionyxBuiltins = [
     'append', 'is_panic', 'clear', 'extend', 'input', 'get_password', 'insert', 'is_func', 'is_list', 'is_py_obj', 'is_none', 'is_num',
     'is_str', 'is_bool', 'is_thread', 'is_thread_pool', 'is_future', 'is_namespace', 'keys', 'values', 'items', 'has', 'get', 'del',
@@ -61,12 +62,13 @@ function activate(context) {
 
             const userDefinedCompletions = [];
             const variableRegex = /([a-zA-Z_]\w*)\s*=/g;
-            const asVariableRegex = /(?<=\bas\b\s+)([a-zA-Z_]\w*)/g;
+            const asVariableRegex = /([a-zA-Z_]\w*)(\bas\b\s+)/g;
             const functionRegex = /defun\s+([a-zA-Z_]\w*)/g;
             const namespaceRegex = /namespace\s+([a-zA-Z_]\w*)/g;
-            const forVarRegex = /(?:for|,)\s+([a-zA-Z_]\w*)\s*(?:=|\bto\b|\bin\b)/g;
+            const forVarRegex = /(?:\bfor|,)\s+([a-zA-Z_]\w*)/g;
 
             let match;
+
             while ((match = variableRegex.exec(fullText)) !== null) {
                 userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Variable));
             }
@@ -79,13 +81,10 @@ function activate(context) {
             while ((match = namespaceRegex.exec(fullText)) !== null) {
                 userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Module));
             }
-            while ((match = forInVarRegex.exec(fullText)) !== null) {
+            while ((match = forVarRegex.exec(fullText)) !== null) {
                 userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Variable));
             }
-            while ((match = forToVarRegex.exec(fullText)) !== null) {
-                userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Variable));
-            }
-
+            
             const allKeywords = [
                 ...zerionyxKeywords.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Keyword)),
                 ...zerionyxControlFlow.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Keyword)),
@@ -104,7 +103,9 @@ function activate(context) {
 
             return uniqueCompletions;
         }
-    }, '.');
+    }, 
+    '.'
+    );
 
     context.subscriptions.push(provider);
 }
@@ -112,4 +113,3 @@ function activate(context) {
 module.exports = {
     activate
 };
-// TODO: cập nhật tự hoàn thành cú pháp và tô màu

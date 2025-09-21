@@ -566,6 +566,7 @@ INT | FLOAT | STRING | IDENTIFIER
 | LIST_EXPR
 | IF_EXPR
 | FOR_EXPR
+| DEL_EXPR
 | HASHMAP_EXPR
 | NAMESPACE_EXPR
 | WHILE_EXPR
@@ -575,6 +576,8 @@ INT | FLOAT | STRING | IDENTIFIER
 | EXPR
 
 USING_STATEMENT ::= <code>using</code> (<code>parent</code>)? IDENTIFIER (<code>,</code> IDENTIFIER)*
+
+DEL_EXPR ::= <code>del</code> IDENTIFIER (<code>,</code> IDENTIFIER)*
 
 LIST_EXPR ::=
 <code>[</code> (EXPR (<code>,</code> EXPR)*)? <code>]</code>
@@ -696,7 +699,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>These constants are string values that correspond to the output of the <code>type()</code>
                         function. They are useful for type checking.</p>
                     <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">if</span> <span class="zyx-func">type</span><span class="zyx-types">([</span><span class="zyx-number">1</span>, <span class="zyx-number">2</span><span class="zyx-types">])</span> <span class="zyx-types">==</span> <span class="zyx-var">list</span> <span class="zyx-keyword">do</span>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">if</span> <span class="zyx-func">type</span><span class="zyx-types">([</span><span class="zyx-number">1</span><span class="zyx-types">,</span> <span class="zyx-number">2</span><span class="zyx-types">])</span> <span class="zyx-types">==</span> <span class="zyx-var">list</span> <span class="zyx-keyword">do</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"It's a list!"</span><span class="zyx-types">)</span>
 <span class="zyx-keyword">done</span></code></pre>
                     <br>
@@ -821,6 +824,7 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>is_nan(n)</b> &rarr; bool &mdash; Check if <code>n</code> is NaN (Not a Number)</li>
                         <li><b>is_channel(n)</b> &rarr; bool &mdash; Check if <code>n</code> is channel</li>
                         <li><b>is_cfloat(n)</b> &rarr; bool &mdash; Check if <code>n</code> is cfloat</li>
+                        <li><b>clone(value)</b> &rarr; any &mdash; Clone and return <code>value</code></li>
                     </ul>
                 </section>
                 <section id="ref-namespaces">
@@ -842,10 +846,10 @@ Zerionyx may be magical, but its syntax must be real.
 
 <span class="zyx-comment"># Access members using dot notation</span>
 <span class="zyx-var">r</span> <span class="zyx-types">=</span> <span class="zyx-number">10</span>
-<span class="zyx-var">area</span> <span class="zyx-types">=</span> <span class="zyx-var">math_utils</span>.<span class="zyx-func">circle_area</span><span class="zyx-types">(</span><span class="zyx-var">r</span><span class="zyx-types">)</span>
+<span class="zyx-var">area</span> <span class="zyx-types">=</span> <span class="zyx-var">math_utils</span><span class="zyx-types">.</span><span class="zyx-func">circle_area</span><span class="zyx-types">(</span><span class="zyx-var">r</span><span class="zyx-types">)</span>
 
-<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"The area is "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">area</span><span class="zyx-types">))</span>
-<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Pi value: "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">math_utils</span>.<span class="zyx-var">pi</span><span class="zyx-types">))</span>
+-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"The area is "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">area</span><span class="zyx-types">))</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Pi value: "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">math_utils</s<span class="zyxpan><span class="zyx-types">.</span><span class="zyx-var">pi</span><span class="zyx-types">))</span>
 </code></pre>
                 </section>
                 <section id="ref-control-flow">
@@ -883,21 +887,27 @@ Zerionyx may be magical, but its syntax must be real.
                     <h4>For Loop (Numeric Range)</h4>
                     <p>Iterates over a range of numbers.</p>
                     <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-comment"># Prints numbers from 1 to 10</span>
-<span class="zyx-keyword">for</span> <span class="zyx-var">i</span> <span class="zyx-types">=</span> <span class="zyx-number">1</span> <span class="zyx-keyword">to</span> <span class="zyx-number">11</span> <span class="zyx-keyword">do</span>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-comment"># Prints numbers from 0 to 10</span>
+<span class="zyx-keyword">for</span> <span class="zyx-var">i</span> <span class="zyx-keyword">to</span> <span class="zyx-number">11</span> <span class="zyx-keyword">do</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">i</span><span class="zyx-types">)</span>
+<span class="zyx-keyword">done</span>
+
+<span class="zyx-comment"># Prints numbers from 01 to 99</span>
+<span class="zyx-keyword">for</span> <span class="zyx-var">i</span> <span class="zyx-keyword">to</span> <span class="zyx-number">10</span><span class="zyx-types">,</span> <span class="zyx-var">j</span> <span class="zyx-types">=</span> <span class="zyx-number">1</span> <span class="zyx-keyword">to</span> <span class="zyx-number">10</span> <span class="zyx-keyword">do</span>
+    <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">i</span><span class="zyx-types">)</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">j</span><span class="zyx-types">))</span>
 <span class="zyx-keyword">done</span>
 
 <span class="zyx-comment"># Prints even numbers from 2 to 10</span>
 <span class="zyx-keyword">for</span> <span class="zyx-var">j</span> <span class="zyx-types">=</span> <span class="zyx-number">2</span> <span class="zyx-keyword">to</span> <span class="zyx-number">11</span> <span class="zyx-keyword">step</span> <span class="zyx-number">2</span> <span class="zyx-keyword">do</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">j</span><span class="zyx-types">)</span>
 <span class="zyx-keyword">done</span>
+
 </code></pre>
                     <br>
                     <h4>For-In Loop (Iterator)</h4>
                     <p>Iterates over the elements of an iterable like a list or string.</p>
                     <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-var">fruits</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-string">"apple"</span>, <span class="zyx-string">"banana"</span>, <span class="zyx-string">"cherry"</span><span class="zyx-types">]</span>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-var">fruits</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-string">"apple"</span><span class="zyx-types">,</span> <span class="zyx-string">"banana"</span><span class="zyx-types">,</span> <span class="zyx-string">"cherry"</span><span class="zyx-types">]</span>
 <span class="zyx-keyword">for</span> <span class="zyx-var">fruit</span> <span class="zyx-keyword">in</span> <span class="zyx-var">fruits</span> <span class="zyx-keyword">do</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"I like "</span> <span class="zyx-types">+</span> <span class="zyx-var">fruit</span><span class="zyx-types">)</span>
 <span class="zyx-keyword">done</span>
@@ -946,7 +956,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">load</span> <span class="zyx-string">"libs.decorators"</span>
 
 <span class="zyx-comment"># &decorators.once ensures this function only runs its body the first time it's called</span>
-<span class="zyx-keyword">&</span><span class="zyx-var">decorators</span>.<span class="zyx-func">once</span>
+<span class="zyx-keyword">&</span><span class="zyx-var">decorators</span><span class="zyx-types">.</span><span class="zyx-func">once</span>
 <span class="zyx-keyword">defun</span> <span class="zyx-func-def">initialize_settings</span><span class="zyx-types">()</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Settings initialized"</span><span class="zyx-types">)</span>
 <span class="zyx-keyword">done</span>
@@ -1025,14 +1035,14 @@ Zerionyx may be magical, but its syntax must be real.
                     <p>A parameter prefixed with a double asterisk (<code>**</code>) will collect all extra keyword
                         arguments into a HashMap. This is commonly known as "kwargs".</p>
                     <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">defun</span> <span class="zyx-func-def">show_details</span><span class="zyx-types">(</span><span class="zyx-var">name</span>, <span class="zyx-types">*</span><span class="zyx-var">scores</span>, <span class="zyx-types">**</span><span class="zyx-var">details</span><span class="zyx-types">)</span>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">defun</span> <span class="zyx-func-def">show_details</span><span class="zyx-types">(</span><span class="zyx-var">name</span><span class="zyx-types">,</span> <span class="zyx-types">*</span><span class="zyx-var">scores</span><span class="zyx-types">,</span> <span class="zyx-types">**</span><span class="zyx-var">details</span><span class="zyx-types">)</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Name: "</span> <span class="zyx-types">+</span> <span class="zyx-var">name</span><span class="zyx-types">)</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Scores (Vargs): "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">scores</span><span class="zyx-types">))</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Details (Kwargs): "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">details</span><span class="zyx-types">))</span>
 <span class="zyx-keyword">done</span>
 
 <span class="zyx-comment"># Call the function with multiple positional and keyword arguments</span>
-<span class="zyx-func">show_details</span><span class="zyx-types">(</span><span class="zyx-string">"Alice"</span>, <span class="zyx-number">95</span>, <span class="zyx-number">88</span>, <span class="zyx-number">100</span>, <span class="zyx-var">age</span><span class="zyx-types">=</span><span class="zyx-number">25</span>, <span class="zyx-var">city</span><span class="zyx-types">=</span><span class="zyx-string">"New York"</span><span class="zyx-types">)</span>
+<span class="zyx-func">show_details</span><span class="zyx-types">(</span><span class="zyx-string">"Alice"</span><span class="zyx-types">,</span> <span class="zyx-number">95</span><span class="zyx-types">,</span> <span class="zyx-number">88</span><span class="zyx-types">,</span> <span class="zyx-number">100</span><span class="zyx-types">,</span> <span class="zyx-var">age</span><span class="zyx-types">=</span><span class="zyx-number">25</span><span class="zyx-types">,</span> <span class="zyx-var">city</span><span class="zyx-types">=</span><span class="zyx-string">"New York"</span><span class="zyx-types">)</span>
 
 <span class="zyx-comment"># Output:</span>
 <span class="zyx-comment"># Name: Alice</span>
@@ -1061,14 +1071,14 @@ Zerionyx may be magical, but its syntax must be real.
                         safely execute a function using the <code>is_panic</code> built-in. It returns a list indicating
                         success or failure.</p>
                     <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">defun</span> <span class="zyx-func-def">divide</span><span class="zyx-types">(</span><span class="zyx-var">a</span>, <span class="zyx-var">b</span><span class="zyx-types">)</span>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">defun</span> <span class="zyx-func-def">divide</span><span class="zyx-types">(</span><span class="zyx-var">a</span><span class="zyx-types">,</span> <span class="zyx-var">b</span><span class="zyx-types">)</span>
     <span class="zyx-keyword">if</span> <span class="zyx-var">b</span> <span class="zyx-types">==</span> <span class="zyx-number">0</span> <span class="zyx-keyword">do</span>
-        <span class="zyx-func">panic</span><span class="zyx-types">(</span><span class="zyx-string">"Cannot divide by zero!"</span>, <span class="zyx-string">"M"</span><span class="zyx-types">)</span> <span class="zyx-comment"># "M" for Math Error</span>
+        <span class="zyx-func">panic</span><span class="zyx-types">(</span><span class="zyx-string">"Cannot divide by zero!"</span><span class="zyx-types">,</span> <span class="zyx-string">"M"</span><span class="zyx-types">)</span> <span class="zyx-comment"># "M" for Math Error</span>
     <span class="zyx-keyword">done</span>
     <span class="zyx-keyword">return</span> <span class="zyx-var">a</span> <span class="zyx-types">/</span> <span class="zyx-var">b</span>
 <span class="zyx-keyword">done</span>
 
-<span class="zyx-var">result</span> <span class="zyx-types">=</span> <span class="zyx-func">is_panic</span><span class="zyx-types">(</span><span class="zyx-var">divide</span>, <span class="zyx-types">[</span><span class="zyx-number">10</span>, <span class="zyx-number">0</span><span class="zyx-types">])</span>
+<span class="zyx-var">result</span> <span class="zyx-types">=</span> <span class="zyx-func">is_panic</span><span class="zyx-types">(</span><span class="zyx-var">divide</span><span class="zyx-types">,</span> <span class="zyx-types">[</span><span class="zyx-number">10</span><span class="zyx-types">,</span> <span class="zyx-number">0</span><span class="zyx-types">])</span>
 <span class="zyx-var">value</span> <span class="zyx-types">=</span> <span class="zyx-var">result</span><span class="zyx-types">$</span><span class="zyx-number">0</span>      <span class="zyx-comment"># The result if successful</span>
 <span class="zyx-var">error_msg</span> <span class="zyx-types">=</span> <span class="zyx-var">result</span><span class="zyx-types">$</span><span class="zyx-number">1</span>  <span class="zyx-comment"># The error message if it failed</span>
 <span class="zyx-var">error_type</span> <span class="zyx-types">=</span> <span class="zyx-var">result</span><span class="zyx-types">$</span><span class="zyx-number">2</span> <span class="zyx-comment"># The error type (e.g., "M")</span>
@@ -1092,10 +1102,10 @@ Zerionyx may be magical, but its syntax must be real.
 <span class="zyx-var">content</span> <span class="zyx-types">=</span> <span class="zyx-string">"Hello from Zerionyx!"</span>
 
 <span class="zyx-comment"># Write to a file</span>
-<span class="zyx-var">ffio</span>.<span class="zyx-func">write</span><span class="zyx-types">(</span><span class="zyx-var">ffio</span>.<span class="zyx-func">open</span><span class="zyx-types">(</span><span class="zyx-var">filename</span><span class="zyx-types">)</span>, <span class="zyx-string">"w"</span>, <span class="zyx-var">content</span><span class="zyx-types">)</span>
+<span class="zyx-var">ffio</span><span class="zyx-types">.</span><span class="zyx-func">write</span><span class="zyx-types">(</span><span class="zyx-var">filename</span><span class="zyx-types">,</span> <span class="zyx-string">"w"</span><span class="zyx-types">,</span> <span class="zyx-var">content</span><span class="zyx-types">)</span>
 
 <span class="zyx-comment"># Read from a file</span>
-<span class="zyx-var">read_content</span> <span class="zyx-types">=</span> <span class="zyx-var">ffio</span>.<span class="zyx-func">read</span><span class="zyx-types">(</span><span class="zyx-var">filename</span>, <span class="zyx-string">"r"</span><span class="zyx-types">)</span>
+<span class="zyx-var">read_content</span> <span class="zyx-types">=</span> <span class="zyx-var">ffio</span><span class="zyx-types">.</span><span class="zyx-func">read</span><span class="zyx-types">(</span><span class="zyx-var">filename</span><span class="zyx-types">,</span> <span class="zyx-string">"r"</span><span class="zyx-types">)</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">read_content</span><span class="zyx-types">)</span> <span class="zyx-comment"># Output: Hello from Zerionyx!</span>
 </code></pre>
                 </section>
@@ -1152,7 +1162,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <h4>List Assignment</h4>
                     <p>You can change the value at a specific index of a list.</p>
                     <br>
-                    <pre><code class="highlight-Zerionyx"><span class="zyx-var">nums</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-number">1</span>, <span class="zyx-number">2</span>, <span class="zyx-number">3</span>, <span class="zyx-number">4</span>, <span class="zyx-number">5</span><span class="zyx-types">]</span>
+                    <pre><code class="highlight-Zerionyx"><span class="zyx-var">nums</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-number">1</span><span class="zyx-types">,</span> <span class="zyx-number">2</span><span class="zyx-types">,</span> <span class="zyx-number">3</span><span class="zyx-types">,</span> <span class="zyx-number">4</span><span class="zyx-types">,</span> <span class="zyx-number">5</span><span class="zyx-types">]</span>
 <span class="zyx-var">nums</span><span class="zyx-types">$</span><span class="zyx-number">1</span> <span class="zyx-types">=</span> <span class="zyx-number">99</span> <span class="zyx-comment"># Update the value at index 1</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">)</span> <span class="zyx-comment"># Output: [1, 99, 3, 4, 5]</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">nums</span><span class="zyx-types">$</span><span class="zyx-number">1</span><span class="zyx-types">)</span> <span class="zyx-comment"># Output: 99</span>
@@ -1163,7 +1173,7 @@ Zerionyx may be magical, but its syntax must be real.
                         building complex structures like a list of hashmaps.</p>
                     <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-var">users</span> <span class="zyx-types">=</span> <span class="zyx-types">[]</span>
-<span class="zyx-func">append</span><span class="zyx-types">(</span><span class="zyx-var">users</span>, <span class="zyx-types">{})</span> <span class="zyx-comment"># Add an empty hashmap to the list</span>
+<span class="zyx-func">append</span><span class="zyx-types">(</span><span class="zyx-var">users</span><span class="zyx-types">,</span> <span class="zyx-types">{})</span> <span class="zyx-comment"># Add an empty hashmap to the list</span>
 
 <span class="zyx-comment"># Assign values to the hashmap inside the list</span>
 <span class="zyx-var">users</span><span class="zyx-types">$</span><span class="zyx-number">0</span><span class="zyx-types">$</span><span class="zyx-string">"name"</span> <span class="zyx-types">=</span> <span class="zyx-string">"user-1"</span>
@@ -1188,7 +1198,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">load</span> <span class="zyx-string">"libs.hash"</span>
 <span class="zyx-var">data</span> <span class="zyx-types">=</span> <span class="zyx-func">to_bytes</span><span class="zyx-types">(</span><span class="zyx-string">"my secret data"</span><span class="zyx-types">)</span>
-<span class="zyx-var">hashed_data</span> <span class="zyx-types">=</span> <span class="zyx-var">hash</span>.<span class="zyx-func">sha256</span><span class="zyx-types">(</span><span class="zyx-var">data</span><span class="zyx-types">)</span>
+<span class="zyx-var">hashed_data</span> <span class="zyx-types">=</span> <span class="zyx-var">hash</span><span class="zyx-types">.</span><span class="zyx-func">sha256</span><span class="zyx-types">(</span><span class="zyx-var">data</span><span class="zyx-types">)</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">hashed_data</span><span class="zyx-types">)</span>
 </code></pre>
                 </section>
@@ -1661,5 +1671,3 @@ Zerionyx may be magical, but its syntax must be real.
 
 
 </html>
-
-<!-- TODO: cập nhật cú pháp -->

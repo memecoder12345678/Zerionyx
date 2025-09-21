@@ -61,12 +61,15 @@ INT | FLOAT | STRING | IDENTIFIER
 | HASHMAP_EXPR
 | NAMESPACE_EXPR
 | WHILE_EXPR
+| DEL_EXPR
 | DEF_FUNC
 | COMMENT
 | USING_STATEMENT
 | EXPR
 
 USING_STATEMENT ::= "using" ("parent")? IDENTIFIER ("," IDENTIFIER)*
+
+DEL_EXPR ::= "del" IDENTIFIER ("," IDENTIFIER)*
 
 LIST_EXPR ::=
 "[" (EXPR ("," EXPR)*)? "]"
@@ -118,7 +121,6 @@ DECORATOR* "defun" IDENTIFIER? "(" PARAM_LIST? ")"
 COMMENT ::= "#" /[^\n]*/
 
 """
-# TODO: cập nhật cú pháp
 
 
 def check_file_comments_or_empty(file_path):
