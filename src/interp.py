@@ -4208,7 +4208,7 @@ class BuiltInFunction(BaseFunction):
             import pyautogui  # type: ignore
 
             result = pyautogui.alert(str(msg.value), str(title.value))
-            return RTResult().success(String(result if result else ""))
+            return RTResult().success(Number.none)
         except Exception as e:
             return RTResult().failure(
                 TError(self.pos_start, self.pos_end, str(e), exec_ctx)
@@ -4259,7 +4259,7 @@ class BuiltInFunction(BaseFunction):
                 str(title.value),
                 [str(b.value) for b in buttons.elements if isinstance(b, String)],
             )
-            return RTResult().success(String(result if result else ""))
+            return RTResult().success(String(result if result else Number.none))
         except Exception as e:
             return RTResult().failure(
                 TError(self.pos_start, self.pos_end, str(e), exec_ctx)
@@ -4293,7 +4293,7 @@ class BuiltInFunction(BaseFunction):
             import pyautogui  # type: ignore
 
             result = pyautogui.prompt(str(msg.value), str(title.value))
-            return RTResult().success(String(result if result else ""))
+            return RTResult().success(String(result if result else Number.none))
         except Exception as e:
             return RTResult().failure(
                 TError(self.pos_start, self.pos_end, str(e), exec_ctx)
@@ -4327,7 +4327,7 @@ class BuiltInFunction(BaseFunction):
             import pyautogui  # type: ignore
 
             result = pyautogui.password(str(msg.value), str(title.value))
-            return RTResult().success(String(result if result else ""))
+            return RTResult().success(String(result if result else Number.none))
         except Exception as e:
             return RTResult().failure(
                 TError(self.pos_start, self.pos_end, str(e), exec_ctx)

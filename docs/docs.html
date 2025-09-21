@@ -1520,16 +1520,16 @@ Zerionyx may be magical, but its syntax must be real.
                     <h4>datetime Namespace</h4>
                     <p>A namespace for working with date and time objects.</p>
                     <ul>
-                        <li><b>now()</b> &rarr; datetime &mdash; Returns the current local date and time</li>
-                        <li><b>today()</b> &rarr; date &mdash; Returns the current local date</li>
+                        <li><b>now()</b> &rarr; str &mdash; Returns the current local date and time</li>
+                        <li><b>today()</b> &rarr; str &mdash; Returns the current local date</li>
                         <li><b>format(dt, fmt)</b> &rarr; str &mdash; Formats a datetime object <code>dt</code> into a
                             string using <code>fmt</code></li>
-                        <li><b>parse(s, fmt)</b> &rarr; datetime &mdash; Parses a string <code>s</code> into a datetime
+                        <li><b>parse(s, fmt)</b> &rarr; str &mdash; Parses a string <code>s</code> into a datetime
                             object using format <code>fmt</code></li>
-                        <li><b>add_days(dt, days)</b> &rarr; datetime &mdash; Returns a new datetime object with
+                        <li><b>add_days(dt, days)</b> &rarr; str &mdash; Returns a new datetime object with
                             <code>days</code> added
                         </li>
-                        <li><b>diff(dt1, dt2)</b> &rarr; timedelta &mdash; Returns the difference between two datetime
+                        <li><b>diff(dt1, dt2)</b> &rarr; number &mdash; Returns the difference between two datetime
                             objects</li>
                     </ul>
                 </div>
@@ -1647,8 +1647,9 @@ Zerionyx may be magical, but its syntax must be real.
                     <h3>msgbox.zyx</h3>
                     <ul>
                         <li><b>alert(message, title)</b> &rarr; none &mdash; Displays a simple alert box</li>
-                        <li><b>confirm(message, title, buttons=["OK", "Cancel"])</b> &rarr; bool &mdash; Displays a
-                            confirmation dialog and returns <code>true</code> if the primary button is clicked</li>
+                        <li><b>confirm(message, title, buttons=["OK", "Cancel"])</b> &rarr; str/none &mdash; Displays a
+                            confirmation dialog and returns the button clicked, or <code>none</code> if the dialog is
+                            closed</li>
                         <li><b>prompt(message, title)</b> &rarr; str/none &mdash; Prompts for text input and returns the
                             entered string or <code>none</code> if canceled</li>
                         <li><b>password(message, title)</b> &rarr; str/none &mdash; Prompts for a masked password and
