@@ -1899,9 +1899,9 @@ class BuiltInFunction(BaseFunction):
             subprocess.check_call(
                 command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
             )
-            return RTResult().success(Bool(True))
+            return RTResult().success(Number.true)
         except subprocess.CalledProcessError:
-            return RTResult().success(Bool(False))
+            return RTResult().success(Number.false)
         except Exception as e:
             return RTResult().failure(
                 RTError(
@@ -4124,7 +4124,7 @@ class BuiltInFunction(BaseFunction):
             res = func.execute(positional_args, keyword_args)
 
             if res.error:
-                raise ZyxErrThreadPool(res.error)
+                raise ThreadPoolError(res.error)
             return res.value
 
         future = pool.executor.submit(task_wrapper)
@@ -4170,7 +4170,7 @@ class BuiltInFunction(BaseFunction):
         try:
             result = future_obj.future.result()
             return RTResult().success(result)
-        except ZyxErrThreadPool as e:
+        except ThreadPoolError as e:
             return RTResult().failure(e.err)
         except Exception as err:
             return RTResult().failure(

@@ -10,7 +10,7 @@ from .errors import (
 )
 
 
-class ZyxErrThreadPool(EOFError):
+class ThreadPoolError(Exception):
     def __init__(self, err):
         self.err = err
         super().__init__(err)
@@ -279,16 +279,16 @@ class NoneObject(Object):
 
     def get_comparison_eq(self, other):
         if isinstance(other, NoneObject):
-            return Bool(True).set_context(self.context), None
-        return Bool(False).set_context(self.context), None
+            return Number.true.set_context(self.context), None
+        return Number.false.set_context(self.context), None
 
     def get_comparison_ne(self, other):
         if isinstance(other, NoneObject):
-            return Bool(False).set_context(self.context), None
-        return Bool(True).set_context(self.context), None
+            return Number.false.set_context(self.context), None
+        return Number.true.set_context(self.context), None
 
     def notted(self):
-        return Bool(True).set_context(self.context)
+        return Number.true.set_context(self.context)
 
     def anded_by(self, other):
         if not isinstance(other, NoneObject) and not isinstance(other, Bool):
@@ -925,7 +925,7 @@ class List(Object):
 
     def get_comparison_eq(self, other):
         if not isinstance(other, List):
-            return Bool(False).set_context(self.context), None
+            return Number.false.set_context(self.context), None
         if len(self.value) != len(other.value):
             return Number.false.set_context(self.context), None
 
@@ -1032,7 +1032,7 @@ class HashMap(Object):
 
     def get_comparison_eq(self, other):
         if not isinstance(other, HashMap):
-            return Bool(False).set_context(self.context), None
+            return Number.false.set_context(self.context), None
         if len(self.value) != len(other.value):
             return Number.false.set_context(self.context), None
 
@@ -1164,12 +1164,12 @@ class Bytes(Object):
     def get_comparison_eq(self, other):
         if isinstance(other, Bytes):
             return Bool(self.value == other.value).set_context(self.context), None
-        return Bool(False).set_context(self.context), None
+        return Number.false.set_context(self.context), None
 
     def get_comparison_ne(self, other):
         if isinstance(other, Bytes):
             return Bool(self.value != other.value).set_context(self.context), None
-        return Bool(True).set_context(self.context), None
+        return Number.true.set_context(self.context), None
 
     def dollared_by(self, index):
         if not isinstance(index, Number):

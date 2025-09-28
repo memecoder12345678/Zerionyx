@@ -735,7 +735,7 @@ class Parser:
                 InvalidSyntaxError(
                     self.current_tok.pos_start,
                     self.current_tok.pos_end,
-                    "Expected NEWLINE",
+                    "Expected newline",
                 )
             )
         res.register_advancement()
