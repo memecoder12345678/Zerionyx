@@ -799,20 +799,22 @@ Zerionyx may be magical, but its syntax must be real.
                         </li>
                         <li><b>to_float(x, supress_error=false)</b> &rarr; number (float)/none &mdash; Convert
                             <code>x</code> to float return
-                            <code>none</code> if fail and <code>silent</code> true else raise
+                            <code>none</code> if fail and <code>supress_error</code> true else raise
                         </li>
                         <li><b>to_int(x, supress_error=false)</b> &rarr; number (int)/none &mdash; Convert
                             <code>x</code> to
                             int return
-                            <code>none</code> if fail and <code>silent</code> true else raise
+                            <code>none</code> if fail and <code>supress_error</code> true else raise
                         </li>
                         <li><b>to_str(x)</b> &rarr; str &mdash; Convert <code>x</code> to string</li>
                         <li><b>to_cfloat(x, supress_error=false)</b> &rarr; cfloat &mdash; Convert
-                            <code>x</code> to cfloat (correct float)
+                            <code>x</code> to cfloat (correct float) return
+                            <code>none</code> if fail and <code>supress_error</code> true else raise
                         </li>
                         <li><b>to_bytes(x, from_hex=false, supress_error=false)</b> &rarr; bytes &mdash; Convert
                             <code>x</code>
-                            to bytes
+                            to bytes return
+                            <code>none</code> if fail and <code>supress_error</code> true else raise
                         </li>
                         </li>
                         <li><b>type(x)</b> &rarr; str &mdash; Return type of <code>x</code> as string</li>
@@ -1674,6 +1676,7 @@ Zerionyx may be magical, but its syntax must be real.
         </div>
     </footer>
 </body>
+
 
 
 </html>

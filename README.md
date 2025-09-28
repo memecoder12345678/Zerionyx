@@ -90,9 +90,10 @@ println(x // y)
 println(x ^ y)
 
 # Alias
-a = 10
-a as b
-# println(a) <-- Error!
+a = [1, 2, 3, 4, 5]
+b as a
+println(b)
+append(a, 6)
 println(b)
 
 # Function definition
@@ -133,7 +134,7 @@ println(type(os))
 r = pyexec("os.system('echo Hello, World!')", os)
 
 # CFloat
-to_cfloat as tcf
+tcf as to_cfloat
 lst = [tcf("1/9")] * 9
 x = tcf(0)
 for i in lst do
@@ -285,4 +286,5 @@ Zerionyx is released under the **MIT License**. See [LICENSE](LICENSE).
 [1]: https://en.wikipedia.org/wiki/README "README"
 [2]: https://github.com/jehna/readme-best-practices "Best practices for writing a README for your open source project - GitHub"
 [3]: https://www.makeareadme.com/ "Make a README"
+
 
