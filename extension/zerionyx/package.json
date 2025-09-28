@@ -11,12 +11,18 @@
         "Programming Languages"
     ],
     "main": "./src/extension.js",
+    "activationEvents": [],
     "contributes": {
         "languages": [
             {
                 "id": "zerionyx",
-                "aliases": ["Zerionyx", "zerionyx"],
-                "extensions": [".zyx"],
+                "aliases": [
+                    "Zerionyx",
+                    "zerionyx"
+                ],
+                "extensions": [
+                    ".zyx"
+                ],
                 "configuration": "./language-configuration.json"
             }
         ],
@@ -27,5 +33,8 @@
                 "path": "./syntaxes/zerionyx.tmLanguage.json"
             }
         ]
+    },
+    "dependencies": {
+        "web-streams-polyfill": "^4.2.0"
     }
 }
