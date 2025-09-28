@@ -88,7 +88,6 @@ class SymbolTable:
             del self.symbols[name]
 
         self.aliases[name] = ref_name
-        print(self.aliases)
 
     def remove(self, name):
         root = self.resolve(name)
