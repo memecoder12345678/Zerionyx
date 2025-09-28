@@ -345,7 +345,7 @@ class Parser:
                     InvalidSyntaxError(
                         self.current_tok.pos_start,
                         self.current_tok.pos_end,
-                        "Invalid module path format. Paths must start with 'libs.' or 'local.'",
+                        "Paths must start with 'libs.' or 'local.'",
                     )
                 )
             chosen_path = None
@@ -1170,7 +1170,7 @@ class Parser:
                     InvalidSyntaxError(
                         self.current_tok.pos_start,
                         self.current_tok.pos_end,
-                        "Expected 'done' to terminate multi-line if-elif-else block",
+                        "Expected 'done'k",
                     )
                 )
             res.register_advancement()

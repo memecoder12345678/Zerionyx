@@ -820,7 +820,7 @@ class String(Object):
             return None, RTError(
                 index.pos_start,
                 index.pos_end,
-                "Element at this index could not be removed from string because index is out of bounds",
+                f"Index {index.value} is out of bounds for string of size {len(self.value)}",
                 self.context,
             )
         return String(self.value[index.value]), None
@@ -881,7 +881,7 @@ class List(Object):
                 return None, RTError(
                     other.pos_start,
                     other.pos_end,
-                    "Element at this index could not be removed from list because index is out of bounds",
+                    f"Index {other.value} is out of bounds for list of size {len(self.value)}",
                     self.context,
                 )
         else:
@@ -911,7 +911,7 @@ class List(Object):
                 return None, RTError(
                     other.pos_start,
                     other.pos_end,
-                    "Element at this index could not be retrieved from list because index is out of bounds",
+                    f"Index {other.value} is out of bounds for list of size {len(self.value)}",
                     self.context,
                 )
         else:
@@ -1180,7 +1180,7 @@ class Bytes(Object):
             return None, RTError(
                 index.pos_start,
                 index.pos_end,
-                "Element at this index could not be retrieved from bytes because index is out of bounds",
+                f"Index {index.value} is out of bounds for bytes of size {len(self.value)}",
                 self.context,
             )
 

@@ -38,27 +38,51 @@ BUILTIN_FUNCTIONS = []
 global_symbol_table = SymbolTable()
 
 
+module_cache = {}
+
+
 def load_module(fn, interpreter, context):
-    result = None
-    with open(fn, "r", encoding="utf-8") as f:
-        text = f.read()
-    text = text.splitlines()
-    for i in range(len(text)):
-        text[i] = text[i].strip()
-    lexer = Lexer(fn, "\n".join(text))
-    tokens, error = lexer.make_tokens()
-    if error:
-        return None, error
-    try:
+    ast = None
+    mtime = os.path.getmtime(fn)
+
+    if fn in module_cache:
+        cached_ast, error, cached_mtime = module_cache[fn]
+        if mtime == cached_mtime:
+            if error:
+                return None, error
+            ast = cached_ast
+        else:
+            ast = None
+
+    if ast is None:
+        with open(fn, "r", encoding="utf-8") as f:
+            text = f.read()
+        
+        text_lines = text.splitlines()
+        for i in range(len(text_lines)):
+            text_lines[i] = text_lines[i].strip()
+        
+        lexer = Lexer(fn, "\n".join(text_lines))
+        tokens, error = lexer.make_tokens()
+        if error:
+            return None, error
+
         parser = Parser(tokens)
         ast = parser.parse()
+        
+        module_cache[fn] = (ast, ast.error, mtime)
+
         if ast.error:
             return None, ast.error
-        context = Context("<module>")
-        context.symbol_table = global_symbol_table
-        context.private_symbol_table = SymbolTable()
-        context.private_symbol_table.set("is_main", Number.false)
-        result = interpreter.visit(ast.node, context)
+
+    try:
+        module_context = Context("<module>")
+        module_context.symbol_table = global_symbol_table
+        module_context.private_symbol_table = SymbolTable()
+        module_context.private_symbol_table.set("is_main", Number.false)
+        
+        result = interpreter.visit(ast.node, module_context)
+        
         result.value = "" if str(result.value) == "none" else result.value
         return result.value, result.error
     except KeyboardInterrupt:
@@ -5546,7 +5570,7 @@ class Interpreter:
                     RTError(
                         var_tok.pos_start,
                         var_tok.pos_end,
-                        f"Name '{var_name}' is not defined in the global scope",
+                        f"'{var_name}' is not defined in the global scope",
                         context,
                     )
                 )
@@ -5740,8 +5764,6 @@ private_symbol_table.set("is_main", Number.false)
 
 
 def clean_value(value):
-    from .datatypes import List, String, NoneObject
-
     if isinstance(value, NoneObject):
         return String("")
     if isinstance(value, String) and value.value.strip().lower() == "none":
