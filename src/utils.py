@@ -23,14 +23,14 @@ class Token:
         if self.value:
             if self.type == "STRING":
                 return (
-                    f"{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}STRING{Fore.RESET}{Style.RESET_ALL}: {Fore.CYAN}'{self.value}'{Fore.RESET}{Style.RESET_ALL}".replace(
+                    f"STRING: '{self.value}'".replace(
                         "\n", "\\n"
                     )
                     .replace("\t", "\\t")
                     .replace("\r", "\\r")
                     .replace("\\", "\\\\")
                     if self.value.find("'") == -1
-                    else f'{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}STRING{Fore.RESET}{Style.RESET_ALL}: {Fore.CYAN}"{self.value}"{Fore.RESET}{Style.RESET_ALL}'.replace(
+                    else f'STRING: "{self.value}"'.replace(
                         "\n", "\\n"
                     )
                     .replace("\t", "\\t")
@@ -43,31 +43,28 @@ class Token:
                 or self.value == "IDENTIFIER"
                 or self.value == "KEYWORD"
             ):
-                return f"{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}{self.type}{Fore.RESET}{Style.RESET_ALL}: {Fore.CYAN}{self.value}{Fore.RESET}{Style.RESET_ALL}"
-            return f"{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}{self.type}{Fore.RESET}{Style.RESET_ALL}: {Fore.CYAN}{self.value}{Fore.RESET}{Style.RESET_ALL}"
-        return f"{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}{self.type}{Fore.RESET}{Style.RESET_ALL}"
+                return f"{self.type}: {self.value}"
+            return f"{self.type}: {self.value}"
+        return f"{self.type}"
 
 
 class Position:
-    __slots__ = ["idx", "ln", "col", "fn", "ftxt"]
+    __slots__ = ["idx", "ln", "fn", "ftxt"]
 
-    def __init__(self, idx, ln, col, fn, ftxt):
+    def __init__(self, idx, ln, fn, ftxt):
         self.idx = idx
         self.ln = ln
-        self.col = col
         self.fn = fn
         self.ftxt = ftxt
 
     def advance(self, current_char=None):
         self.idx += 1
-        self.col += 1
         if current_char == "\n":
             self.ln += 1
-            self.col = 0
         return self
 
     def copy(self):
-        return Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
+        return Position(self.idx, self.ln, self.fn, self.ftxt)
 
 
 class RTResult:

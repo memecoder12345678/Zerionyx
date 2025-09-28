@@ -9,7 +9,7 @@ class Lexer:
     def __init__(self, fn, text):
         self.fn = fn
         self.text = text
-        self.pos = Position(-1, 0, -1, fn, text)
+        self.pos = Position(-1, 0, fn, text)
         self.current_char = None
         self.advance()
         self.tokens = []

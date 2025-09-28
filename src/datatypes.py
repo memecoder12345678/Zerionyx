@@ -48,13 +48,25 @@ class SymbolTable:
 
     def resolve(self, name):
         seen = set()
-        cur = name
-        while cur in self.aliases:
-            if cur in seen:
-                break
-            seen.add(cur)
-            cur = self.aliases[cur]
-        return cur
+
+        current_name = name
+        table = self
+
+        while table:
+            if current_name in table.aliases:
+                if current_name in seen:
+                    return current_name
+                seen.add(current_name)
+
+                current_name = table.aliases[current_name]
+                continue
+
+            if current_name in table.symbols:
+                return current_name
+
+            table = table.parent
+
+        return current_name
 
     def get(self, name):
         root = self.resolve(name)
@@ -69,12 +81,14 @@ class SymbolTable:
         self.symbols[root] = value
 
     def set_ref(self, name, ref_name):
-        root_ref = self.resolve(ref_name)
-        if self.get(root_ref) is None:
+        if self.get(ref_name) is None:
             raise NameError(f"'{ref_name}' is not defined")
+
         if name in self.symbols:
             del self.symbols[name]
-        self.aliases[name] = root_ref
+
+        self.aliases[name] = ref_name
+        print(self.aliases)
 
     def remove(self, name):
         root = self.resolve(name)
@@ -83,6 +97,15 @@ class SymbolTable:
         to_del = [k for k, v in self.aliases.items() if v == root or k == name]
         for k in to_del:
             del self.aliases[k]
+
+    def is_reference(self, name1, name2):
+        if self.get(name1) is None or self.get(name2) is None:
+            return False
+
+        root1 = self.resolve(name1)
+        root2 = self.resolve(name2)
+
+        return root1 == root2
 
     def change(self, other):
         self.symbols = other.symbols

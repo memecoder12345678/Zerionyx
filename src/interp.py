@@ -57,11 +57,11 @@ def load_module(fn, interpreter, context):
     if ast is None:
         with open(fn, "r", encoding="utf-8") as f:
             text = f.read()
-        
+
         text_lines = text.splitlines()
         for i in range(len(text_lines)):
             text_lines[i] = text_lines[i].strip()
-        
+
         lexer = Lexer(fn, "\n".join(text_lines))
         tokens, error = lexer.make_tokens()
         if error:
@@ -69,7 +69,7 @@ def load_module(fn, interpreter, context):
 
         parser = Parser(tokens)
         ast = parser.parse()
-        
+
         module_cache[fn] = (ast, ast.error, mtime)
 
         if ast.error:
@@ -80,9 +80,9 @@ def load_module(fn, interpreter, context):
         module_context.symbol_table = global_symbol_table
         module_context.private_symbol_table = SymbolTable()
         module_context.private_symbol_table.set("is_main", Number.false)
-        
+
         result = interpreter.visit(ast.node, module_context)
-        
+
         result.value = "" if str(result.value) == "none" else result.value
         return result.value, result.error
     except KeyboardInterrupt:
@@ -4661,6 +4661,43 @@ class BuiltInFunction(BaseFunction):
                 )
             )
         return RTResult().success(Number(~int(a.value)))
+
+    @set_args(["name1", "name2"])
+    def execute_is_reference(self, exec_ctx):
+        name1_obj = exec_ctx.symbol_table.get("name1")
+        name2_obj = exec_ctx.symbol_table.get("name2")
+
+        if not isinstance(name1_obj, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'is_reference' must be a string (the variable name)",
+                    exec_ctx,
+                )
+            )
+
+        if not isinstance(name2_obj, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'is_reference' must be a string (the variable name)",
+                    exec_ctx,
+                )
+            )
+
+        var_name1 = name1_obj.value
+        var_name2 = name2_obj.value
+
+        calling_context = exec_ctx.parent
+
+        symbol_table = calling_context.symbol_table
+
+        are_references = symbol_table.is_reference(var_name1, var_name2)
+
+        result_val = Number.true if are_references else Number.false
+        return RTResult().success(result_val)
 
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:

@@ -82,7 +82,7 @@ class Parser:
                 InvalidSyntaxError(
                     self.current_tok.pos_start,
                     self.current_tok.pos_end,
-                    "Token cannot appear after previous tokens",
+                    f"Unexpected token '{self.current_tok.type}'",
                 )
             )
         return res
@@ -1170,7 +1170,7 @@ class Parser:
                     InvalidSyntaxError(
                         self.current_tok.pos_start,
                         self.current_tok.pos_end,
-                        "Expected 'done'k",
+                        "Expected 'done'",
                     )
                 )
             res.register_advancement()

@@ -831,9 +831,11 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>is_cfloat(n)</b> &rarr; bool &mdash; Check if <code>n</code> is cfloat</li>
                         <li><b>clone(value)</b> &rarr; any &mdash; Clone and return <code>value</code></li>
                         <li><b>get_member(namespace, member, default=none)</b> &rarr; any &mdash; Gets a member from a
-                            <code>namespace</code>, returning <code>default</code> if it does not exist</li>
+                            <code>namespace</code>, returning <code>default</code> if it does not exist
+                        </li>
                         <li><b>shl(a, b)</b> &rarr; number (int) &mdash; Bitwise left shift on integer <code>a</code> by
-                            <code>b</code> positions</li>
+                            <code>b</code> positions
+                        </li>
                         <li><b>shr(a, b)</b> &rarr; number (int) &mdash; Bitwise right shift on integer <code>a</code>
                             by <code>b</code> positions</li>
                         <li><b>bitwise_and(a, b)</b> &rarr; number (int) &mdash; Performs a bitwise AND operation on
@@ -844,6 +846,8 @@ Zerionyx may be magical, but its syntax must be real.
                             integers <code>a</code> and <code>b</code></li>
                         <li><b>bitwise_not(a)</b> &rarr; number (int) &mdash; Performs a bitwise NOT (inversion)
                             operation on integer <code>a</code></li>
+                        <li><b>is_reference(name1, name2)</b> &rarr; bool &mdash; Checks if two variable names (as
+                            strings) are aliases of each other</li>
                     </ul>
                 </section>
                 <section id="ref-namespaces">
