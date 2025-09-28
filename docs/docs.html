@@ -830,8 +830,20 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>is_channel(n)</b> &rarr; bool &mdash; Check if <code>n</code> is channel</li>
                         <li><b>is_cfloat(n)</b> &rarr; bool &mdash; Check if <code>n</code> is cfloat</li>
                         <li><b>clone(value)</b> &rarr; any &mdash; Clone and return <code>value</code></li>
-                        <li><b>get_member(namespace, member, default=none)</b> &rarr; any &mdash; Gets a member from a <code>namespace</code>, returning <code>default</code> if it does not exist</li>
-
+                        <li><b>get_member(namespace, member, default=none)</b> &rarr; any &mdash; Gets a member from a
+                            <code>namespace</code>, returning <code>default</code> if it does not exist</li>
+                        <li><b>shl(a, b)</b> &rarr; number (int) &mdash; Bitwise left shift on integer <code>a</code> by
+                            <code>b</code> positions</li>
+                        <li><b>shr(a, b)</b> &rarr; number (int) &mdash; Bitwise right shift on integer <code>a</code>
+                            by <code>b</code> positions</li>
+                        <li><b>bitwise_and(a, b)</b> &rarr; number (int) &mdash; Performs a bitwise AND operation on
+                            integers <code>a</code> and <code>b</code></li>
+                        <li><b>bitwise_or(a, b)</b> &rarr; number (int) &mdash; Performs a bitwise OR operation on
+                            integers <code>a</code> and <code>b</code></li>
+                        <li><b>bitwise_xor(a, b)</b> &rarr; number (int) &mdash; Performs a bitwise XOR operation on
+                            integers <code>a</code> and <code>b</code></li>
+                        <li><b>bitwise_not(a)</b> &rarr; number (int) &mdash; Performs a bitwise NOT (inversion)
+                            operation on integer <code>a</code></li>
                     </ul>
                 </section>
                 <section id="ref-namespaces">

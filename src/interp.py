@@ -4528,6 +4528,140 @@ class BuiltInFunction(BaseFunction):
         value = exec_ctx.symbol_table.get("value")
         return RTResult().success(deepcopy(value))
 
+    @set_args(["a", "b"])
+    def execute_shl(self, exec_ctx):
+        a = exec_ctx.symbol_table.get("a")
+        b = exec_ctx.symbol_table.get("b")
+        if not isinstance(a, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'shl' must be a number",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(b, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'shl' must be a number",
+                    exec_ctx,
+                )
+            )
+        return RTResult().success(Number(int(a.value) << int(b.value)))
+
+    @set_args(["a", "b"])
+    def execute_shr(self, exec_ctx):
+        a = exec_ctx.symbol_table.get("a")
+        b = exec_ctx.symbol_table.get("b")
+        if not isinstance(a, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'shr' must be a number",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(b, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'shr' must be a number",
+                    exec_ctx,
+                )
+            )
+        return RTResult().success(Number(int(a.value) >> int(b.value)))
+
+    @set_args(["a", "b"])
+    def execute_bitwise_and(self, exec_ctx):
+        a = exec_ctx.symbol_table.get("a")
+        b = exec_ctx.symbol_table.get("b")
+        if not isinstance(a, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'bitwise_and' must be a number",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(b, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'bitwise_and' must be a number",
+                    exec_ctx,
+                )
+            )
+        return RTResult().success(Number(int(a.value) & int(b.value)))
+
+    @set_args(["a", "b"])
+    def execute_bitwise_or(self, exec_ctx):
+        a = exec_ctx.symbol_table.get("a")
+        b = exec_ctx.symbol_table.get("b")
+        if not isinstance(a, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'bitwise_or' must be a number",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(b, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'bitwise_or' must be a number",
+                    exec_ctx,
+                )
+            )
+        return RTResult().success(Number(int(a.value) | int(b.value)))
+
+    @set_args(["a", "b"])
+    def execute_bitwise_xor(self, exec_ctx):
+        a = exec_ctx.symbol_table.get("a")
+        b = exec_ctx.symbol_table.get("b")
+        if not isinstance(a, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'bitwise_xor' must be a number",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(b, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'bitwise_xor' must be a number",
+                    exec_ctx,
+                )
+            )
+        return RTResult().success(Number(int(a.value) ^ int(b.value)))
+
+    @set_args(["a"])
+    def execute_bitwise_not(self, exec_ctx):
+        a = exec_ctx.symbol_table.get("a")
+        if not isinstance(a, Number):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'bitwise_not' must be a number",
+                    exec_ctx,
+                )
+            )
+        return RTResult().success(Number(~int(a.value)))
+
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
     func_name = method_name[8:]
