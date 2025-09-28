@@ -778,6 +778,14 @@ class Parser:
         res = ParseResult()
         pairs = []
         pos_start = self.current_tok.pos_start.copy()
+
+        if self.current_tok.type != TT_LBRACE:
+            return res.failure(
+                InvalidSyntaxError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, "Expected '{'"
+                )
+            )
+
         res.register_advancement()
         self.advance()
         self.skip_newlines()
@@ -786,10 +794,86 @@ class Parser:
             res.register_advancement()
             self.advance()
             return res.success(
-                HashMapNode(pairs, pos_start, self.current_tok.pos_end.copy())
+                HashMapNode([], pos_start, self.current_tok.pos_end.copy())
             )
-        else:
-            key = res.register(self.expr(allow_assignment=False))
+
+        if self.current_tok.matches(TT_KEYWORD, "for"):
+            res.register_advancement()
+            self.advance()
+
+            if self.current_tok.type != TT_IDENTIFIER:
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected identifier",
+                    )
+                )
+
+            var_name_tok = self.current_tok
+            res.register_advancement()
+            self.advance()
+
+            loop_node = None
+
+            if self.current_tok.matches(TT_KEYWORD, "to"):
+                res.register_advancement()
+                self.advance()
+
+                start_value_node = NumberNode(
+                    Token(TT_INT, 0, var_name_tok.pos_start, var_name_tok.pos_end)
+                )
+                end_value_node = res.register(self.expr(allow_assignment=False))
+                if res.error:
+                    return res
+
+                step_value_node = None
+                if self.current_tok.matches(TT_KEYWORD, "step"):
+                    res.register_advancement()
+                    self.advance()
+                    step_value_node = res.register(self.expr(allow_assignment=False))
+                    if res.error:
+                        return res
+
+                loop_node = ForNode(
+                    var_name_tok,
+                    start_value_node,
+                    end_value_node,
+                    step_value_node,
+                    None,
+                    True,
+                )
+
+            elif self.current_tok.matches(TT_KEYWORD, "in"):
+                res.register_advancement()
+                self.advance()
+                iterable_node = res.register(self.expr(allow_assignment=False))
+                if res.error:
+                    return res
+                loop_node = ForInNode([var_name_tok], iterable_node, None, True)
+
+            else:
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected 'to' or 'in'",
+                    )
+                )
+
+            if not self.current_tok.matches(TT_KEYWORD, "do"):
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected 'do'",
+                    )
+                )
+
+            res.register_advancement()
+            self.advance()
+
+            key_node = res.register(self.expr(allow_assignment=False))
             if res.error:
                 return res
 
@@ -801,58 +885,94 @@ class Parser:
                         "Expected ':'",
                     )
                 )
+
             res.register_advancement()
             self.advance()
 
-            value = res.register(self.expr(allow_assignment=False))
+            value_node = res.register(self.expr(allow_assignment=False))
             if res.error:
                 return res
-            pairs.append((key, value))
 
-            while self.current_tok.type == TT_COMMA:
-                res.register_advancement()
-                self.advance()
-                self.skip_newlines()
-
-                key = res.register(self.expr(allow_assignment=False))
-                if res.error:
-                    return res
-                self.skip_newlines()
-
-                if self.current_tok.type != TT_COLON:
-                    return res.failure(
-                        InvalidSyntaxError(
-                            self.current_tok.pos_start,
-                            self.current_tok.pos_end,
-                            "Expected ':'",
-                        )
-                    )
-                res.register_advancement()
-                self.advance()
-                self.skip_newlines()
-
-                value = res.register(self.expr(allow_assignment=False))
-                if res.error:
-                    return res
-                self.skip_newlines()
-
-                pairs.append((key, value))
-
-            self.skip_newlines()
             if self.current_tok.type != TT_RBRACE:
                 return res.failure(
                     InvalidSyntaxError(
                         self.current_tok.pos_start,
                         self.current_tok.pos_end,
-                        "Expected ',' or '}'",
+                        "Expected '}'",
                     )
                 )
+
+            pos_end = self.current_tok.pos_end.copy()
             res.register_advancement()
             self.advance()
 
             return res.success(
-                HashMapNode(pairs, pos_start, self.current_tok.pos_end.copy())
+                HashMapComprehensionNode(
+                    loop_node, key_node, value_node, pos_start, pos_end
+                )
             )
+
+        key = res.register(self.expr(allow_assignment=False))
+        if res.error:
+            return res
+
+        if self.current_tok.type != TT_COLON:
+            return res.failure(
+                InvalidSyntaxError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, "Expected ':'"
+                )
+            )
+        res.register_advancement()
+        self.advance()
+
+        value = res.register(self.expr(allow_assignment=False))
+        if res.error:
+            return res
+        pairs.append((key, value))
+
+        while self.current_tok.type == TT_COMMA:
+            res.register_advancement()
+            self.advance()
+            self.skip_newlines()
+
+            key = res.register(self.expr(allow_assignment=False))
+            if res.error:
+                return res
+            self.skip_newlines()
+
+            if self.current_tok.type != TT_COLON:
+                return res.failure(
+                    InvalidSyntaxError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Expected ':'",
+                    )
+                )
+            res.register_advancement()
+            self.advance()
+            self.skip_newlines()
+
+            value = res.register(self.expr(allow_assignment=False))
+            if res.error:
+                return res
+            self.skip_newlines()
+            pairs.append((key, value))
+
+        self.skip_newlines()
+        if self.current_tok.type != TT_RBRACE:
+            return res.failure(
+                InvalidSyntaxError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "Expected ',' or '}'",
+                )
+            )
+        res.register_advancement()
+        self.advance()
+
+        return res.success(
+            HashMapNode(pairs, pos_start, self.current_tok.pos_end.copy())
+        )
 
     def list_expr(self):
         res = ParseResult()

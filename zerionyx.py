@@ -1,10 +1,22 @@
 import os
 import sys
 from src.interp import run, INFO, Fore, Style
+from typing import TYPE_CHECKING
 import io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+
+if os.name != "nt" and not TYPE_CHECKING:
+    try:
+        import readline
+
+        readline.parse_and_bind(r'"\e[A": history-search-backward')
+        readline.parse_and_bind(r'"\e[B": history-search-forward')
+        readline.parse_and_bind(r'"\e[C": forward-char')
+        readline.parse_and_bind(r'"\e[D": backward-char')
+    except ImportError:
+        pass
 
 G = """
 
@@ -50,6 +62,7 @@ POWER ::= CALL ("^" FACTOR)*
 CALL ::= ATOM ("(" ARG_LIST? ")")?
 
 ARG_LIST ::= ARG ("," ARG)*
+
 ARG ::= EXPR
 
 ATOM ::=
@@ -73,9 +86,12 @@ DEL_EXPR ::= "del" IDENTIFIER ("," IDENTIFIER)*
 
 LIST_EXPR ::=
 "[" (EXPR ("," EXPR)*)? "]"
-| "[" EXPR FOR_CLAUSES "]"
+| "[" FOR_CLAUSES EXPR "]"
 
-HASHMAP_EXPR ::= "{" (STRING ":" EXPR ("," STRING ":" EXPR)*)? "}"
+HASHMAP_EXPR ::= 
+"{" (EXPR ":" EXPR ("," EXPR ":" EXPR)* "}"
+| "{" (FOR_CLAUSES | FOR_IN_CLAUSE) "do" EXPR ":" EXPR)? "}"
+
 
 NAMESPACE_EXPR ::=
 "namespace" IDENTIFIER
@@ -87,11 +103,11 @@ IF_EXPR ::=
 (NEWLINE "else" "do" STATEMENT)?
 (NEWLINE "done")?
 
-FOR_CLAUSES ::= "for" FOR_CLAUSE ("," FOR_CLAUSE)*
+FOR_CLAUSES ::= "for" FOR_CLAUSE ("," FOR_CLAUSE)* "do"
 
 FOR_CLAUSE ::= IDENTIFIER ("=" EXPR)? "to" EXPR ("step" EXPR)?
 
-FOR_IN_CLAUSE ::= "for" IDENTIFIER ("," IDENTIFIER)* "in" EXPR
+FOR_IN_CLAUSE ::= "for" IDENTIFIER ("," IDENTIFIER)* "in" EXPR "do"
 
 FOR_EXPR ::=
 (FOR_CLAUSES | FOR_IN_CLAUSE)

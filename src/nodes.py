@@ -146,7 +146,13 @@ class ForNode:
         self.body_node = body_node
         self.should_return_none = should_return_none
         self.pos_start = self.var_name_tok.pos_start
-        self.pos_end = self.body_node.pos_end
+
+        if body_node:
+            self.pos_end = self.body_node.pos_end
+        elif step_value_node:
+            self.pos_end = self.step_value_node.pos_end
+        else:
+            self.pos_end = self.end_value_node.pos_end
 
     def __str__(self):
         return f"ForNode({self.var_name_tok.value} from {self.start_value_node} to {self.end_value_node} step {self.step_value_node} do {self.body_node})"
@@ -458,3 +464,17 @@ class ListComprehensionNode:
 
     def __str__(self):
         return f"ListComprehensionNode({self.element_node} for ...)"
+
+
+class HashMapComprehensionNode:
+    __slots__ = ["loop_node", "key_node", "value_node", "pos_start", "pos_end"]
+
+    def __init__(self, loop_node, key_node, value_node, pos_start, pos_end):
+        self.loop_node = loop_node
+        self.key_node = key_node
+        self.value_node = value_node
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+
+    def __str__(self):
+        return f"HashMapComprehensionNode({self.loop_node} do {self.key_node}: {self.value_node})"

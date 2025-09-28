@@ -558,6 +558,7 @@ POWER ::= CALL (<code>^</code> FACTOR)*
 CALL ::= ATOM (<code>(</code> ARG_LIST? <code>)</code>)?
 
 ARG_LIST ::= ARG (<code>,</code> ARG)*
+
 ARG ::= EXPR
 
 ATOM ::=
@@ -581,9 +582,11 @@ DEL_EXPR ::= <code>del</code> IDENTIFIER (<code>,</code> IDENTIFIER)*
 
 LIST_EXPR ::=
 <code>[</code> (EXPR (<code>,</code> EXPR)*)? <code>]</code>
-| <code>[</code> EXPR FOR_CLAUSES <code>]</code>
+| <code>[</code> FOR_CLAUSES EXPR <code>]</code>
 
-HASHMAP_EXPR ::= <code>{</code> (STRING <code>:</code> EXPR (<code>,</code> STRING <code>:</code> EXPR)*)? <code>}</code>
+HASHMAP_EXPR ::= 
+<code>{</code> (EXPR <code>:</code> EXPR (<code>,</code> EXPR <code>:</code> EXPR)*)? <code>}</code>
+| <code>{</code> (FOR_CLAUSES | FOR_IN_CLAUSE) <code>do</code> STRING <code>:</code> EXPR <code>}</code>
 
 NAMESPACE_EXPR ::=
 <code>namespace</code> IDENTIFIER
@@ -779,7 +782,7 @@ Zerionyx may be magical, but its syntax must be real.
                             <code>default</code>
                             if not found
                         </li>
-                        <li><b>del(hm, key)</b> &rarr; none &mdash; Delete <code>key</code> and its value from
+                        <li><b>del_key(hm, key)</b> &rarr; none &mdash; Delete <code>key</code> and its value from
                             <code>hm</code>
                         </li>
                         <li><b>len(x)</b> &rarr; number &mdash; Get length of <code>x</code></li>
@@ -825,6 +828,8 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>is_channel(n)</b> &rarr; bool &mdash; Check if <code>n</code> is channel</li>
                         <li><b>is_cfloat(n)</b> &rarr; bool &mdash; Check if <code>n</code> is cfloat</li>
                         <li><b>clone(value)</b> &rarr; any &mdash; Clone and return <code>value</code></li>
+                        <li><b>get_member(namespace, member, default=none)</b> &rarr; any &mdash; Gets a member from a <code>namespace</code>, returning <code>default</code> if it does not exist</li>
+
                     </ul>
                 </section>
                 <section id="ref-namespaces">

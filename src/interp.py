@@ -10,7 +10,7 @@ import json
 from .parser import *
 from .nodes import *
 from .datatypes import *
-from copy import deepcopy 
+from copy import deepcopy
 
 from .consts import *
 from .errors import TError, IError, MError, Error, RTError
@@ -3373,7 +3373,6 @@ class BuiltInFunction(BaseFunction):
             del hm.value[key_to_del]
             return RTResult().success(hm)
         return RTResult().success(Number.none)
-    
 
     @set_args(["space", "member", "default"], [None, None, Number.none])
     def execute_get_member(self, exec_ctx):
@@ -3389,6 +3388,23 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
+        if not isinstance(key, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'get_member' must be a string",
+                    exec_ctx,
+                )
+            )
+
+        member_name_str = key.value
+        member_value = hm.get(member_name_str)
+
+        if member_value is None:
+            return RTResult().success(default)
+
+        return RTResult().success(member_value)
 
     @set_args(["x", "y"])
     def execute_mouse_move_fp(self, exec_ctx):
@@ -4480,9 +4496,11 @@ class BuiltInFunction(BaseFunction):
             )
         r = _str.value.format(*lst.value)
         return RTResult().success(String(r))
-    
+
     @set_args(["value"])
-    def execute_clone(self, exec_ctx): # This may cause lag if overused, and should only be used for functions or namespaces when truly needed.
+    def execute_clone(
+        self, exec_ctx
+    ):  # This may cause lag if overused, and should only be used for functions or namespaces when truly needed
         value = exec_ctx.symbol_table.get("value")
         return RTResult().success(deepcopy(value))
 
@@ -4535,6 +4553,104 @@ class Interpreter:
                 return res
         return res.success(
             List(value).set_context(context).set_pos(node.pos_start, node.pos_end)
+        )
+
+    def visit_HashMapComprehensionNode(self, node, context):
+        res = RTResult()
+        elements = {}
+
+        current_loop_node = node.loop_node
+
+        if isinstance(current_loop_node, ForNode):
+            start_value = res.register(
+                self.visit(current_loop_node.start_value_node, context)
+            )
+            if res.should_return():
+                return res
+            end_value = res.register(
+                self.visit(current_loop_node.end_value_node, context)
+            )
+            if res.should_return():
+                return res
+
+            step_value = Number(1)
+            if current_loop_node.step_value_node:
+                step_value = res.register(
+                    self.visit(current_loop_node.step_value_node, context)
+                )
+                if res.should_return():
+                    return res
+
+            var_name = current_loop_node.var_name_tok.value
+
+            for i in range(
+                int(start_value.value), int(end_value.value), int(step_value.value)
+            ):
+                context.symbol_table.set(var_name, Number(i))
+
+                key = res.register(self.visit(node.key_node, context))
+                if res.should_return():
+                    return res
+                if not isinstance(key, String):
+                    return res.failure(
+                        RTError(
+                            node.key_node.pos_start,
+                            node.key_node.pos_end,
+                            f"Non-string key for hashmap: '{key!r}'",
+                            context,
+                        )
+                    )
+
+                value = res.register(self.visit(node.value_node, context))
+                if res.should_return():
+                    return res
+
+                elements[key.value] = value
+
+        elif isinstance(current_loop_node, ForInNode):
+            iterable = res.register(
+                self.visit(current_loop_node.iterable_node, context)
+            )
+            if res.should_return():
+                return res
+
+            iterator, error = iterable.iter()
+            if error:
+                return res.failure(error)
+
+            var_names = [tok.value for tok in current_loop_node.var_name_toks]
+
+            try:
+                while True:
+                    current_item = next(iterator)
+                    if len(var_names) == 1:
+                        context.symbol_table.set(var_names[0], current_item)
+                    else:
+                        pass
+
+                    key = res.register(self.visit(node.key_node, context))
+                    if res.should_return():
+                        return res
+                    if not isinstance(key, String):
+                        return res.failure(
+                            RTError(
+                                node.key_node.pos_start,
+                                node.key_node.pos_end,
+                                f"Non-string key for hashmap: '{key!r}'",
+                                context,
+                            )
+                        )
+
+                    value = res.register(self.visit(node.value_node, context))
+                    if res.should_return():
+                        return res
+
+                    elements[key.value] = value
+            except StopIteration:
+                pass
+
+        return res.success(
+            HashMap(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
         )
 
     def visit_VarAccessNode(self, node, context: Context):

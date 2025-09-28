@@ -1,6 +1,0 @@
-- [ ] `del`
-- [ ] `as`
-- [ ] get_member
-- [ ] del -> del_key
-- [ ] docs
-- [ ] extension
