@@ -852,12 +852,19 @@ Zerionyx may be magical, but its syntax must be real.
                 </section>
                 <section id="ref-namespaces">
                     <h3>Namespaces</h3>
-                    <p>Namespaces are objects that act as containers to group related variables and functions. This is
-                        useful for organizing code and preventing name collisions, especially when creating libraries.
-                    </p>
-                    <p>You can define a namespace using the <code>namespace ... done</code> block. Members within the
+                    <p>Namespaces are objects that serve as containers to group related variables and functions. They
+                        help organize code and prevent name conflicts, especially when building libraries.</p>
+                    <p>You can define a namespace using the <code>namespace ... done</code> block. Members inside the
                         namespace are accessed using dot notation (<code>.</code>).</p>
-                    <br>
+                    <p><strong>Important note:</strong> All variables and functions declared inside a namespace are
+                        immutable. This means:
+                    <ul>
+                        <li>The names of variables and functions cannot be changed or reassigned after they are defined.
+                        </li>
+                        <li>Members of a namespace are read-only &mdash; they can be accessed but not modified or overridden.
+                        </li>
+                    </ul> This ensures that the namespace remains consistent, safe, and protected from unintended
+                    changes.</p> <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-comment"># Define a namespace to group math-related utilities</span>
 <span class="zyx-keyword">namespace</span> <span class="zyx-var">math_utils</span>
     <span class="zyx-var">pi</span> <span class="zyx-types">=</span> <span class="zyx-number">3.14159</span>
@@ -871,7 +878,7 @@ Zerionyx may be magical, but its syntax must be real.
 <span class="zyx-var">r</span> <span class="zyx-types">=</span> <span class="zyx-number">10</span>
 <span class="zyx-var">area</span> <span class="zyx-types">=</span> <span class="zyx-var">math_utils</span><span class="zyx-types">.</span><span class="zyx-func">circle_area</span><span class="zyx-types">(</span><span class="zyx-var">r</span><span class="zyx-types">)</span>
 
--func">println</span><span class="zyx-types">(</span><span class="zyx-string">"The area is "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">area</span><span class="zyx-types">))</span>
+<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"The area is "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">area</span><span class="zyx-types">))</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Pi value: "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">math_utils</s<span class="zyxpan><span class="zyx-types">.</span><span class="zyx-var">pi</span><span class="zyx-types">))</span>
 </code></pre>
                 </section>
