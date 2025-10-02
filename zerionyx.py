@@ -50,9 +50,9 @@ def pack_zex(output_file, main_script, other_files):
 
                 lines = content.splitlines()
                 processed_lines = [line.strip() for line in lines]
-                processed_content = "\n".join(processed_lines)
+                processed_content = ";".join(processed_lines)
 
-                zf.writestr(os.path.basename(f), content)
+                zf.writestr(os.path.basename(f), processed_content)
 
         with open(output_file, "wb") as f:
             f.write(MAGIC)
