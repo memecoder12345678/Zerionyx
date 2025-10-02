@@ -11,11 +11,10 @@ const zerionyxTypeConstants = ['list', 'str', 'int', 'float', 'bool', 'func', 'h
 
 const zerionyxBuiltins = [
     'append', 'is_panic', 'clear', 'extend', 'input', 'get_password', 'insert', 'is_func', 'is_list', 'is_py_obj', 'is_none', 'is_num',
-    'is_str', 'is_bool', 'is_thread', 'is_thread_pool', 'is_future', 'is_namespace', 'keys', 'values', 'items', 'has', 'get', 'del',
-    'len', 'panic', 'pop', 'print', 'println', 'to_float', 'to_int', 'to_str', 'to_cfloat', 'to_bytes', 'type', 'pyexec', 'slice',
-    'is_nan', 'is_channel', 'is_cfloat'
+    'is_str', 'is_bool', 'is_thread', 'is_thread_pool', 'is_future', 'is_namespace', 'keys', 'values', 'items', 'has', 'get', 'del_key',
+    'len', 'panic', 'pop', 'print', 'println', 'to_float', 'to_int', 'to_str', 'to_cfloat', 'to_bytes', 'type', 'pyexec', 'slice', 'clone',
+    'is_nan', 'is_channel', 'is_cfloat', 'shl', 'shr', 'bitwise_and', 'bitwise_or', 'bitwise_xor', 'bitwise_not', 'is_reference', 'get_member'
 ];
-
 const libraryFunctions = {
     "msgbox": ["alert", "confirm", "prompt", "password"],
     "time.datetime": ["now", "diff", "add_days", "format", "today"],
@@ -84,7 +83,7 @@ function activate(context) {
             while ((match = forVarRegex.exec(fullText)) !== null) {
                 userDefinedCompletions.push(new vscode.CompletionItem(match[1], vscode.CompletionItemKind.Variable));
             }
-            
+
             const allKeywords = [
                 ...zerionyxKeywords.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Keyword)),
                 ...zerionyxControlFlow.map(k => new vscode.CompletionItem(k, vscode.CompletionItemKind.Keyword)),
@@ -103,8 +102,8 @@ function activate(context) {
 
             return uniqueCompletions;
         }
-    }, 
-    '.'
+    },
+        '.'
     );
 
     context.subscriptions.push(provider);

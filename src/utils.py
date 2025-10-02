@@ -23,16 +23,12 @@ class Token:
         if self.value:
             if self.type == "STRING":
                 return (
-                    f"STRING: '{self.value}'".replace(
-                        "\n", "\\n"
-                    )
+                    f"STRING: '{self.value}'".replace("\n", "\\n")
                     .replace("\t", "\\t")
                     .replace("\r", "\\r")
                     .replace("\\", "\\\\")
                     if self.value.find("'") == -1
-                    else f'STRING: "{self.value}"'.replace(
-                        "\n", "\\n"
-                    )
+                    else f'STRING: "{self.value}"'.replace("\n", "\\n")
                     .replace("\t", "\\t")
                     .replace("\r", "\\r")
                     .replace("\\", "\\\\")

@@ -2,26 +2,66 @@
     "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
     "name": "Zerionyx",
     "patterns": [
-        { "include": "#comments" },
-        { "include": "#strings" },
-        { "include": "#decorators" },
-        { "include": "#namespace" },
-        { "include": "#keywords" },
-        { "include": "#control-flow" },
-        { "include": "#for-in-loop" },
-        { "include": "#for-to-loop" },
-        { "include": "#function-definition" },
-        { "include": "#function-call" },
-        { "include": "#call-member-access" },
-        { "include": "#member-access" },
-        { "include": "#builtins" },
-        { "include": "#literals" },
-        { "include": "#numbers" },
-        { "include": "#operators" },
-        { "include": "#hashmap" },
-        { "include": "#list" },
-        { "include": "#identifiers" },
-        { "include": "#errors" }
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#decorators"
+        },
+        {
+            "include": "#namespace"
+        },
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#control-flow"
+        },
+        {
+            "include": "#for-in-loop"
+        },
+        {
+            "include": "#for-to-loop"
+        },
+        {
+            "include": "#function-definition"
+        },
+        {
+            "include": "#function-call"
+        },
+        {
+            "include": "#call-member-access"
+        },
+        {
+            "include": "#member-access"
+        },
+        {
+            "include": "#builtins"
+        },
+        {
+            "include": "#literals"
+        },
+        {
+            "include": "#numbers"
+        },
+        {
+            "include": "#operators"
+        },
+        {
+            "include": "#hashmap"
+        },
+        {
+            "include": "#list"
+        },
+        {
+            "include": "#identifiers"
+        },
+        {
+            "include": "#errors"
+        }
     ],
     "repository": {
         "builtins": {
@@ -36,7 +76,7 @@
                 },
                 {
                     "name": "support.function.builtin.zerionyx",
-                    "match": "\\b(append|is_panic|clear|extend|input|get_password|insert|is_func|is_list|is_py_obj|is_none|is_num|is_str|is_bool|is_thread|is_thread_pool|is_future|is_namespace|keys|values|items|has|get|del|len|panic|pop|print|println|to_float|to_int|to_str|to_cfloat|to_bytes|type|pyexec|slice|is_nan|is_channel|is_cfloat)\\b"
+                    "match": "\\b(append|is_panic|clear|extend|input|get_password|insert|is_func|is_list|is_py_obj|is_none|is_num|is_str|is_bool|is_thread|is_thread_pool|is_future|is_namespace|keys|values|items|has|get|del_key|len|panic|pop|print|println|to_float|to_int|to_str|to_cfloat|to_bytes|type|pyexec|slice|is_nan|is_channel|is_cfloat|shl|shr|bitwise_and|bitwise_or|bitwise_xor|bitwise_not|is_reference|get_member)\\b"
                 }
             ]
         },
@@ -60,12 +100,20 @@
             "begin": "\\b(for)\\b(?=.*\\bto\\b.*\\bdo\\b)",
             "end": "\\b(done)\\b",
             "beginCaptures": {
-                "1": { "name": "keyword.control.zerionyx" }
+                "1": {
+                    "name": "keyword.control.zerionyx"
+                }
             },
             "endCaptures": {
-                "1": { "name": "keyword.control.zerionyx" }
+                "1": {
+                    "name": "keyword.control.zerionyx"
+                }
             },
-            "patterns": [ { "include": "$self" } ]
+            "patterns": [
+                {
+                    "include": "$self"
+                }
+            ]
         },
         "control-flow": {
             "patterns": [
@@ -73,34 +121,58 @@
                     "begin": "\\b(if)\\b",
                     "end": "\\b(done)\\b",
                     "beginCaptures": {
-                        "1": { "name": "keyword.control.zerionyx" }
+                        "1": {
+                            "name": "keyword.control.zerionyx"
+                        }
                     },
                     "endCaptures": {
-                        "1": { "name": "keyword.control.zerionyx" }
+                        "1": {
+                            "name": "keyword.control.zerionyx"
+                        }
                     },
-                    "patterns": [ { "include": "$self" } ]
+                    "patterns": [
+                        {
+                            "include": "$self"
+                        }
+                    ]
                 },
                 {
                     "begin": "\\b(for)\\b",
                     "end": "\\b(done)\\b",
                     "beginCaptures": {
-                        "1": { "name": "keyword.control.zerionyx" }
+                        "1": {
+                            "name": "keyword.control.zerionyx"
+                        }
                     },
                     "endCaptures": {
-                        "1": { "name": "keyword.control.zerionyx" }
+                        "1": {
+                            "name": "keyword.control.zerionyx"
+                        }
                     },
-                    "patterns": [ { "include": "$self" } ]
+                    "patterns": [
+                        {
+                            "include": "$self"
+                        }
+                    ]
                 },
                 {
                     "begin": "\\b(while)\\b",
                     "end": "\\b(done)\\b",
                     "beginCaptures": {
-                        "1": { "name": "keyword.control.zerionyx" }
+                        "1": {
+                            "name": "keyword.control.zerionyx"
+                        }
                     },
                     "endCaptures": {
-                        "1": { "name": "keyword.control.zerionyx" }
+                        "1": {
+                            "name": "keyword.control.zerionyx"
+                        }
                     },
-                    "patterns": [ { "include": "$self" } ]
+                    "patterns": [
+                        {
+                            "include": "$self"
+                        }
+                    ]
                 }
             ]
         },
@@ -117,8 +189,9 @@
                 {
                     "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(\\()",
                     "captures": {
-                        "1": { "name": "entity.name.function.zerionyx" }
-
+                        "1": {
+                            "name": "entity.name.function.zerionyx"
+                        }
                     }
                 }
             ]
@@ -127,31 +200,49 @@
             "begin": "\\b(defun)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
             "end": "\\b(done)\\b",
             "beginCaptures": {
-                "1": { "name": "keyword.control.zerionyx" },
-                "2": { "name": "entity.name.function.zerionyx" }
+                "1": {
+                    "name": "keyword.control.zerionyx"
+                },
+                "2": {
+                    "name": "entity.name.function.zerionyx"
+                }
             },
             "endCaptures": {
-                "1": { "name": "keyword.control.zerionyx" }
+                "1": {
+                    "name": "keyword.control.zerionyx"
+                }
             },
             "patterns": [
                 {
                     "match": "->",
                     "name": "keyword.operator.zerionyx"
                 },
-                { "include": "$self" }
+                {
+                    "include": "$self"
+                }
             ]
         },
         "for-in-loop": {
             "begin": "\\b(for)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s+(in)\\b",
             "end": "\\b(done)\\b",
             "beginCaptures": {
-                "1": { "name": "keyword.control.zerionyx" },
-                "3": { "name": "keyword.control.zerionyx" }
+                "1": {
+                    "name": "keyword.control.zerionyx"
+                },
+                "3": {
+                    "name": "keyword.control.zerionyx"
+                }
             },
             "endCaptures": {
-                "1": { "name": "keyword.control.zerionyx" }
+                "1": {
+                    "name": "keyword.control.zerionyx"
+                }
             },
-            "patterns": [ { "include": "$self" } ]
+            "patterns": [
+                {
+                    "include": "$self"
+                }
+            ]
         },
         "hashmap": {
             "begin": "\\{",
@@ -162,7 +253,9 @@
                     "match": ":",
                     "name": "keyword.operator.zerionyx"
                 },
-                { "include": "$self" }
+                {
+                    "include": "$self"
+                }
             ]
         },
         "keywords": {
@@ -181,7 +274,11 @@
             "begin": "\\[",
             "end": "\\]",
             "name": "markup.list",
-            "patterns": [ { "include": "$self" } ]
+            "patterns": [
+                {
+                    "include": "$self"
+                }
+            ]
         },
         "literals": {
             "patterns": [
@@ -191,36 +288,52 @@
                 }
             ]
         },
-		"call-member-access": {
-			"match": "([a-zA-Z_][a-zA-Z0-9_]*)\\.([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
-			"captures": {
-				"1": { "name": "entity.name.class.zerionyx" },
-				"2": { "name": "entity.name.function.zerionyx" }
-			}
-		},
-		"member-access": {
-			"match": "([a-zA-Z_][a-zA-Z0-9_]*)\\.([a-zA-Z_][a-zA-Z0-9_]*)",
-			"captures": {
-				"1": { "name": "entity.name.class.zerionyx" },
-                "2": { "name": "variable.other.zerionyx" }
-			}
-		},
+        "call-member-access": {
+            "match": "([a-zA-Z_][a-zA-Z0-9_]*)\\.([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
+            "captures": {
+                "1": {
+                    "name": "entity.name.class.zerionyx"
+                },
+                "2": {
+                    "name": "entity.name.function.zerionyx"
+                }
+            }
+        },
+        "member-access": {
+            "match": "([a-zA-Z_][a-zA-Z0-9_]*)\\.([a-zA-Z_][a-zA-Z0-9_]*)",
+            "captures": {
+                "1": {
+                    "name": "entity.name.class.zerionyx"
+                },
+                "2": {
+                    "name": "variable.other.zerionyx"
+                }
+            }
+        },
         "namespace": {
             "begin": "\\b(namespace)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
             "end": "\\b(done)\\b",
             "beginCaptures": {
-                "1": { "name": "keyword.control.zerionyx" },
-                "2": { "name": "entity.name.class.zerionyx" }
+                "1": {
+                    "name": "keyword.control.zerionyx"
+                },
+                "2": {
+                    "name": "entity.name.class.zerionyx"
+                }
             },
             "endCaptures": {
-                "1": { "name": "keyword.control.zerionyx" }
+                "1": {
+                    "name": "keyword.control.zerionyx"
+                }
             },
             "patterns": [
                 {
                     "match": "(?<=\\bnamespace\\s+)([a-zA-Z_][a-zA-Z0-9_]*)",
                     "name": "entity.name.class.zerionyx"
                 },
-                { "include": "$self" }
+                {
+                    "include": "$self"
+                }
             ]
         },
         "numbers": {
@@ -290,10 +403,14 @@
                     "begin": "\"",
                     "end": "\"",
                     "beginCaptures": {
-                        "0": { "name": "markup.punctuation.quote.beginning.zerionyx" }
+                        "0": {
+                            "name": "markup.punctuation.quote.beginning.zerionyx"
+                        }
                     },
                     "endCaptures": {
-                        "0": { "name": "markup.punctuation.quote.beginning.zerionyx" }
+                        "0": {
+                            "name": "markup.punctuation.quote.beginning.zerionyx"
+                        }
                     },
                     "patterns": [
                         {
@@ -307,10 +424,14 @@
                     "begin": "'",
                     "end": "'",
                     "beginCaptures": {
-                        "0": { "name": "markup.punctuation.quote.beginning.zerionyx" }
+                        "0": {
+                            "name": "markup.punctuation.quote.beginning.zerionyx"
+                        }
                     },
                     "endCaptures": {
-                        "0": { "name": "markup.punctuation.quote.beginning.zerionyx" }
+                        "0": {
+                            "name": "markup.punctuation.quote.beginning.zerionyx"
+                        }
                     },
                     "patterns": [
                         {
