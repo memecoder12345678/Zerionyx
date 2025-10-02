@@ -495,6 +495,7 @@
                 <li><a href="#lib-decorators">decorators</a></li>
                 <li><a href="#lib-channel">channel</a></li>
                 <li><a href="#lib-msgbox">msgbox</a></li>
+                <li><a href="#lib-csv">csv</a></li>
             </ul>
 
         </aside>
@@ -861,7 +862,8 @@ Zerionyx may be magical, but its syntax must be real.
                     <ul>
                         <li>The names of variables and functions cannot be changed or reassigned after they are defined.
                         </li>
-                        <li>Members of a namespace are read-only &mdash; they can be accessed but not modified or overridden.
+                        <li>Members of a namespace are read-only &mdash; they can be accessed but not modified or
+                            overridden.
                         </li>
                     </ul> This ensures that the namespace remains consistent, safe, and protected from unintended
                     changes.</p> <br>
@@ -1626,7 +1628,7 @@ Zerionyx may be magical, but its syntax must be real.
                     </ul>
                 </div>
                 <div id="lib-json">
-                    <h3>json.nyx</h3>
+                    <h3>json.zyx</h3>
                     <ul>
                         <li><b>parse(o)</b> &rarr; str &mdash; Convert <code>o</code> to JSON string</li>
                         <li><b>stringify(s)</b> &rarr; any &mdash; Parse JSON string <code>s</code> to Zerionyx object
@@ -1635,7 +1637,7 @@ Zerionyx may be magical, but its syntax must be real.
                 </div>
 
                 <div id="lib-decorators">
-                    <h3>decorators.nyx</h3>
+                    <h3>decorators.zyx</h3>
                     <ul>
                         <li><b>cache(fn)</b> &rarr; func &mdash; Store results of function calls and return cached value
                             for the same inputs</li>
@@ -1684,6 +1686,17 @@ Zerionyx may be magical, but its syntax must be real.
                             entered string or <code>none</code> if canceled</li>
                         <li><b>password(message, title)</b> &rarr; str/none &mdash; Prompts for a masked password and
                             returns the entered string or <code>none</code> if canceled</li>
+                    </ul>
+                </div>
+                <div id="lib-csv">
+                    <h3>csv.zyx</h3>
+                    <ul>
+                        <li><b>read(file_path)</b> &rarr; list &mdash; Read CSV file at <code>file_path</code> and
+                            return
+                            header-keyed hashmap of column lists</li>
+                        <li><b>write(file_path, data)</b> &rarr; none &mdash; Write <code>data</code> to CSV file at
+                            <code>file_path</code>
+                        </li>
                     </ul>
                 </div>
 

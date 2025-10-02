@@ -1,0 +1,12 @@
+# libs.csv
+
+namespace csv
+    defun write(f, data)
+        write_csv_fp(f, data)
+        return none
+    done
+
+    defun read(f)
+        return read_csv_fp(f)
+    done
+done

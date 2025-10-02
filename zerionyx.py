@@ -8,7 +8,7 @@ import tempfile
 import shutil
 import atexit
 
-MAGIC_BYTE = b"\x5a\x45\x58\x2d\x5b\x3c\x2f\x3e\x5d\x3f"
+MAGIC = b"ZEX-[</>]?"
 MANIFEST_NAME = "__main__.zex.manifest"
 _temp_dirs_to_clean = []
 
@@ -45,10 +45,17 @@ def pack_zex(output_file, main_script, other_files):
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
             zf.writestr(MANIFEST_NAME, os.path.basename(main_script))
             for f in all_files:
-                zf.write(f, os.path.basename(f))
+                with open(f, "r", encoding="utf-8") as file:
+                    content = file.read()
+
+                lines = content.splitlines()
+                processed_lines = [line.strip() for line in lines]
+                processed_content = "\n".join(processed_lines)
+
+                zf.writestr(os.path.basename(f), content)
 
         with open(output_file, "wb") as f:
-            f.write(MAGIC_BYTE)
+            f.write(MAGIC)
             f.write(zip_buffer.getvalue())
 
         print(
@@ -67,7 +74,7 @@ def run_zex(file_path):
 
     try:
         with open(file_path, "rb") as f:
-            if f.read(len(MAGIC_BYTE)) != MAGIC_BYTE:
+            if f.read(len(MAGIC)) != MAGIC:
                 print(
                     f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}Error{Fore.RESET}{Style.RESET_ALL}: {Fore.MAGENTA}Not a valid .zex file (invalid magic byte){Fore.RESET}{Style.RESET_ALL}"
                 )

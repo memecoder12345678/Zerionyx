@@ -1,6 +1,7 @@
 import os
 import platform
 import sys
+import csv
 from threading import Thread
 from datetime import datetime, date, timedelta
 import time
@@ -41,7 +42,7 @@ global_symbol_table = SymbolTable()
 module_cache = {}
 
 
-def load_module(fn, interpreter, context):
+def load_module(fn, interpreter):
     ast = None
     mtime = os.path.getmtime(fn)
 
@@ -4699,6 +4700,111 @@ class BuiltInFunction(BaseFunction):
         result_val = Number.true if are_references else Number.false
         return RTResult().success(result_val)
 
+    @set_args(["file_path"])
+    def execute_read_csv_fp(self, exec_ctx):
+        file_path_obj = exec_ctx.symbol_table.get("file_path")
+        if not isinstance(file_path_obj, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'read' must be a string",
+                    exec_ctx,
+                )
+            )
+
+        try:
+            file_path = file_path_obj.value
+
+            with open(file_path, mode="r", newline="", encoding="utf-8") as csvfile:
+                reader = csv.reader(csvfile)
+
+                header = next(reader)
+
+                py_data = {col_name: [] for col_name in header}
+
+                for row in reader:
+                    for col_name, cell_value in zip(header, row):
+                        py_data[col_name].append(cell_value)
+
+            zyx_hashmap = self.validate_pyexec_result(py_data)
+
+            return RTResult().success(zyx_hashmap)
+
+        except FileNotFoundError:
+            return RTResult().failure(
+                IError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"File not found: '{file_path_obj.value}'",
+                    exec_ctx,
+                )
+            )
+        except StopIteration:
+            return RTResult().success(HashMap({}))
+        except Exception as e:
+            return RTResult().failure(
+                IError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error reading CSV file: {e}",
+                    exec_ctx,
+                )
+            )
+
+    @set_args(["file_path", "data"])
+    def execute_write_csv_fp(self, exec_ctx):
+        file_path_obj = exec_ctx.symbol_table.get("file_path")
+        data_obj = exec_ctx.symbol_table.get("data")
+
+        if not isinstance(file_path_obj, String):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "First argument of 'write' must be a string",
+                    exec_ctx,
+                )
+            )
+        if not isinstance(data_obj, HashMap):
+            return RTResult().failure(
+                TError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Second argument of 'write' must be a hashmap",
+                    exec_ctx,
+                )
+            )
+
+        try:
+
+            if not py_data:
+                open(file_path_obj.value, "w").close()
+                return RTResult().success(Number.none)
+
+            header = list(py_data.keys())
+            columns = list(py_data.values())
+
+            rows = zip(*columns)
+
+            with open(
+                file_path_obj.value, mode="w", newline="", encoding="utf-8"
+            ) as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(header)
+                writer.writerows(rows)
+
+            return RTResult().success(Number.none)
+        except Exception as e:
+            return RTResult().failure(
+                IError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Error writing to CSV file: {e}",
+                    exec_ctx,
+                )
+            )
+
 
 for method_name in [m for m in dir(BuiltInFunction) if m.startswith("execute_")]:
     func_name = method_name[8:]
@@ -5603,7 +5709,7 @@ class Interpreter:
                         context,
                     )
                 )
-        result, err = load_module(path, self, context)
+        result, err = load_module(path, self)
         if err:
             if isinstance(err, Error):
                 return res.failure(err)
