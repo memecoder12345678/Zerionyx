@@ -3741,18 +3741,45 @@ class BuiltInFunction(BaseFunction):
         suppress_error_ = bool(suppress_error.value)
 
         try:
+
             if isinstance(value, Number):
                 hex_str = hex(int(value.value))[2:]
                 if len(hex_str) % 2 != 0:
-                    hex_str = '0' + hex_str
+                    hex_str = "0" + hex_str
                 return RTResult().success(Bytes(bytes.fromhex(hex_str)))
-
 
             elif isinstance(value, String):
                 if from_hex_:
                     return RTResult().success(Bytes(bytes.fromhex(value.value)))
                 else:
                     return RTResult().success(Bytes(value.value.encode()))
+
+            elif isinstance(value, List):
+                byte_values = []
+                for i, element in enumerate(value.value):
+                    if not isinstance(element, Number):
+                        return RTResult().failure(
+                            TError(
+                                self.pos_start,
+                                self.pos_end,
+                                f"First argument of 'to_bytes' must be a list of numbers",
+                                exec_ctx,
+                            )
+                        )
+
+                    num_val = int(element.value)
+                    if not (0 <= num_val <= 255):
+                        return RTResult().failure(
+                            RTError(
+                                self.pos_start,
+                                self.pos_end,
+                                f"Byte value must be between 0 and 255 (found {num_val} at index {i})",
+                                exec_ctx,
+                            )
+                        )
+                    byte_values.append(num_val)
+
+                return RTResult().success(Bytes(bytes(byte_values)))
 
             elif isinstance(value, Bytes):
                 return RTResult().success(Bytes(value.value))
