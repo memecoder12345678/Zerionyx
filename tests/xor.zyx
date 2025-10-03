@@ -1,0 +1,28 @@
+load "libs.string"
+
+defun xor_encrypt_decrypt(data, key)
+    key_len = len(key)
+    result = to_bytes("")
+    for i to len(data) do
+        result += to_bytes(bitwise_xor(data$i, key$(i % key_len)))
+    done
+    return result
+done
+
+plaintext = to_bytes("Hello Zerionyx!")
+println("Plaintext: " + to_str(plaintext))
+
+key = to_bytes("KY8")
+println("Key: " + to_str(key))
+
+ciphertext = xor_encrypt_decrypt(plaintext, key)
+println("Ciphertext: " + to_str(ciphertext))
+
+decrypted = xor_encrypt_decrypt(ciphertext, key)
+println("Decrypted: " + to_str(decrypted))
+
+for i in decrypted do
+    print(string.chr(i))
+done
+print("\n")
+

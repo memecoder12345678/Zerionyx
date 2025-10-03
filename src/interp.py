@@ -3743,7 +3743,10 @@ class BuiltInFunction(BaseFunction):
         try:
             if isinstance(value, Number):
                 hex_str = hex(int(value.value))[2:]
+                if len(hex_str) % 2 != 0:
+                    hex_str = '0' + hex_str
                 return RTResult().success(Bytes(bytes.fromhex(hex_str)))
+
 
             elif isinstance(value, String):
                 if from_hex_:

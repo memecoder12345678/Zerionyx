@@ -1,0 +1,17 @@
+laod load "libs.sys"
+load "libs.ffio"
+load "libs.csv"
+
+if len(sys.argv) != 2 do
+    println("Usage: " + ffio.abs_path(sys.argv$0) + " <your-csv-file>")
+    sys.exit(1)
+done
+
+if not ffio.exists(sys.argv$1) do
+    println('File not found: "' + ffio.abs_path(sys.argv$1) + '"')
+    sys.exit(1)
+done
+
+r = csv.read(sys.argv$1)
+
+println("r = " + to_str(r))

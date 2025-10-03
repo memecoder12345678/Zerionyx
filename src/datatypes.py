@@ -1213,7 +1213,7 @@ class Bytes(Object):
         return copy
 
     def iter(self):
-        pairs = [Number([i]) for i in self.value]
+        pairs = [Number(i) for i in self.value]
         return iter(pairs), None
 
     def is_true(self):
