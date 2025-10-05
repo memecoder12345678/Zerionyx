@@ -4745,20 +4745,22 @@ class BuiltInFunction(BaseFunction):
 
         try:
             file_path = file_path_obj.value
-
             with open(file_path, mode="r", newline="", encoding="utf-8") as csvfile:
                 reader = csv.reader(csvfile)
 
-                header = next(reader)
+                try:
+                    header = next(reader)
+                except StopIteration:
+                    return RTResult().success(HashMap({}))
 
                 py_data = {col_name: [] for col_name in header}
 
                 for row in reader:
-                    for col_name, cell_value in zip(header, row):
-                        py_data[col_name].append(cell_value)
+                    if len(row) == len(header):
+                        for col_name, cell_value in zip(header, row):
+                            py_data[col_name].append(cell_value)
 
             zyx_hashmap = self.validate_pyexec_result(py_data)
-
             return RTResult().success(zyx_hashmap)
 
         except FileNotFoundError:
@@ -4770,8 +4772,6 @@ class BuiltInFunction(BaseFunction):
                     exec_ctx,
                 )
             )
-        except StopIteration:
-            return RTResult().success(HashMap({}))
         except Exception as e:
             return RTResult().failure(
                 IError(
@@ -4807,22 +4807,35 @@ class BuiltInFunction(BaseFunction):
             )
 
         try:
+            py_data = self.convert_zer_to_py(data_obj)
 
             if not py_data:
                 open(file_path_obj.value, "w").close()
                 return RTResult().success(Number.none)
 
-            header = list(py_data.keys())
             columns = list(py_data.values())
+            if columns:
+                num_rows = len(columns[0])
+                for col in columns[1:]:
+                    if len(col) != num_rows:
+                        return RTResult().failure(
+                            RTError(
+                                self.pos_start,
+                                self.pos_end,
+                                "All columns in the hashmap must have the same number of rows",
+                                exec_ctx,
+                            )
+                        )
 
-            rows = zip(*columns)
+            header = list(py_data.keys())
+            rows_to_write = zip(*py_data.values())
 
             with open(
                 file_path_obj.value, mode="w", newline="", encoding="utf-8"
             ) as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(header)
-                writer.writerows(rows)
+                writer.writerows(rows_to_write)
 
             return RTResult().success(Number.none)
         except Exception as e:
@@ -5152,6 +5165,33 @@ class Interpreter:
 
     def visit_BinOpNode(self, node, context):
         res = RTResult()
+
+        if node.op_tok.matches(TT_KEYWORD, "and"):
+            left = res.register(self.visit(node.left_node, context))
+            if res.should_return():
+                return res
+
+            if not left.is_true():
+                return res.success(left)
+
+            right = res.register(self.visit(node.right_node, context))
+            if res.should_return():
+                return res
+            return res.success(right)
+
+        if node.op_tok.matches(TT_KEYWORD, "or"):
+            left = res.register(self.visit(node.left_node, context))
+            if res.should_return():
+                return res
+
+            if left.is_true():
+                return res.success(left)
+
+            right = res.register(self.visit(node.right_node, context))
+            if res.should_return():
+                return res
+            return res.success(right)
+
         left = res.register(self.visit(node.left_node, context))
         if res.should_return():
             return res
@@ -5293,10 +5333,6 @@ class Interpreter:
         if op_type in ops:
             method = getattr(left, ops[op_type])
             result, error = method(right)
-        elif node.op_tok.matches(TT_KEYWORD, "and"):
-            result, error = left.anded_by(right)
-        elif node.op_tok.matches(TT_KEYWORD, "or"):
-            result, error = left.ored_by(right)
         else:
             return res.failure(
                 RTError(

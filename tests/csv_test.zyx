@@ -1,4 +1,4 @@
-laod load "libs.sys"
+load "libs.sys"
 load "libs.ffio"
 load "libs.csv"
 
