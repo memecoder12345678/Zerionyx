@@ -10,3 +10,7 @@
 **/*.tar.gz
 **/*.tar
 **/*.cast
+**/build/
+**/dist/
+**/LICENSE.txt
+**/*.spec
