@@ -1,63 +1,34 @@
 # libs.memory
 
-memory_private_mem_ = []
+memory_private_mem_36 = {}
 
 defun remember_(k, v)
-    for i = 0 to len(memory_private_mem_) do 
-        pair = memory_private_mem_$i
-        if pair$0 == k do 
-            pair$1 = v
-            return none
-        done
-    done
-    append(memory_private_mem_, [k, v])
-    return none
+    memory_private_mem_36$k = v
 done
 
 defun recall_(k)
-    for i = 0 to len(memory_private_mem_) do
-        pair = memory_private_mem_$i
-        if pair$0 == k do
-            return pair$1
-        done
-    done
-    return none
+    return get(memory_private_mem_36, k)
 done
 
 defun forget_(k)
-    i = 0
-    while i < len(memory_private_mem_) do
-        pair = memory_private_mem_$i
-        if pair$0 == k do
-            pop(memory_private_mem_, i)
-        else do
-            i = i + 1
-        done
-    done
-    return none
+    del_key(memory_private_mem_36, k)
 done
 
 defun clear_memory_()
-    for i = 0 to len(l) do
-        pop(l, i)
-    done
-    return none
+    using memory_private_mem_36
+    memory_private_mem_36 = {}
 done
 
 defun keys_()
-    l = []
-    for i = 0 to len(memory_private_mem_) do
-        append(l, memory_private_mem_$i$0)
-    done
-    return l
+    return keys(memory_private_mem_36)
 done
 
 defun is_empty_()
-    return len(memory_private_mem_) == 0
+    return len(memory_private_mem_36) == 0
 done
 
 defun size_()
-    return len(memory_private_mem_)
+    return len(memory_private_mem_36)
 done
 
 namespace memory
