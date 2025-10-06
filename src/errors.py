@@ -32,7 +32,7 @@ class Error:
     def __str__(self):
         result = create_traceback_header(self.error_name)
 
-        result += f'  File "{Fore.MAGENTA}{self.pos_start.fn}{Style.RESET_ALL}", line {Fore.MAGENTA}{self.pos_start.ln + 1}{Style.RESET_ALL}\n'
+        result += f'  File {Fore.MAGENTA}"{self.pos_start.fn}"{Style.RESET_ALL}, line {Fore.MAGENTA}{self.pos_start.ln + 1}{Style.RESET_ALL}\n'
 
         line_text = get_line_from_text(self.pos_start.ftxt, self.pos_start.ln)
 
@@ -82,7 +82,7 @@ class RTError(Error):
             pos = frame["pos"]
             display_name = frame["display_name"]
 
-            result += f'  File "{Fore.MAGENTA}{pos.fn}{Style.RESET_ALL}", line {Fore.MAGENTA}{pos.ln + 1}{Style.RESET_ALL}, in {Fore.MAGENTA}{display_name}{Style.RESET_ALL}\n'
+            result += f'  File {Fore.MAGENTA}"{pos.fn}"{Style.RESET_ALL}, line {Fore.MAGENTA}{pos.ln + 1}{Style.RESET_ALL}, in {Fore.MAGENTA}{display_name}{Style.RESET_ALL}\n'
 
         line_text = get_line_from_text(self.pos_start.ftxt, self.pos_start.ln)
         if line_text is not None:
