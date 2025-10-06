@@ -79,7 +79,7 @@ FACTOR ::=
   | "**" FACTOR                     (* kargs unpacking *)
   | DOLLAR_EXPR
 
-DOLLAR_EXPR ::= POWER ("$" POWER)*
+DOLLAR_EXPR ::= POWER ("$" POWER)*  (* $ is for indexing instead of [] *)
 
 POWER ::= CALL ("^" FACTOR)*        (* power operator *)
 
