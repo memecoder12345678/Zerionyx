@@ -17,5 +17,5 @@ while true do
     for ch in order do
         append(lst, bits$ch)
     done
-    print(string.join("", lst))
+    print(string.join(" ", lst) + " ")
 done
