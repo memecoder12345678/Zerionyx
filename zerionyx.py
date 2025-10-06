@@ -8,9 +8,182 @@ import tempfile
 import shutil
 import atexit
 
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+
+if os.name != "nt" and not TYPE_CHECKING:
+    try:
+        import readline
+
+        readline.parse_and_bind(r'"\e[A": history-search-backward')
+        readline.parse_and_bind(r'"\e[B": history-search-forward')
+        readline.parse_and_bind(r'"\e[C": forward-char')
+        readline.parse_and_bind(r'"\e[D": backward-char')
+    except ImportError:
+        pass
+
 MAGIC = b"ZEX-[</>]?"
 MANIFEST_NAME = "__main__.zex.manifest"
 _temp_dirs_to_clean = []
+G = """
+
+PROGRAM ::= STATEMENTS
+
+STATEMENTS ::= STATEMENT (NEWLINE+ STATEMENT)* NEWLINE*
+
+STATEMENT ::= SIMPLE_STATEMENT | COMPOUND_STATEMENT
+
+SIMPLE_STATEMENT ::=
+    "load" STRING
+  | "return" [EXPR]
+  | "continue"
+  | "break"
+  | "using" ["parent"] IDENTIFIER ("," IDENTIFIER)*
+  | "del" IDENTIFIER ("," IDENTIFIER)*
+  | EXPR
+
+COMPOUND_STATEMENT ::=
+    IF_EXPR
+  | FOR_EXPR
+  | WHILE_EXPR
+  | NAMESPACE_EXPR
+  | (DECORATOR+ DEF_FUNC)
+  | DEF_FUNC
+
+BODY ::= STATEMENT | (NEWLINE STATEMENTS "done")
+
+EXPR ::= ASSIGNMENT_EXPR
+
+ASSIGNMENT_EXPR ::=
+    (IDENTIFIER ("," IDENTIFIER)* "=" EXPR)
+  | (IDENTIFIER AUG_ASSIGN_OP EXPR)
+  | (IDENTIFIER "as" IDENTIFIER)
+  | LOGIC_EXPR
+
+AUG_ASSIGN_OP ::= "+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^="
+
+LOGIC_EXPR ::= COMP_EXPR (("and" | "or") COMP_EXPR)*
+
+COMP_EXPR ::=
+    "not" COMP_EXPR
+  | ARITH_EXPR (("==" | "!=" | "<" | ">" | "<=" | ">=") ARITH_EXPR)*
+
+ARITH_EXPR ::= TERM (("+" | "-") TERM)*
+
+TERM ::= FACTOR (("*" | "/" | "//" | "%") FACTOR)*
+
+FACTOR ::=
+    "-" FACTOR
+  | "*" FACTOR                      (* vargs unpacking *) 
+  | "**" FACTOR                     (* kargs unpacking *)
+  | DOLLAR_EXPR
+
+DOLLAR_EXPR ::= POWER ("$" POWER)*
+
+POWER ::= CALL ("^" FACTOR)*        (* power operator *)
+
+CALL ::= ATOM ( ("." IDENTIFIER) | ("(" [ARG_LIST] ")") )*
+
+ARG_LIST ::= ARG ("," ARG)*
+
+ARG ::= EXPR | (IDENTIFIER "=" EXPR)
+
+ATOM ::=
+    INT | FLOAT | STRING | IDENTIFIER
+  | "(" EXPR ")"
+  | LIST_EXPR
+  | HASHMAP_EXPR
+  | IF_EXPR
+  | FOR_EXPR
+  | WHILE_EXPR
+  | DEF_FUNC
+  | NAMESPACE_EXPR
+
+LIST_EXPR ::= "[" [EXPR ("," EXPR)*] "]"
+
+HASHMAP_EXPR ::= "{" [EXPR ":" EXPR ("," EXPR ":" EXPR)*] "}"
+
+NAMESPACE_EXPR ::= "namespace" IDENTIFIER NEWLINE STATEMENTS "done"
+
+IF_EXPR ::=
+    "if" EXPR "do" BODY
+    ("elif" EXPR "do" BODY)*
+    ["else" "do" BODY]?
+
+FOR_EXPR ::=
+    ("for" FOR_IN_CLAUSE | FOR_RANGE_CLAUSES) "do" BODY
+
+FOR_IN_CLAUSE ::= IDENTIFIER ("," IDENTIFIER)* "in" EXPR
+
+FOR_RANGE_CLAUSES ::= FOR_RANGE_CLAUSE ("," FOR_RANGE_CLAUSE)*
+
+FOR_RANGE_CLAUSE ::= IDENTIFIER ["=" EXPR] "to" EXPR ["step" EXPR]
+
+WHILE_EXPR ::= "while" EXPR "do" BODY
+
+DECORATOR ::= "&" EXPR NEWLINE*
+
+DEF_FUNC ::=
+    "defun" [IDENTIFIER] "(" [PARAM_LIST] ")" ("->" EXPR | (NEWLINE STATEMENTS "done"))
+
+PARAM_LIST ::= (PARAMS ["," VAR_PARAMS]) | VAR_PARAMS
+
+PARAMS ::= PARAM ("," PARAM)*
+
+PARAM ::= IDENTIFIER ["=" EXPR]
+
+VAR_PARAMS ::= (VARARGS_PARAM ["," KWARGS_PARAM]) | KWARGS_PARAM
+
+VARARGS_PARAM ::= "*" IDENTIFIER
+
+KWARGS_PARAM ::= "**" IDENTIFIER
+
+"""
+L = """
+
+MIT License
+
+WARNING: This project contains code adapted from multiple public sources.
+
+Some components are originally based on David Callanan's interpreter tutorial (2019),
+licensed under the MIT License. Other parts are believed to derive from Fus3n's version,
+which did not include an explicit license but was publicly shared for free use and modification.
+
+Only modifications made by MemeCoder are explicitly claimed under copyright.
+Reasonable efforts have been made to trace original authors.
+If you are an original author and believe attribution or licensing is missing,
+please contact MemeCoder.
+
+Credits:
+- David Callanan (2019)
+- Fus3n (2022, no license stated)
+- Modified by angelcaru (2024)
+- Further modified by MemeCoder (2025)
+
+Copyright (c) 2019-2025
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+"""
+
+
 
 
 def cleanup_temp_dirs():
@@ -139,141 +312,6 @@ def run_zex(file_path):
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
-
-if os.name != "nt" and not TYPE_CHECKING:
-    try:
-        import readline
-
-        readline.parse_and_bind(r'"\e[A": history-search-backward')
-        readline.parse_and_bind(r'"\e[B": history-search-forward')
-        readline.parse_and_bind(r'"\e[C": forward-char')
-        readline.parse_and_bind(r'"\e[D": backward-char')
-    except ImportError:
-        pass
-
-G = """
-
-PROGRAM ::= (STATEMENT NEWLINE*)*
-
-STATEMENT ::= SIMPLE_STATEMENT | COMPOUND_STATEMENT
-
-SIMPLE_STATEMENT ::=
-"load" STRING
-| "return" EXPR
-| "continue"
-| "break"
-| EXPR
-
-COMPOUND_STATEMENT ::=
-IF_EXPR
-| FOR_EXPR
-| WHILE_EXPR
-| DEF_FUNC
-
-EXPR ::=
-IDENTIFIER "=" EXPR
-| IDENTIFIER "as" EXPR
-| IDENTIFIER ("," IDENTIFIER)* "=" "["? EXPR ("," EXPR)* "]"?
-| IDENTIFIER ("+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^=") EXPR
-| COMP_EXPR (("and" | "or") COMP_EXPR)*
-
-COMP_EXPR ::=
-ARITH_EXPR (("==" | "<" | ">" | "<=" | ">=" | "!=") ARITH_EXPR)*
-| "not" COMP_EXPR
-
-ARITH_EXPR ::= TERM (("+" | "-") TERM)*
-
-TERM ::= FACTOR (("*" | "/" | "//" | "%") FACTOR)*
-
-FACTOR ::= ("+" | "-") FACTOR
-| "*" EXPR
-| "**" EXPR
-| POWER
-
-POWER ::= CALL ("^" FACTOR)*
-
-CALL ::= ATOM ("(" ARG_LIST? ")")?
-
-ARG_LIST ::= ARG ("," ARG)*
-
-ARG ::= EXPR
-
-ATOM ::=
-INT | FLOAT | STRING | IDENTIFIER
-| "(" EXPR ")"
-| LIST_EXPR
-| IF_EXPR
-| FOR_EXPR
-| HASHMAP_EXPR
-| NAMESPACE_EXPR
-| WHILE_EXPR
-| DEL_EXPR
-| DEF_FUNC
-| COMMENT
-| USING_STATEMENT
-| EXPR
-
-USING_STATEMENT ::= "using" ("parent")? IDENTIFIER ("," IDENTIFIER)*
-
-DEL_EXPR ::= "del" IDENTIFIER ("," IDENTIFIER)*
-
-LIST_EXPR ::=
-"[" (EXPR ("," EXPR)*)? "]"
-| "[" FOR_CLAUSES EXPR "]"
-
-HASHMAP_EXPR ::=
-"{" (EXPR ":" EXPR ("," EXPR ":" EXPR)* "}"
-| "{" (FOR_CLAUSES | FOR_IN_CLAUSE) "do" EXPR ":" EXPR)? "}"
-
-
-NAMESPACE_EXPR ::=
-"namespace" IDENTIFIER
-NEWLINE STATEMENT NEWLINE "done"
-
-IF_EXPR ::=
-"if" EXPR "do" STATEMENT
-(NEWLINE "elif" EXPR "do" STATEMENT)*
-(NEWLINE "else" "do" STATEMENT)?
-(NEWLINE "done")?
-
-FOR_CLAUSES ::= "for" FOR_CLAUSE ("," FOR_CLAUSE)* "do"
-
-FOR_CLAUSE ::= IDENTIFIER ("=" EXPR)? "to" EXPR ("step" EXPR)?
-
-FOR_IN_CLAUSE ::= "for" IDENTIFIER ("," IDENTIFIER)* "in" EXPR "do"
-
-FOR_EXPR ::=
-(FOR_CLAUSES | FOR_IN_CLAUSE)
-"do" STATEMENT
-("done")?
-
-WHILE_EXPR ::=
-"while" EXPR "do" STATEMENT
-(NEWLINE "done")?
-
-PARAM_LIST ::= (PARAMS ("," VAR_PARAMS)? | VAR_PARAMS)?
-
-PARAMS ::= PARAM ("," PARAM)*
-PARAM ::= IDENTIFIER ("=" EXPR)?
-
-VAR_PARAMS ::= VARARGS_PARAM ("," KWARGS_PARAM)? | KWARGS_PARAM
-VARARGS_PARAM ::= "*" IDENTIFIER
-KWARGS_PARAM ::= "**" IDENTIFIER
-
-DECORATOR ::= "&" EXPR NEWLINE*
-
-DEF_FUNC ::=
-DECORATOR* "defun" IDENTIFIER? "(" PARAM_LIST? ")"
-("->" EXPR)?
-(NEWLINE STATEMENT NEWLINE "done")?
-
-COMMENT ::= "#" /[^\n]*/
-
-"""
-
-
 def check_file_comments_or_empty(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
         lines = file.readlines()
@@ -323,7 +361,7 @@ def main():
                 if text.strip() == "license":
                     print(
                         ("=" * 96)
-                        + '\n\nMIT License\n\nWARNING: This project contains code adapted from multiple public sources.\n\nSome components are originally based on David Callanan\'s interpreter tutorial (2019),\nlicensed under the MIT License. Other parts are believed to derive from Fus3n\'s version,\nwhich did not include an explicit license but was publicly shared for free use and modification.\n\nOnly modifications made by MemeCoder are explicitly claimed under copyright.\nReasonable efforts have been made to trace original authors.\nIf you are an original author and believe attribution or licensing is missing,\nplease contact MemeCoder.\n\nCredits:\n- David Callanan (2019)\n- Fus3n (2022, no license stated)\n- Modified by angelcaru (2024)\n- Further modified by MemeCoder (2025)\n\nCopyright (c) 2019-2025\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the "Software"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n\n'
+                        + L
                         + ("=" * 96)
                         + "\n\nPlease scroll up to read from the beginning.\n"
                     )

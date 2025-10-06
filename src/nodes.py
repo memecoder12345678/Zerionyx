@@ -451,30 +451,3 @@ class MultiAssignNode:
     def __str__(self):
         var_names = ", ".join(str(tok.value) for tok in self.var_name_toks)
         return f"MultiAssignNode(({var_names}) = {self.value_node})"
-
-
-class ListComprehensionNode:
-    __slots__ = ["element_node", "loop_node", "pos_start", "pos_end"]
-
-    def __init__(self, element_node, loop_node):
-        self.element_node = element_node
-        self.loop_node = loop_node
-        self.pos_start = element_node.pos_start
-        self.pos_end = loop_node.pos_end
-
-    def __str__(self):
-        return f"ListComprehensionNode({self.element_node} for ...)"
-
-
-class HashMapComprehensionNode:
-    __slots__ = ["loop_node", "key_node", "value_node", "pos_start", "pos_end"]
-
-    def __init__(self, loop_node, key_node, value_node, pos_start, pos_end):
-        self.loop_node = loop_node
-        self.key_node = key_node
-        self.value_node = value_node
-        self.pos_start = pos_start
-        self.pos_end = pos_end
-
-    def __str__(self):
-        return f"HashMapComprehensionNode({self.loop_node} do {self.key_node}: {self.value_node})"

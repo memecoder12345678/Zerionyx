@@ -98,120 +98,116 @@
 
             <section id="grammar">
                 <h2>Language Grammar</h2>
-                <pre><code class="highlight-Zerionyx">PROGRAM ::= (STATEMENT NEWLINE*)*
+                <pre><code class="highlight-Zerionyx">PROGRAM ::= STATEMENTS
+
+STATEMENTS ::= STATEMENT (NEWLINE+ STATEMENT)* NEWLINE*
 
 STATEMENT ::= SIMPLE_STATEMENT | COMPOUND_STATEMENT
 
 SIMPLE_STATEMENT ::=
-<code>load</code> STRING
-| <code>return</code> EXPR
-| <code>continue</code>
-| <code>break</code>
-| EXPR
+    <code>load</code> STRING
+  | <code>return</code> [EXPR]
+  | <code>continue</code>
+  | <code>break</code>
+  | <code>using</code> [<code>parent</code>] IDENTIFIER (<code>,</code> IDENTIFIER)*
+  | <code>del</code> IDENTIFIER (<code>,</code> IDENTIFIER)*
+  | EXPR
 
 COMPOUND_STATEMENT ::=
-IF_EXPR
-| FOR_EXPR
-| WHILE_EXPR
-| DEF_FUNC
+    IF_EXPR
+  | FOR_EXPR
+  | WHILE_EXPR
+  | NAMESPACE_EXPR
+  | (DECORATOR+ DEF_FUNC)
+  | DEF_FUNC
 
-EXPR ::=
-IDENTIFIER <code>=</code> EXPR
-| IDENTIFIER <code>as</code> EXPR
-| IDENTIFIER (<code>,</code> IDENTIFIER)* <code>=</code> <code>[</code>? EXPR (<code>,</code> EXPR)* <code>]</code>?
-| IDENTIFIER (<code>+=</code> | <code>-=</code> | <code>*=</code> | <code>/=</code> | <code>//=</code> | <code>%=</code> | <code>^=</code>) EXPR
-| COMP_EXPR ((<code>and</code> | <code>or</code>) COMP_EXPR)*
+BODY ::= STATEMENT | (NEWLINE STATEMENTS <code>done</code>)
+
+EXPR ::= ASSIGNMENT_EXPR
+
+ASSIGNMENT_EXPR ::=
+    (IDENTIFIER (<code>,</code> IDENTIFIER)* <code>=</code> EXPR)
+  | (IDENTIFIER AUG_ASSIGN_OP EXPR)
+  | (IDENTIFIER <code>as</code> IDENTIFIER)
+  | LOGIC_EXPR
+
+AUG_ASSIGN_OP ::= <code>+=</code> | <code>-=</code> | <code>*=</code> | <code>/=</code> | <code>//=</code> | <code>%=</code> | <code>^=</code>
+
+LOGIC_EXPR ::= COMP_EXPR ((<code>and</code> | <code>or</code>) COMP_EXPR)*
 
 COMP_EXPR ::=
-ARITH_EXPR ((<code>==</code> | <code>&lt;</code> | <code>&gt;</code> | <code>&lt;=</code> | <code>&gt;=</code> | <code>!=</code>) ARITH_EXPR)*
-| <code>not</code> COMP_EXPR
+    <code>not</code> COMP_EXPR
+  | ARITH_EXPR ((<code>==</code> | <code>!=</code> | <code><</code> | <code>></code> | <code><=</code> | <code>>=</code>) ARITH_EXPR)*
 
 ARITH_EXPR ::= TERM ((<code>+</code> | <code>-</code>) TERM)*
 
 TERM ::= FACTOR ((<code>*</code> | <code>/</code> | <code>//</code> | <code>%</code>) FACTOR)*
 
-FACTOR ::= (<code>+</code> | <code>-</code>) FACTOR
-| <code>*</code> EXPR
-| <code>**</code> EXPR
-| POWER
+FACTOR ::=
+    <code>+</code> FACTOR
+  | <code>*</code> FACTOR                      (* vargs unpacking *)
+  | <code>**</code> FACTOR                     (* kargs unpacking *)
+  | DOLLAR_EXPR
 
-POWER ::= CALL (<code>^</code> FACTOR)*
+DOLLAR_EXPR ::= POWER (<code>$</code> POWER)*
 
-CALL ::= ATOM (<code>(</code> ARG_LIST? <code>)</code>)?
+POWER ::= CALL (<code>^</code> FACTOR)*        (* power operator *)
+
+CALL ::= ATOM ( (<code>.</code> IDENTIFIER) | (<code>(</code> [ARG_LIST] <code>)</code>) )*
 
 ARG_LIST ::= ARG (<code>,</code> ARG)*
 
-ARG ::= EXPR
+ARG ::= EXPR | (IDENTIFIER <code>=</code> EXPR)
 
 ATOM ::=
-INT | FLOAT | STRING | IDENTIFIER
-| <code>(</code> EXPR <code>)</code>
-| LIST_EXPR
-| IF_EXPR
-| FOR_EXPR
-| DEL_EXPR
-| HASHMAP_EXPR
-| NAMESPACE_EXPR
-| WHILE_EXPR
-| DEF_FUNC
-| COMMENT
-| USING_STATEMENT
-| EXPR
+    INT | FLOAT | STRING | IDENTIFIER
+  | <code>(</code> EXPR <code>)</code>
+  | LIST_EXPR
+  | HASHMAP_EXPR
+  | IF_EXPR
+  | FOR_EXPR
+  | WHILE_EXPR
+  | DEF_FUNC
+  | NAMESPACE_EXPR
 
-USING_STATEMENT ::= <code>using</code> (<code>parent</code>)? IDENTIFIER (<code>,</code> IDENTIFIER)*
+LIST_EXPR ::= <code>[</code> [EXPR (<code>,</code> EXPR)*] <code>]</code>
 
-DEL_EXPR ::= <code>del</code> IDENTIFIER (<code>,</code> IDENTIFIER)*
+HASHMAP_EXPR ::= <code>{</code> [EXPR <code>:</code> EXPR (<code>,</code> EXPR <code>:</code> EXPR)*] <code>}</code>
 
-LIST_EXPR ::=
-<code>[</code> (EXPR (<code>,</code> EXPR)*)? <code>]</code>
-| <code>[</code> FOR_CLAUSES EXPR <code>]</code>
-
-HASHMAP_EXPR ::= 
-<code>{</code> (EXPR <code>:</code> EXPR (<code>,</code> EXPR <code>:</code> EXPR)*)? <code>}</code>
-| <code>{</code> (FOR_CLAUSES | FOR_IN_CLAUSE) <code>do</code> STRING <code>:</code> EXPR <code>}</code>
-
-NAMESPACE_EXPR ::=
-<code>namespace</code> IDENTIFIER
-NEWLINE STATEMENT NEWLINE <code>done</code>
+NAMESPACE_EXPR ::= <code>namespace</code> IDENTIFIER NEWLINE STATEMENTS <code>done</code>
 
 IF_EXPR ::=
-<code>if</code> EXPR <code>do</code> STATEMENT
-(NEWLINE <code>elif</code> EXPR <code>do</code> STATEMENT)*
-(NEWLINE <code>else</code> <code>do</code> STATEMENT)?
-(NEWLINE <code>done</code>)?
-
-FOR_CLAUSES ::= <code>for</code> FOR_CLAUSE (<code>,</code> FOR_CLAUSE)*
-
-FOR_CLAUSE ::= IDENTIFIER (<code>=</code> EXPR)? <code>to</code> EXPR (<code>step</code> EXPR)?
-
-FOR_IN_CLAUSE ::= <code>for</code> IDENTIFIER (<code>,</code> IDENTIFIER)* <code>,</code> EXPR
+    <code>if</code> EXPR <code>do</code> BODY
+    (<code>elif</code> EXPR <code>do</code> BODY)*
+    [<code>else</code> <code>do</code> BODY]?
 
 FOR_EXPR ::=
-(FOR_CLAUSES | FOR_IN_CLAUSE)
-<code>do</code> STATEMENT
-(NEWLINE <code>done</code>)?
+    (<code>for</code> FOR_IN_CLAUSE | FOR_RANGE_CLAUSES) <code>do</code> BODY
 
-WHILE_EXPR ::=
-<code>while</code> EXPR <code>do</code> STATEMENT
-(NEWLINE <code>done</code>)?
+FOR_IN_CLAUSE ::= IDENTIFIER (<code>,</code> IDENTIFIER)* <code>in</code> EXPR
 
-PARAM_LIST ::= (PARAMS (<code>,</code> VAR_PARAMS)? | VAR_PARAMS)?
+FOR_RANGE_CLAUSES ::= FOR_RANGE_CLAUSE (<code>,</code> FOR_RANGE_CLAUSE)*
 
-PARAMS ::= PARAM (<code>,</code> PARAM)*
-PARAM ::= IDENTIFIER (<code>=</code> EXPR)?
+FOR_RANGE_CLAUSE ::= IDENTIFIER [<code>=</code> EXPR] <code>to</code> EXPR [<code>step</code> EXPR]?
 
-VAR_PARAMS ::= VARARGS_PARAM (<code>,</code> KWARGS_PARAM)? | KWARGS_PARAM
-VARARGS_PARAM ::= <code>*</code> IDENTIFIER
-KWARGS_PARAM ::= <code>**</code> IDENTIFIER
+WHILE_EXPR ::= <code>while</code> EXPR <code>do</code> BODY
 
 DECORATOR ::= <code>&</code> EXPR NEWLINE*
 
 DEF_FUNC ::=
-DECORATOR* <code>defun</code> IDENTIFIER? <code>(</code> PARAM_LIST? <code>)</code>
-(<code>-&gt;</code> EXPR)?
-(NEWLINE STATEMENT NEWLINE <code>done</code>)?
+    <code>defun</code> [IDENTIFIER] <code>(</code> [PARAM_LIST] <code>)</code> (<code>-></code> EXPR | (NEWLINE STATEMENTS <code>done</code>))
 
-COMMENT ::= <code>#</code> /[^\n]*/
+PARAM_LIST ::= (PARAMS [<code>,</code> VAR_PARAMS]) | VAR_PARAMS
+
+PARAMS ::= PARAM (<code>,</code> PARAM)*
+
+PARAM ::= IDENTIFIER [<code>=</code> EXPR]
+
+VAR_PARAMS ::= (VARARGS_PARAM [<code>,</code> KWARGS_PARAM]) | KWARGS_PARAM
+
+VARARGS_PARAM ::= <code>*</code> IDENTIFIER
+
+KWARGS_PARAM ::= <code>**</code> IDENTIFIER
 </code></pre>
             </section>
 

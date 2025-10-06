@@ -1,0 +1,21 @@
+load "libs.random"
+load "libs.time"
+load "libs.sys"
+load "libs.string"
+
+clear()
+if sys.os_name == "nt" do sys.system("color 02")
+
+order = ['a', 'd', 'c', 'b', 'b', 'f', 'a', 'e', 'f', 'g', 'h', 'c', 'z', 'x', 'y', 'f', 'e', 'r', 'b', 'm', 'z', 'p', 'k', 'u', 'i', 'g', 's', 'a', 'd', 'l', 'o', 'p', 'w', 't', 'y', 'b', 'n', 'f', 'u', 's', 'p', 's', 't', 'u', 'g', 'h', 's', 'l', 'r', 's', 'q', 'w', 'e', 'r', 't', 'v', 'b', 'n', 'o', 'u', 'i', 'l', 'p', 's', 'f', 'e', 'c', 'x', 'z', 'b', 'h', 'r', 'u', 'l', 'o', 'm', 'e', 'e', 's']
+
+while true do
+    bits = {}
+    lst = []
+    for ch in order do
+        bits += {ch: to_str(random.rand_int(0, 1))}
+    done
+    for ch in order do
+        append(lst, bits$ch)
+    done
+    print(string.join("", lst))
+done

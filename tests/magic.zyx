@@ -1,5 +1,12 @@
 # https://memecoder12345678.github.io/Zerionyx/docs.html#zen-of-zerionyx
 
+a = 1
+b = 2
+c = 3
+x = 4
+y = 5
+z = 6
+
 # yes
 result = (
     x
@@ -69,4 +76,4 @@ b = a + a
 
 # no
 _ = 1
-__ = _ + _
+__ = _ --++++-+-+----+--+ _
