@@ -5,7 +5,7 @@ from fractions import Fraction
 from queue import Queue as PyQueue
 
 from .errors import MError, RTError, TError
-from .lexer import RTResult
+from .utils import RTResult
 
 
 class ThreadPoolError(Exception):
