@@ -1,13 +1,13 @@
-import os
-import sys
-from src.interp import run, INFO, Fore, Style
-from typing import TYPE_CHECKING
-import io
-import zipfile
-import tempfile
-import shutil
 import atexit
+import io
+import os
+import shutil
+import sys
+import tempfile
+import zipfile
+from typing import TYPE_CHECKING
 
+from src.interp import INFO, Fore, Style, run
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
@@ -182,8 +182,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 """
-
-
 
 
 def cleanup_temp_dirs():

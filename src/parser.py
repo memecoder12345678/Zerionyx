@@ -1,9 +1,8 @@
 import os
-from .nodes import *
+
 from .consts import *
-from .errors import (
-    InvalidSyntaxError,
-)
+from .errors import InvalidSyntaxError
+from .nodes import *
 from .utils import Token
 
 

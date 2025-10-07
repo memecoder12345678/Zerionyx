@@ -1,8 +1,3 @@
-from colorama import init, Fore, Style
-
-init(autoreset=True)
-
-
 class Token:
     __slots__ = ["type", "value", "pos_start", "pos_end"]
 

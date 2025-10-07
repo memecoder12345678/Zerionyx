@@ -1,37 +1,36 @@
+import csv
+import hashlib
+import json
+import math
 import os
 import platform
-import sys
-import csv
-from threading import Thread
-from datetime import datetime, date, timedelta
-import time
 import random
-import math
-import json
-from .parser import *
-from .nodes import *
-from .datatypes import *
+import re
+import socket
+import ssl
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+import uuid
+import zlib
 from copy import deepcopy
+from datetime import date, datetime, timedelta
+from getpass import getpass
+from shutil import copy, rmtree
+from threading import Thread
+from urllib.parse import unquote
+
+from colorama import Fore, Style, init
 
 from .consts import *
-from .errors import TError, IError, MError, Error, RTError
-from shutil import rmtree, copy
-from .lexer import Lexer, RTResult
-
-from getpass import getpass
-import urllib.request
-import urllib.error
-from urllib.parse import unquote
-import re
-import subprocess
-import socket
-import uuid
-import time
-import ssl
-import hashlib
-import zlib
-
-from colorama import init, Fore, Style
+from .datatypes import *
+from .errors import Error, IError, MError, RTError, TError
+from .lexer import Lexer
+from .nodes import *
+from .parser import *
+from .utils import RTResult
 
 init()
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -5305,7 +5304,6 @@ class Interpreter:
                 return res
             return res.success(Number.none if should_return_none else expr_value)
         return res.success(Number.none)
-
 
     def visit_ForNode(self, node, context):
         res = RTResult()

@@ -1,13 +1,11 @@
-from .lexer import RTResult
+import operator
+from concurrent.futures import Future as PyFuture
+from concurrent.futures import ThreadPoolExecutor
 from fractions import Fraction
 from queue import Queue as PyQueue
-from concurrent.futures import ThreadPoolExecutor, Future as PyFuture
-import operator
-from .errors import (
-    TError,
-    RTError,
-    MError,
-)
+
+from .errors import MError, RTError, TError
+from .lexer import RTResult
 
 
 class ThreadPoolError(Exception):

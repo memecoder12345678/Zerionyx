@@ -1,6 +1,6 @@
 from .consts import *
-from .utils import Token, Position, RTResult
-from .errors import IllegalCharError, ExpectedCharError, InvalidSyntaxError
+from .errors import ExpectedCharError, IllegalCharError, InvalidSyntaxError
+from .utils import Position, Token
 
 
 class Lexer:
