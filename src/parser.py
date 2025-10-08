@@ -291,22 +291,6 @@ class Parser:
                     else:
                         return res.success(VarAssignNode(var_name_toks[0], rhs_node))
 
-                if not is_multi_assign and self.current_tok.matches(TT_KEYWORD, "as"):
-                    res.register_advancement()
-                    self.advance()
-                    if self.current_tok.type != TT_IDENTIFIER:
-                        return res.failure(
-                            InvalidSyntaxError(
-                                self.current_tok.pos_start,
-                                self.current_tok.pos_end,
-                                "Expected identifier for alias",
-                            )
-                        )
-                    alias_name = self.current_tok
-                    res.register_advancement()
-                    self.advance()
-                    return res.success(VarAssignAsNode(var_name_toks[0], alias_name))
-
                 self.reverse(res.advance_count)
 
         if self.current_tok.matches(TT_KEYWORD, "load"):

@@ -1,6 +1,6 @@
-# libs.mlist
+# libs.listm
 
-namespace mlist
+namespace listm
     load "libs.random"
 
     defun map(f, l)

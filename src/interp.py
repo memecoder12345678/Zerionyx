@@ -3358,9 +3358,10 @@ class BuiltInFunction(BaseFunction):
                         exec_ctx,
                     )
                 )
-            for k, v in hm.value.items():
-                if hasattr(k, "value") and k.value == key.value:
-                    return RTResult().success(v)
+            try:
+                return RTResult().success(hm.value[key.value])
+            except:
+                pass
         else:
             if not isinstance(key, Number):
                 return RTResult().failure(
@@ -4692,43 +4693,6 @@ class BuiltInFunction(BaseFunction):
             )
         return RTResult().success(Number(~int(a.value)))
 
-    @set_args(["name1", "name2"])
-    def execute_is_reference(self, exec_ctx):
-        name1_obj = exec_ctx.symbol_table.get("name1")
-        name2_obj = exec_ctx.symbol_table.get("name2")
-
-        if not isinstance(name1_obj, String):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "First argument of 'is_reference' must be a string (the variable name)",
-                    exec_ctx,
-                )
-            )
-
-        if not isinstance(name2_obj, String):
-            return RTResult().failure(
-                TError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Second argument of 'is_reference' must be a string (the variable name)",
-                    exec_ctx,
-                )
-            )
-
-        var_name1 = name1_obj.value
-        var_name2 = name2_obj.value
-
-        calling_context = exec_ctx.parent
-
-        symbol_table = calling_context.symbol_table
-
-        are_references = symbol_table.is_reference(var_name1, var_name2)
-
-        result_val = Number.true if are_references else Number.false
-        return RTResult().success(result_val)
-
     @set_args(["file_path"])
     def execute_read_csv_fp(self, exec_ctx):
         file_path_obj = exec_ctx.symbol_table.get("file_path")
@@ -4974,30 +4938,6 @@ class Interpreter:
             context.symbol_table.set(var_name, value)
 
         context.private_symbol_table.set(var_name, value)
-
-        return res.success(value)
-
-    def visit_VarAssignAsNode(self, node, context: Context):
-        res = RTResult()
-        ref_name = node.var_name_tok.value
-        referenced_name = node.var_name_tok2.value
-
-        value = context.symbol_table.get(referenced_name)
-        if value is None:
-            return res.failure(
-                RTError(
-                    node.pos_start,
-                    node.pos_end,
-                    f"'{referenced_name}' is not defined",
-                    context,
-                )
-            )
-
-        try:
-            context.symbol_table.set_ref(ref_name, referenced_name)
-            context.private_symbol_table.set_ref(ref_name, referenced_name)
-        except NameError as e:
-            return res.failure(RTError(node.pos_start, node.pos_end, str(e), context))
 
         return res.success(value)
 

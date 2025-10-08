@@ -1,4 +1,4 @@
-# libs.ffio
+# libs.ffio (File Folder I/O)
 
 namespace ffio
     os_sep = os_sep_fp

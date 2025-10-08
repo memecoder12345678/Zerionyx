@@ -57,7 +57,7 @@
             </ul>
             <h3>Standard Library</h3>
             <ul>
-                <li><a href="#lib-mlist">list</a></li>
+                <li><a href="#lib-listm">list</a></li>
                 <li><a href="#lib-string">string</a></li>
                 <li><a href="#lib-math">math</a></li>
                 <li><a href="#lib-ffio">ffio</a></li>
@@ -128,7 +128,6 @@ EXPR ::= ASSIGNMENT_EXPR
 ASSIGNMENT_EXPR ::=
     (IDENTIFIER (<code>,</code> IDENTIFIER)* <code>=</code> EXPR)
   | (IDENTIFIER AUG_ASSIGN_OP EXPR)
-  | (IDENTIFIER <code>as</code> IDENTIFIER)
   | LOGIC_EXPR
 
 AUG_ASSIGN_OP ::= <code>+=</code> | <code>-=</code> | <code>*=</code> | <code>/=</code> | <code>//=</code> | <code>%=</code> | <code>^=</code>
@@ -425,8 +424,6 @@ Zerionyx may be magical, but its syntax must be real.
                             integers <code>a</code> and <code>b</code></li>
                         <li><b>bitwise_not(a)</b> &rarr; number (int) &mdash; Performs a bitwise NOT (inversion)
                             operation on integer <code>a</code></li>
-                        <li><b>is_reference(name1, name2)</b> &rarr; bool &mdash; Checks if two variable names (as
-                            strings) are aliases of each other</li>
                     </ul>
                 </section>
                 <section id="ref-namespaces">
@@ -745,7 +742,7 @@ Zerionyx may be magical, but its syntax must be real.
                         <li><b>Concatenation</b>: <code>[1, 2] * [3, 4]</code> returns <code>[1, 2, 3, 4]</code></li>
                         <li><b>Removal by index</b>: <code>[1, 2, 3] - 1</code> returns <code>[1, 3]</code></li>
                     </ul>
-                    <p>The <code>mlist</code> library provides functions like <code>map</code>, <code>filter</code>,
+                    <p>The <code>listm</code> library provides functions like <code>map</code>, <code>filter</code>,
                         <code>sort</code>, etc.
                     </p>
                 </section>
@@ -863,8 +860,8 @@ Zerionyx may be magical, but its syntax must be real.
 
 
 
-                <div id="lib-mlist">
-                    <h3>mlist.zyx</h3>
+                <div id="lib-listm">
+                    <h3>listm.zyx</h3>
                     <ul>
                         <li><b>map(f, l)</b> &rarr; list &mdash; Apply function <code>f</code> to each element of list
                             <code>l</code>

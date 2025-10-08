@@ -7,6 +7,8 @@ load "libs.keyboard"
 
 A = 0
 B = 0
+sin_ = math.sin # get member beforehand to avoid overhead
+cos_ = math.cos # get member beforehand to avoid overhead
 loop_count = 0
 max_loop = to_int(2 * math.PI / 0.04, false) # 157 frames
 shading = [".", ",", "-", "~", ":", ";", "=", "!", "*", "#", "$", "@"]
@@ -35,16 +37,16 @@ while true do
             b = [" "] * 1760
             for j = 0 to 628 step 7 do
                 for i = 0 to 628 step 2 do
-                    c = math.sin(i / 100)
-                    d = math.cos(j / 100)
-                    e = math.sin(A)
-                    f = math.sin(j / 100)
-                    g = math.cos(A)
+                    c = sin_(i / 100)
+                    d = cos_(j / 100)
+                    e = sin_(A)
+                    f = sin_(j / 100)
+                    g = cos_(A)
                     h = d + 2
                     D = 1 / (c * h * e + f * g + 5)
-                    l = math.cos(i / 100)
-                    m = math.cos(B)
-                    n = math.sin(B)
+                    l = cos_(i / 100)
+                    m = cos_(B)
+                    n = sin_(B)
                     t = c * h * g - f * e
                     x = to_int(40 + 30 * D * (l * h * m - t * n), false)
                     y = to_int(12 + 15 * D * (l * h * n + t * m), false)

@@ -37,78 +37,28 @@ class Context:
 
 
 class SymbolTable:
-    __slots__ = ("symbols", "parent", "aliases")
+
+    __slots__ = ("symbols", "parent")
 
     def __init__(self, parent=None):
         self.symbols = {}
         self.parent = parent
-        self.aliases = {}
-
-    def resolve(self, name):
-        seen = set()
-
-        current_name = name
-        table = self
-
-        while table:
-            if current_name in table.aliases:
-                if current_name in seen:
-                    return current_name
-                seen.add(current_name)
-
-                current_name = table.aliases[current_name]
-                continue
-
-            if current_name in table.symbols:
-                return current_name
-
-            table = table.parent
-
-        return current_name
 
     def get(self, name):
-        root = self.resolve(name)
-        if root in self.symbols:
-            return self.symbols[root]
-        if self.parent:
-            return self.parent.get(root)
-        return None
+        value = self.symbols.get(name, None)
+        if value == None and self.parent:
+            return self.parent.get(name)
+        return value
 
     def set(self, name, value):
-        root = self.resolve(name)
-        self.symbols[root] = value
-
-    def set_ref(self, name, ref_name):
-        if self.get(ref_name) is None:
-            raise NameError(f"'{ref_name}' is not defined")
-
-        if name in self.symbols:
-            del self.symbols[name]
-
-        self.aliases[name] = ref_name
-
-    def remove(self, name):
-        root = self.resolve(name)
-        if root in self.symbols:
-            del self.symbols[root]
-        to_del = [k for k, v in self.aliases.items() if v == root or k == name]
-        for k in to_del:
-            del self.aliases[k]
-
-    def is_reference(self, name1, name2):
-        if self.get(name1) is None or self.get(name2) is None:
-            return False
-
-        root1 = self.resolve(name1)
-        root2 = self.resolve(name2)
-
-        return root1 == root2
+        self.symbols[name] = value
 
     def change(self, other):
         self.symbols = other.symbols
         self.parent = other.parent
-        self.aliases = dict(other.aliases)
-        return self
+
+    def remove(self, name):
+        del self.symbols[name]
 
     def exists(self, value):
         return True if value in self.symbols.values() else False

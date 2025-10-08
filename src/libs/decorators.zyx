@@ -54,7 +54,7 @@ namespace decorators
                     println("Attempt " + to_str(i) + "/" + to_str(times) + " failed: " + err)
                 done
                 
-                panic("Function " + name(fn) + " failed after " + to_str(times) + " retries", "RT")
+                panic("Function '" + name(fn) + "' failed after " + to_str(times) + " retries", "RT")
             done
             return wrapper
         done
@@ -80,8 +80,7 @@ namespace decorators
                 threading.join(t, timeout=(ms / 1000.0))
 
                 if not state$"done" do
-                    threading.cancel(t)
-                    panic("Function " + name(fn) + " timed out after " + to_str(ms) + "ms", "RT")
+                    panic("Function '" + name(fn) + "' timed out after " + to_str(ms) + "ms", "RT")
                 done
                 
                 if state$"error" do

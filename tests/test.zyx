@@ -13,13 +13,6 @@ println(x % y)
 println(x // y)
 println(x ^ y)
 
-# Alias
-a = [1, 2, 3, 4, 5]
-b as a
-println(b)
-append(a, 6)
-println(b)
-
 # Function definition
 defun add(a, b)
     return a + b
@@ -58,7 +51,7 @@ println(type(os))
 r = pyexec("os.system('echo Hello, World!')", os)
 
 # CFloat
-tcf as to_cfloat
+tcf = to_cfloat
 lst = [tcf("1/9")] * 9
 x = tcf(0)
 for i in lst do

@@ -48,13 +48,6 @@
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">x</span> <span class="zyx-types">//</span> <span class="zyx-var">y</span><span class="zyx-types">)</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">x</span> <span class="zyx-types">^</span> <span class="zyx-var">y</span><span class="zyx-types">)</span>
 
-<span class="zyx-comment"># Alias</span>
-<span class="zyx-var">a</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-number">1</span><span class="zyx-types">,</span> <span class="zyx-number">2</span><span class="zyx-types">,</span> <span class="zyx-number">3</span><span class="zyx-types">,</span> <span class="zyx-number">4</span><span class="zyx-types">,</span> <span class="zyx-number">5</span><span class="zyx-types">]</span>
-<span class="zyx-var">b</span> <span class="zyx-keyword">as</span> <span class="zyx-var">a</span>
-<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">b</span><span class="zyx-types">)</span>
-<span class="zyx-func">append</span><span class="zyx-types">(</span><span class="zyx-var">a</span><span class="zyx-types">,</span> <span class="zyx-number">6</span><span class="zyx-types">)</span>
-<span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">b</span><span class="zyx-types">)</span>
-
 <span class="zyx-comment"># Function definition</span>
 <span class="zyx-keyword">defun</span> <span class="zyx-func-def">add</span><span class="zyx-types">(</span><span class="zyx-var">a</span><span class="zyx-types">,</span> <span class="zyx-var">b</span><span class="zyx-types">)</span>
     <span class="zyx-keyword">return</span> <span class="zyx-var">a</span> <span class="zyx-types">+</span> <span class="zyx-var">b</span>
@@ -93,7 +86,7 @@
 <span class="zyx-var">r</span> <span class="zyx-types">=</span> <span class="zyx-func">pyexec</span><span class="zyx-types">(</span><span class="zyx-string">"os.system('echo Hello, World!')"</span><span class="zyx-types">,</span> <span class="zyx-var">os</span><span class="zyx-types">)</span>
 
 <span class="zyx-comment"># CFloat</span>
-<span class="zyx-func">tcf</span> <span class="zyx-keyword">as</span> <span class="zyx-func">to_cfloat</span>
+<span class="zyx-func">tcf</span> <span class="zyx-keyword">=</span> <span class="zyx-func">to_cfloat</span>
 <span class="zyx-var">lst</span> <span class="zyx-types">=</span> <span class="zyx-types">[</span><span class="zyx-func">tcf</span><span class="zyx-types">(</span><span class="zyx-string">"1/9"</span><span class="zyx-types">)</span><span class="zyx-types">]</span> <span class="zyx-types">*</span> <span class="zyx-number">9</span>
 <span class="zyx-var">x</span> <span class="zyx-types">=</span> <span class="zyx-func">tcf</span><span class="zyx-types">(</span><span class="zyx-number">0</span><span class="zyx-types">)</span>
 <span class="zyx-keyword">for</span> <span class="zyx-var">i</span> <span class="zyx-keyword">in</span> <span class="zyx-var">lst</span> <span class="zyx-keyword">do</span>

@@ -2,61 +2,33 @@
 
 memory_private_mem_36 = {}
 
-defun remember_(k, v)
-    memory_private_mem_36$k = v
-done
-
-defun recall_(k)
-    return get(memory_private_mem_36, k)
-done
-
-defun forget_(k)
-    del_key(memory_private_mem_36, k)
-done
-
-defun clear_memory_()
-    using memory_private_mem_36
-    memory_private_mem_36 = {}
-done
-
-defun keys_()
-    return keys(memory_private_mem_36)
-done
-
-defun is_empty_()
-    return len(memory_private_mem_36) == 0
-done
-
-defun size_()
-    return len(memory_private_mem_36)
-done
-
 namespace memory
     defun remember(k, v)
-        remember_(k, v)
+        memory_private_mem_36$k = v
     done
 
     defun recall(k)
-        return recall_(k)
+        return get(memory_private_mem_36, k)
     done
 
     defun forget(k)
-        forget_(k)
+        del_key(memory_private_mem_36, k)
     done
 
     defun clear_memory()
-        clear_memory_()
+        using memory_private_mem_36
+        memory_private_mem_36 = {}
     done
 
     defun keys()
-        keys_()
+        return keys(memory_private_mem_36)
     done
 
     defun is_empty()
-        is_empty_()
+        return len(memory_private_mem_36) == 0
     done
 
     defun size()
-        size_()
+        return len(memory_private_mem_36)
     done
 done

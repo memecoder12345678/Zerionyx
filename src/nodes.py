@@ -339,21 +339,6 @@ class ForInNode:
         return f"ForInNode({var_names} in {self.iterable_node} do {self.body_node})"
 
 
-class VarAssignAsNode:
-    __slots__ = ["var_name_tok", "var_name_tok2", "pos_start", "pos_end"]
-
-    def __init__(self, var_name_tok, var_name_tok2):
-        self.var_name_tok = var_name_tok
-        self.var_name_tok2 = var_name_tok2
-        self.pos_start = self.var_name_tok.pos_start
-        self.pos_end = self.var_name_tok2.pos_end
-
-    def __str__(self):
-        return (
-            f"VarAssignAsNode({self.var_name_tok.value} = {self.var_name_tok2.value})"
-        )
-
-
 class NameSpaceNode:
     __slots__ = ["namespace_name", "statements", "pos_start", "pos_end"]
 
