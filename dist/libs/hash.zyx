@@ -1,0 +1,23 @@
+# libs.hash
+
+namespace hash
+    defun md5(s)
+        return md5_fp(s)
+    done
+
+    defun sha1(s)
+        return sha1_fp(s)
+    done
+
+    defun sha256(s)
+        return sha256_fp(s)
+    done
+
+    defun sha512(s)
+        return sha512_fp(s)
+    done
+
+    defun crc32(s)
+        return crc32_fp(s)
+    done
+done

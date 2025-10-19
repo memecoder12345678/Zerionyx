@@ -1,0 +1,91 @@
+# libs.memory
+
+mem_ = []
+
+defun remember_(k, v)
+    for i = 0 to len(mem_) do 
+        pair = mem_$i
+        if pair$0 == k do 
+            pair$1 = v
+            return none
+        done
+    done
+    append(mem_, [k, v])
+    return none
+done
+
+defun recall_(k)
+    for i = 0 to len(mem_) do
+        pair = mem_$i
+        if pair$0 == k do
+            return pair$1
+        done
+    done
+    return none
+done
+
+defun forget_(k)
+    i = 0
+    while i < len(mem_) do
+        pair = mem_$i
+        if pair$0 == k do
+            pop(mem_, i)
+        else do
+            i = i + 1
+        done
+    done
+    return none
+done
+
+defun clear_memory_()
+    for i = 0 to len(l) do
+        pop(l, i)
+    done
+    return none
+done
+
+defun keys_()
+    l = []
+    for i = 0 to len(mem_) do
+        append(l, mem_$i$0)
+    done
+    return l
+done
+
+defun is_empty_()
+    return len(mem_) == 0
+done
+
+defun size_()
+    return len(mem_)
+done
+
+namespace memory
+    defun remember(k, v)
+        remember_(k, v)
+    done
+
+    defun recall(k)
+        return recall_(k)
+    done
+
+    defun forget(k)
+        forget_(k)
+    done
+
+    defun clear_memory()
+        clear_memory_()
+    done
+
+    defun keys()
+        keys_()
+    done
+
+    defun is_empty()
+        is_empty_()
+    done
+
+    defun size()
+        size_()
+    done
+done
