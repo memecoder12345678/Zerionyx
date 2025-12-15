@@ -8,16 +8,6 @@ defun log_call(fn)
     return wrapper
 done
 
-defun logger(prefix, *vargs, **kargs)
-    print(prefix)
-    for arg in vargs do
-        println("  - Positional: " + to_str(arg))
-    done
-    for item in items(kargs) do
-        println("  - Keyword: " + item$0 + " = " + to_str(item$1))
-    done
-done
-
 &log_call
 defun add(a, b) -> a + b
 
