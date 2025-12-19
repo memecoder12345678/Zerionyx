@@ -215,23 +215,30 @@ def pack_zex(output_file, main_script, other_files):
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
             zf.writestr(MANIFEST_NAME, os.path.basename(main_script))
+
             for f in all_files:
-                with open(f, "r", encoding="utf-8") as file:
-                    content = file.read()
+                filename = os.path.basename(f)
 
-                lines = content.splitlines()
-                processed_lines = [line.strip() for line in lines]
-                processed_content = ";".join(processed_lines)
+                if f.endswith(".zyx"):
+                    with open(f, "r", encoding="utf-8") as file:
+                        content = file.read()
 
-                zf.writestr(os.path.basename(f), processed_content)
+                    lines = content.splitlines()
+                    processed_lines = [line.strip() for line in lines if line.strip()]
+                    processed_content = ";".join(processed_lines)
+
+                    zf.writestr(filename, processed_content.encode("utf-8"))
+
+                else:
+                    with open(f, "rb") as file:
+                        binary_content = file.read()
+                    zf.writestr(filename, binary_content)
 
         with open(output_file, "wb") as f:
             f.write(MAGIC)
             f.write(zip_buffer.getvalue())
 
-        print(
-            f"{Fore.GREEN}Successfully packed to '{os.path.abspath(output_file)}'{Fore.RESET}"
-        )
+        print(f"{Fore.GREEN}Successfully packed to '{output_file}'{Fore.RESET}")
 
     except Exception as e:
         print(
