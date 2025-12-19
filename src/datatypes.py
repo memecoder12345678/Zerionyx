@@ -363,9 +363,11 @@ class CFloat(Object):
         return CFloat(self.value, self.context, self.pos_start, self.pos_end)
 
     def _convert_to_fraction(self, other):
-        if isinstance(other, (Number, CFloat)):
-            if isinstance(other.value, Fraction):
-                return other.value
+        if isinstance(other, CFloat):
+            return other.value
+        if isinstance(other, Number):
+            if isinstance(other.value, int):
+                return Fraction(other.value)
             return Fraction(str(other.value))
         return None
 
