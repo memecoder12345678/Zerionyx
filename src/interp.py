@@ -5850,18 +5850,19 @@ for func in BUILTIN_FUNCTIONS:
 private_symbol_table = SymbolTable()
 private_symbol_table.set("is_main", Number.false)
 
+
 def clean_value(value):
     if isinstance(value, List):
         cleaned_list = [
-            elem for elem in value.value 
-            if not (isinstance(elem, NoneObject))
+            elem for elem in value.value if not (isinstance(elem, NoneObject))
         ]
-        
+
         if len(cleaned_list) == 0:
             return String("")
-            
+
         return List(cleaned_list)
     return value
+
 
 def run(fn, text):
     lexer = Lexer(fn, text)
