@@ -42,7 +42,7 @@
                 <li><a href="#ref-control-flow">Control Flow</a></li>
                 <li><a href="#ref-loops">Loops</a></li>
                 <li><a href="#ref-functions">Functions</a></li>
-                <li><a href="#ref-decorators">Functions</a></li>
+                <li><a href="#ref-decorators">Decorators</a></li>
                 <li><a href="#ref-using">Using Statements</a></li>
                 <li><a href="#ref-vargs-kwargs">Vargs and Kwargs</a></li>
                 <li><a href="#ref-io">Input/Output</a></li>
@@ -263,6 +263,14 @@ Zerionyx may be magical, but its syntax must be real.
                             <code>none</code>
                         </li>
                     </ul>
+                    <div class="note"
+                        style="border-left: 5px solid #ffcc00; padding: 10px; background: rgba(255, 204, 0, 0.1); margin: 20px 0;">
+                        <strong>⚠️ Important Note on Type Conversion:</strong>
+                        Many built-in and library functions that specifically require an <b>int</b> will automatically
+                        convert <b>float</b> arguments using the <code>to_int()</code> function.
+                        Since <code>to_int()</code> truncates towards zero (identical to Python's <code>int()</code>),
+                        ensure your values are pre-rounded if precision is critical.
+                    </div>
                 </section>
 
                 <section id="ref-built-in-constants">
@@ -433,16 +441,7 @@ Zerionyx may be magical, but its syntax must be real.
                         help organize code and prevent name conflicts, especially when building libraries.</p>
                     <p>You can define a namespace using the <code>namespace ... done</code> block. Members inside the
                         namespace are accessed using dot notation (<code>.</code>).</p>
-                    <p><strong>Important note:</strong> All variables and functions declared inside a namespace are
-                        immutable. This means:
-                    <ul>
-                        <li>The names of variables and functions cannot be changed or reassigned after they are defined.
-                        </li>
-                        <li>Members of a namespace are read-only &mdash; they can be accessed but not modified or
-                            overridden.
-                        </li>
-                    </ul> This ensures that the namespace remains consistent, safe, and protected from unintended
-                    changes.</p> <br>
+                    <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-comment"># Define a namespace to group math-related utilities</span>
 <span class="zyx-keyword">namespace</span> <span class="zyx-var">math_utils</span>
     <span class="zyx-var">pi</span> <span class="zyx-types">=</span> <span class="zyx-number">3.14159</span>
@@ -459,6 +458,19 @@ Zerionyx may be magical, but its syntax must be real.
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"The area is "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">area</span><span class="zyx-types">))</span>
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Pi value: "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">math_utils</s<span class="zyxpan><span class="zyx-types">.</span><span class="zyx-var">pi</span><span class="zyx-types">))</span>
 </code></pre>
+                    <br>
+                    <div class="note"
+                        style="border-left: 5px solid var(--neon-blue); padding: 10px; background: rgba(0, 255, 204, 0.1); margin: 20px 0;">
+                        <strong>💡 Immutable Namespaces:</strong>
+                        All variables and functions declared inside a namespace are <b>immutable</b>.
+                        <ul>
+                            <li>Names cannot be changed or reassigned once they are defined.</li>
+                            <li>Members are <b>read-only</b> &mdash; they can be accessed but not modified or
+                                overridden.</li>
+                        </ul>
+                        This ensures that namespaces remain consistent, safe, and protected from unintended side
+                        effects.
+                    </div>
                 </section>
                 <section id="ref-control-flow">
                     <h3>Control Flow</h3>
