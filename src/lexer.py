@@ -15,11 +15,12 @@ class Lexer:
         self.tokens = []
         self.open_bracket_stack = []
 
-    def advance(self):
-        self.pos.advance(self.current_char)
-        self.current_char = (
-            self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
-        )
+    def advance(self, steps=1):
+        for _ in range(steps):
+            self.pos.advance(self.current_char)
+            self.current_char = (
+                self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
+            )
 
     def make_tokens(self):
         while self.current_char is not None:
@@ -50,12 +51,7 @@ class Lexer:
                 self.tokens.append(self.make_number())
             elif self.current_char in LETTERS + "_":
                 self.tokens.append(self.make_identifier())
-            elif self.current_char == '"':
-                token, error = self.make_string()
-                if error:
-                    return [], error
-                self.tokens.append(token)
-            elif self.current_char == "'":
+            elif self.current_char == '"' or self.current_char == "'":
                 token, error = self.make_string()
                 if error:
                     return [], error
@@ -73,8 +69,7 @@ class Lexer:
                 self.advance()
             elif self.current_char == "\\":
                 if self.peek_foward_steps(1) == "\n":
-                    self.advance()
-                    self.advance()
+                    self.advance(2)
                 else:
                     pos_start = self.pos.copy()
                     self.advance()
@@ -182,108 +177,40 @@ class Lexer:
                 char = self.current_char
                 self.advance()
                 return [], IllegalCharError(pos_start, self.pos, "'" + char + "'")
-        if self.open_bracket_stack and self.open_bracket_stack[-1][0] == ")augmented":
+
+        while (
+            self.open_bracket_stack and self.open_bracket_stack[-1][0] == ")augmented"
+        ):
             rparen_pos = self.pos.copy()
             self.tokens.append(
                 Token(TT_RPAREN, pos_start=rparen_pos, pos_end=rparen_pos)
             )
             self.open_bracket_stack.pop()
+
         if self.open_bracket_stack:
             expected_closer, opener_pos_start = self.open_bracket_stack[-1]
-            if expected_closer == ")augmented":
-                return [], InvalidSyntaxError(
-                    opener_pos_start,
-                    self.pos,
-                    "Incomplete augmented assignment expression, expected an expression after operator",
-                )
             return [], ExpectedCharError(
                 opener_pos_start, self.pos, f"Expected '{expected_closer}'"
             )
+
         self.tokens.append(Token(TT_EOF, pos_start=self.pos))
         return self.tokens, None
 
-    def make_number(self):
-        num_str = ""
-        dot_count = 0
-        pos_start = self.pos.copy()
-        while self.current_char != None and self.current_char in DIGITS + ".":
-            if self.current_char == ".":
-                if dot_count == 1:
-                    break
-                dot_count += 1
-            num_str += self.current_char
-            self.advance()
-        if dot_count == 0:
-            return Token(TT_INT, int(num_str), pos_start, self.pos)
-        else:
-            return Token(TT_FLOAT, float(num_str), pos_start, self.pos)
+    def _get_lhs_tokens(self) -> list[Token]:
+        lhs = []
+        stop_types = {TT_NEWLINE, TT_LBRACE, TT_RBRACE, TT_COLON, TT_COMMA}
 
-    def make_string(self):
-        quote_char = self.current_char
-        return self._process_string_literal(quote_char)
+        for tok in reversed(self.tokens):
+            if tok.type in stop_types:
+                break
+            lhs.append(tok)
 
-    def _process_string_literal(self, quote_char):
-        string_content = []
-        pos_start = self.pos.copy()
-        self.advance()
-        is_multiline = False
-        closing_sequence = quote_char
-        if self.current_char == quote_char and self.peek_foward_steps(1) == quote_char:
-            is_multiline = True
-            closing_sequence = quote_char * 3
-            self.advance(2)
-        escape_character = False
-        while self.current_char is not None:
-            if is_multiline:
-                if (
-                    self.current_char == quote_char
-                    and self.peek_foward_steps(1) == quote_char
-                    and self.peek_foward_steps(2) == quote_char
-                ):
-                    self.advance(3)
-                    break
-            else:
-                if not escape_character and self.current_char == quote_char:
-                    self.advance()
-                    break
-            if escape_character:
-                string_content.append(self.current_char)
-                escape_character = False
-            elif self.current_char == "\\":
-                string_content.append("\\")
-                escape_character = True
-            else:
-                string_content.append(self.current_char)
-            self.advance()
-        else:
-            return None, ExpectedCharError(pos_start, self.pos, f"'{closing_sequence}'")
-        raw_string = "".join(string_content)
-        try:
-            processed_string = raw_string.encode("raw_unicode_escape").decode(
-                "unicode_escape"
-            )
-        except UnicodeDecodeError:
-            return None, IllegalCharError(
-                pos_start, self.pos, f"Invalid escape sequence in string"
-            )
-        return Token(TT_STRING, processed_string, pos_start, self.pos), None
-
-    def peek_foward_steps(self, steps) -> str | None:
-        peek_pos_idx = self.pos.idx + steps
-        if peek_pos_idx < len(self.text) and peek_pos_idx >= 0:
-            return self.text[peek_pos_idx : peek_pos_idx + 1]
-        return None
-
-    def previous_token(self) -> Token | None:
-        try:
-            return self.tokens[-1]
-        except IndexError:
-            return None
+        return list(reversed(lhs))
 
     def _emit_augmented_assignment_tokens(
         self,
         base_op_type: str,
-        identifier_token_original: Token,
+        lhs_tokens: list[Token],
         eq_token_pos_start: Position,
         eq_token_pos_end: Position,
         op_token_pos_start: Position,
@@ -296,14 +223,15 @@ class Lexer:
                 pos_end=eq_token_pos_end.copy(),
             )
         )
-        self.tokens.append(
-            Token(
-                TT_IDENTIFIER,
-                value=identifier_token_original.value,
-                pos_start=identifier_token_original.pos_start.copy(),
-                pos_end=identifier_token_original.pos_end.copy(),
+        for tok in lhs_tokens:
+            self.tokens.append(
+                Token(
+                    tok.type,
+                    value=tok.value,
+                    pos_start=tok.pos_start.copy(),
+                    pos_end=tok.pos_end.copy(),
+                )
             )
-        )
         self.tokens.append(
             Token(
                 base_op_type,
@@ -326,7 +254,9 @@ class Lexer:
     ):
         pos_end_op_char = self.pos.copy()
         if self.current_char == "=":
-            if not self.tokens or self.tokens[-1].type != TT_IDENTIFIER:
+            lhs_tokens = self._get_lhs_tokens()
+
+            if not lhs_tokens:
                 self.tokens.append(
                     Token(
                         base_op_type,
@@ -336,19 +266,18 @@ class Lexer:
                 )
                 pos_start_eq = self.pos.copy()
                 self.advance()
-                pos_end_eq = self.pos.copy()
                 self.tokens.append(
-                    Token(TT_EQ, pos_start=pos_start_eq, pos_end=pos_end_eq)
+                    Token(TT_EQ, pos_start=pos_start_eq, pos_end=self.pos.copy())
                 )
                 return
-            identifier_token = self.tokens.pop()
+
             pos_start_eq_char = self.pos.copy()
             self.advance()
             pos_end_eq_char = self.pos.copy()
-            self.tokens.append(identifier_token)
+
             self._emit_augmented_assignment_tokens(
                 base_op_type,
-                identifier_token_original=identifier_token,
+                lhs_tokens=lhs_tokens,
                 eq_token_pos_start=pos_start_eq_char,
                 eq_token_pos_end=pos_end_eq_char,
                 op_token_pos_start=pos_start_op_char,
@@ -360,6 +289,63 @@ class Lexer:
                     base_op_type, pos_start=pos_start_op_char, pos_end=pos_end_op_char
                 )
             )
+
+    def make_number(self):
+        num_str = ""
+        dot_count = 0
+        pos_start = self.pos.copy()
+        while self.current_char is not None and self.current_char in DIGITS + ".":
+            if self.current_char == ".":
+                if dot_count == 1:
+                    break
+                dot_count += 1
+            num_str += self.current_char
+            self.advance()
+        if dot_count == 0:
+            return Token(TT_INT, int(num_str), pos_start, self.pos)
+        return Token(TT_FLOAT, float(num_str), pos_start, self.pos)
+
+    def make_string(self):
+        quote_char = self.current_char
+        string_content = []
+        pos_start = self.pos.copy()
+        self.advance()
+
+        is_multiline = False
+        if self.current_char == quote_char and self.peek_foward_steps(1) == quote_char:
+            is_multiline = True
+            self.advance(2)
+
+        while self.current_char is not None:
+            if is_multiline:
+                if (
+                    self.current_char == quote_char
+                    and self.peek_foward_steps(1) == quote_char
+                    and self.peek_foward_steps(2) == quote_char
+                ):
+                    self.advance(3)
+                    break
+            elif self.current_char == quote_char:
+                self.advance()
+                break
+
+            if self.current_char == "\\":
+                self.advance()
+                if self.current_char is not None:
+                    string_content.append(self.current_char)
+            else:
+                string_content.append(self.current_char)
+            self.advance()
+        else:
+            return None, ExpectedCharError(pos_start, self.pos, f"'{quote_char}'")
+
+        return Token(TT_STRING, "".join(string_content), pos_start, self.pos), None
+
+    def peek_foward_steps(self, steps) -> str | None:
+        peek_pos_idx = self.pos.idx + steps
+        if 0 <= peek_pos_idx < len(self.text):
+            return self.text[peek_pos_idx]
+        return None
 
     def handle_plus_or_augmented(self):
         pos_start_op = self.pos.copy()
@@ -381,10 +367,9 @@ class Lexer:
         pos_start_op = self.pos.copy()
         self.advance()
         if self.current_char == "*":
+            pos_start_ds = pos_start_op
             self.advance()
-            self.tokens.append(
-                Token(TT_DOUBLE_STAR, pos_start=pos_start_op, pos_end=self.pos.copy())
-            )
+            self._handle_augmented_assignment_common(TT_DOUBLE_STAR, pos_start_ds)
         else:
             self._handle_augmented_assignment_common(TT_MUL, pos_start_op)
 
@@ -410,18 +395,14 @@ class Lexer:
 
     def make_identifier(self) -> Token:
         id_str = ""
-        pos_start_identifier = self.pos.copy()
+        pos_start = self.pos.copy()
         while (
             self.current_char is not None and self.current_char in LETTERS_DIGITS + "_"
         ):
             id_str += self.current_char
             self.advance()
-        pos_end_identifier = self.pos.copy()
-        peek_idx = self.pos.idx
-        while peek_idx < len(self.text) and self.text[peek_idx] in " \t":
-            peek_idx += 1
         tok_type = TT_KEYWORD if id_str in KEYWORDS else TT_IDENTIFIER
-        return Token(tok_type, id_str, pos_start_identifier, pos_end_identifier)
+        return Token(tok_type, id_str, pos_start, self.pos.copy())
 
     def make_not_equals(self):
         pos_start = self.pos.copy()
