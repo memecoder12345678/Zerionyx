@@ -54,6 +54,7 @@
                 <li><a href="#ref-assignment">Assignment</a></li>
                 <li><a href="#ref-bytes">Bytes</a></li>
                 <li><a href="#ref-cfloat">CFloat</a></li>
+                <li><a href="#ref-zex">ZEX Executables</a></li>
             </ul>
             <h3>Standard Library</h3>
             <ul>
@@ -825,6 +826,42 @@ Zerionyx may be magical, but its syntax must be real.
 
 <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-var">result</span><span class="zyx-types">)</span> <span class="zyx-comment"># Output: 0.3</span>
 </code></pre>
+                </section>
+                <section id="ref-zex">
+                    <h3>ZEX Executables (.zex)</h3>
+                    <p>
+                        The <b>ZEX (Zerionyx Executable)</b> is a bundled file format that allows you to distribute your
+                        programs as a single file.
+                        It compresses the source code, performs basic minification to protect your logic, and supports
+                        bundling together with resource files (assets).
+                    </p>
+
+                    <h4>Packing</h4>
+                    <p>Use the <code>--pack</code> flag to create a <b>.zex</b> file from a main script and related
+                        files:</p>
+                    <br>
+                    <pre><code class="highlight-Zerionyx">python zerionyx.py --pack <span class="zyx-string">output.zex</span> <span class="zyx-var">main.zyx</span> <span class="zyx-comment">file1.txt file2.zyx</span></code></pre>
+                    <br>
+                    <h4>Running</h4>
+                    <p>You can execute a <b>.zex</b> file just like a regular <b>.zyx</b> file:</p>
+                    <br>
+                    <pre><code class="highlight-Zerionyx">python zerionyx.py <span class="zyx-string">output.zex</span></code></pre>
+                    <br>
+                    <h4>Technical Features</h4>
+                    <ul>
+                        <li><b>Portability</b>: Automatically extracts to a temporary directory and cleans up after
+                            execution.</li>
+                        <li><b>Security</b>: Source code inside a <b>.zex</b> is compressed into a single line
+                            (semicolon-separated) to discourage direct reading.</li>
+                        <li><b>Resource Management</b>: Supports bundling additional configuration files, data, or
+                            sub-libraries.</li>
+                    </ul>
+
+                    <div class="note"
+                        style="border-left: 5px solid var(--neon-blue); padding: 10px; background: rgba(0, 255, 204, 0.1); margin-top: 15px;">
+                        <strong>💡 Pro Tip:</strong> When packing, the main script <b>must</b> be the first argument
+                        after the output filename so Zerionyx knows where to start the execution.
+                    </div>
                 </section>
             </section>
 
