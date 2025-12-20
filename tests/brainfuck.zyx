@@ -14,57 +14,69 @@ defun brainfuck(nput)
     output = ""
     i = 0
     while i < len(nput) do
-        # println("i: " + to_str(i) + ", " + "nput$i: " + to_str(nput$i) + ", " + "memory: " + to_str(memory) + ", " + "pointer: " + to_str(pointer))
-        if (nput$i) == ">" do
-            if pointer+1 > 30000 do
+        c = nput$i
+        # println("i: " + to_str(i) + ", " + "c: " + to_str(c) + ", " + "memory: " + to_str(memory) + ", " + "pointer: " + to_str(pointer))
+        if (c) == ">" do
+            if pointer+1 >= 30000 do
                 println("Memory Error")
-                sys.exit(1)
+                return
             else do
                 if pointer+1 >= len(memory) do
                     append(memory, 0)
                 done
             done
             pointer += 1
-        elif (nput$i) == "<" do
+        elif (c) == "<" do
             if pointer > 0 do
                 pointer -= 1
             done
-        elif (nput$i) == "+" do
+        elif (c) == "+" do
             memory$pointer = ((memory$pointer) + 1) % 256
-        elif (nput$i) == "-" do
-            if memory$pointer > 0 do
-                memory$pointer = ((memory$pointer) - 1)  % 256
-            done
-        elif (nput$i) == "." do
+        elif (c) == "-" do
+            memory$pointer = ((memory$pointer) - 1)  % 256
+        elif (c) == "." do
             output = output + string.chr(memory$pointer)
-        elif (nput$i) == "," do
-            memory$pointer = to_int(string.ord(input("> ")$0), false)
-        elif (nput$i) == "[" do
+        elif (c) == "," do
+            _in = input("> ")
+            if len(_in) == 0 do
+                memory$pointer = 0
+            else do
+                memory$pointer = string.ord(_in$0)
+            done
+        elif (c) == "[" do
             if (memory$pointer) == 0 do
                 count = 1
                 while count > 0 do
                     i += 1
-                    if (nput$i) == "[" do
+                    c = nput$i
+                    if i >= len(nput) do
+                        println("Unmatched '['")
+                        return
+                    done
+                    if (c) == "[" do
                         count += 1
-                    elif (nput$i) == "]" do
+                    elif (c) == "]" do
                         count -= 1
                     done
                 done
             done
-        elif (nput$i) == "]" do
+        elif (c) == "]" do
             if (memory$pointer) != 0 do
                 count = 1
                 while count > 0 do
                     i -= 1
-                    if (nput$i) == "]" do
+                    c = nput$i
+                    if i < 0 do
+                        println("Unmatched ']'")
+                        return
+                    done
+                    if (c) == "]" do
                         count += 1
-                    elif (nput$i) == "[" do
+                    elif (c) == "[" do
                         count -= 1
                     done
                 done
             done
-        else do
-            pass()
         done
         i += 1
     done
@@ -84,8 +96,10 @@ defun main()
             continue
         elif len(output) == 0 do
             continue
-        else do
+        elif output$(-1) != "\n" do
             println(output)
+        else do
+            print(output)
         done
     done
 done

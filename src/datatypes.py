@@ -788,14 +788,15 @@ class String(Object):
     def dollared_by(self, index):
         if not isinstance(index, Number):
             return None, self.illegal_operation(index, "Index must be a number")
-        if index.value < 0 or index.value >= len(self.value):
+        try:
+            return String(self.value[index.value]), None
+        except IndexError:
             return None, RTError(
                 index.pos_start,
                 index.pos_end,
                 f"Index {index.value} is out of bounds for string of size {len(self.value)}",
                 self.context,
             )
-        return String(self.value[index.value]), None
 
     def iter(self):
         return iter([String(ch) for ch in self.value]), None
