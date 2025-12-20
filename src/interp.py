@@ -2994,7 +2994,7 @@ class BuiltInFunction(BaseFunction):
                 IError(
                     self.pos_start,
                     self.pos_end,
-                    f"Cannot unlink '{path_arg.value}': It is a directory",
+                    f"Can't unlink '{path_arg.value}': It is a directory",
                     exec_ctx,
                 )
             )
@@ -3785,7 +3785,7 @@ class BuiltInFunction(BaseFunction):
                 return RTResult().success(Bytes(value.value))
 
             else:
-                raise TypeError(f"Cannot convert type '{value.type()}' to bytes")
+                raise TypeError(f"Can't convert type '{value.type()}' to bytes")
 
         except Exception as e:
             if suppress_error_:
@@ -4093,7 +4093,7 @@ class BuiltInFunction(BaseFunction):
                         RTError(
                             self.pos_start,
                             self.pos_end,
-                            f"Cannot convert '{value.type()}' to decimal",
+                            f"Can't convert '{value.type()}' to decimal",
                             exec_ctx,
                         )
                     )
@@ -5193,15 +5193,6 @@ class Interpreter:
         value = res.register(self.visit(node.node, context))
         if res.should_return():
             return res
-        if isinstance(value, Number) and value.value is None:
-            return res.failure(
-                TError(
-                    node.pos_start,
-                    node.pos_end,
-                    "Cannot perform arithmetic or logical operation on 'none'",
-                    context,
-                )
-            )
         op_type = node.op_tok.type
         ops = {
             TT_MINUS: lambda x: x.multed_by(Number(-1)),
@@ -5284,7 +5275,7 @@ class Interpreter:
                 else node.end_value_node.pos_start
             )
             return res.failure(
-                RTError(pos, pos, "Step value for a 'for' loop cannot be zero", context)
+                RTError(pos, pos, "Step value for a 'for' loop can't be zero", context)
             )
 
         for i in range(start, end, step):
@@ -5420,7 +5411,7 @@ class Interpreter:
                             RTError(
                                 arg_node.pos_start,
                                 arg_node.pos_end,
-                                "Value to unpack with * must be a list",
+                                "Value to unpack with '*' must be a list",
                                 context,
                             )
                         )
@@ -5436,7 +5427,7 @@ class Interpreter:
                             RTError(
                                 arg_node.pos_start,
                                 arg_node.pos_end,
-                                "Value to unpack with ** must be a hashmap",
+                                "Value to unpack with '**' must be a hashmap",
                                 context,
                             )
                         )
@@ -5647,7 +5638,7 @@ class Interpreter:
                 RTError(
                     node.pos_start,
                     node.pos_end,
-                    "'using' cannot be used at the global level",
+                    "'using' can't be used at the global level",
                     context,
                 )
             )

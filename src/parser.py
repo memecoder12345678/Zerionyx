@@ -969,7 +969,7 @@ class Parser:
                         InvalidSyntaxError(
                             self.current_tok.pos_start,
                             self.current_tok.pos_end,
-                            "Cannot mix single-line and multi-line blocks in an if-elif-else chain",
+                            "Can't mix single-line and multi-line blocks in an if-elif-else chain",
                         )
                     )
                 body = res.register(self.statement())
@@ -1006,7 +1006,7 @@ class Parser:
                         InvalidSyntaxError(
                             self.current_tok.pos_start,
                             self.current_tok.pos_end,
-                            "Cannot mix single-line and multi-line blocks in an if-elif-else chain",
+                            "Can't mix single-line and multi-line blocks in an if-elif-else chain",
                         )
                     )
                 body = res.register(self.statement())

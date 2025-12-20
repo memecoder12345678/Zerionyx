@@ -18,7 +18,7 @@ namespace random
             panic("First argument of 'rand_choice' must be a list", "T")
         done
         if len(l) == 0 do
-            panic("Cannot choose from an empty list", "T")
+            panic("Can't choose from an empty list", "T")
         done
         return rand_choice_fp(l)
     done

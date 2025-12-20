@@ -137,7 +137,7 @@ class Object:
 
     def execute(self, _, __):
         return RTResult().failure(
-            self.illegal_operation(error_str="Cannot call non-function")
+            self.illegal_operation(error_str="Can't call non-function")
         )
 
     def copy(self):
@@ -309,13 +309,13 @@ class Bool(Object):
     def _get_comparison_result(self, other, op):
         if (
             isinstance(other, Bool)
-            and self.value is not None
-            and other.value is not None
+            and isinstance(self, NoneObject)
+            and isinstance(other, NoneObject)
         ):
             result = bool(op(self.value, other.value))
             return Bool(result).set_context(self.context), None
 
-        if self.value is None:
+        if isinstance(self, NoneObject):
             if isinstance(other, NoneObject):
                 result = op in (operator.eq, operator.le, operator.ge)
             else:
@@ -368,7 +368,15 @@ class CFloat(Object):
         if isinstance(other, Number):
             if isinstance(other.value, int):
                 return Fraction(other.value)
-            return Fraction(str(other.value))
+            try:
+                return Fraction(str(other.value))
+            except ValueError:
+                return None, MError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Math domain error",
+                    self.context,
+                )
         return None
 
     def added_to(self, other):
@@ -377,7 +385,7 @@ class CFloat(Object):
             result = self.value + other_frac
             return CFloat(result).set_context(self.context), None
         return None, Object.illegal_operation(
-            self, other, f"Can't add cfloat to '{other.type()}'"
+            other, f"Can't add cfloat to '{other.type()}'"
         )
 
     def subbed_by(self, other):
@@ -386,7 +394,7 @@ class CFloat(Object):
             result = self.value - other_frac
             return CFloat(result).set_context(self.context), None
         return None, Object.illegal_operation(
-            self, other, f"Can't subtract cfloat from '{other.type()}'"
+            other, f"Can't subtract cfloat from '{other.type()}'"
         )
 
     def multed_by(self, other):
@@ -395,7 +403,7 @@ class CFloat(Object):
             result = self.value * other_frac
             return CFloat(result).set_context(self.context), None
         return None, Object.illegal_operation(
-            self, other, f"Can't multiply cfloat by '{other.type()}'"
+            other, f"Can't multiply cfloat by '{other.type()}'"
         )
 
     def dived_by(self, other):
@@ -408,7 +416,7 @@ class CFloat(Object):
             result = self.value / other_frac
             return CFloat(result).set_context(self.context), None
         return None, Object.illegal_operation(
-            self, other, f"Can't divide cfloat by '{other.type()}'"
+            other, f"Can't divide cfloat by '{other.type()}'"
         )
 
     def moduled_by(self, other):
@@ -421,7 +429,7 @@ class CFloat(Object):
             result = self.value % other_frac
             return CFloat(result).set_context(self.context), None
         return None, Object.illegal_operation(
-            self, other, f"Can't mod cfloat by '{other.type()}'"
+            other, f"Can't mod cfloat by '{other.type()}'"
         )
 
     def powed_by(self, other):
@@ -431,14 +439,14 @@ class CFloat(Object):
                 result = self.value**other_frac
                 return CFloat(result).set_context(self.context), None
             except ValueError:
-                return None, RTError(
+                return None, MError(
                     self.pos_start,
                     self.pos_end,
-                    "Math domain error (e.g., negative base with fractional exponent)",
+                    "Math domain error",
                     self.context,
                 )
         return None, Object.illegal_operation(
-            self, other, f"Can't power cfloat by '{other.type()}'"
+            other, f"Can't power cfloat by '{other.type()}'"
         )
 
     def floordived_by(self, other):
@@ -451,15 +459,15 @@ class CFloat(Object):
             result = self.value // other_frac
             return Number(int(result)).set_context(self.context), None
         return None, Object.illegal_operation(
-            self, other, f"Can't floor divide cfloat by '{other.type()}'"
+            other, f"Can't floor divide cfloat by '{other.type()}'"
         )
 
     def _get_comparison_result(self, other, op):
         other_frac = self._convert_to_fraction(other)
-        if other_frac is not None and self.value is not None:
+        if other_frac is not None and not isinstance(self, NoneObject):
             return Bool(op(self.value, other_frac)).set_context(self.context), None
 
-        if self.value is None:
+        if isinstance(self, NoneObject):
             is_none_other = isinstance(other, NoneObject)
             if op == operator.eq:
                 return Bool(is_none_other).set_context(self.context), None
@@ -467,7 +475,7 @@ class CFloat(Object):
                 return Bool(not is_none_other).set_context(self.context), None
 
         return None, Object.illegal_operation(
-            self, other, f"Cannot compare cfloat with '{other.type()}'"
+            other, f"Can't compare cfloat with '{other.type()}'"
         )
 
     def get_comparison_eq(self, other):
@@ -491,14 +499,14 @@ class CFloat(Object):
     def anded_by(self, other):
         if not isinstance(other, (Number, CFloat)):
             return None, Object.illegal_operation(
-                self, other, f"Can't perform logical AND on cfloat and '{other.type()}'"
+                other, f"Can't perform logical AND on cfloat and '{other.type()}'"
             )
         return Bool(self.is_true() and other.is_true()).set_context(self.context), None
 
     def ored_by(self, other):
         if not isinstance(other, (Number, CFloat)):
             return None, Object.illegal_operation(
-                self, other, f"Can't perform logical OR on cfloat and '{other.type()}'"
+                other, f"Can't perform logical OR on cfloat and '{other.type()}'"
             )
         return Bool(self.is_true() or other.is_true()).set_context(self.context), None
 
@@ -506,7 +514,7 @@ class CFloat(Object):
         return Bool(not self.is_true()).set_context(self.context), None
 
     def is_true(self):
-        return self.value != 0 if self.value is not None else False
+        return self.value != 0 if not isinstance(self, NoneObject) else False
 
     def type(self):
         return "<cfloat>"
@@ -515,7 +523,7 @@ class CFloat(Object):
         return self.__repr__()
 
     def __repr__(self):
-        if self.value is None:
+        if isinstance(self, NoneObject):
             return "none"
         if self.value.denominator == 1:
             return str(self.value.numerator)
@@ -548,86 +556,85 @@ class Number(Object):
 
     def added_to(self, other):
         other_value = self._convert_value(other)
-        if other_value is not None:
+        if not isinstance(other_value, NoneObject):
             return Number(self.value + other_value).set_context(self.context), None
         return None, Object.illegal_operation(
-            self, other, f"Can't add number to '{other.type()}'"
+            other, f"Can't add number to '{other.type()}'"
         )
 
     def subbed_by(self, other):
         other_value = self._convert_value(other)
-        if other_value is not None:
+        if not isinstance(other_value, NoneObject):
             return Number(self.value - other_value).set_context(self.context), None
         return None, Object.illegal_operation(
-            self, other, f"Can't subtract number from '{other.type()}'"
+            other, f"Can't subtract number from '{other.type()}'"
         )
 
     def multed_by(self, other):
         other_value = self._convert_value(other)
-        if other_value is not None:
+        if not isinstance(other_value, NoneObject):
             return Number(self.value * other_value).set_context(self.context), None
         return None, Object.illegal_operation(
-            self, other, f"Can't multiply number by '{other.type()}'"
+            other, f"Can't multiply number by '{other.type()}'"
         )
 
     def dived_by(self, other):
         other_value = self._convert_value(other)
-        if other_value is not None:
-            if other_value == 0:
+        if not isinstance(other_value, NoneObject):
+            if surgeons_value := other_value == 0:
                 return None, RTError(
                     other.pos_start, other.pos_end, "Division by zero", self.context
                 )
             return Number(self.value / other_value).set_context(self.context), None
         return None, Object.illegal_operation(
-            self, other, f"Can't divide number by '{other.type()}'"
+            other, f"Can't divide number by '{other.type()}'"
         )
 
     def moduled_by(self, other):
         other_value = self._convert_value(other)
-        if other_value is not None:
+        if not isinstance(other_value, NoneObject):
             if other_value == 0:
                 return None, RTError(
                     other.pos_start, other.pos_end, "Division by zero", self.context
                 )
             return Number(self.value % other_value).set_context(self.context), None
         return None, Object.illegal_operation(
-            self, other, f"Can't mod number by '{other.type()}'"
+            other, f"Can't mod number by '{other.type()}'"
         )
 
     def powed_by(self, other):
         other_value = self._convert_value(other)
-        if other_value is not None:
+        if not isinstance(other_value, NoneObject):
             try:
                 return Number(self.value**other_value).set_context(self.context), None
             except:
-                return None, RTError(
-                    self.pos_start, self.pos_end, "Exponentiation error", self.context
+                return None, MError(
+                    self.pos_start, self.pos_end, "Math domain error", self.context
                 )
         return None, Object.illegal_operation(
-            self, other, f"Can't power number by '{other.type()}'"
+            other, f"Can't power number by '{other.type()}'"
         )
 
     def floordived_by(self, other):
         other_value = self._convert_value(other)
-        if other_value is not None:
+        if not isinstance(other_value, NoneObject):
             if other_value == 0:
                 return None, MError(
                     other.pos_start, other.pos_end, "Division by zero", self.context
                 )
             return Number(self.value // other_value).set_context(self.context), None
         return None, Object.illegal_operation(
-            self, other, f"Can't floor divide number by '{other.type()}'"
+            other, f"Can't floor divide number by '{other.type()}'"
         )
 
     def _get_comparison_result(self, other, op):
         other_value = self._convert_value(other)
         if (
-            other_value is not None
-            and self.value is not None
-            and other_value is not None
+            not isinstance(other_value, NoneObject)
+            and not isinstance(self, NoneObject)
         ):
             return Bool(op(self.value, other_value)).set_context(self.context), None
-        if self.value is None:
+        if isinstance(self, NoneObject):
             if isinstance(other, NoneObject):
                 result = op in (operator.eq, operator.le, operator.ge)
             else:
@@ -656,13 +663,13 @@ class Number(Object):
     def anded_by(self, other):
         if not isinstance(other, (Number, CFloat)):
             return None, Object.illegal_operation(
-                self, other, f"Can't compare number to '{other.type()}'"
+                other, f"Can't perform logical AND on number and '{other.type()}'"
             )
-        if self.value is None or other.value is None:
+        if isinstance(self, NoneObject) or isinstance(other, NoneObject):
             return None, TError(
                 self.pos_start,
                 self.pos_end,
-                "Cannot perform logical operation with 'none'",
+                "Can't perform logical operation with 'none'",
                 self.context,
             )
         return (
@@ -673,13 +680,13 @@ class Number(Object):
     def ored_by(self, other):
         if not isinstance(other, (Number, CFloat)):
             return None, Object.illegal_operation(
-                self, other, f"Can't compare number to '{other.type()}'"
+                other, f"Can't perform logical OR on number and '{other.type()}'"
             )
-        if self.value is None or other.value is None:
+        if isinstance(self, NoneObject) or isinstance(other, NoneObject):
             return None, TError(
                 self.pos_start,
                 self.pos_end,
-                "Cannot perform logical operation with 'none'",
+                "Can't perform logical operation with 'none'",
                 self.context,
             )
         return (
@@ -688,31 +695,31 @@ class Number(Object):
         )
 
     def notted(self):
-        if self.value is None:
+        if isinstance(self, NoneObject):
             return None, TError(
                 self.pos_start,
                 self.pos_end,
-                "Cannot perform logical operation with 'none'",
+                "Can't perform logical operation with 'none'",
                 self.context,
             )
         return Bool(not bool(self.value)).set_context(self.context), None
 
     def is_true(self):
-        return bool(self.value) if self.value is not None else False
+        return bool(self.value) if not isinstance(self, NoneObject) else False
 
     def type(self):
         if isinstance(self.value, int):
             return "<int>"
         elif isinstance(self.value, float):
             return "<float>"
-        elif self.value is None:
+        elif isinstance(self, NoneObject):
             return "<none>"
 
     def __str__(self):
         return self.__repr__()
 
     def __repr__(self):
-        if self.value is None:
+        if isinstance(self, NoneObject):
             return "none"
         if isinstance(self.value, bool):
             return "true" if self.value else "false"
@@ -746,7 +753,7 @@ class String(Object):
             return String(self.value + other.value).set_context(self.context), None
         else:
             return None, self.illegal_operation(
-                self, other, f"Can't add a string to a type of '{other.type()}'"
+                other, f"Can't add string to '{other.type()}'"
             )
 
     def multed_by(self, other):
@@ -754,7 +761,7 @@ class String(Object):
             return String(self.value * other.value).set_context(self.context), None
         else:
             return None, self.illegal_operation(
-                self, other, f"Can't multiply a string by a type of '{other.type()}'"
+                other, f"Can't multiply string by '{other.type()}'"
             )
 
     def _make_comparison(self, other, op, type_to_check):
@@ -859,7 +866,7 @@ class List(Object):
                 )
         else:
             return None, self.illegal_operation(
-                self, other, f"Can't subtract a list by a type of '{other.type()}'"
+                other, f"Can't subtract list by '{other.type()}'"
             )
 
     def multed_by(self, other):
@@ -873,7 +880,7 @@ class List(Object):
             return new_list, None
         else:
             return None, self.illegal_operation(
-                self, other, f"Can't multiply a list by a type of '{other.type()}'"
+                other, f"Can't multiply list by '{other.type()}'"
             )
 
     def dollared_by(self, other):
@@ -888,7 +895,7 @@ class List(Object):
                     self.context,
                 )
         else:
-            return None, self.illegal_operation(self, other, "Index must be a number")
+            return None, self.illegal_operation(other, "Index must be a number")
 
     def copy(self):
         copy = List(self.value[:])
@@ -975,7 +982,7 @@ class HashMap(Object):
             return None, RTError(
                 index.pos_start,
                 index.pos_end,
-                "Value at this key could not be retrieved from hashmap because key is not found",
+                "Key not found in hashmap",
                 self.context,
             )
 
@@ -988,7 +995,7 @@ class HashMap(Object):
             return None, RTError(
                 index.pos_start,
                 index.pos_end,
-                "Value at this key could not be retrieved from hashmap because key is not found",
+                "Key not found in hashmap",
                 self.context,
             )
 

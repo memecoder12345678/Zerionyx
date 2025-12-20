@@ -464,7 +464,7 @@ Zerionyx may be magical, but its syntax must be real.
                         <strong>💡 Immutable Namespaces:</strong>
                         All variables and functions declared inside a namespace are <b>immutable</b>.
                         <ul>
-                            <li>Names cannot be changed or reassigned once they are defined.</li>
+                            <li>Names can't be changed or reassigned once they are defined.</li>
                             <li>Members are <b>read-only</b> &mdash; they can be accessed but not modified or
                                 overridden.</li>
                         </ul>
@@ -693,7 +693,7 @@ Zerionyx may be magical, but its syntax must be real.
                     <br>
                     <pre><code class="highlight-Zerionyx"><span class="zyx-keyword">defun</span> <span class="zyx-func-def">divide</span><span class="zyx-types">(</span><span class="zyx-var">a</span><span class="zyx-types">,</span> <span class="zyx-var">b</span><span class="zyx-types">)</span>
     <span class="zyx-keyword">if</span> <span class="zyx-var">b</span> <span class="zyx-types">==</span> <span class="zyx-number">0</span> <span class="zyx-keyword">do</span>
-        <span class="zyx-func">panic</span><span class="zyx-types">(</span><span class="zyx-string">"Cannot divide by zero!"</span><span class="zyx-types">,</span> <span class="zyx-string">"M"</span><span class="zyx-types">)</span> <span class="zyx-comment"># "M" for Math Error</span>
+        <span class="zyx-func">panic</span><span class="zyx-types">(</span><span class="zyx-string">"Can't divide by zero!"</span><span class="zyx-types">,</span> <span class="zyx-string">"M"</span><span class="zyx-types">)</span> <span class="zyx-comment"># "M" for Math Error</span>
     <span class="zyx-keyword">done</span>
     <span class="zyx-keyword">return</span> <span class="zyx-var">a</span> <span class="zyx-types">/</span> <span class="zyx-var">b</span>
 <span class="zyx-keyword">done</span>
@@ -708,7 +708,7 @@ Zerionyx may be magical, but its syntax must be real.
 <span class="zyx-keyword">else</span> <span class="zyx-keyword">do</span>
     <span class="zyx-func">println</span><span class="zyx-types">(</span><span class="zyx-string">"Result: "</span> <span class="zyx-types">+</span> <span class="zyx-func">to_str</span><span class="zyx-types">(</span><span class="zyx-var">value</span><span class="zyx-types">))</span>
 <span class="zyx-keyword">done</span>
-<span class="zyx-comment"># Output: Error: Cannot divide by zero!</span>
+<span class="zyx-comment"># Output: Error: Can't divide by zero!</span>
 </code></pre>
                 </section>
 
