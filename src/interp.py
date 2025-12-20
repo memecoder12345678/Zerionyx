@@ -5310,6 +5310,8 @@ class Interpreter:
                 else:
                     elements.append(value)
 
+        context.symbol_table.remove(var_name)
+        
         if node.should_return_none:
             return res.success(Number.none)
         else:
@@ -5572,7 +5574,7 @@ class Interpreter:
             return res.failure(error)
 
         elements = [] if not should_return_none else None
-
+        loop_var = var_names.copy()
         try:
             while True:
                 current = next(iterator)
@@ -5624,7 +5626,10 @@ class Interpreter:
 
         except StopIteration:
             pass
-
+            
+        for name in loop_var:
+            context.symbol_table.remove(name)
+                                    
         if should_return_none:
             return res.success(Number.none)
         else:
