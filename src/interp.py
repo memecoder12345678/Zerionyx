@@ -4080,7 +4080,17 @@ class BuiltInFunction(BaseFunction):
                 return RTResult().success(result)
 
             elif isinstance(value, String):
-                decimal_value = Fraction(value.value)
+                try:
+                    decimal_value = Fraction(value.value)
+                except ZeroDivisionError:
+                    return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Division by zero",
+                    exec_ctx,
+                )
+            )
                 result = CFloat(decimal_value)
                 return RTResult().success(result)
 

@@ -309,8 +309,8 @@ class Bool(Object):
     def _get_comparison_result(self, other, op):
         if (
             isinstance(other, Bool)
-            and isinstance(self, NoneObject)
-            and isinstance(other, NoneObject)
+            and not isinstance(self, NoneObject)
+            and not isinstance(other, NoneObject)
         ):
             result = bool(op(self.value, other.value))
             return Bool(result).set_context(self.context), None
@@ -370,13 +370,8 @@ class CFloat(Object):
                 return Fraction(other.value)
             try:
                 return Fraction(str(other.value))
-            except ValueError:
-                return None, MError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Math domain error",
-                    self.context,
-                )
+            except (ValueError, ZeroDivisionError, TypeError):
+                return None
         return None
 
     def added_to(self, other):
@@ -437,8 +432,15 @@ class CFloat(Object):
         if other_frac is not None:
             try:
                 result = self.value**other_frac
+                if isinstance(result, complex):
+                    return None, MError(
+                        self.pos_start,
+                        self.pos_end,
+                        "Math domain error (imaginary numbers are not supported)",
+                        self.context,
+                    )
                 return CFloat(result).set_context(self.context), None
-            except ValueError:
+            except (ValueError, OverflowError, ZeroDivisionError):
                 return None, MError(
                     self.pos_start,
                     self.pos_end,
@@ -556,7 +558,7 @@ class Number(Object):
 
     def added_to(self, other):
         other_value = self._convert_value(other)
-        if not isinstance(other_value, NoneObject):
+        if other_value is not None:
             return Number(self.value + other_value).set_context(self.context), None
         return None, Object.illegal_operation(
             other, f"Can't add number to '{other.type()}'"
@@ -564,7 +566,7 @@ class Number(Object):
 
     def subbed_by(self, other):
         other_value = self._convert_value(other)
-        if not isinstance(other_value, NoneObject):
+        if other_value is not None:
             return Number(self.value - other_value).set_context(self.context), None
         return None, Object.illegal_operation(
             other, f"Can't subtract number from '{other.type()}'"
@@ -572,7 +574,7 @@ class Number(Object):
 
     def multed_by(self, other):
         other_value = self._convert_value(other)
-        if not isinstance(other_value, NoneObject):
+        if other_value is not None:
             return Number(self.value * other_value).set_context(self.context), None
         return None, Object.illegal_operation(
             other, f"Can't multiply number by '{other.type()}'"
@@ -580,8 +582,8 @@ class Number(Object):
 
     def dived_by(self, other):
         other_value = self._convert_value(other)
-        if not isinstance(other_value, NoneObject):
-            if surgeons_value := other_value == 0:
+        if other_value is not None:
+            if other_value == 0:
                 return None, RTError(
                     other.pos_start, other.pos_end, "Division by zero", self.context
                 )
@@ -592,7 +594,7 @@ class Number(Object):
 
     def moduled_by(self, other):
         other_value = self._convert_value(other)
-        if not isinstance(other_value, NoneObject):
+        if other_value is not None:
             if other_value == 0:
                 return None, RTError(
                     other.pos_start, other.pos_end, "Division by zero", self.context
@@ -604,10 +606,18 @@ class Number(Object):
 
     def powed_by(self, other):
         other_value = self._convert_value(other)
-        if not isinstance(other_value, NoneObject):
+        if other_value is not None:
             try:
-                return Number(self.value**other_value).set_context(self.context), None
-            except:
+                result = self.value**other_value
+                if isinstance(result, complex):
+                    return None, MError(
+                        self.pos_start,
+                        self.pos_end,
+                        "Math domain error (imaginary numbers are not supported)",
+                        self.context,
+                    )
+                return Number(result).set_context(self.context), None
+            except (ValueError, OverflowError, ZeroDivisionError):
                 return None, MError(
                     self.pos_start, self.pos_end, "Math domain error", self.context
                 )
@@ -617,7 +627,7 @@ class Number(Object):
 
     def floordived_by(self, other):
         other_value = self._convert_value(other)
-        if not isinstance(other_value, NoneObject):
+        if other_value is not None:
             if other_value == 0:
                 return None, MError(
                     other.pos_start, other.pos_end, "Division by zero", self.context
@@ -630,7 +640,7 @@ class Number(Object):
     def _get_comparison_result(self, other, op):
         other_value = self._convert_value(other)
         if (
-            not isinstance(other_value, NoneObject)
+            other_value is not None
             and not isinstance(self, NoneObject)
         ):
             return Bool(op(self.value, other_value)).set_context(self.context), None
