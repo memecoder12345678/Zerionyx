@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 
 const zerionyxKeywords = [
-    'load', 'namespace', 'done', 'defun', 'as', 'using', 'if', 'elif', 'else', 'do', 'for', 'to', 'step', 'in', 'while'
+    'load', 'namespace', 'done', 'defun', 'using', 'if', 'elif', 'else', 'do', 'for', 'to', 'step', 'in', 'while'
 ];
 
 const zerionyxControlFlow = ['return', 'continue', 'break'];
