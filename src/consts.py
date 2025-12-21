@@ -59,7 +59,6 @@ KEYWORDS = [
     "break",
     "load",
     "in",
-    "as",
     "del",
     "namespace",
     "using",
