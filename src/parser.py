@@ -424,16 +424,16 @@ class Parser:
                 return res
             return res.success(KargsUnpackNode(node_to_unpack))
 
-        return self.dot_op()
-
-    def dot_op(self):
-        return self.bin_op(self.dollar_op, (TT_DOT,))
-
-    def dollar_op(self):
-        return self.bin_op(self.power, (TT_DOLLAR,))
+        return self.dollar_op()
 
     def power(self):
         return self.bin_op(self.call, (TT_POW,))
+
+    def dot_op(self):
+        return self.bin_op(self.power, (TT_DOT,))
+
+    def dollar_op(self):
+        return self.bin_op(self.dot_op, (TT_DOLLAR,))
 
     def call(self):
         res = ParseResult()
