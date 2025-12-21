@@ -639,10 +639,7 @@ class Number(Object):
 
     def _get_comparison_result(self, other, op):
         other_value = self._convert_value(other)
-        if (
-            other_value is not None
-            and not isinstance(self, NoneObject)
-        ):
+        if other_value is not None and not isinstance(self, NoneObject):
             return Bool(op(self.value, other_value)).set_context(self.context), None
         if isinstance(self, NoneObject):
             if isinstance(other, NoneObject):

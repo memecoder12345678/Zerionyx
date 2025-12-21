@@ -2238,7 +2238,17 @@ class BuiltInFunction(BaseFunction):
     @set_args(["a"])
     def execute_sqrt_fp(self, exec_ctx):
         a = exec_ctx.symbol_table.get("a")
-        return RTResult().success(Number(math.sqrt(a.value)))
+        try:
+            return RTResult().success(Number(math.sqrt(a.value)))
+        except ValueError:
+            RTResult().failure(
+                MError(
+                    self.pos_start,
+                    self.pos_end,
+                    "Math domain error",
+                    self.context,
+                )
+            )
 
     @set_args(["a"])
     def execute_abs_fp(self, exec_ctx):
@@ -4084,13 +4094,13 @@ class BuiltInFunction(BaseFunction):
                     decimal_value = Fraction(value.value)
                 except ZeroDivisionError:
                     return RTResult().failure(
-                RTError(
-                    self.pos_start,
-                    self.pos_end,
-                    "Division by zero",
-                    exec_ctx,
-                )
-            )
+                        RTError(
+                            self.pos_start,
+                            self.pos_end,
+                            "Division by zero",
+                            exec_ctx,
+                        )
+                    )
                 result = CFloat(decimal_value)
                 return RTResult().success(result)
 
@@ -5312,7 +5322,7 @@ class Interpreter:
                     elements.append(value)
 
         context.symbol_table.remove(var_name)
-        
+
         if node.should_return_none:
             return res.success(Number.none)
         else:
@@ -5627,10 +5637,10 @@ class Interpreter:
 
         except StopIteration:
             pass
-            
+
         for name in loop_var:
             context.symbol_table.remove(name)
-                                    
+
         if should_return_none:
             return res.success(Number.none)
         else:
